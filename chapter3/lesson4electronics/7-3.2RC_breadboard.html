@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>កម្មវិធីក្លែងធ្វើសៀគ្វី កុងដង់សាទ័រ (RC Canvas Simulator)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 1000px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            max-width: 900px;
+            height: auto;
+            background-color: #f8fafc;
+            border-radius: 12px;
+            margin: 0 auto 20px auto;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #cbd5e1;
+        }
+        /* Custom UI Buttons */
+        .btn {
+            transition: all 0.2s ease;
+            transform: translateY(0);
+        }
+        .btn:active {
+            transform: translateY(2px);
+        }
+        .btn-active {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-slate-800">បន្ទះសៀគ្វី RC (RC Breadboard Simulator)</h1>
+            <p class="text-slate-500 text-sm mt-1">រៀបចំខ្សែភ្លើងឱ្យមានសណ្តាប់ធ្នាប់ ងាយស្រួលមើល និងសិក្សាពីការសាក/បញ្ចេញបន្ទុក</p>
+        </div>
+
+        <!-- The Canvas -->
+        <canvas id="simCanvas" width="900" height="450"></canvas>
+
+        <!-- Controls & Information -->
+        <div class="flex flex-col md:flex-row gap-6 justify-between items-center bg-slate-50 p-6 rounded-xl border border-slate-200">
+            
+            <!-- Action Buttons -->
+            <div class="flex gap-4">
+                <button id="btnCharge" class="btn px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-lg shadow-md flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    ដោតខ្សែសាក (Charge)
+                </button>
+                <button id="btnDischarge" class="btn px-6 py-3 bg-slate-600 hover:bg-slate-700 text-white rounded-xl font-bold text-lg shadow-md flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 11-12.728 0M12 3v9" />
+                    </svg>
+                    ដកខ្សែចេញ (Discharge)
+                </button>
+            </div>
+
+            <!-- Status Indicator -->
+            <div class="text-right">
+                <div class="text-sm font-bold tracking-wider text-slate-500 uppercase mb-1">ស្ថានភាពសៀគ្វី</div>
+                <div id="statusText" class="text-xl font-bold text-red-600 bg-red-100 px-4 py-1 rounded-full inline-block border border-red-200">
+                    កំពុងសាកបន្ទុក
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const btnCharge = document.getElementById('btnCharge');
+        const btnDischarge = document.getElementById('btnDischarge');
+        const statusText = document.getElementById('statusText');
+
+        // State variables
+        let isCharging = true;
+        let voltage = 0.0;
+        const V_MAX = 7.4; // Max voltage on capacitor (voltage divider effect simplified)
+        const TAU_CHARGE = 1.0; 
+        const TAU_DISCHARGE = 2.0;
+
+        let lastTime = performance.now();
+        let dashOffset = 0;
+
+        // Coordinate Constants
+        const BREAD_X = 180;
+        const BREAD_Y = 100;
+        
+        // Component positions (Centers or key nodes)
+        const NODE_SW_TOP = {x: 270, y: 130};
+        const NODE_SW_BOT = {x: 270, y: 190};
+        
+        const NODE_R1_L = {x: 270, y: 190};
+        const NODE_R1_R = {x: 400, y: 190};
+        
+        const NODE_C1_P = {x: 400, y: 210};
+        const NODE_C1_N = {x: 440, y: 210};
+        
+        const NODE_R2_L = {x: 400, y: 230};
+        const NODE_R2_R = {x: 550, y: 230};
+        
+        const NODE_LED_A = {x: 550, y: 250};
+        const NODE_LED_C = {x: 590, y: 250};
+
+        // Event Listeners
+        btnCharge.addEventListener('click', () => {
+            isCharging = true;
+            btnCharge.classList.add('btn-active');
+            btnDischarge.classList.remove('btn-active');
+            statusText.innerText = "កំពុងសាកបន្ទុក";
+            statusText.className = "text-xl font-bold text-red-600 bg-red-100 px-4 py-1 rounded-full inline-block border border-red-200";
+        });
+
+        btnDischarge.addEventListener('click', () => {
+            isCharging = false;
+            btnDischarge.classList.add('btn-active');
+            btnCharge.classList.remove('btn-active');
+            statusText.innerText = "កំពុងបញ្ចេញបន្ទុក";
+            statusText.className = "text-xl font-bold text-slate-700 bg-slate-200 px-4 py-1 rounded-full inline-block border border-slate-300";
+        });
+
+        // Initialize button states
+        btnCharge.classList.add('btn-active');
+
+        // Utility Draw Functions
+        function drawLine(ctx, x1, y1, x2, y2, color, width) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+
+        function drawWirePath(ctx, points, color, width) {
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+
+        function fillCircle(ctx, x, y, r, color) {
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        function drawBreadboard() {
+            // Main Board
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = 'rgba(0,0,0,0.1)';
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetY = 5;
+            ctx.beginPath();
+            ctx.roundRect(BREAD_X, BREAD_Y, 680, 260, 10);
+            ctx.fill();
+            ctx.shadowBlur = 0; // Reset shadow
+            ctx.shadowOffsetY = 0;
+            
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Rails
+            drawLine(ctx, BREAD_X + 20, 120, BREAD_X + 660, 120, '#ef4444', 3);
+            drawLine(ctx, BREAD_X + 20, 160, BREAD_X + 660, 160, '#3b82f6', 3);
+            drawLine(ctx, BREAD_X + 20, 300, BREAD_X + 660, 300, '#3b82f6', 3);
+            drawLine(ctx, BREAD_X + 20, 340, BREAD_X + 660, 340, '#ef4444', 3);
+
+            // Center Divider
+            ctx.fillStyle = '#f1f5f9';
+            ctx.fillRect(BREAD_X, 220, 680, 10);
+
+            // Holes
+            ctx.fillStyle = '#cbd5e1';
+            for (let x = BREAD_X + 30; x <= BREAD_X + 650; x += 20) {
+                // Top power rails holes
+                fillCircle(ctx, x, 130, 3, '#cbd5e1');
+                fillCircle(ctx, x, 150, 3, '#cbd5e1');
+                // Bottom power rails holes
+                fillCircle(ctx, x, 310, 3, '#cbd5e1');
+                fillCircle(ctx, x, 330, 3, '#cbd5e1');
+                
+                // Component area holes
+                for (let y = 180; y <= 210; y += 15) {
+                    fillCircle(ctx, x, y, 3, '#94a3b8');
+                }
+                for (let y = 240; y <= 270; y += 15) {
+                    fillCircle(ctx, x, y, 3, '#94a3b8');
+                }
+            }
+        }
+
+        function drawBattery() {
+            const bx = 40, by = 200;
+            // Battery Body
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath(); ctx.roundRect(bx, by, 100, 70, 8); ctx.fill();
+            
+            // Terminals
+            ctx.fillStyle = '#94a3b8';
+            ctx.beginPath(); ctx.roundRect(bx + 15, by - 10, 15, 15, 3); ctx.fill(); // +
+            ctx.beginPath(); ctx.roundRect(bx + 70, by - 10, 15, 15, 3); ctx.fill(); // -
+            
+            // Labels
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('9.0 V', bx + 50, by + 35);
+            ctx.font = 'bold 12px "Battambang"';
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillText('ថ្មពិល', bx + 50, by + 55);
+            
+            // Terminal symbols
+            ctx.fillStyle = '#ef4444';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText('+', bx + 22.5, by + 15);
+            ctx.fillStyle = '#3b82f6';
+            ctx.fillText('-', bx + 77.5, by + 15);
+        }
+
+        function drawPhysicalWires() {
+            // Battery + to Red Rail
+            drawWirePath(ctx, [{x: 62.5, y: 190}, {x: 62.5, y: 130}, {x: 230, y: 130}], '#ef4444', 4);
+            // Battery - to Blue Rail
+            drawWirePath(ctx, [{x: 117.5, y: 190}, {x: 117.5, y: 150}, {x: 230, y: 150}], '#1e293b', 4);
+
+            // Switch Jumper (Dynamic based on state)
+            if (isCharging) {
+                drawWirePath(ctx, [NODE_SW_TOP, NODE_SW_BOT], '#10b981', 4); // Green when closed
+            } else {
+                // Open state, dangling wire
+                drawWirePath(ctx, [NODE_SW_TOP, {x: 240, y: 170}], '#10b981', 4); 
+            }
+
+            // Capacitor GND Jumper (Node C1_N to Blue Rail)
+            drawWirePath(ctx, [NODE_C1_N, {x: 440, y: 150}], '#1e293b', 4);
+            
+            // LED GND Jumper (Node LED_C to Blue Rail)
+            drawWirePath(ctx, [NODE_LED_C, {x: 590, y: 150}], '#1e293b', 4);
+        }
+
+        function drawResistor(x, y, text, bands) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            // Legs
+            drawLine(ctx, -60, 0, -40, 0, '#94a3b8', 3);
+            drawLine(ctx, 40, 0, 60, 0, '#94a3b8', 3);
+            
+            // Body
+            ctx.fillStyle = '#eaddcf';
+            ctx.strokeStyle = '#d6c3ae';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(-40, -8, 80, 16, 4);
+            ctx.fill(); ctx.stroke();
+            
+            // Color Bands
+            const bandXs = [-30, -15, 0, 25];
+            for(let i=0; i<4; i++) {
+                ctx.fillStyle = bands[i];
+                ctx.fillRect(bandXs[i], -8, i===3?4:6, 16);
+            }
+            
+            // Label
+            ctx.fillStyle = '#334155';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, 0, -15);
+            ctx.restore();
+        }
+
+        function drawCapacitor() {
+            ctx.save();
+            ctx.translate(NODE_C1_P.x + 20, NODE_C1_P.y - 30); // Center above the pins
+            
+            // Legs (drawn beneath body)
+            drawLine(ctx, -20, 0, -20, 30, '#94a3b8', 3); // Positive
+            drawLine(ctx, 20, 0, 20, 30, '#94a3b8', 3);   // Negative
+            
+            // Cylinder Body
+            ctx.fillStyle = '#111827';
+            ctx.beginPath();
+            ctx.roundRect(-30, -40, 60, 50, 4);
+            ctx.fill();
+            
+            // Negative Stripe
+            ctx.fillStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.roundRect(15, -40, 10, 50, 2);
+            ctx.fill();
+            ctx.fillStyle = '#111827';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('-', 17, -15);
+            
+            // Top circle perspective
+            ctx.fillStyle = '#334155';
+            ctx.beginPath();
+            ctx.ellipse(0, -40, 30, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Label
+            ctx.fillStyle = '#1e293b';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('C1: 1000µF', 40, -10);
+            
+            ctx.restore();
+        }
+
+        function drawLED() {
+            const lx = NODE_LED_A.x + 20;
+            const ly = NODE_LED_A.y;
+            
+            ctx.save();
+            ctx.translate(lx, ly);
+            
+            // Legs
+            drawLine(ctx, -20, 0, -20, 10, '#94a3b8', 3); // Anode
+            drawLine(ctx, 20, 0, 20, 10, '#94a3b8', 3);   // Cathode
+            
+            // Base
+            ctx.fillStyle = '#64748b';
+            ctx.beginPath();
+            ctx.moveTo(-25, -5); ctx.lineTo(25, -5); ctx.lineTo(20, 0); ctx.lineTo(-20, 0);
+            ctx.fill();
+            
+            // Dome Base Color
+            ctx.fillStyle = '#fca5a5';
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(-25, -5);
+            ctx.bezierCurveTo(-25, -45, 25, -45, 25, -5);
+            ctx.fill(); ctx.stroke();
+
+            // Glow Effect based on Voltage
+            let glow = 0;
+            if (voltage > 1.8) {
+                glow = (voltage - 1.8) / (V_MAX - 1.8);
+            }
+            if (glow > 0) {
+                ctx.fillStyle = `rgba(239, 68, 68, ${Math.min(glow, 1)})`;
+                ctx.shadowColor = 'rgba(239, 68, 68, 1)';
+                ctx.shadowBlur = 30 * glow;
+                ctx.beginPath();
+                ctx.moveTo(-25, -5);
+                ctx.bezierCurveTo(-25, -45, 25, -45, 25, -5);
+                ctx.fill();
+                ctx.shadowBlur = 0; // reset
+            }
+
+            // Label
+            ctx.fillStyle = '#ef4444';
+            ctx.font = 'bold 14px "Battambang"';
+            ctx.textAlign = 'center';
+            ctx.fillText('អំពូល LED', 0, -50);
+            
+            ctx.restore();
+        }
+
+        function drawVoltmeter() {
+            const vx = 420;
+            const vy = 55;
+            
+            // Probes connecting to Capacitor nodes
+            drawLine(ctx, vx - 20, vy + 20, NODE_C1_P.x, NODE_C1_P.y, '#ef4444', 2);
+            drawLine(ctx, vx + 20, vy + 20, NODE_C1_N.x, NODE_C1_N.y, '#1e293b', 2);
+            
+            // Voltmeter Box
+            ctx.fillStyle = '#0f172a';
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 4;
+            ctx.beginPath();
+            ctx.roundRect(vx - 60, vy - 35, 120, 55, 8);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Screen
+            ctx.fillStyle = '#064e3b'; // Dark Emerald
+            ctx.beginPath();
+            ctx.roundRect(vx - 50, vy - 25, 100, 35, 4);
+            ctx.fill();
+            
+            // Text
+            ctx.fillStyle = '#34d399'; // Emerald-400
+            ctx.font = '24px "Share Tech Mono"';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`${voltage.toFixed(2)} V`, vx, vy - 7);
+            
+            // Box Label
+            ctx.fillStyle = '#64748b';
+            ctx.font = 'bold 12px "Battambang"';
+            ctx.fillText('វ៉ុលម៉ែត្រ', vx, vy - 45);
+        }
+
+        function drawAnimatedParticles(dt) {
+            dashOffset -= 40 * dt; // Speed of animation
+
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.setLineDash([6, 12]);
+            ctx.lineDashOffset = dashOffset;
+
+            // Define Flow Paths
+            const pChargeIn = [
+                {x: 62.5, y: 190}, {x: 62.5, y: 130}, {x: NODE_SW_TOP.x, y: NODE_SW_TOP.y},
+                NODE_SW_BOT, NODE_R1_L, NODE_R1_R, NODE_C1_P
+            ];
+            
+            const pCapToGnd = [
+                NODE_C1_P, {x: 400, y: 210}, NODE_C1_N, {x: 440, y: 150},
+                {x: 117.5, y: 150}, {x: 117.5, y: 190}
+            ];
+
+            const pDischarge = [
+                NODE_C1_P, NODE_R2_L, NODE_R2_R, NODE_LED_A, NODE_LED_C,
+                {x: 590, y: 150}, {x: 440, y: 150}, NODE_C1_N, NODE_C1_P
+            ];
+
+            const currentCharge = Math.max(0, V_MAX - voltage);
+            const currentDischarge = voltage;
+
+            if (isCharging) {
+                // Flow from battery through R1 to Cap
+                if (currentCharge > 0.1) {
+                    ctx.strokeStyle = `rgba(245, 158, 11, ${Math.min(currentCharge, 1)})`; // Amber
+                    drawWirePath(ctx, pChargeIn, ctx.strokeStyle, 3);
+                    drawWirePath(ctx, pCapToGnd, ctx.strokeStyle, 3);
+                }
+                
+                // Flow through LED branch during charge
+                if (currentDischarge > 0.5) {
+                    ctx.strokeStyle = `rgba(245, 158, 11, ${Math.min(currentDischarge/V_MAX, 1)})`;
+                    const pChargeLED = [
+                        NODE_C1_P, NODE_R2_L, NODE_R2_R, NODE_LED_A, NODE_LED_C,
+                        {x: 590, y: 150}, {x: 117.5, y: 150}, {x: 117.5, y: 190}
+                    ];
+                    drawWirePath(ctx, pChargeLED, ctx.strokeStyle, 3);
+                }
+            } else {
+                // Discharge loop (Cap -> R2 -> LED -> Cap)
+                if (currentDischarge > 0.1) {
+                    ctx.strokeStyle = `rgba(59, 130, 246, ${Math.min(currentDischarge/V_MAX, 1)})`; // Blue particles for discharge
+                    drawWirePath(ctx, pDischarge, ctx.strokeStyle, 3);
+                }
+            }
+
+            ctx.setLineDash([]); // Reset
+        }
+
+        // Main Animation Loop
+        function render(time) {
+            let dt = (time - lastTime) / 1000;
+            if (dt > 0.1) dt = 0.1; // Prevent huge jumps
+            lastTime = time;
+
+            // 1. Update Physics
+            if (isCharging) {
+                voltage += (V_MAX - voltage) * (dt / TAU_CHARGE);
+            } else {
+                voltage -= voltage * (dt / TAU_DISCHARGE);
+                if (voltage < 0.01) voltage = 0;
+            }
+
+            // 2. Clear Canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 3. Draw Layers
+            drawBreadboard();
+            drawBattery();
+            drawPhysicalWires();
+            
+            // Draw Components
+            // R1: 200 Ohm (Red, Black, Brown, Gold)
+            drawResistor(335, 190, 'R1: 200Ω', ['#ef4444', '#000000', '#78350f', '#eab308']);
+            // R2: 1k Ohm (Brown, Black, Red, Gold)
+            drawResistor(475, 230, 'R2: 1kΩ', ['#78350f', '#000000', '#ef4444', '#eab308']);
+            
+            drawCapacitor();
+            drawLED();
+            
+            // Draw Interactive/Animated Layers
+            drawAnimatedParticles(dt);
+            drawVoltmeter(); // Voltmeter drawn last to overlap everything cleanly
+
+            requestAnimationFrame(render);
+        }
+
+        // Start Loop
+        requestAnimationFrame(render);
+
+    </script>
+</body>
+</html>

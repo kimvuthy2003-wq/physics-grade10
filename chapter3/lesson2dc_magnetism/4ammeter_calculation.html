@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>មេរៀនទី២ចរន្តជាប់និងម៉ាញេទិច</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kantumruy Pro', sans-serif; background-color: #f8fafc; overflow: hidden; }
+        .slider-custom { -webkit-appearance: none; width: 100%; height: 8px; border-radius: 5px; background: #cbd5e1; outline: none; }
+        .slider-custom::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #3b82f6; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .slider-custom::-webkit-slider-thumb:hover { background: #2563eb; transform: scale(1.1); }
+        .math-box { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); }
+        #canvas-container { width: 100%; height: 100%; min-height: 500px; }
+        canvas { display: block; width: 100%; height: 100%; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen">
+
+    <!-- Left Panel -->
+    <div class="w-full md:w-1/3 lg:w-1/4 h-full bg-white flex flex-col p-6 shadow-[4px_0_24px_rgba(0,0,0,0.04)] z-10 overflow-y-auto border-r border-slate-200">
+        <h1 class="text-xl font-bold text-slate-800 mb-2 leading-tight">ការអាន និងគណនាចរន្តតាមអំពែម៉ែត្រ</h1>
+        <p class="text-sm text-slate-500 mb-6 border-b border-slate-100 pb-4">ប្ដូរតម្លៃរេស៊ីស្តង់ និងកាលីបដើម្បីសង្កេតមើលបម្រែបម្រួលទ្រនិច។</p>
+
+        <!-- Controls -->
+        <div class="space-y-6 mb-6">
+            <!-- Resistance Slider -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-sm font-bold text-slate-700">រេស៊ីស្តង់ (R)</label>
+                    <span id="r-val" class="text-sm font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded">10 Ω</span>
+                </div>
+                <input type="range" id="resistor-slider" min="1" max="24" value="10" class="slider-custom mt-2">
+                <div class="flex justify-between text-xs text-slate-400 mt-1">
+                    <span>1 Ω</span>
+                    <span>24 Ω</span>
+                </div>
+            </div>
+
+            <!-- Caliber Select -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <label class="text-sm font-bold text-slate-700 block mb-2">កាលីប (Cal)</label>
+                <select id="cal-select" class="w-full p-2 border border-slate-300 rounded-lg text-sm font-semibold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <option value="1">1 A</option>
+                    <option value="5" selected>5 A</option>
+                    <option value="15">15 A</option>
+                </select>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col gap-3">
+                <button id="btn-power" class="w-full py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition shadow-[0_4px_12px_rgba(16,185,129,0.3)] flex justify-center items-center gap-2 text-sm">
+                    ⚡ ភ្ជាប់សៀគ្វី (Power ON)
+                </button>
+                <button id="btn-polarity" class="w-full py-3 rounded-xl font-bold text-slate-700 bg-white border-2 border-slate-200 hover:bg-slate-50 transition shadow-sm flex justify-center items-center gap-2 text-sm">
+                    🔄 ប្ដូរប៉ូលថ្មពិល
+                </button>
+            </div>
+        </div>
+
+        <!-- Math Box -->
+        <div class="math-box p-4 rounded-xl border border-green-200 mt-auto shadow-sm relative">
+            <h3 class="font-bold text-green-800 mb-3 border-b border-green-300 pb-2 text-sm">ការគណនាចរន្តអគ្គិសនី (I)</h3>
+            
+            <div class="space-y-2 mb-4">
+                <div class="flex justify-between text-sm">
+                    <span class="text-green-700">ចំនួនក្រិតសរុប (n₀):</span>
+                    <span class="font-bold text-green-900">100</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-green-700">កាលីប (Cal):</span>
+                    <span id="math-cal" class="font-bold text-green-900">5 A</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-green-700">ក្រិតដែលទ្រនិចចង្អុល (n):</span>
+                    <span id="math-n" class="font-bold text-blue-700">0</span>
+                </div>
+            </div>
+
+            <div class="bg-white/80 p-3 rounded-lg border border-green-200 text-center">
+                <p class="text-sm font-semibold text-slate-600 mb-1">I = Cal &times; (n / n₀)</p>
+                <p class="text-lg font-bold text-green-700">
+                    I = <span id="math-result">0 A</span>
+                </p>
+            </div>
+            
+            <!-- Warning Overlays -->
+            <div id="warning-overlay" class="absolute inset-0 bg-red-50/95 backdrop-blur-sm rounded-xl border border-red-200 p-4 flex flex-col justify-center items-center text-center hidden">
+                <span class="text-2xl mb-1">⚠️</span>
+                <p id="warning-text" class="text-sm font-bold text-red-600"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="w-full md:w-2/3 lg:w-3/4 relative bg-[#f1f5f9] flex flex-col items-center justify-center p-4">
+        <div class="absolute top-4 left-4 bg-white px-3 py-1 rounded-full shadow-sm text-xs font-bold text-slate-500 border border-slate-200 z-10">
+            ថ្មពិល (V) = 12V ថេរ
+        </div>
+        <div id="canvas-container" class="w-full h-full max-w-4xl max-h-[800px] bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+            <canvas id="simCanvas"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        // Physics State
+        const V = 12; // Fixed Volts
+        let R = 10;
+        let Cal = 5;
+        const n0 = 100;
+        let isPowerOn = false;
+        let isReversed = false;
+        
+        let I_actual = 0; 
+        let n_target = 0; 
+        let n_current = 0; // Smooth animation tracker
+
+        // Electrons array
+        let electrons = [];
+        for (let i = 0; i < 20; i++) {
+            electrons.push({ progress: i / 20 });
+        }
+
+        // DOM Inputs
+        const rSlider = document.getElementById('resistor-slider');
+        const rValText = document.getElementById('r-val');
+        const calSelect = document.getElementById('cal-select');
+        const btnPower = document.getElementById('btn-power');
+        const btnPolarity = document.getElementById('btn-polarity');
+        
+        const mathCal = document.getElementById('math-cal');
+        const mathN = document.getElementById('math-n');
+        const mathResult = document.getElementById('math-result');
+        const warningOverlay = document.getElementById('warning-overlay');
+        const warningText = document.getElementById('warning-text');
+
+        function resize() {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Update Physics
+        function updatePhysics() {
+            R = parseFloat(rSlider.value);
+            Cal = parseFloat(calSelect.value);
+            rValText.innerText = `${R} Ω`;
+            mathCal.innerText = `${Cal} A`;
+
+            if (isPowerOn) {
+                I_actual = V / R;
+                if (isReversed) {
+                    I_actual = -I_actual; // Reversed flow
+                }
+            } else {
+                I_actual = 0;
+            }
+
+            // Calculate 'n' formula: n = (I / Cal) * 100
+            n_target = (I_actual / Cal) * n0;
+            
+            updateMathUI();
+        }
+
+        function updateMathUI() {
+            if (!isPowerOn) {
+                warningOverlay.classList.add('hidden');
+                mathN.innerText = '0';
+                mathResult.innerText = '0 A';
+                return;
+            }
+
+            if (isReversed) {
+                warningOverlay.classList.remove('hidden');
+                warningText.innerText = "ទ្រនិចងាកបញ្ច្រាស (ភ្ជាប់ប៉ូលខុស)! អំពែម៉ែត្រអាចខូច។";
+                return;
+            }
+
+            if (n_target > 100) {
+                warningOverlay.classList.remove('hidden');
+                warningText.innerText = "លើសកាលីប (Overload)! ចរន្តធំជាងកាលីបដែលបានជ្រើសរើស។";
+                return;
+            }
+
+            warningOverlay.classList.add('hidden');
+            mathN.innerText = n_target.toFixed(1);
+            
+            const displayI = Cal * (n_target / n0);
+            mathResult.innerHTML = `${displayI.toFixed(2)} A`;
+        }
+
+        // Listeners
+        rSlider.addEventListener('input', updatePhysics);
+        calSelect.addEventListener('change', updatePhysics);
+        
+        btnPower.addEventListener('click', () => {
+            isPowerOn = !isPowerOn;
+            if (isPowerOn) {
+                btnPower.innerHTML = '🔌 ផ្តាច់សៀគ្វី (Power OFF)';
+                btnPower.className = "w-full py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-[0_4px_12px_rgba(239,68,68,0.3)] flex justify-center items-center gap-2 text-sm";
+            } else {
+                btnPower.innerHTML = '⚡ ភ្ជាប់សៀគ្វី (Power ON)';
+                btnPower.className = "w-full py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition shadow-[0_4px_12px_rgba(16,185,129,0.3)] flex justify-center items-center gap-2 text-sm";
+            }
+            updatePhysics();
+        });
+
+        btnPolarity.addEventListener('click', () => {
+            isReversed = !isReversed;
+            updatePhysics();
+        });
+
+        function drawAmmeter(cx, cy, radius) {
+            ctx.save();
+            ctx.translate(cx, cy);
+
+            // Ammeter Box
+            const boxW = radius * 3;
+            const boxH = radius * 1.8;
+            ctx.fillStyle = "#ffffff";
+            ctx.shadowColor = "rgba(0,0,0,0.08)";
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetY = 8;
+            ctx.fillRect(-boxW/2, -radius * 1.3, boxW, boxH);
+            ctx.shadowColor = "transparent";
+            
+            ctx.strokeStyle = "#cbd5e1";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(-boxW/2, -radius * 1.3, boxW, boxH);
+
+            // Scale Arc (Top half)
+            const startAngle = -Math.PI * 0.85; // Left (-153 deg)
+            const endAngle = -Math.PI * 0.15;   // Right (-27 deg)
+            
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, startAngle, endAngle);
+            ctx.strokeStyle = "#1e293b";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Ticks and Labels
+            ctx.fillStyle = "#0f172a";
+            ctx.font = "bold 14px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            for (let i = 0; i <= 100; i += 5) {
+                let fraction = i / 100;
+                let angle = startAngle + fraction * (endAngle - startAngle);
+                
+                let isMajor = (i % 20 === 0);
+                let tickLen = isMajor ? 14 : 7;
+                
+                let x1 = Math.cos(angle) * radius;
+                let y1 = Math.sin(angle) * radius;
+                let x2 = Math.cos(angle) * (radius - tickLen);
+                let y2 = Math.sin(angle) * (radius - tickLen);
+
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.lineWidth = isMajor ? 2.5 : 1.5;
+                ctx.strokeStyle = "#1e293b";
+                ctx.stroke();
+
+                if (isMajor) {
+                    let tx = Math.cos(angle) * (radius - 28);
+                    let ty = Math.sin(angle) * (radius - 28);
+                    ctx.fillText(i.toString(), tx, ty);
+                }
+            }
+
+            // Central Labels
+            ctx.font = "bold 28px Arial";
+            ctx.fillStyle = "#1e293b";
+            ctx.fillText("A", 0, -radius * 0.45);
+            ctx.font = "11px Arial";
+            ctx.fillStyle = "#64748b";
+            ctx.fillText("Moving Coil", 0, -radius * 0.25);
+
+            // Calculate Needle Angle smoothly
+            n_current += (n_target - n_current) * 0.15;
+            
+            // Constrain physical movement (-10 below zero, 110 max overload)
+            let display_n = Math.max(-10, Math.min(110, n_current));
+            let needleAngle = startAngle + (display_n / 100) * (endAngle - startAngle);
+
+            // Draw Needle
+            ctx.save();
+            ctx.rotate(needleAngle);
+            
+            // The needle is drawn pointing along the positive X-axis
+            // When rotated by startAngle (e.g. -153 deg), it will point to the '0' mark perfectly!
+            ctx.beginPath();
+            ctx.moveTo(-15, -4); // Base (behind pivot)
+            ctx.lineTo(-15, 4);
+            ctx.lineTo(radius * 1.05, 1); // Tip
+            ctx.lineTo(radius * 1.05, -1);
+            ctx.fillStyle = "#ef4444";
+            ctx.fill();
+            
+            ctx.restore();
+
+            // Pivot Center
+            ctx.beginPath();
+            ctx.arc(0, 0, 10, 0, Math.PI * 2);
+            ctx.fillStyle = "#1e293b";
+            ctx.fill();
+            ctx.strokeStyle = "#cbd5e1";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawCircuit(cw, ch) {
+            const marginX = 100;
+            const yTop = ch * 0.65;
+            const yBot = ch * 0.90;
+            const xLeft = marginX;
+            const xRight = cw - marginX;
+
+            // Wire Rectangle
+            ctx.beginPath();
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 3;
+            ctx.moveTo(xLeft, yTop); ctx.lineTo(xRight, yTop);
+            ctx.lineTo(xRight, yBot);
+            ctx.lineTo(xLeft, yBot);
+            ctx.lineTo(xLeft, yTop);
+            ctx.stroke();
+
+            const cx = cw / 2;
+
+            // Battery (Top center)
+            ctx.fillStyle = "#f1f5f9";
+            ctx.fillRect(cx - 30, yTop - 15, 60, 30);
+            
+            ctx.beginPath();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#0f172a";
+            if (!isReversed) {
+                // Normal: Left +, Right -
+                ctx.moveTo(cx - 10, yTop - 20); ctx.lineTo(cx - 10, yTop + 20);
+                ctx.moveTo(cx + 10, yTop - 10); ctx.lineTo(cx + 10, yTop + 10);
+                ctx.lineWidth = 6; ctx.stroke(); ctx.lineWidth = 4;
+                
+                ctx.fillStyle = "#ef4444"; ctx.font = "bold 16px Arial"; ctx.fillText("+", cx - 25, yTop - 25);
+                ctx.fillStyle = "#3b82f6"; ctx.fillText("-", cx + 25, yTop - 25);
+            } else {
+                // Reversed: Left -, Right +
+                ctx.moveTo(cx - 10, yTop - 10); ctx.lineTo(cx - 10, yTop + 10);
+                ctx.moveTo(cx + 10, yTop - 20); ctx.lineTo(cx + 10, yTop + 20);
+                ctx.lineWidth = 6; ctx.stroke(); ctx.lineWidth = 4;
+                
+                ctx.fillStyle = "#3b82f6"; ctx.font = "bold 16px Arial"; ctx.fillText("-", cx - 25, yTop - 25);
+                ctx.fillStyle = "#ef4444"; ctx.fillText("+", cx + 25, yTop - 25);
+            }
+            ctx.stroke();
+            ctx.fillStyle = "#64748b"; ctx.font = "12px Kantumruy Pro"; ctx.textAlign="center"; ctx.fillText("ថ្មពិល (12V)", cx, yTop + 35);
+
+            // Ammeter (Left center)
+            const cyLeft = (yTop + yBot) / 2;
+            ctx.fillStyle = "#f1f5f9";
+            ctx.beginPath(); ctx.arc(xLeft, cyLeft, 22, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2.5; ctx.stroke();
+            ctx.fillStyle = "#0f172a"; ctx.font = "bold 20px Arial"; ctx.fillText("A", xLeft, cyLeft + 7);
+            ctx.fillStyle = "#64748b"; ctx.font = "12px Kantumruy Pro"; ctx.fillText("អំពែម៉ែត្រ", xLeft - 45, cyLeft + 5);
+
+            // Resistor (Bottom center)
+            ctx.fillStyle = "#f1f5f9";
+            ctx.fillRect(cx - 40, yBot - 15, 80, 30);
+            ctx.beginPath();
+            ctx.moveTo(cx - 30, yBot);
+            ctx.lineTo(cx - 20, yBot - 12); ctx.lineTo(cx - 10, yBot + 12);
+            ctx.lineTo(cx, yBot - 12);     ctx.lineTo(cx + 10, yBot + 12);
+            ctx.lineTo(cx + 20, yBot - 12); ctx.lineTo(cx + 30, yBot);
+            ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2; ctx.stroke();
+            ctx.fillStyle = "#64748b"; ctx.font = "12px Kantumruy Pro"; ctx.fillText(`R = ${R}Ω`, cx, yBot + 25);
+
+            // Switch (Right center)
+            const cyRight = (yTop + yBot) / 2;
+            ctx.fillStyle = "#f1f5f9";
+            ctx.fillRect(xRight - 15, cyRight - 30, 30, 60);
+            ctx.beginPath();
+            ctx.arc(xRight, cyRight - 20, 5, 0, Math.PI*2);
+            ctx.arc(xRight, cyRight + 20, 5, 0, Math.PI*2);
+            ctx.fillStyle = "#0f172a"; ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(xRight, cyRight - 20);
+            if (isPowerOn) {
+                ctx.lineTo(xRight, cyRight + 20); // Closed
+            } else {
+                ctx.lineTo(xRight - 25, cyRight + 5); // Open
+            }
+            ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 3; ctx.stroke();
+            ctx.fillStyle = "#64748b"; ctx.font = "12px Kantumruy Pro"; ctx.fillText("កុងតាក់", xRight + 45, cyRight + 5);
+
+            // Electron Path
+            const getPathPoint = (progress) => {
+                const w = xRight - xLeft;
+                const h = yBot - yTop;
+                const totalLen = w*2 + h*2;
+                let d = (progress % 1) * totalLen;
+                if (d < 0) d += totalLen;
+
+                if (d <= w) return { x: xLeft + d, y: yTop }; // Top
+                d -= w;
+                if (d <= h) return { x: xRight, y: yTop + d }; // Right
+                d -= h;
+                if (d <= w) return { x: xRight - d, y: yBot }; // Bot
+                d -= w;
+                return { x: xLeft, y: yBot - d }; // Left
+            };
+
+            if (isPowerOn) {
+                // Base speed + proportional to current
+                const speed = 0.005 + (Math.abs(I_actual) * 0.0008);
+                // Electrons flow from Negative to Positive
+                const dir = isReversed ? -1 : 1; 
+
+                electrons.forEach(e => {
+                    e.progress += speed * dir;
+                    const p = getPathPoint(e.progress);
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 6, 0, Math.PI*2);
+                    ctx.fillStyle = "#3b82f6";
+                    ctx.fill();
+                    ctx.strokeStyle = "#fff"; ctx.lineWidth=1; ctx.stroke();
+                    ctx.fillStyle = "#fff"; ctx.font = "bold 8px Arial"; ctx.fillText("-", p.x, p.y + 3);
+                });
+            }
+        }
+
+        // Main Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw Ammeter on top half, circuit on bottom half
+            drawAmmeter(canvas.width / 2, canvas.height * 0.45, canvas.height * 0.22);
+            drawCircuit(canvas.width, canvas.height);
+        }
+
+        updatePhysics();
+        animate();
+
+    </script>
+</body>
+</html>

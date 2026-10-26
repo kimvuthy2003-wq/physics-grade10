@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ15ទំព័រ167ត្រង់ស្វូ</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- MathJax Configuration and Script -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Prevent math equations from breaking on small screens */
+        .math-scroll-container {
+            width: 100%;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 1rem 0;
+            -webkit-overflow-scrolling: touch;
+            -ms-overflow-style: none;  
+            scrollbar-width: none;  
+        }
+        .math-scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Smooth accordion transition for the answer section */
+        .answer-grid-wrapper {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.5s ease-in-out;
+        }
+        .answer-grid-wrapper.show {
+            grid-template-rows: 1fr;
+        }
+        .answer-inner {
+            overflow: hidden;
+        }
+
+        .flux-line {
+            animation: dash 1.5s linear infinite;
+        }
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -24;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased p-3 md:p-6 flex items-center justify-center min-h-screen">
+
+    <div class="max-w-3xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 my-4">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-700 to-cyan-600 px-5 py-5 shadow-sm">
+            <h1 class="text-xl md:text-2xl text-white font-bold text-center drop-shadow-sm">
+                លំហាត់លេខ១៥
+            </h1>
+        </div>
+
+        <div class="p-4 md:p-6 space-y-6">
+            
+            <!-- Problem Statement -->
+            <section class="bg-blue-50/50 p-5 md:p-6 rounded-xl border border-blue-100 shadow-sm relative">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500 rounded-l-xl"></div>
+                <div class="text-base md:text-lg leading-relaxed text-slate-700 space-y-3">
+                    <p class="font-bold text-slate-800">
+                        ត្រង់ស្វូបរិសុទ្ធមួយមានរបុំបឋមស្មើនឹង <span class="text-blue-700">2000 ស្ពៀ</span> និងរបុំមធ្យម <span class="text-emerald-700">500 ស្ពៀ</span> ។
+                    </p>
+                    <p class="pl-2">ក. ចូរគូសគំនូសបំព្រួញបង្ហាញត្រង់ស្វូ ។</p>
+                    <p class="pl-2">ខ. តើត្រង់ស្វូនេះជាស៊ូកវ៉ុលទ័រ ឬស៊ូវ៉ុលទ័រ? បើតង់ស្យុងចូលរបុំបឋមស្មើនឹង <span class="text-blue-700 font-bold">220 V</span> តើតង់ស្យុងចេញនៅរបុំមធ្យមមានតម្លៃប៉ុន្មាន?</p>
+                </div>
+            </section>
+
+            <!-- Simulator -->
+            <section class="bg-slate-50 p-3 rounded-xl border border-slate-200 shadow-inner">
+                <h3 class="text-center font-bold text-slate-600 mb-3 text-sm md:text-base">គំនូសបំព្រួញប្រព័ន្ធត្រង់ស្វូ </h3>
+                <div class="w-full bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <svg viewBox="0 0 800 450" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="iron" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#cbd5e1" />
+                                <stop offset="100%" stop-color="#64748b" />
+                            </linearGradient>
+                            <linearGradient id="copper" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#f59e0b" />
+                                <stop offset="100%" stop-color="#b45309" />
+                            </linearGradient>
+                        </defs>
+
+                        <!-- Iron Core -->
+                        <path d="M 200 75 h 400 v 300 h -400 v -300 z M 275 150 v 150 h 250 v -150 h -250 z" fill="url(#iron)" stroke="#475569" stroke-width="4" fill-rule="evenodd" />
+
+                        <!-- Animated Magnetic Flux -->
+                        <rect x="237" y="112" width="326" height="226" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="12 12" class="flux-line" opacity="0.7"/>
+                        
+                        <!-- Primary Coil (MORE turns - Step down) -->
+                        <g stroke-linejoin="round" fill="none">
+                            <path d="M 120 160 L 200 160" stroke="url(#copper)" stroke-width="6" />
+                            <path d="M 120 290 L 200 290" stroke="url(#copper)" stroke-width="6" />
+                            
+                            <!-- 7 Loops -->
+                            <path d="M 275 170 C 295 175, 295 180, 200 185" stroke="#78350f" stroke-width="4"/>
+                            <path d="M 200 160 L 275 170" stroke="url(#copper)" stroke-width="8"/>
+
+                            <path d="M 275 190 C 295 195, 295 200, 200 205" stroke="#78350f" stroke-width="4"/>
+                            <path d="M 200 185 L 275 190" stroke="url(#copper)" stroke-width="8"/>
+
+                            <path d="M 275 210 C 295 215, 295 220, 200 225" stroke="#78350f" stroke-width="4"/>
+                            <path d="M 200 205 L 275 210" stroke="url(#copper)" stroke-width="8"/>
+
+                            <path d="M 275 230 C 295 235, 295 240, 200 245" stroke="#78350f" stroke-width="4"/>
+                            <path d="M 200 225 L 275 230" stroke="url(#copper)" stroke-width="8"/>
+
+                            <path d="M 275 250 C 295 255, 295 260, 200 265" stroke="#78350f" stroke-width="4"/>
+                            <path d="M 200 245 L 275 250" stroke="url(#copper)" stroke-width="8"/>
+
+                            <path d="M 275 270 C 295 275, 295 280, 200 285" stroke="#78350f" stroke-width="4"/>
+                            <path d="M 200 265 L 275 270" stroke="url(#copper)" stroke-width="8"/>
+
+                            <path d="M 275 290 C 295 295, 295 300, 200 290" stroke="#78350f" stroke-width="4"/>
+                            <path d="M 200 285 L 275 290" stroke="url(#copper)" stroke-width="8"/>
+                        </g>
+
+                        <!-- Secondary Coil (FEWER turns - Step down) -->
+                        <g stroke-linejoin="round" fill="none">
+                            <path d="M 680 180 L 600 180" stroke="url(#copper)" stroke-width="8" />
+                            <path d="M 680 270 L 600 270" stroke="url(#copper)" stroke-width="8" />
+                            
+                            <!-- 3 Loops -->
+                            <path d="M 525 190 C 505 195, 505 200, 600 205" stroke="#78350f" stroke-width="6"/>
+                            <path d="M 600 180 L 525 190" stroke="url(#copper)" stroke-width="10"/>
+
+                            <path d="M 525 220 C 505 225, 505 230, 600 235" stroke="#78350f" stroke-width="6"/>
+                            <path d="M 600 205 L 525 220" stroke="url(#copper)" stroke-width="10"/>
+
+                            <path d="M 525 250 C 505 255, 505 260, 600 270" stroke="#78350f" stroke-width="6"/>
+                            <path d="M 600 235 L 525 250" stroke="url(#copper)" stroke-width="10"/>
+                        </g>
+
+                        <!-- Labels -->
+                        <rect x="50" y="40" width="140" height="70" rx="6" fill="#fee2e2" stroke="#fca5a5" opacity="0.9"/>
+                        <text x="120" y="65" font-family="Battambang" font-weight="bold" font-size="16" fill="#b91c1c" text-anchor="middle">របុំបឋម</text>
+                        <text x="120" y="90" font-family="Times New Roman" font-size="16" fill="#7f1d1d" text-anchor="middle" font-weight="bold">N₁ = 2000</text>
+
+                        <rect x="610" y="40" width="140" height="70" rx="6" fill="#d1fae5" stroke="#6ee7b7" opacity="0.9"/>
+                        <text x="680" y="65" font-family="Battambang" font-weight="bold" font-size="16" fill="#047857" text-anchor="middle">របុំមធ្យម</text>
+                        <text x="680" y="90" font-family="Times New Roman" font-size="16" fill="#064e3b" text-anchor="middle" font-weight="bold">N₂ = 500</text>
+                    </svg>
+                </div>
+            </section>
+
+            <!-- Toggle Button -->
+            <div class="flex justify-center pt-2">
+                <button id="toggleBtn" onclick="toggleAnswer()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform active:scale-95 flex items-center">
+                    <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span id="btnText">បង្ហាញដំណោះស្រាយ</span>
+                </button>
+            </div>
+
+            <!-- Answer Section -->
+            <div id="answer-section" class="answer-grid-wrapper mt-4">
+                <div class="answer-inner">
+                    <div class="bg-white rounded-xl p-5 md:p-6 border border-slate-200 shadow-inner space-y-8">
+                        
+                        <!-- Part A -->
+                        <div class="border-l-4 border-indigo-500 pl-4 space-y-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded text-sm">ក</span>
+                                <h4 class="font-bold text-blue-900 text-base md:text-lg">គំនូសបំព្រួញបង្ហាញត្រង់ស្វូ</h4>
+                            </div>
+                            
+                            <!-- Schematic Diagram Styled Exactly as Image 3.57 (Step-down) -->
+                            <div class="mt-4 bg-slate-50/70 p-4 md:p-6 rounded-xl border border-slate-200 flex flex-col items-center">
+                                <svg viewBox="0 0 540 270" class="w-full max-w-lg h-auto" xmlns="http://www.w3.org/2000/svg">
+                                    <defs>
+                                        <marker id="arrow_in" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
+                                        </marker>
+                                        <marker id="arrow_out" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
+                                        </marker>
+                                    </defs>
+
+                                    <!-- Iron Core Parallel Lines -->
+                                    <line x1="262" y1="40" x2="262" y2="230" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+                                    <line x1="278" y1="40" x2="278" y2="230" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+
+                                    <!-- Primary Coil (Left: 5 Loops for Step-down) -->
+                                    <path d="M 125 55 L 220 55" fill="none" stroke="#1e293b" stroke-width="2.5" />
+                                    <!-- Arrow at midpoint of top lead -->
+                                    <line x1="125" y1="55" x2="185" y2="55" stroke="#1e293b" stroke-width="2.5" marker-end="url(#arrow_in)" />
+                                    
+                                    <!-- 5 Arcs for Primary -->
+                                    <path d="M 220 55 A 16 16 0 0 1 220 87 A 16 16 0 0 1 220 119 A 16 16 0 0 1 220 151 A 16 16 0 0 1 220 183 A 16 16 0 0 1 220 215 L 125 215" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round" />
+
+                                    <!-- Primary Terminals -->
+                                    <circle cx="120" cy="55" r="4.5" fill="none" stroke="#1e293b" stroke-width="2.5" />
+                                    <circle cx="120" cy="215" r="4.5" fill="none" stroke="#1e293b" stroke-width="2.5" />
+
+                                    <!-- Secondary Coil (Right: 3 Loops for Step-down) -->
+                                    <path d="M 315 75 L 415 75" fill="none" stroke="#1e293b" stroke-width="2.5" />
+                                    <!-- Arrow at midpoint of top lead -->
+                                    <line x1="315" y1="75" x2="385" y2="75" stroke="#1e293b" stroke-width="2.5" marker-end="url(#arrow_out)" />
+                                    
+                                    <!-- 3 Arcs for Secondary -->
+                                    <path d="M 315 75 A 20 20 0 0 1 315 115 A 20 20 0 0 1 315 155 A 20 20 0 0 1 315 195 L 415 195" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round" />
+
+                                    <!-- Secondary Terminals -->
+                                    <circle cx="420" cy="75" r="4.5" fill="none" stroke="#1e293b" stroke-width="2.5" />
+                                    <circle cx="420" cy="195" r="4.5" fill="none" stroke="#1e293b" stroke-width="2.5" />
+
+                                    <!-- Labels matching Figure 3.57 -->
+                                    <text x="175" y="42" font-family="Battambang" font-size="14" fill="#1e293b" text-anchor="middle">របុំបឋម</text>
+                                    <text x="365" y="60" font-family="Battambang" font-size="14" fill="#1e293b" text-anchor="middle">របុំមធ្យម</text>
+
+                                    <text x="95" y="140" font-family="Battambang" font-size="15" fill="#1e293b" text-anchor="middle">ចូល</text>
+                                    <text x="445" y="140" font-family="Battambang" font-size="15" fill="#1e293b" text-anchor="middle">ចេញ</text>
+
+                                    <text x="175" y="242" font-family="Times New Roman" font-style="italic" font-size="17" fill="#1e293b" text-anchor="middle">V<tspan font-size="12" dy="4">P</tspan><tspan dy="-4">, </tspan>N<tspan font-size="12" dy="4">P</tspan><tspan dy="-4">, </tspan>I<tspan font-size="12" dy="4">P</tspan></text>
+                                    <text x="365" y="222" font-family="Times New Roman" font-style="italic" font-size="17" fill="#1e293b" text-anchor="middle">V<tspan font-size="12" dy="4">s</tspan><tspan dy="-4">, </tspan>N<tspan font-size="12" dy="4">s</tspan><tspan dy="-4">, </tspan>I<tspan font-size="12" dy="4">s</tspan></text>
+                                </svg>
+                                
+                                <span class="font-bold text-slate-800 text-sm md:text-base mt-2">
+                                    រូបទី 3.57 គំនូសបំព្រួញស៊ូវ៉ុលទ័រ
+                                </span>
+                            </div>
+                        </div>
+
+                        <hr class="border-slate-100">
+
+                        <!-- Part B -->
+                        <div class="border-l-4 border-emerald-500 pl-4 space-y-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded text-sm">ខ</span>
+                                <h4 class="font-bold text-emerald-800 text-base md:text-lg">ប្រភេទត្រង់ស្វូ និងតង់ស្យុងចេញ</h4>
+                            </div>
+                            
+                            <!-- Sub-part 1: Type of Transformer using k -->
+                            <div class="bg-emerald-50/40 p-4 rounded-lg border border-emerald-100">
+                                <p class="text-slate-700 font-bold mb-2">១. កំណត់ប្រភេទត្រង់ស្វូ ៖</p>
+                                <div class="math-scroll-container">
+                                    <p class="text-slate-700 mb-2">តាមរូបមន្តផលធៀបបំប្លែង ៖ $k = \frac{N_2}{N_1}$</p>
+                                    <p class="text-slate-700 mb-2">ដោយ $N_1 = 2000$ ស្ពៀ, $N_2 = 500$ ស្ពៀ</p>
+                                    $$k = \frac{500}{2000} = 0.25$$
+                                    <p class="text-slate-700 mt-2">កាលណាផលធៀបបំប្លែង $k < 1$ នោះគេហៅថា <span class="font-bold text-emerald-700">ស៊ូវ៉ុលទ័រ</span> (Step-down Transformer) ។</p>
+                                </div>
+                            </div>
+
+                            <!-- Sub-part 2: Calculate Output Voltage -->
+                            <div class="bg-emerald-50/40 p-4 rounded-lg border border-emerald-100">
+                                <p class="text-slate-700 font-bold mb-2">២. រកតង់ស្យុងចេញនៅរបុំមធ្យម ($V_2$) ៖</p>
+                                <div class="math-scroll-container">
+                                    <p class="text-slate-700 mb-2">តាមរូបមន្ត ៖</p>
+                                    $$\frac{V_1}{V_2} = \frac{N_1}{N_2}$$
+                                    
+                                    <p class="text-slate-700 mt-4 mb-2">ទាញរក $V_2$ ៖</p>
+                                    $$V_2 = \frac{V_1 \times N_2}{N_1}$$
+                                    
+                                    <p class="text-slate-700 mt-4 mb-2">ដោយ $V_1 = 220 \text{ V}, \ N_1 = 2000$ ស្ពៀ, $N_2 = 500$ ស្ពៀ</p>
+                                    <p class="text-slate-700 mb-2">ជំនួសលេខ ៖</p>
+                                    $$V_2 = \frac{220 \times 500}{2000} = \frac{110000}{2000} = 55 \text{ V}$$
+                                </div>
+                            </div>
+                            
+                            <p class="font-bold text-base md:text-lg text-emerald-700 mt-4 bg-white shadow-sm border border-slate-100 inline-block px-4 py-2 rounded-lg">
+                                ដូចនេះ តង់ស្យុងចេញនៅរបុំមធ្យមគឺ $V_2 = 55 \text{ V}$ ។
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function toggleAnswer() {
+            const answerSection = document.getElementById('answer-section');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const button = document.getElementById('toggleBtn');
+            
+            answerSection.classList.toggle('show');
+            
+            if (answerSection.classList.contains('show')) {
+                btnText.textContent = 'លាក់ដំណោះស្រាយ';
+                button.classList.replace('bg-blue-600', 'bg-slate-600');
+                button.classList.replace('hover:bg-blue-700', 'hover:bg-slate-700');
+                
+                btnIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                `;
+
+                if (window.MathJax) {
+                    MathJax.typesetPromise();
+                }
+
+                setTimeout(() => {
+                    answerSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 300);
+
+            } else {
+                btnText.textContent = 'បង្ហាញដំណោះស្រាយ';
+                button.classList.replace('bg-slate-600', 'bg-blue-600');
+                button.classList.replace('hover:bg-slate-700', 'hover:bg-blue-700');
+                
+                btnIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

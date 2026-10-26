@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី ១០៖ សៀគ្វីស្ពានឌីយ៉ូតបំប្លែងចរន្ត</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Battambang:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #2563eb;
+            color: white;
+            padding: 16px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .problem-statement {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #1f2937;
+            margin-bottom: 24px;
+            padding: 16px;
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            position: relative;
+            gap: 15px;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            border-radius: 4px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            max-width: 100%;
+            height: auto;
+        }
+
+        .controls {
+            display: flex;
+            gap: 16px;
+            margin-top: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        button {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .btn-toggle {
+            background-color: #8b5cf6;
+            color: white;
+            box-shadow: 0 4px 0 #6d28d9;
+        }
+        .btn-toggle:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #6d28d9;
+        }
+        .btn-toggle.off {
+            background-color: #9ca3af;
+            box-shadow: 0 4px 0 #4b5563;
+        }
+
+        .solution-btn-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .btn-solution {
+            background-color: #10b981;
+            color: white;
+            font-size: 1.1rem;
+            padding: 12px 24px;
+        }
+        .btn-solution:hover {
+            background-color: #059669;
+        }
+
+        .solution-box {
+            display: none;
+            background-color: #ecfdf5;
+            border: 1px solid #34d399;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 20px;
+            color: #064e3b;
+            line-height: 1.8;
+        }
+
+        .solution-box h2 {
+            color: #047857;
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1.25rem;
+            border-bottom: 2px solid #a7f3d0;
+            padding-bottom: 8px;
+        }
+
+        .solution-box ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .solution-box li {
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>លំហាត់ទី ១០៖ សៀគ្វីស្ពានឌីយ៉ូតបំប្លែងចរន្ត</h1>
+    </div>
+    
+    <div class="content">
+        <!-- Problem Statement -->
+        <div class="problem-statement">
+            <strong>១០. គេដំឡើងសៀគ្វីដូចរូបខាងក្រោម ។</strong><br><br>
+            ក. ចូររៀបរាប់ឈ្មោះគ្រឿងអេឡិចត្រូនិកដែលយកមកប្រើក្នុងដ្យាក្រាមនៃសៀគ្វីនេះ ។<br>
+            ខ. ចូរបង្ហាញពីដំណើរការនៃសៀគ្វីនេះ ។<br>
+            គ. បើសិនអាច ចូរដំឡើងសៀគ្វីនេះលើបន្ទះសៀគ្វីជាក់ស្តែង ។ អ្នកអាចដំឡើងវាដោយប្រើកម្មវិធី E-Lab ។
+        </div>
+
+        <!-- Simulator Canvas -->
+        <div class="canvas-container">
+            <!-- Schematic Canvas -->
+            <canvas id="circuitCanvas" width="800" height="320"></canvas>
+            <!-- Graph Canvas -->
+            <canvas id="graphCanvas" width="800" height="150"></canvas>
+            
+            <div class="controls">
+                <button class="btn-toggle" id="btnToggleCap" onclick="toggleCapacitor()">ភ្ជាប់កុងដង់សាទ័រ C1 (ON)</button>
+            </div>
+        </div>
+
+        <!-- Solution Button -->
+        <div class="solution-btn-container">
+            <button class="btn-solution" onclick="toggleSolution()">បង្ហាញដំណោះស្រាយ</button>
+        </div>
+
+        <!-- Solution Content -->
+        <div class="solution-box" id="solutionBox">
+            <h2>ដំណោះស្រាយលំហាត់លេខ ១០</h2>
+            <ul>
+                <li><strong>ក. ឈ្មោះគ្រឿងអេឡិចត្រូនិក៖</strong>
+                    <ul>
+                        <li>ប្រភពចរន្តឆ្លាស់ (AC Source 12V)</li>
+                        <li>ឌីយ៉ូត ៤ គ្រាប់តភ្ជាប់ជាស្ពាន (Bridge Rectifier D1, D2, D3, D4)</li>
+                        <li>កុងដង់សាទ័រ (Capacitor C1 100μF) សម្រាប់ត្រងចរន្ត</li>
+                        <li>រេស៊ីស្តង់បន្ទុក (Load Resistor R1 10kΩ)</li>
+                    </ul>
+                </li>
+                <li><strong>ខ. ដំណើរការនៃសៀគ្វី៖</strong><br>
+                    សៀគ្វីនេះជាសៀគ្វីបំប្លែងចរន្តឆ្លាស់ទៅជាចរន្តជាប់ពេញខួប (Full-Wave Bridge Rectifier)៖
+                    <ul>
+                        <li><strong>ស្ពានឌីយ៉ូត៖</strong> ក្នុងមួយខួបនៃចរន្ត AC ឌីយ៉ូតធ្វើការឆ្លាស់គ្នាម្ដង២ (D1&D3 និង D2&D4) ដើម្បីបំប្លែងចរន្តឆ្លាស់ឱ្យរត់ទៅមុខតែមួយទិស (ក្លាយជា Pulsating DC)។</li>
+                        <li><strong>កុងដង់សាទ័រ C1៖</strong> ដើរតួជាតម្រង (Filter) ដោយវាសាកបន្ទុកពេលតង់ស្យុងឡើងខ្ពស់ និងបញ្ចេញបន្ទុកពេលតង់ស្យុងធ្លាក់ចុះ ធ្វើឱ្យតង់ស្យុងចរន្តជាប់ដែលចេញមកមានលក្ខណៈរាបស្មើល្អ (Smooth DC)។</li>
+                        <li><strong>រេស៊ីស្តង់ R1៖</strong> ដើរតួជាបន្ទុក (Load) ដែលទាញយកចរន្តជាប់នេះទៅប្រើប្រាស់។</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- SCHEMATIC CANVAS ---
+    const canvas = document.getElementById('circuitCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // --- GRAPH CANVAS ---
+    const graphCanvas = document.getElementById('graphCanvas');
+    const gCtx = graphCanvas.getContext('2d');
+
+    let time = 0;
+    let hasCapacitor = true;
+    
+    // Graph History
+    const historyLength = 400;
+    let vInHistory = new Array(historyLength).fill(0);
+    let vOutHistory = new Array(historyLength).fill(0);
+    let currentVout = 0;
+
+    // Coordinates
+    const AC_X = 150, AC_Y = 150;
+    const BR_X = 350, BR_Y = 150;
+    const BR_SIZE = 40;
+    const C1_X = 550;
+    const R1_X = 700;
+    const TOP_Y = 100, BOT_Y = 250;
+
+    function toggleCapacitor() {
+        hasCapacitor = !hasCapacitor;
+        const btn = document.getElementById('btnToggleCap');
+        if (hasCapacitor) {
+            btn.innerText = "ភ្ជាប់កុងដង់សាទ័រ C1 (ON)";
+            btn.classList.remove('off');
+        } else {
+            btn.innerText = "ផ្ដាច់កុងដង់សាទ័រ C1 (OFF)";
+            btn.classList.add('off');
+        }
+    }
+
+    function toggleSolution() {
+        const box = document.getElementById('solutionBox');
+        box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function drawLine(ctx, x1, y1, x2, y2, color = '#374151', width = 2) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+    }
+
+    function drawNode(x, y) {
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#111827';
+        ctx.fill();
+    }
+
+    function drawDiode(x1, y1, x2, y2, label) {
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        const midX = (x1 + x2) / 2;
+        const midY = (y1 + y2) / 2;
+        
+        ctx.save();
+        ctx.translate(midX, midY);
+        ctx.rotate(angle);
+        
+        drawLine(ctx, -20, 0, 20, 0); // Wire
+        
+        // Triangle
+        ctx.beginPath();
+        ctx.moveTo(-10, -10);
+        ctx.lineTo(10, 0);
+        ctx.lineTo(-10, 10);
+        ctx.closePath();
+        ctx.fillStyle = '#1f2937';
+        ctx.fill();
+        
+        // Line
+        drawLine(ctx, 10, -10, 10, 10, '#1f2937', 3);
+        ctx.restore();
+
+        // Label
+        ctx.fillStyle = '#111827';
+        ctx.font = 'bold 14px Arial';
+        if(label === 'D1') ctx.fillText(label, midX + 15, midY - 15);
+        if(label === 'D2') ctx.fillText(label, midX - 25, midY - 15);
+        if(label === 'D3') ctx.fillText(label, midX - 25, midY + 25);
+        if(label === 'D4') ctx.fillText(label, midX + 15, midY + 25);
+    }
+
+    function drawGround(x, y) {
+        drawLine(ctx, x, y, x, y + 15);
+        drawLine(ctx, x - 15, y + 15, x + 15, y + 15);
+        drawLine(ctx, x - 10, y + 20, x + 10, y + 20);
+        drawLine(ctx, x - 5, y + 25, x + 5, y + 25);
+    }
+
+    function drawCurrent(path, progress, color) {
+        ctx.save();
+        let p = progress % 1;
+        if (p < 0) p += 1;
+
+        ctx.setLineDash([8, 12]);
+        ctx.lineDashOffset = -p * 20;
+        
+        ctx.beginPath();
+        ctx.moveTo(path[0].x, path[0].y);
+        for(let i=1; i<path.length; i++) {
+            ctx.lineTo(path[i].x, path[i].y);
+        }
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        time += 0.05;
+
+        // --- MATH / PHYSICS SIMULATION ---
+        const vPeak = 12;
+        const vIn = vPeak * Math.sin(time);
+        let vRect = Math.abs(vIn) - 1.4; // Diode voltage drop (2 * 0.7)
+        if (vRect < 0) vRect = 0;
+
+        if (hasCapacitor) {
+            // Charging or Discharging
+            if (vRect > currentVout) {
+                currentVout = vRect; // Instant charge
+            } else {
+                currentVout *= 0.98; // RC Discharge rate
+            }
+        } else {
+            currentVout = vRect; // Follows rectified wave exactly
+        }
+
+        // Update history for graph
+        vInHistory.push(vIn);
+        vInHistory.shift();
+        vOutHistory.push(currentVout);
+        vOutHistory.shift();
+
+        // --- DRAW SCHEMATIC ---
+        
+        // AC Source
+        ctx.beginPath();
+        ctx.arc(AC_X, AC_Y, 25, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff'; ctx.fill();
+        ctx.strokeStyle = '#374151'; ctx.lineWidth = 2; ctx.stroke();
+        // Sine wave symbol
+        ctx.beginPath();
+        ctx.moveTo(AC_X - 15, AC_Y);
+        ctx.bezierCurveTo(AC_X - 5, AC_Y - 15, AC_X + 5, AC_Y + 15, AC_X + 15, AC_Y);
+        ctx.stroke();
+        ctx.fillStyle = '#111827';
+        ctx.font = '14px Arial';
+        ctx.fillText('AC 12V', AC_X - 55, AC_Y + 5);
+
+        // Wiring to Bridge
+        drawLine(ctx, AC_X, AC_Y - 25, AC_X, TOP_Y);
+        drawLine(ctx, AC_X, TOP_Y, BR_X, TOP_Y);
+        drawLine(ctx, AC_X, AC_Y + 25, AC_X, BOT_Y);
+        drawLine(ctx, AC_X, BOT_Y, BR_X, BOT_Y);
+
+        // Bridge Rectifier Diamond
+        const nTop = {x: BR_X, y: BR_Y - BR_SIZE};
+        const nBot = {x: BR_X, y: BR_Y + BR_SIZE};
+        const nLeft = {x: BR_X - BR_SIZE, y: BR_Y};
+        const nRight = {x: BR_X + BR_SIZE, y: BR_Y};
+
+        // Connections to diamond
+        drawLine(ctx, BR_X, TOP_Y, nTop.x, nTop.y); // AC top
+        drawLine(ctx, BR_X, BOT_Y, nBot.x, nBot.y); // AC bot
+        
+        drawNode(nTop.x, nTop.y);
+        drawNode(nBot.x, nBot.y);
+        drawNode(nLeft.x, nLeft.y);
+        drawNode(nRight.x, nRight.y);
+
+        // Diodes based on textbook image
+        drawDiode(nTop.x, nTop.y, nRight.x, nRight.y, 'D1');
+        drawDiode(nLeft.x, nLeft.y, nTop.x, nTop.y, 'D2');
+        drawDiode(nLeft.x, nLeft.y, nBot.x, nBot.y, 'D3');
+        drawDiode(nBot.x, nBot.y, nRight.x, nRight.y, 'D4');
+
+        // DC Wiring Out
+        drawLine(ctx, nRight.x, nRight.y, R1_X, BR_Y); // DC+ Top
+        drawLine(ctx, nLeft.x, nLeft.y, nLeft.x, BOT_Y + 40); // DC- out left side
+        drawLine(ctx, nLeft.x, BOT_Y + 40, R1_X, BOT_Y + 40); // DC- Bottom rail
+
+        // Capacitor C1
+        if (hasCapacitor) {
+            drawLine(ctx, C1_X, BR_Y, C1_X, BR_Y + 30);
+            drawLine(ctx, C1_X - 10, BR_Y + 30, C1_X + 10, BR_Y + 30, '#374151', 3);
+            drawLine(ctx, C1_X - 10, BR_Y + 38, C1_X + 10, BR_Y + 38, '#374151', 3);
+            drawLine(ctx, C1_X, BR_Y + 38, C1_X, BOT_Y + 40);
+            ctx.fillText('C1', C1_X + 15, BR_Y + 15);
+            ctx.fillText('100 uF', C1_X + 15, BR_Y + 30);
+            drawNode(C1_X, BR_Y);
+            drawNode(C1_X, BOT_Y + 40);
+        }
+
+        // Resistor R1
+        drawLine(ctx, R1_X, BR_Y, R1_X, BR_Y + 15);
+        ctx.strokeRect(R1_X - 8, BR_Y + 15, 16, 40); // Resistor Box
+        drawLine(ctx, R1_X, BR_Y + 55, R1_X, BOT_Y + 40);
+        ctx.fillText('R1', R1_X + 15, BR_Y + 25);
+        ctx.fillText('10 k', R1_X + 15, BR_Y + 40);
+        drawNode(R1_X, BR_Y);
+        drawNode(R1_X, BOT_Y + 40);
+
+        // Ground
+        drawGround(C1_X, BOT_Y + 40);
+        drawNode(C1_X, BOT_Y + 40);
+
+        // --- ANIMATED CURRENT FLOW (FIXED PATHS) ---
+        const speed = time * 3;
+        
+        if (vIn > 0.5) {
+            // Positive Half Cycle
+            // Red Forward: AC Top -> D1 -> Load
+            drawCurrent([
+                {x: AC_X, y: AC_Y-25}, {x: AC_X, y: TOP_Y}, {x: BR_X, y: TOP_Y}, 
+                {x: nTop.x, y: nTop.y}, {x: nRight.x, y: nRight.y}
+            ], speed, 'rgba(239, 68, 68, 0.8)');
+            
+            drawCurrent([
+                {x: nRight.x, y: nRight.y}, {x: R1_X, y: BR_Y}, {x: R1_X, y: BOT_Y+40}
+            ], speed, 'rgba(239, 68, 68, 0.8)');
+            
+            // Blue Return: Load -> D3 -> AC Bot
+            drawCurrent([
+                {x: R1_X, y: BOT_Y+40}, {x: nLeft.x, y: BOT_Y+40}, {x: nLeft.x, y: nLeft.y}
+            ], speed, 'rgba(59, 130, 246, 0.8)');
+            
+            drawCurrent([
+                {x: nLeft.x, y: nLeft.y}, {x: nBot.x, y: nBot.y}, 
+                {x: BR_X, y: BOT_Y}, {x: AC_X, y: BOT_Y}, {x: AC_X, y: AC_Y+25}
+            ], speed, 'rgba(59, 130, 246, 0.8)');
+
+        } else if (vIn < -0.5) {
+            // Negative Half Cycle
+            // Red Forward: AC Bot -> D4 -> Load
+            drawCurrent([
+                {x: AC_X, y: AC_Y+25}, {x: AC_X, y: BOT_Y}, {x: BR_X, y: BOT_Y}, 
+                {x: nBot.x, y: nBot.y}, {x: nRight.x, y: nRight.y}
+            ], speed, 'rgba(239, 68, 68, 0.8)');
+            
+            drawCurrent([
+                {x: nRight.x, y: nRight.y}, {x: R1_X, y: BR_Y}, {x: R1_X, y: BOT_Y+40}
+            ], speed, 'rgba(239, 68, 68, 0.8)');
+            
+            // Blue Return: Load -> D2 -> AC Top
+            drawCurrent([
+                {x: R1_X, y: BOT_Y+40}, {x: nLeft.x, y: BOT_Y+40}, {x: nLeft.x, y: nLeft.y}
+            ], speed, 'rgba(59, 130, 246, 0.8)');
+            
+            drawCurrent([
+                {x: nLeft.x, y: nLeft.y}, {x: nTop.x, y: nTop.y}, 
+                {x: BR_X, y: TOP_Y}, {x: AC_X, y: TOP_Y}, {x: AC_X, y: AC_Y-25}
+            ], speed, 'rgba(59, 130, 246, 0.8)');
+        }
+
+
+        // --- DRAW GRAPH ---
+        gCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+        
+        // Graph Background & Grid
+        gCtx.fillStyle = '#111827';
+        gCtx.fillRect(0, 0, graphCanvas.width, graphCanvas.height);
+        
+        gCtx.strokeStyle = '#374151';
+        gCtx.lineWidth = 1;
+        gCtx.beginPath();
+        gCtx.moveTo(0, 75); gCtx.lineTo(800, 75); // Center line
+        gCtx.stroke();
+
+        // Draw AC Input Graph (Blue/Grey)
+        gCtx.beginPath();
+        for(let i=0; i<historyLength; i++) {
+            let x = i * (800 / historyLength);
+            let y = 75 - (vInHistory[i] * 4); 
+            if (i===0) gCtx.moveTo(x, y);
+            else gCtx.lineTo(x, y);
+        }
+        gCtx.strokeStyle = 'rgba(156, 163, 175, 0.5)';
+        gCtx.lineWidth = 2;
+        gCtx.stroke();
+
+        // Draw DC Output Graph (Red/Orange)
+        gCtx.beginPath();
+        for(let i=0; i<historyLength; i++) {
+            let x = i * (800 / historyLength);
+            let y = 75 - (vOutHistory[i] * 4); 
+            if (i===0) gCtx.moveTo(x, y);
+            else gCtx.lineTo(x, y);
+        }
+        gCtx.strokeStyle = '#ef4444'; // Red
+        gCtx.lineWidth = 3;
+        gCtx.stroke();
+
+        // Legend
+        gCtx.fillStyle = '#9ca3af';
+        gCtx.font = '14px Arial';
+        gCtx.fillText('AC Input (Vin)', 10, 20);
+        gCtx.fillStyle = '#ef4444';
+        gCtx.fillText('DC Output (Vout)', 10, 40);
+
+        requestAnimationFrame(render);
+    }
+
+    render();
+</script>
+</body>
+</html>

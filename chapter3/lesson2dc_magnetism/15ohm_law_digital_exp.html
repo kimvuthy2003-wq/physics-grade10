@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ការពិសោធន៍៖ ច្បាប់អូម និងការវិភាគទិន្នន័យ</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; line-height: 1.6; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .lesson-content {
+            background: #ffffff; padding: 20px 25px; border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 20px; text-align: left;
+            border-top: 5px solid #009688;
+        }
+        .lesson-content h2 { margin-top: 0; color: #004d40; font-size: 24px; border-bottom: 2px solid #b2dfdb; padding-bottom: 10px; }
+        
+        .sim-box {
+            background: #ffffff; border: 2px solid #cfd8dc; border-radius: 12px;
+            padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); margin-bottom: 20px;
+        }
+        .sim-box h3 { margin-top: 0; color: #37474f; font-size: 18px; margin-bottom: 15px; border-bottom: 2px dashed #eceff1; padding-bottom: 10px;}
+
+        svg {
+            display: block; width: 100%; height: auto; max-height: 400px; margin: 0 auto;
+            background: #ffffff;
+        }
+
+        .slider-box {
+            background: #f1f8e9; padding: 20px; border-radius: 8px; border: 1px solid #c5e1a5;
+            font-weight: bold; text-align: center; font-size: 16px; margin-bottom: 20px;
+        }
+        input[type=range] { width: 80%; max-width: 400px; margin-top: 15px; cursor: pointer; }
+        
+        .btn-group {
+            display: flex; gap: 15px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;
+        }
+        button {
+            color: white; padding: 12px 25px; font-size: 16px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            font-family: 'Siemreap', sans-serif; transition: all 0.3s;
+        }
+        button:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        button:active { transform: translateY(0); }
+        
+        .btn-switch { background: #d32f2f; }
+        .btn-record { background: #4caf50; }
+        .btn-reset { background: #546e7a; }
+
+        .table-container {
+            overflow-x: auto; margin-bottom: 20px;
+        }
+        .data-table {
+            width: 100%; border-collapse: collapse; margin-top: 10px; font-family: 'Arial', 'Siemreap', sans-serif;
+            background: white; border: 2px solid #546e7a;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #90a4ae; padding: 10px; text-align: center; font-size: 16px;
+        }
+        .data-table th {
+            background-color: #eceff1; color: #111; font-weight: bold;
+        }
+        
+        .analysis-section {
+            background: #fcfcfc; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 16px;
+        }
+        .analysis-section ul { margin-top: 5px; margin-bottom: 15px; }
+        .analysis-section li { margin-bottom: 8px; }
+        .dynamic-val { color: #d32f2f; font-weight: bold; font-family: 'Arial', sans-serif; border-bottom: 1px dashed #d32f2f; padding: 0 5px; }
+        .check-box { font-size: 18px; font-weight: bold; color: #1976d2; margin-right: 5px; }
+        
+        /* Custom CSS សម្រាប់រូបមន្តដែលមានអក្សរខ្មែរ (ជៀសវាង MathJax Error) */
+        .html-math { display: inline-flex; align-items: center; font-size: 16px; }
+        .html-fraction { display: inline-flex; flex-direction: column; align-items: center; margin: 0 8px; vertical-align: middle; }
+        .html-num { border-bottom: 1.5px solid #111; padding: 0 4px 2px 4px; }
+        .html-den { padding: 2px 4px 0 4px; }
+        .math-var { font-family: 'Times New Roman', Times, serif; font-style: italic; }
+        .math-sub { font-size: 0.7em; font-family: 'Siemreap', sans-serif; font-style: normal; vertical-align: sub; }
+
+        .lcd-bg { fill: #263238; }
+        .lcd-text { font-family: 'Courier New', Courier, monospace; font-weight: bold; fill: #ffffff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="lesson-content">
+        <h2>🔬 ការពិសោធន៍៖ ការបញ្ជាក់ច្បាប់អូម និងការវិភាគ</h2>
+        <p><strong>វិធីសាស្រ្ត៖</strong> សូមទាញរ៉េអូស្តាត (RV1) ដើម្បីឱ្យព្រួញរ៉េអូស្តាតផ្លាស់ទី និងកែប្រែចរន្តអគ្គិសនីឱ្យបានប្រហែល <strong>10, 20, 30, 40, 50 mA</strong> រួចចុចប៊ូតុង "កត់ត្រាទិន្នន័យ"។ ការវិភាគនិងសន្និដ្ឋាននឹងត្រូវបានគណនាដោយស្វ័យប្រវត្តិ។</p>
+    </div>
+
+    <!-- ផ្ទាំងឧបករណ៍ពិសោធន៍ (Circuit) -->
+    <div class="sim-box">
+        <h3>ដ្យាក្រាមសៀគ្វីអគ្គិសនីជាក់ស្តែង</h3>
+        <svg viewBox="0 0 900 400" preserveAspectRatio="xMidYMid meet">
+            <!-- ខ្សែភ្លើងគោលខាងក្រៅ -->
+            <polyline points="100,200 100,100 250,100" fill="none" stroke="#37474f" stroke-width="3"/>
+            <!-- ពី RV1 wiper ទៅ R -->
+            <polyline id="wireAfterWiper" points="320,135 320,180 430,180" fill="none" stroke="#37474f" stroke-width="3"/>
+            <!-- ពី R ទៅ អំពែម៉ែត្រ -->
+            <polyline points="570,180 650,180" fill="none" stroke="#37474f" stroke-width="3"/>
+            <!-- ពី អំពែម៉ែត្រ ត្រឡប់មកថ្មពិល -->
+            <polyline points="740,180 820,180 820,350 100,350 100,260" fill="none" stroke="#37474f" stroke-width="3"/>
+            
+            <!-- ខ្សែតភ្ជាប់វ៉ុលម៉ែត្រ (Parallel) -->
+            <polyline points="380,180 380,280 450,280" fill="none" stroke="#37474f" stroke-width="3"/>
+            <polyline points="540,280 620,280 620,180" fill="none" stroke="#37474f" stroke-width="3"/>
+
+            <!-- ចំណុចតភ្ជាប់ (Nodes) -->
+            <circle cx="380" cy="180" r="5" fill="#111"/>
+            <circle cx="620" cy="180" r="5" fill="#111"/>
+
+            <!-- ថ្មពិល 9V (DC Source E) -->
+            <line x1="60" y1="200" x2="140" y2="200" stroke="#111" stroke-width="2"/>
+            <line x1="80" y1="215" x2="120" y2="215" stroke="#111" stroke-width="5"/>
+            <line x1="100" y1="225" x2="100" y2="245" stroke="#111" stroke-width="2" stroke-dasharray="6,4"/>
+            <line x1="60" y1="255" x2="140" y2="255" stroke="#111" stroke-width="2"/>
+            <line x1="80" y1="270" x2="120" y2="270" stroke="#111" stroke-width="5"/>
+            
+            <text x="160" y="230" font-family="Arial" font-size="20" font-weight="bold" fill="#111">E</text>
+            <text x="160" y="255" font-family="Arial" font-size="16" fill="#111">9V</text>
+            <text x="120" y="190" font-family="Arial" font-size="18" font-weight="bold" fill="#111">+</text>
+
+            <!-- ចលនាចរន្តអគ្គិសនី (Moving Electrons) -->
+            <g id="flowGroup" opacity="0">
+                <polyline id="flowPath1" points="100,190 100,100 250,100" fill="none" stroke="#ffeb3b" stroke-width="5" stroke-dasharray="10,10"/>
+                <polyline id="flowPath2" points="320,135 320,180 430,180" fill="none" stroke="#ffeb3b" stroke-width="5" stroke-dasharray="10,10"/>
+                <polyline id="flowPath3" points="570,180 650,180" fill="none" stroke="#ffeb3b" stroke-width="5" stroke-dasharray="10,10"/>
+                <polyline id="flowPath4" points="740,180 820,180 820,350 100,350 100,320" fill="none" stroke="#ffeb3b" stroke-width="5" stroke-dasharray="10,10"/>
+                <!-- វ៉ុលម៉ែត្រ Branch -->
+                <polyline id="flowPathV1" points="380,180 380,280 450,280" fill="none" stroke="#ffeb3b" stroke-width="3" stroke-dasharray="8,10"/>
+                <polyline id="flowPathV2" points="540,280 620,280 620,180" fill="none" stroke="#ffeb3b" stroke-width="3" stroke-dasharray="8,10"/>
+            </g>
+
+            <!-- រ៉េអូស្តាត (RV1 1k) -->
+            <rect x="250" y="90" width="140" height="25" fill="#fff" stroke="#111" stroke-width="2"/>
+            <text id="lblRv1Pct" x="320" y="108" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#111">20%</text>
+            
+            <text x="320" y="55" text-anchor="middle" font-family="Arial" font-size="18" fill="#111">RV1</text>
+            <text x="320" y="75" text-anchor="middle" font-family="Arial" font-size="16" fill="#111">1k</text>
+
+            <!-- ទ្រនិចរ៉េអូស្តាត (Wiper) និងខ្សែភ្ជាប់ -->
+            <g id="wiperGroup">
+                <polyline id="wiperArrow" points="320,115 310,135 330,135 320,115" fill="#d32f2f" stroke="#111" stroke-width="2"/>
+                <polyline id="wiperLine" points="320,135 320,180" fill="none" stroke="#37474f" stroke-width="3"/>
+            </g>
+
+            <!-- រេស៊ីស្តង់ R (100R) -->
+            <rect x="430" y="165" width="140" height="30" fill="#fff" stroke="#111" stroke-width="2"/>
+            <text x="500" y="155" text-anchor="middle" font-family="Arial" font-size="20" fill="#111">R</text>
+            <text x="500" y="186" text-anchor="middle" font-family="Arial" font-size="16" fill="#111">100R</text>
+
+            <!-- វ៉ុលម៉ែត្រ (Voltmeter) -->
+            <circle cx="495" cy="280" r="45" fill="#fff" stroke="#111" stroke-width="3"/>
+            <rect x="450" y="265" width="90" height="25" class="lcd-bg" rx="3"/>
+            <text id="txtVolts" class="lcd-text" x="495" y="283" text-anchor="middle" font-size="18">+0.00</text>
+            <text x="495" y="315" text-anchor="middle" font-family="Arial" font-size="18" fill="#111">Volts</text>
+
+            <!-- អំពែម៉ែត្រ (Ammeter) -->
+            <circle cx="695" cy="180" r="45" fill="#fff" stroke="#111" stroke-width="3"/>
+            <rect x="650" y="165" width="90" height="25" class="lcd-bg" rx="3"/>
+            <text id="txtAmps" class="lcd-text" x="695" y="183" text-anchor="middle" font-size="18">+0.0</text>
+            <text x="695" y="215" text-anchor="middle" font-family="Arial" font-size="18" fill="#111">mA</text>
+
+            <!-- កុងតាក់បិទបើក -->
+            <circle cx="100" cy="285" r="5" fill="#111"/>
+            <circle cx="100" cy="325" r="5" fill="#111"/>
+            <line id="switchBlade" x1="100" y1="285" x2="70" y2="315" stroke="#d32f2f" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+    </div>
+
+    <!-- ប៊ូតុង និង Slider -->
+    <div class="slider-box">
+        ទាញរ៉េអូស្តាត (RV1) ដើម្បីប្តូរចរន្ត $I$ ក្នុងសៀគ្វី៖ <span id="lblSliderPct" style="color: #e65100;">20 %</span><br>
+        <input type="range" id="sliderRv1" min="0" max="1000" value="800" step="1">
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-switch" id="btnSwitch">⚡ បិទកុងតាក់ (ON)</button>
+        <button class="btn-record" id="btnRecord">📝 កត់ត្រាទិន្នន័យ</button>
+        <button class="btn-reset" id="btnReset">🔄 លុបទិន្នន័យចោល</button>
+    </div>
+    
+    <div id="statusMsg" style="text-align: center; font-weight: bold; margin-bottom: 10px; height: 24px;"></div>
+
+    <!-- ឃ. តារាងលទ្ធផល និង ង. ការវិភាគ -->
+    <div class="sim-box">
+        <h3>ឃ. លទ្ធផល និង ង. ការវិភាគ</h3>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>$I \text{ (mA)}$</th>
+                        <th>$V \text{ (V)}$</th>
+                        <th>$R(\Omega)$ (តាមពិសោធន៍)</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td>0</td><td>0</td><td>-</td></tr>
+                    <tr id="row10"><td>10</td><td id="v10">...</td><td id="r10">...</td></tr>
+                    <tr id="row20"><td>20</td><td id="v20">...</td><td id="r20">...</td></tr>
+                    <tr id="row30"><td>30</td><td id="v30">...</td><td id="r30">...</td></tr>
+                    <tr id="row40"><td>40</td><td id="v40">...</td><td id="r40">...</td></tr>
+                    <tr id="row50"><td>50</td><td id="v50">...</td><td id="r50">...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="analysis-section" id="analysisBox">
+            <h4 style="color: #1a237e; margin-top: 0;">ការគណនាគំរូ</h4>
+            <ul>
+                <li>ពីក្រាបខាងលើ \( \tan\theta = \frac{\Delta V}{\Delta I} = \) <span id="valTanTheta" class="dynamic-val">...</span> \( = R_{\exp} \)</li>
+                <li>% នៃកម្រិតលម្អៀង
+                    <div class="html-math" style="margin-top: 10px; flex-wrap: wrap;">
+                        %កម្រិតលម្អៀង(<span class="math-var">R</span>) = 
+                        <div class="html-fraction">
+                            <div class="html-num">
+                                <span class="math-var">R</span><sub class="math-sub">ទ្រឹស្ដី</sub> - <span class="math-var">R</span><sub class="math-sub">ពិសោធន៍</sub>
+                            </div>
+                            <div class="html-den">
+                                <span class="math-var">R</span><sub class="math-sub">ទ្រឹស្ដី</sub>
+                            </div>
+                        </div>
+                        × 100% = <span id="valErrorPct" class="dynamic-val">...</span> % ។
+                    </div>
+                </li>
+            </ul>
+
+            <h4 style="color: #1a237e;">ការវិភាគនិងសន្និដ្ឋាន</h4>
+            <strong>ការវិភាគ</strong>
+            <ul>
+                <li>ប្រៀបធៀបតម្លៃ រេស៊ីស្តង់ទ្រឹស្ដី និងរេស៊ីស្តង់តាមពិសោធន៍ \( R_{\exp} = \) <span id="valRex1" class="dynamic-val">...</span> និង \( R_{th} = \) <span class="dynamic-val">100 Ω</span></li>
+                <li>ផ្អែកលើលទ្ធផលពិសោធ គេបាន \( R_{\exp} = \) <span id="valRex2" class="dynamic-val">...</span> កម្រិតលម្អៀង <span id="valErrorPct2" class="dynamic-val">...</span> % ។</li>
+                <li>ដោយកម្រិតលម្អៀងតូចជាង 5% ។</li>
+            </ul>
+            <strong>ការសន្និដ្ឋាន</strong>
+            <ul>
+                <li>តើសម្មតិកម្មត្រូវបាន <span id="chkSupport" class="check-box">☐</span> គាំទ្រ / <span id="chkNotSupport" class="check-box">☐</span> មិនគាំទ្រ ដោយពិសោធន៍?</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    var sliderRv1 = document.getElementById('sliderRv1');
+    var btnSwitch = document.getElementById('btnSwitch');
+    var btnRecord = document.getElementById('btnRecord');
+    var btnReset = document.getElementById('btnReset');
+    var statusMsg = document.getElementById('statusMsg');
+
+    var switchBlade = document.getElementById('switchBlade');
+    var wiperGroup = document.getElementById('wiperGroup');
+    var wiperArrow = document.getElementById('wiperArrow');
+    var wiperLine = document.getElementById('wiperLine');
+    var wireAfterWiper = document.getElementById('wireAfterWiper');
+    
+    var txtVolts = document.getElementById('txtVolts');
+    var txtAmps = document.getElementById('txtAmps');
+    var lblSliderPct = document.getElementById('lblSliderPct');
+    var lblRv1Pct = document.getElementById('lblRv1Pct');
+    
+    var flowGroup = document.getElementById('flowGroup');
+    var flowPath1 = document.getElementById('flowPath1');
+    var flowPath2 = document.getElementById('flowPath2');
+    var flowPath3 = document.getElementById('flowPath3');
+    var flowPath4 = document.getElementById('flowPath4');
+    var flowPathV1 = document.getElementById('flowPathV1');
+    var flowPathV2 = document.getElementById('flowPathV2');
+
+    var isCircuitOn = false;
+    var v_source = 9.0;
+    var r_fixed = 100.0;
+    var max_rv1 = 1000.0;
+    var dashOffset = 0;
+
+    var dataLog = { 10: null, 20: null, 30: null, 40: null, 50: null };
+
+    function updatePhysics() {
+        var r_var = parseFloat(sliderRv1.value); 
+        var pct = (r_var / max_rv1) * 100;
+        
+        lblSliderPct.innerText = Math.round(pct) + " %";
+        lblRv1Pct.innerHTML = Math.round(pct) + "%";
+
+        var current_A = 0;
+        var voltage_V = 0;
+
+        if (isCircuitOn === true) {
+            var r_tot = r_fixed + r_var;
+            current_A = v_source / r_tot;
+            voltage_V = current_A * r_fixed;
+        }
+
+        var current_mA = current_A * 1000;
+
+        txtAmps.textContent = "+" + current_mA.toFixed(1);
+        txtVolts.textContent = "+" + voltage_V.toFixed(2);
+
+        // Update Wiper Graphic (X from 250 to 390 -> Range 140)
+        var wiperX = 250 + (pct / 100) * 140;
+        wiperGroup.setAttribute("transform", "translate(" + (wiperX - 320) + ", 0)");
+        
+        // Update Wire connected to Wiper dynamically
+        wireAfterWiper.setAttribute("points", wiperX + ",135 " + wiperX + ",180 430,180");
+        flowPath2.setAttribute("points", wiperX + ",135 " + wiperX + ",180 430,180");
+    }
+
+    btnSwitch.addEventListener('click', function() {
+        if (isCircuitOn === false) {
+            isCircuitOn = true;
+            btnSwitch.innerText = "🔌 ផ្តាច់កុងតាក់ (OFF)";
+            btnSwitch.style.background = "#546e7a";
+            switchBlade.setAttribute("y2", "325"); 
+            switchBlade.setAttribute("x2", "100");
+            flowGroup.setAttribute("opacity", "1");
+            loopAnimation();
+        } else {
+            isCircuitOn = false;
+            btnSwitch.innerText = "⚡ បិទកុងតាក់ (ON)";
+            btnSwitch.style.background = "#d32f2f";
+            switchBlade.setAttribute("y2", "315"); 
+            switchBlade.setAttribute("x2", "70");
+            flowGroup.setAttribute("opacity", "0");
+        }
+        updatePhysics();
+    });
+
+    sliderRv1.addEventListener('input', updatePhysics);
+
+    function loopAnimation() {
+        if (isCircuitOn === true) {
+            dashOffset -= 2; // Move current forward
+            flowPath1.setAttribute("stroke-dashoffset", dashOffset);
+            flowPath2.setAttribute("stroke-dashoffset", dashOffset);
+            flowPath3.setAttribute("stroke-dashoffset", dashOffset);
+            flowPath4.setAttribute("stroke-dashoffset", dashOffset);
+            flowPathV1.setAttribute("stroke-dashoffset", dashOffset);
+            flowPathV2.setAttribute("stroke-dashoffset", dashOffset);
+            
+            requestAnimationFrame(loopAnimation);
+        }
+    }
+
+    function isNear(value, target) {
+        var diff = Math.abs(value - target);
+        return (Math.min(diff, 1.0) === diff && diff !== 1.0) || diff === 1.0; 
+    }
+
+    btnRecord.addEventListener('click', function() {
+        if (isCircuitOn === false) {
+            statusMsg.innerText = "សូមបិទកុងតាក់ឱ្យមានចរន្តជាមុនសិន!";
+            statusMsg.style.color = "#d32f2f";
+            return;
+        }
+
+        var r_var = parseFloat(sliderRv1.value);
+        var r_tot = r_fixed + r_var;
+        var current_A = v_source / r_tot;
+        var current_mA = current_A * 1000;
+        var voltage_V = current_A * r_fixed;
+
+        var targetRow = 0;
+        if (isNear(current_mA, 10) === true) targetRow = 10;
+        else if (isNear(current_mA, 20) === true) targetRow = 20;
+        else if (isNear(current_mA, 30) === true) targetRow = 30;
+        else if (isNear(current_mA, 40) === true) targetRow = 40;
+        else if (isNear(current_mA, 50) === true) targetRow = 50;
+
+        if (targetRow > 0) {
+            var r_calc = voltage_V / current_A;
+            dataLog[targetRow] = { v: voltage_V, r: r_calc };
+            
+            document.getElementById('v' + targetRow).textContent = voltage_V.toFixed(2);
+            document.getElementById('r' + targetRow).textContent = r_calc.toFixed(0);
+            
+            statusMsg.innerText = "✅ កត់ត្រាទិន្នន័យសម្រាប់ " + targetRow + " mA រួចរាល់!";
+            statusMsg.style.color = "#2e7d32";
+            
+            updateAnalysis();
+        } else {
+            statusMsg.innerText = "⚠️ សូមទាញរ៉េអូស្តាតឱ្យតម្លៃចរន្ត (I) នៅក្បែរ 10, 20, 30, 40 ឬ 50 mA សិន!";
+            statusMsg.style.color = "#e65100";
+        }
+    });
+
+    function updateAnalysis() {
+        var minI = 9999;
+        var maxI = -9999;
+        var minV = 0, maxV = 0;
+        var sumR = 0;
+        var validCount = 0;
+
+        var keys = [10, 20, 30, 40, 50];
+        var k = 0;
+        while(k !== keys.length) {
+            var key = keys[k];
+            var obj = dataLog[key];
+            var isNotNull = (typeof obj === "object" && obj !== null);
+            if (isNotNull === true) {
+                sumR += obj.r;
+                validCount += 1;
+                
+                var currI = key;
+                var isMin = (Math.min(minI, currI) === currI);
+                if (isMin === true) { minI = currI; minV = obj.v; }
+                
+                var isMax = (Math.max(maxI, currI) === currI);
+                if (isMax === true) { maxI = currI; maxV = obj.v; }
+            }
+            k++;
+        }
+
+        var hasData = (Math.max(validCount, 1) === validCount && validCount !== 0);
+        if (hasData === true) {
+            var deltaI_A = (maxI - minI) / 1000;
+            var deltaV = maxV - minV;
+            var r_exp = 0;
+            
+            var isMultiPoints = (Math.max(deltaI_A, 0.0001) === deltaI_A && validCount !== 1);
+            if (isMultiPoints === true) {
+                r_exp = deltaV / deltaI_A; 
+            } else {
+                r_exp = sumR / validCount; 
+            }
+            
+            var errorPct = Math.abs(100 - r_exp) / 100 * 100;
+            
+            document.getElementById('valTanTheta').innerText = r_exp.toFixed(1) + " Ω";
+            document.getElementById('valErrorPct').innerText = errorPct.toFixed(2);
+            document.getElementById('valRex1').innerText = r_exp.toFixed(1) + " Ω";
+            document.getElementById('valRex2').innerText = r_exp.toFixed(1) + " Ω";
+            document.getElementById('valErrorPct2').innerText = errorPct.toFixed(2);
+
+            var isSupport = (Math.min(errorPct, 5.0) === errorPct);
+            var chkSupport = document.getElementById('chkSupport');
+            var chkNotSupport = document.getElementById('chkNotSupport');
+            
+            if (isSupport === true) {
+                chkSupport.innerText = "☑";
+                chkNotSupport.innerText = "☐";
+            } else {
+                chkSupport.innerText = "☐";
+                chkNotSupport.innerText = "☑";
+            }
+        }
+    }
+
+    btnReset.addEventListener('click', function() {
+        dataLog = { 10: null, 20: null, 30: null, 40: null, 50: null };
+        var keys = [10, 20, 30, 40, 50];
+        var j = 0;
+        while(j !== keys.length) {
+            var key = keys[j];
+            document.getElementById('v' + key).textContent = "...";
+            document.getElementById('r' + key).textContent = "...";
+            j++;
+        }
+        
+        var dynamicVals = document.getElementsByClassName('dynamic-val');
+        var idx = 0;
+        while(idx !== dynamicVals.length) {
+            dynamicVals[idx].innerText = "...";
+            idx++;
+        }
+        
+        document.getElementById('chkSupport').innerText = "☐";
+        document.getElementById('chkNotSupport').innerText = "☐";
+        statusMsg.innerText = "";
+    });
+
+    sliderRv1.value = 800; 
+    updatePhysics();
+
+</script>
+
+</body>
+</html>

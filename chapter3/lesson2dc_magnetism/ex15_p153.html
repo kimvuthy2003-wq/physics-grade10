@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ជើងវិភាគអគ្គិសនី និងអំពូលភ្លើង</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Load Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        /* កំណត់ទំហំអក្សរខ្មែរជាគោលធំជាងមុនសម្រាប់ពេញមួយកម្មវិធី */
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            margin: 0;
+            overflow-x: hidden;
+            font-size: 1.15rem; 
+            line-height: 1.8;
+        }
+        
+        .kh-text {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #475569;
+        }
+
+        /* ស្ទីលសម្រាប់រូបមន្តគណិតវិទ្យា (Math Font) */
+        .math-font {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.4rem; 
+            letter-spacing: 0.05em;
+        }
+        .math-formula {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.45rem; 
+            font-weight: bold;
+            color: #1d4ed8; /* ពណ៌ខៀវ */
+        }
+        .math-result {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.7rem;
+            font-weight: bold;
+        }
+
+        /* ស្ទីល Sliders */
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #cbd5e1;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #0ea5e9; 
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(14, 165, 233, 0.5);
+        }
+        
+        /* ផ្ទៃ Simulator - ប្រើពណ៌ងងឹតដើម្បីឱ្យពន្លឺលេចធ្លោ */
+        #canvas-container {
+            width: 100%;
+            height: 500px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #0f172a, #1e293b);
+            position: relative;
+            touch-action: none;
+            cursor: grab;
+            border: 2px solid #334155;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+        #canvas-container:active { cursor: grabbing; }
+        canvas { display: block; outline: none; }
+        
+        .solution-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.6s ease-in-out;
+        }
+        .solution-content.open {
+            max-height: 2500px;
+            opacity: 1;
+            margin-top: 1.5rem;
+        }
+
+        .text-sm { font-size: 1rem; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- ========================================== -->
+        <!-- 1. ប្រធានលំហាត់ -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <h2 class="text-2xl font-bold text-amber-700 mb-4 border-b border-slate-100 pb-3 flex items-center gap-2">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                លំហាត់ទី១៥
+            </h2>
+            <div class="text-justify font-medium space-y-4">
+                <p>15. គេធ្វើឱ្យជើងវិភាគមួយមានសូលុយស្យុងស្ថិតដំណើរការអស់រយៈពេល <span class="math-font text-emerald-600 font-bold" id="prob_t">t = 10 mn</span> ឆ្លងកាត់អាំងតង់ស៊ីតេចរន្ត <span class="math-font text-rose-600 font-bold" id="prob_i">I = 1.2 A</span> ។ គណនាបរិមាណអគ្គិសនីឆ្លងកាត់ជើងវិភាគ ។</p>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 2. SIMULATOR (3D CANVAS & CONTROLS) -->
+        <!-- ========================================== -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- 3D Canvas -->
+            <div class="lg:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <h3 class="font-bold text-gray-800 text-xl">ជើងវិភាគអគ្គិសនី </h3>
+                    <span class="text-sm bg-slate-100 text-slate-700 px-4 py-1.5 rounded-full font-bold shadow-sm">ប្រើម៉ៅស៍អូសបង្វិល និង Scroll ពង្រីក</span>
+                </div>
+                <div id="canvas-container" class="flex-grow">
+                    <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-5 py-4 rounded-xl shadow-lg text-gray-800 pointer-events-none z-10 border border-white/50">
+                        <ul class="space-y-3 font-medium">
+                            <li class="flex items-center gap-3"><span class="w-5 h-5 rounded-full bg-yellow-400 shadow-[0_0_8px_#facc15]"></span> អំពូលភ្លើង (ភ្លឺតាមទំហំ I)</li>
+                            <li class="flex items-center gap-3"><span class="w-4 h-4 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee]"></span> អេឡិចត្រុងរត់តាមខ្សែចម្លង</li>
+                            <li class="flex items-center gap-3"><span class="w-4 h-4 rounded-full bg-rose-500 shadow-[0_0_6px_#f43f5e]"></span> អ៊ីយ៉ុងរត់ក្នុងសូលុយស្យុង</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls & Live Results -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col gap-8">
+                <h3 class="text-xl font-bold text-amber-700 border-b border-slate-100 pb-3">ការកំណត់តម្លៃ</h3>
+                
+                <div class="space-y-8">
+                    <!-- ចរន្ត I -->
+                    <div>
+                        <div class="flex justify-between mb-3">
+                            <label class="font-bold text-gray-700">អាំងតង់ស៊ីតេចរន្ត <span class="math-font">I</span> (A)</label>
+                            <span id="iDisp" class="math-font text-rose-600 font-bold">1.2 A</span>
+                        </div>
+                        <input type="range" id="iSlider" min="0.0" max="5.0" value="1.2" step="0.1" class="slider py-2">
+                    </div>
+
+                    <!-- រយៈពេល t -->
+                    <div>
+                        <div class="flex justify-between mb-3">
+                            <label class="font-bold text-gray-700">រយៈពេល <span class="math-font">t</span> (mn)</label>
+                            <span id="tDisp" class="math-font text-emerald-600 font-bold">10 mn</span>
+                        </div>
+                        <input type="range" id="tSlider" min="1" max="60" value="10" step="1" class="slider py-2" style="background: #a7f3d0;">
+                    </div>
+                </div>
+
+                <!-- លទ្ធផលជាក់ស្តែង -->
+                <div class="mt-auto space-y-4">
+                    <div class="bg-sky-50 p-6 rounded-xl border border-sky-100 text-center shadow-sm flex flex-col justify-center items-center h-36">
+                        <div class="font-bold text-sky-800 mb-2">បរិមាណអគ្គិសនី <span class="math-font">q</span></div>
+                        <div id="res_q" class="math-result text-sky-600 text-4xl mt-1">720.00 C</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 3. ដំណោះស្រាយ (SOLUTION TOGGLE) -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <!-- ប៊ូតុងពណ៌លឿងទុំ -->
+            <button id="toggleBtn" class="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold py-4 px-6 rounded-xl shadow-md transition-colors flex justify-center items-center gap-3">
+                <svg id="toggleIcon" class="w-6 h-6 transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                <span id="btnText" class="text-xl">បង្ហាញដំណោះស្រាយ</span>
+            </button>
+
+            <div id="solutionBox" class="solution-content bg-slate-50 border border-slate-200 rounded-xl p-6 md:p-10 mt-6">
+                <h3 class="font-bold text-[#d97706] border-b-2 border-slate-200 pb-3 mb-8 text-3xl inline-block border-b-[#f59e0b]">ដំណោះស្រាយ</h3>
+                
+                <div class="space-y-8">
+                    <div class="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-gray-800 text-2xl mb-6 flex items-center gap-3">
+                            គណនាបរិមាណអគ្គិសនីឆ្លងកាត់ជើងវិភាគ (<span class="math-font font-bold">q</span>) <span class="text-red-500 font-bold ml-1"></span>
+                        </h4>
+                        <div class="kh-text space-y-5">
+                            <p>តាមរូបមន្ត៖ <span class="math-formula">q = I &times; t</span></p>
+                            
+                            <p class="border-t border-dashed border-gray-300 pt-5 mt-5">ដោយ៖</p>
+                            <ul class="pl-8 space-y-3 math-font text-[1.4rem]">
+                                <li>I = <span class="text-rose-600 font-bold" id="sol_i">1.2</span> A</li>
+                                <li>t = <span class="text-emerald-600 font-bold" id="sol_t">10</span> mn = <span id="sol_t2">10</span> &times; 60 s = <span class="font-bold" id="sol_t_s">600</span> s</li>
+                            </ul>
+                            
+                            <div class="mt-8 flex flex-wrap items-center gap-3 math-font text-[1.45rem]">
+                                <span>គេបាន៖ q = <span id="sol_i_sub">1.2</span> &times; <span id="sol_t_sub">600</span> = <span class="font-bold text-blue-700" id="sol_q_calc">720</span> C</span>
+                            </div>
+                            
+                            <div class="mt-8 bg-sky-50 p-4 rounded-xl border border-sky-100 inline-block px-8">
+                                <span class="font-bold text-gray-800 text-xl mr-3">ដូចនេះ</span>
+                                <span class="math-result text-blue-700 border-b-4 border-blue-700 pb-1">q = <span id="sol_q_final">720</span> C</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- THREE.JS 3D APPLICATION CODE -->
+    <script>
+        // --- 1. Three.js Initialization (ផ្ទៃងងឹត) ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        // ប្រើផ្ទៃពណ៌ Slate-900 ដើម្បីឱ្យពន្លឺលេចធ្លោខ្លាំង
+        scene.background = new THREE.Color(0x0f172a); 
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 15, 30); 
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // ពន្លឺទូទៅ (កាត់បន្ថយពន្លឺខាងក្រៅ ដើម្បីអោយពន្លឺអំពូលច្បាស់)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        dirLight.position.set(10, 20, 15);
+        scene.add(dirLight);
+
+        // --- 2. Create 3D Objects ---
+        
+        // កែវបេស៊ែ (Beaker) - ថ្លា
+        const beakerGeo = new THREE.CylinderGeometry(5, 4.5, 10, 32, 1, true);
+        const beakerMat = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff, transmission: 0.8, opacity: 1, transparent: true, roughness: 0.1, side: THREE.DoubleSide
+        });
+        const beaker = new THREE.Mesh(beakerGeo, beakerMat);
+        scene.add(beaker);
+        
+        const baseGeo = new THREE.CylinderGeometry(4.5, 4.5, 0.2, 32);
+        const baseMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: 0.8, opacity: 1, transparent: true, roughness: 0.1 });
+        const base = new THREE.Mesh(baseGeo, baseMat);
+        base.position.y = -5;
+        scene.add(base);
+
+        // សូលុយស្យុង (Solution) - ពណ៌ទឹកសមុទ្រងងឹតបន្តិច
+        const liquidGeo = new THREE.CylinderGeometry(4.8, 4.4, 7, 32);
+        const liquidMat = new THREE.MeshPhysicalMaterial({
+            color: 0x0891b2, transmission: 0.6, opacity: 0.8, transparent: true, roughness: 0.3
+        });
+        const liquid = new THREE.Mesh(liquidGeo, liquidMat);
+        liquid.position.y = -1.4;
+        scene.add(liquid);
+
+        // អេឡិចត្រូត (Electrodes - Anode & Cathode)
+        const electrodeGeo = new THREE.CylinderGeometry(0.5, 0.5, 12, 16);
+        const electrodeMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.9, roughness: 0.2 });
+        
+        const anode = new THREE.Mesh(electrodeGeo, electrodeMat);
+        anode.position.set(-2.5, 1, 0); 
+        scene.add(anode);
+        
+        const cathode = new THREE.Mesh(electrodeGeo, electrodeMat);
+        cathode.position.set(2.5, 1, 0); 
+        scene.add(cathode);
+
+        // សញ្ញា (+) និង (-)
+        function createSign(char, color, xPos) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = color;
+            ctx.font = 'bold 100px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(char, 64, 64);
+            const tex = new THREE.CanvasTexture(canvas);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+            sprite.scale.set(2.5, 2.5, 1);
+            sprite.position.set(xPos, 8, 0);
+            scene.add(sprite);
+        }
+        createSign('+', '#e11d48', -2.5); // Anode
+        createSign('-', '#38bdf8', 2.5);  // Cathode
+
+        // ខ្សែភ្លើងតភ្ជាប់ទៅអំពូល
+        const wirePath = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(-2.5, 2, 0),
+            new THREE.Vector3(-2.5, 10, 0),
+            new THREE.Vector3(-0.6, 10, 0),
+            new THREE.Vector3(0.6, 10, 0),
+            new THREE.Vector3(2.5, 10, 0),
+            new THREE.Vector3(2.5, 2, 0)
+        ], false, 'catmullrom', 0.1);
+        
+        const wireTubeGeo = new THREE.TubeGeometry(wirePath, 64, 0.15, 8, false);
+        const wireTubeMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 });
+        const wireMesh = new THREE.Mesh(wireTubeGeo, wireTubeMat);
+        scene.add(wireMesh);
+
+        // --- អំពូលភ្លើង (Lightbulb) ---
+        const bulbGroup = new THREE.Group();
+        
+        // គូទអំពូល
+        const bulbBaseGeo = new THREE.CylinderGeometry(0.7, 0.7, 1.2, 16);
+        const bulbBaseMat = new THREE.MeshStandardMaterial({ color: 0xa1a1aa, metalness: 0.8 });
+        const bulbBase = new THREE.Mesh(bulbBaseGeo, bulbBaseMat);
+        bulbBase.position.set(0, 10, 0);
+        bulbBase.rotation.z = Math.PI / 2; 
+        bulbGroup.add(bulbBase);
+
+        // កញ្ចក់អំពូល
+        const bulbGlassGeo = new THREE.SphereGeometry(1.8, 32, 32);
+        const bulbGlassMat = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            transmission: 0.9,
+            opacity: 1,
+            transparent: true,
+            roughness: 0.1,
+            emissive: 0xffea00,
+            emissiveIntensity: 0 // ភ្លឺតាម I
+        });
+        const bulbGlass = new THREE.Mesh(bulbGlassGeo, bulbGlassMat);
+        bulbGlass.position.set(0, 12, 0);
+        bulbGroup.add(bulbGlass);
+
+        // បង្កើតពន្លឺ Halo (Glow Sprite) ពណ៌លឿងនៅចំកណ្តាលអំពូលយ៉ាងច្បាស់
+        function createGlowMaterial() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+            gradient.addColorStop(0, 'rgba(255, 234, 0, 1)');      // លឿងកណ្តាល
+            gradient.addColorStop(0.2, 'rgba(255, 200, 0, 0.8)');  // លឿងទុំ
+            gradient.addColorStop(0.5, 'rgba(255, 150, 0, 0.4)');  // ទុំព្រាល
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');          // បាត់
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 128, 128);
+            const texture = new THREE.CanvasTexture(canvas);
+            return new THREE.SpriteMaterial({ 
+                map: texture, 
+                transparent: true, 
+                blending: THREE.AdditiveBlending, 
+                depthWrite: false,
+                opacity: 0 
+            });
+        }
+        const glowSprite = new THREE.Sprite(createGlowMaterial());
+        glowSprite.scale.set(10, 10, 1);
+        glowSprite.position.set(0, 12, 0);
+        bulbGroup.add(glowSprite);
+
+        // ពន្លឺជះចេញ (PointLight) - ជះតិចតួចជុំវិញអំពូល
+        const bulbLight = new THREE.PointLight(0xffea00, 0, 20);
+        bulbLight.position.set(0, 12, 0);
+        bulbGroup.add(bulbLight);
+
+        scene.add(bulbGroup);
+
+        // --- 3. Animation Particles (Ions & Electrons) ---
+        
+        // អ៊ីយ៉ុងរត់ក្នុងទឹក
+        const ionsGroup = new THREE.Group();
+        scene.add(ionsGroup);
+        const ionGeo = new THREE.SphereGeometry(0.3, 16, 16);
+        const ionMat = new THREE.MeshPhongMaterial({ color: 0xf43f5e, emissive: 0x9f1239, shininess: 100 }); 
+
+        for(let i=0; i<30; i++) {
+            const ion = new THREE.Mesh(ionGeo, ionMat);
+            ion.position.x = -2 + Math.random() * 4;
+            ion.position.y = -4 + Math.random() * 5;
+            ion.position.z = (Math.random() - 0.5) * 3;
+            ion.userData.speed = 0.02 + Math.random() * 0.03;
+            ionsGroup.add(ion);
+        }
+
+        // អេឡិចត្រុងរត់តាមខ្សែភ្លើង (ពណ៌ស៊ីយ៉ាន ឱ្យភ្លឺលើផ្ទៃងងឹត)
+        const wireElectronsGroup = new THREE.Group();
+        scene.add(wireElectronsGroup);
+        const electronWireGeo = new THREE.SphereGeometry(0.35, 16, 16);
+        const electronWireMat = new THREE.MeshPhongMaterial({ color: 0x22d3ee, emissive: 0x0284c7, shininess: 100 });
+        
+        const numWireElectrons = 30;
+        for(let i=0; i<numWireElectrons; i++) {
+            const e = new THREE.Mesh(electronWireGeo, electronWireMat);
+            e.userData.t = i / numWireElectrons; 
+            wireElectronsGroup.add(e);
+        }
+
+        // --- 4. Logic & UI Update ---
+        const iSlider = document.getElementById('iSlider');
+        const tSlider = document.getElementById('tSlider');
+        let currentFlowSpeed = 0;
+        
+        function updateSimulation() {
+            const I = parseFloat(iSlider.value);
+            const t_mn = parseFloat(tSlider.value);
+
+            // Math
+            const t_s = t_mn * 60;
+            const q = I * t_s;
+
+            // Update UI Displays
+            document.getElementById('iDisp').innerHTML = `${I.toFixed(1)} A`;
+            document.getElementById('tDisp').innerHTML = `${t_mn} mn`;
+            document.getElementById('prob_i').innerHTML = `I = ${I.toFixed(1)} A`;
+            document.getElementById('prob_t').innerHTML = `t = ${t_mn} mn`;
+            
+            // Update Results
+            document.getElementById('res_q').innerHTML = `${q.toFixed(2)} C`;
+
+            // Update Solution Box
+            document.getElementById('sol_i').textContent = I.toFixed(1);
+            document.getElementById('sol_t').textContent = t_mn;
+            document.getElementById('sol_t2').textContent = t_mn;
+            document.getElementById('sol_t_s').textContent = t_s;
+            
+            document.getElementById('sol_i_sub').textContent = I.toFixed(1);
+            document.getElementById('sol_t_sub').textContent = t_s;
+            document.getElementById('sol_q_calc').textContent = q.toFixed(1);
+            document.getElementById('sol_q_final').textContent = q.toFixed(2);
+
+            // Update Animation & Light Bulb Halo intensity based on I
+            currentFlowSpeed = I * 0.005; 
+            
+            if (I > 0) {
+                // អំពូល និង Halo ភ្លឺខ្លាំងតាម I (Max I=5.0)
+                bulbGlass.material.emissiveIntensity = (I / 5.0) * 2.5 + 0.5;
+                glowSprite.material.opacity = (I / 5.0) * 0.8 + 0.2;
+                bulbLight.intensity = (I / 5.0) * 1.5;
+                
+                wireElectronsGroup.visible = true;
+                ionsGroup.visible = true;
+            } else {
+                bulbGlass.material.emissiveIntensity = 0;
+                glowSprite.material.opacity = 0;
+                bulbLight.intensity = 0;
+                
+                wireElectronsGroup.visible = false;
+                ionsGroup.visible = false;
+            }
+        }
+
+        // --- 5. Event Listeners ---
+        iSlider.addEventListener('input', updateSimulation);
+        tSlider.addEventListener('input', updateSimulation);
+
+        const toggleBtn = document.getElementById('toggleBtn');
+        const solutionBox = document.getElementById('solutionBox');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const btnText = document.getElementById('btnText');
+        let isOpen = false;
+
+        toggleBtn.addEventListener('click', () => {
+            isOpen = !isOpen;
+            if (isOpen) {
+                solutionBox.classList.add('open');
+                btnText.textContent = "លាក់ដំណោះស្រាយ";
+                toggleIcon.style.transform = "rotate(0deg)";
+            } else {
+                solutionBox.classList.remove('open');
+                btnText.textContent = "បង្ហាញដំណោះស្រាយ";
+                toggleIcon.style.transform = "rotate(180deg)";
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // --- 6. Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // Animate Ions in solution
+            ionsGroup.children.forEach(ion => {
+                ion.position.x += ion.userData.speed * (currentFlowSpeed * 100);
+                if (ion.position.x > 2.3) {
+                    ion.position.x = -2.3;
+                    ion.position.y = -4 + Math.random() * 5;
+                    ion.position.z = (Math.random() - 0.5) * 3;
+                }
+            });
+
+            // Animate Electrons on the wire
+            wireElectronsGroup.children.forEach(e => {
+                e.userData.t += currentFlowSpeed;
+                if (e.userData.t > 1) {
+                    e.userData.t = 0; 
+                }
+                const pos = wirePath.getPoint(e.userData.t);
+                e.position.copy(pos);
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        // Initialize
+        updateSimulation();
+        animate();
+    </script>
+</body>
+</html>
+```<ElicitationsGroup></ElicitationsGroup>

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>កម្មវិធីក្លែងធ្វើ សៀគ្វី SCR លើបន្ទះ (Fixed Layout)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .app-card {
+            width: 100%;
+            max-width: 1050px;
+            background: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 550px;
+            background-color: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .btn-wire {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+        .btn-wire:active {
+            transform: scale(0.96);
+        }
+        .wire-connected-sw1 {
+            background-color: #059669 !important; /* Emerald */
+            color: white !important;
+            border-color: #047857 !important;
+        }
+        .wire-connected-sw2 {
+            background-color: #d97706 !important; /* Amber */
+            color: white !important;
+            border-color: #b45309 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-card">
+        <!-- Header -->
+        <div class="bg-slate-800 text-white p-5 text-center">
+            <h1 class="text-2xl font-bold tracking-wide">ពិសោធន៍សៀគ្វី SCR (Thyristor) លើបន្ទះ</h1>
+            <p class="text-slate-400 text-sm mt-1">រៀបចំទីតាំងគ្រឿងបន្លាស់ច្បាស់លាស់ ងាយស្រួលមើលពីដំណើរការចាក់សោរ (Latching)</p>
+        </div>
+
+        <!-- Canvas Area -->
+        <canvas id="breadboardCanvas" width="950" height="480"></canvas>
+
+        <!-- Lower Panel -->
+        <div class="p-6 flex flex-col md:flex-row gap-6 bg-slate-50 items-stretch">
+            
+            <!-- Controls -->
+            <div class="flex flex-col gap-4 w-full md:w-1/3 justify-center">
+                <button id="btnSw1" onclick="toggleSW1()" class="btn-wire py-4 px-5 rounded-2xl font-bold text-slate-700 bg-white border-2 border-slate-300 shadow-sm flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 rounded-full bg-emerald-500"></div>
+                        <span>កុងតាក់មេ (SW1)</span>
+                    </div>
+                    <span id="txtSw1" class="text-sm px-3 py-1 bg-slate-100 text-slate-500 rounded-lg">ដកចេញ</span>
+                </button>
+
+                <button id="btnSw2" onclick="toggleSW2()" class="btn-wire py-4 px-5 rounded-2xl font-bold text-slate-700 bg-white border-2 border-slate-300 shadow-sm flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 rounded-full bg-amber-500"></div>
+                        <span>ខ្សែបញ្ជា (SW2)</span>
+                    </div>
+                    <span id="txtSw2" class="text-sm px-3 py-1 bg-slate-100 text-slate-500 rounded-lg">ដកចេញ</span>
+                </button>
+            </div>
+
+            <!-- Analysis Box -->
+            <div class="flex-1">
+                <div class="h-full bg-white border border-slate-200 rounded-2xl p-6 shadow-sm transition-all duration-300 flex flex-col justify-center" id="infoPanel">
+                    <h3 class="text-indigo-700 font-bold mb-3 flex items-center gap-2 text-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        ការសង្កេត និងវិភាគ៖
+                    </h3>
+                    <div id="explanationText" class="text-slate-700 text-[1.05rem] leading-relaxed font-bold">
+                        <!-- Text injected via JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('breadboardCanvas');
+        const ctx = canvas.getContext('2d');
+        const btnSw1 = document.getElementById('btnSw1');
+        const btnSw2 = document.getElementById('btnSw2');
+        const txtSw1 = document.getElementById('txtSw1');
+        const txtSw2 = document.getElementById('txtSw2');
+        const infoPanel = document.getElementById('infoPanel');
+        const explanationText = document.getElementById('explanationText');
+
+        // State Variables
+        let isSw1Connected = false;
+        let isSw2Connected = false;
+        let isLatched = false;
+        let dashOffset = 0;
+        let lastTime = performance.now();
+
+        // Breadboard Grid Setup
+        const B_X = 180, B_Y = 120; 
+        const GRID = 20;
+
+        function getPos(col, row) {
+            let x = B_X + 30 + col * GRID;
+            let y = B_Y;
+            if (row <= 1) y += 15 + row * GRID; // Top power
+            else if (row <= 6) y += 75 + (row - 2) * GRID; // Top terminal
+            else if (row <= 11) y += 190 + (row - 7) * GRID; // Bot terminal
+            else y += 310 + (row - 12) * GRID; // Bot power
+            return { x, y };
+        }
+
+        // Logic
+        function updateLogic() {
+            if (!isSw1Connected) {
+                isLatched = false;
+            } else if (isSw1Connected && isSw2Connected) {
+                isLatched = true;
+            }
+            updateUI();
+        }
+
+        function toggleSW1() { isSw1Connected = !isSw1Connected; updateLogic(); }
+        function toggleSW2() { isSw2Connected = !isSw2Connected; updateLogic(); }
+
+        function updateUI() {
+            // Button 1
+            if (isSw1Connected) {
+                btnSw1.classList.add('wire-connected-sw1');
+                txtSw1.innerText = "ដោតជាប់"; txtSw1.className = "text-sm px-3 py-1 bg-white text-emerald-700 rounded-lg shadow-sm";
+            } else {
+                btnSw1.classList.remove('wire-connected-sw1');
+                txtSw1.innerText = "ដកចេញ"; txtSw1.className = "text-sm px-3 py-1 bg-slate-100 text-slate-500 rounded-lg";
+            }
+
+            // Button 2
+            if (isSw2Connected) {
+                btnSw2.classList.add('wire-connected-sw2');
+                txtSw2.innerText = "ដោតជាប់"; txtSw2.className = "text-sm px-3 py-1 bg-white text-amber-700 rounded-lg shadow-sm";
+            } else {
+                btnSw2.classList.remove('wire-connected-sw2');
+                txtSw2.innerText = "ដកចេញ"; txtSw2.className = "text-sm px-3 py-1 bg-slate-100 text-slate-500 rounded-lg";
+            }
+
+            // Explanation Updates
+            if (!isSw1Connected) {
+                infoPanel.className = "h-full bg-slate-100 border border-slate-200 rounded-2xl p-6 shadow-inner transition-all duration-300 flex flex-col justify-center";
+                explanationText.innerHTML = `ផ្តាច់ខ្សែភ្លើងមេ (SW1)៖ <br>សៀគ្វីទាំងមូលដាច់ចរន្តអគ្គិសនី។ អំពូល LED រលត់ ហើយ SCR ត្រឡប់ទៅសភាពដើមវិញ (Reset) ។`;
+            } else if (isSw1Connected && !isSw2Connected && !isLatched) {
+                infoPanel.className = "h-full bg-white border border-slate-200 rounded-2xl p-6 shadow-sm transition-all duration-300 flex flex-col justify-center";
+                explanationText.innerHTML = `ដោតខ្សែមេ (SW1) តែដកខ្សែបញ្ជា (SW2)៖ <br>អំពូល LED <span class="text-slate-400">មិនភ្លឺទេ</span>។ ដោយសារគ្មានចរន្តកេះចូលជើង Gate (G) ធ្វើឱ្យ SCR រាំងខ្ទប់មិនឱ្យចរន្តឆ្លងកាត់ពី Anode ទៅ Cathode ឡើយ។`;
+            } else if (isSw1Connected && isSw2Connected) {
+                infoPanel.className = "h-full bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm transition-all duration-300 flex flex-col justify-center shadow-[0_0_15px_rgba(239,68,68,0.1)]";
+                explanationText.innerHTML = `ដោតខ្សែទាំងពីរចូល (SW1 និង SW2)៖ <br>ចរន្តហូរចូលជើង Gate (G) បញ្ជាឱ្យ SCR ចាប់ផ្ដើមចម្លងចរន្ត។ ចរន្តធំហូរពី Anode ទៅ Cathode ធ្វើឱ្យអំពូល <span class="text-red-600">LED ភ្លឺយ៉ាងច្បាស់</span>។`;
+            } else if (isSw1Connected && !isSw2Connected && isLatched) {
+                infoPanel.className = "h-full bg-amber-50 border border-amber-200 rounded-2xl p-6 shadow-sm transition-all duration-300 flex flex-col justify-center shadow-[0_0_15px_rgba(245,158,11,0.1)]";
+                explanationText.innerHTML = `ដកខ្សែបញ្ជាចេញ (SW2) វិញ ខណៈខ្សែមេដោតជាប់៖ <br>អំពូល <span class="text-red-600">LED នៅបន្តភ្លឺដដែល!</span> នេះជាលក្ខណៈ <span class="text-amber-600">ចាក់សោរ (Latching)</span> របស់ SCR ។`;
+            }
+        }
+
+        // --- Drawing Helpers ---
+
+        function drawBreadboard() {
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = 'rgba(0,0,0,0.08)';
+            ctx.shadowBlur = 20;
+            ctx.shadowOffsetY = 8;
+            ctx.beginPath();
+            ctx.roundRect(B_X, B_Y, 700, 360, 12);
+            ctx.fill();
+            ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+            ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2; ctx.stroke();
+
+            // Colored Power Rails
+            ctx.strokeStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(B_X + 20, B_Y + 10); ctx.lineTo(B_X + 680, B_Y + 10); ctx.stroke();
+            ctx.strokeStyle = '#3b82f6'; ctx.beginPath(); ctx.moveTo(B_X + 20, B_Y + 40); ctx.lineTo(B_X + 680, B_Y + 40); ctx.stroke();
+            ctx.strokeStyle = '#3b82f6'; ctx.beginPath(); ctx.moveTo(B_X + 20, B_Y + 300); ctx.lineTo(B_X + 680, B_Y + 300); ctx.stroke();
+            ctx.strokeStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(B_X + 20, B_Y + 340); ctx.lineTo(B_X + 680, B_Y + 340); ctx.stroke();
+
+            // Center Divider
+            ctx.fillStyle = '#f1f5f9'; ctx.fillRect(B_X, B_Y + 170, 700, 15);
+
+            // Holes
+            ctx.fillStyle = '#cbd5e1';
+            for (let c = 0; c < 32; c++) {
+                if (c % 6 === 5) continue; // Gap
+                for (let r = 0; r < 14; r++) {
+                    let pos = getPos(c, r);
+                    ctx.beginPath(); ctx.rect(pos.x - 2, pos.y - 2, 4, 4); ctx.fill();
+                }
+            }
+        }
+
+        function drawBattery() {
+            const bx = 30, by = 160;
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath(); ctx.roundRect(bx, by, 110, 70, 8); ctx.fill();
+            ctx.fillStyle = '#94a3b8';
+            ctx.beginPath(); ctx.roundRect(bx + 110, by + 10, 10, 20, 2); ctx.fill(); // +
+            ctx.beginPath(); ctx.roundRect(bx + 110, by + 40, 10, 20, 2); ctx.fill(); // -
+            
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 24px Arial'; ctx.fillText('9V', bx + 40, by + 45);
+            ctx.fillStyle = '#ef4444'; ctx.font = 'bold 18px Arial'; ctx.fillText('+', bx + 125, by + 26);
+            ctx.fillStyle = '#3b82f6'; ctx.fillText('-', bx + 125, by + 56);
+
+            // Fixed Wires to Top Rails
+            drawWireCurve({x: bx + 115, y: by + 20}, getPos(0, 0), '#ef4444');
+            drawWireCurve({x: bx + 115, y: by + 50}, getPos(0, 1), '#1e293b');
+        }
+
+        function drawWireCurve(p1, p2, color, isDashed = false) {
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            // Dynamic control points to make beautiful arches
+            const dist = Math.abs(p2.x - p1.x);
+            const cp1x = p1.x + dist * 0.2; 
+            const cp1y = Math.min(p1.y, p2.y) - 80;
+            const cp2x = p2.x - dist * 0.2; 
+            const cp2y = cp1y;
+            
+            ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+            
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            if (isDashed) {
+                ctx.setLineDash([8, 12]);
+                ctx.lineDashOffset = dashOffset;
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Metal pins into the breadboard
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(p1.x - 1.5, p1.y, 3, 10);
+            ctx.fillRect(p2.x - 1.5, p2.y, 3, 10);
+        }
+
+        function drawResistor(p1, p2, colors) {
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+
+            const midX = (p1.x + p2.x) / 2;
+            const midY = (p1.y + p2.y) / 2;
+            
+            ctx.save();
+            ctx.translate(midX, midY);
+            ctx.rotate(Math.atan2(p2.y - p1.y, p2.x - p1.x));
+            
+            ctx.fillStyle = '#eaddcf'; ctx.strokeStyle = '#d6c3ae'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(-22, -7, 44, 14, 4); ctx.fill(); ctx.stroke();
+            
+            ctx.fillStyle = colors[0]; ctx.fillRect(-16, -7, 4, 14);
+            ctx.fillStyle = colors[1]; ctx.fillRect(-6, -7, 4, 14);
+            ctx.fillStyle = colors[2]; ctx.fillRect(4, -7, 4, 14);
+            ctx.fillStyle = '#eab308'; ctx.fillRect(14, -7, 4, 14); // Gold
+            
+            ctx.restore();
+        }
+
+        function drawLED(pA, pC, isOn) {
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pA.x, pA.y - 30); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(pC.x, pC.y); ctx.lineTo(pC.x, pC.y - 30); ctx.stroke();
+
+            const midX = (pA.x + pC.x) / 2;
+            const midY = pA.y - 45;
+
+            ctx.save();
+            ctx.translate(midX, midY);
+
+            // Glow Effect
+            if (isOn) {
+                ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.35)'; ctx.fill();
+                ctx.shadowColor = '#ef4444'; ctx.shadowBlur = 20;
+            }
+
+            // Dome
+            ctx.fillStyle = isOn ? '#ef4444' : '#fca5a5';
+            ctx.strokeStyle = '#b91c1c'; ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(-14, 15);
+            ctx.bezierCurveTo(-14, -20, 14, -20, 14, 15);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // Flat edge for Cathode (Right side)
+            ctx.fillStyle = '#b91c1c';
+            ctx.fillRect(11, 2, 4, 13);
+            
+            // Label
+            ctx.fillStyle = '#b91c1c'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('LED', 0, 0);
+
+            ctx.restore();
+        }
+
+        function drawSCR(pC, pA, pG) {
+            // Place TO-220 body centered on Anode
+            const px = pA.x; 
+            const py = pA.y - 40;
+
+            // Legs going down to holes
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(pC.x, pC.y); ctx.lineTo(pC.x, py + 15); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pA.x, py + 15); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(pG.x, pG.y); ctx.lineTo(pG.x, py + 15); ctx.stroke();
+
+            ctx.save();
+            ctx.translate(px, py);
+
+            // Metal Heat Sink Tab
+            ctx.fillStyle = '#94a3b8';
+            ctx.beginPath(); ctx.roundRect(-12, -35, 24, 20, 2); ctx.fill();
+            ctx.fillStyle = '#334155';
+            ctx.beginPath(); ctx.arc(0, -26, 4, 0, Math.PI*2); ctx.fill(); // Hole
+
+            // Black Epoxy Body
+            ctx.fillStyle = '#111827';
+            ctx.beginPath(); ctx.roundRect(-16, -20, 32, 35, 3); ctx.fill();
+
+            // Label text
+            ctx.fillStyle = '#cbd5e1'; ctx.font = 'bold 10px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('C106B', 0, -5);
+            ctx.font = '9px Arial';
+            ctx.fillText('SCR', 0, 8);
+
+            ctx.restore();
+        }
+
+
+        // --- Main Render Loop ---
+        function render(time) {
+            let dt = (time - lastTime) / 1000;
+            if (dt > 0.1) dt = 0.1;
+            lastTime = time;
+            dashOffset -= 50 * dt;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawBreadboard();
+            drawBattery();
+
+            // ------ Layout Setup ------
+            // Distribute cleanly to avoid ANY overlap
+            
+            // 1. SW1 (Main Power Jumper): Red Top -> Col 3
+            const pSw1In = getPos(3, 0);
+            const pSw1Out = getPos(3, 2);
+            if (isSw1Connected) {
+                drawWireCurve(pSw1In, pSw1Out, '#10b981', isSw1Connected && isLatched); // Emerald green jumper
+            } else {
+                drawWireCurve(pSw1In, {x: pSw1In.x - 30, y: pSw1In.y + 80}, '#10b981'); // Dangling
+            }
+
+            // 2. R1 (220R) - Main load resistor: Col 3 -> Col 10
+            const pR1_In = getPos(3, 4);
+            const pR1_Out = getPos(10, 4);
+            drawResistor(pR1_In, pR1_Out, ['#ef4444', '#ef4444', '#78350f']); // Red Red Brown
+
+            // 3. LED: Anode at Col 10, Cathode at Col 14
+            // Placed squarely on the middle-left side
+            const pLed_A = getPos(10, 6);
+            const pLed_C = getPos(14, 6);
+            drawLED(pLed_A, pLed_C, isSw1Connected && isLatched);
+
+            // 4. Jumper from LED Cathode (Col 14) to SCR Anode (Col 24)
+            const pJmp_LED_SCR_Start = getPos(14, 5);
+            const pJmp_LED_SCR_End = getPos(24, 5);
+            drawWireCurve(pJmp_LED_SCR_Start, pJmp_LED_SCR_End, '#334155', isSw1Connected && isLatched);
+
+            // 5. SCR: Placed on the middle-right side
+            // Standard TO-220 Pinout (Front View): Cathode, Anode, Gate
+            const pScr_C = getPos(23, 6);
+            const pScr_A = getPos(24, 6); // Receives power from LED
+            const pScr_G = getPos(25, 6);
+            drawSCR(pScr_C, pScr_A, pScr_G);
+
+            // 6. SCR Cathode to Ground (Blue Rail)
+            const pScr_Gnd = getPos(23, 1);
+            drawWireCurve(getPos(23, 2), pScr_Gnd, '#1e293b', isSw1Connected && isLatched);
+
+            // 7. Gate Circuit
+            // R2 (1k) from Main Power (Col 3) to Gate Trigger switch (Col 10 bottom)
+            const pR2_In = getPos(3, 8);
+            const pR2_Out = getPos(10, 8);
+            drawResistor(pR2_In, pR2_Out, ['#78350f', '#000000', '#ef4444']); // Brown Black Red
+
+            // 8. SW2 (Gate Trigger Jumper)
+            const pSw2In = getPos(10, 10);
+            const pSw2Out = getPos(18, 10);
+            if (isSw2Connected) {
+                drawWireCurve(pSw2In, pSw2Out, '#f59e0b', isSw1Connected && isSw2Connected); // Amber jumper
+            } else {
+                drawWireCurve(pSw2In, {x: pSw2In.x + 30, y: pSw2In.y + 80}, '#f59e0b'); // Dangling
+            }
+
+            // 9. Jumper from SW2 to SCR Gate (Crossing the gap)
+            const pJmp_Gate_Start = getPos(18, 8);
+            const pJmp_Gate_End = getPos(25, 4); // To Gate Column
+            drawWireCurve(pJmp_Gate_Start, pJmp_Gate_End, '#3b82f6', isSw1Connected && isSw2Connected);
+
+            requestAnimationFrame(render);
+        }
+
+        // Init
+        updateLogic();
+        requestAnimationFrame(render);
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី៦៖ ទ្វារតក្កវិទ្យា OR (OR Logic Gate)</title>
+    
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Battambang:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #2563eb;
+            color: white;
+            padding: 16px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .problem-statement {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #1f2937;
+            margin-bottom: 24px;
+            padding: 16px;
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            border-radius: 4px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            max-width: 100%;
+            height: auto;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .switch-group {
+            display: flex;
+            gap: 20px;
+        }
+
+        .switch-btn {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: all 0.2s;
+            min-width: 180px;
+        }
+
+        .switch-btn.off {
+            background-color: #475569;
+            box-shadow: 0 4px 0 #334155;
+        }
+        .switch-btn.off:active { transform: translateY(4px); box-shadow: 0 0 0 #334155; }
+
+        .switch-btn.on {
+            background-color: #3b82f6;
+            box-shadow: 0 4px 0 #2563eb;
+        }
+        .switch-btn.on:active { transform: translateY(4px); box-shadow: 0 0 0 #2563eb; }
+
+        .logic-status {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-align: center;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .solution-btn-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .btn-solution {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #10b981;
+            color: white;
+            font-size: 1.1rem;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-solution:hover { background-color: #059669; }
+
+        .solution-box {
+            display: none;
+            background-color: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 20px;
+            color: #064e3b;
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>លំហាត់ទី៦៖ ទ្វារតក្កវិទ្យា OR (OR Logic Gate)</h1>
+    </div>
+    
+    <div class="content">
+        <div class="problem-statement">
+            <strong>៦. គេដំឡើងសៀគ្វីដូចរូបខាងក្រោម ។</strong><br><br>
+            ក. ចូររៀបរាប់ឈ្មោះគ្រឿងអេឡិចត្រូនិកដែលយកមកប្រើក្នុងដ្យាក្រាមនៃសៀគ្វីនេះ ។<br>
+            ខ. ចូរបង្ហាញពីដំណើរការនៃសៀគ្វីនេះ ។<br>
+            គ. បើសិនជាអាច ចូរដំឡើងសៀគ្វីនេះលើបន្ទះសៀគ្វីជាក់ស្តែង និងវាស់តង់ស្យុងចេញ ដើម្បីពិនិត្យដំណើរការរបស់វា ។ អ្នកអាចដំឡើងវាដោយប្រើកម្មវិធី E-Lab ។ (សៀគ្វីនេះត្រូវបានគេស្គាល់ថាជាទ្វារតក្កៈ OR) ។
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="circuitCanvas" width="800" height="340"></canvas>
+            
+            <div class="controls">
+                <div class="switch-group">
+                    <button class="switch-btn off" id="btnSW2" onclick="toggleSW2()">SW2: ភ្ជាប់ម៉ាស់ (0)</button>
+                    <button class="switch-btn off" id="btnSW3" onclick="toggleSW3()">SW3: ភ្ជាប់ម៉ាស់ (0)</button>
+                </div>
+                
+                <div class="logic-status" id="logicStatus" style="background-color:#fee2e2; color:#b91c1c; border:1px solid #fca5a5;">
+                    ស្ថានភាពតក្កៈ៖ 0 OR 0 = LED OFF
+                </div>
+            </div>
+        </div>
+
+        <div class="solution-btn-container">
+            <button class="btn-solution" onclick="toggleSolution()">បង្ហាញដំណោះស្រាយ</button>
+        </div>
+
+        <div class="solution-box" id="solutionBox">
+            <h2 style="margin-top:0; border-bottom:2px solid #6ee7b7; padding-bottom:8px; color: #047857;">ដំណោះស្រាយលំហាត់លេខ ៦</h2>
+            <ul>
+                <li><strong>ក. ឈ្មោះគ្រឿងអេឡិចត្រូនិក៖</strong>
+                    <ul>
+                        <li>ថ្មពិល B1 9.0V</li>
+                        <li>កុងតាក់ SW2 និង SW3 ប្រភេទ SPDT (សម្រាប់ប្ដូរស្ថានភាព 0 ឬ 1)</li>
+                        <li>ឌីយ៉ូត D2 និង D3 ម៉ូដែល 1N4001</li>
+                        <li>រេស៊ីស្តង់ R1 ទំហំ 100Ω សម្រាប់ការពារអំពូល</li>
+                        <li>អំពូល LED</li>
+                    </ul>
+                </li>
+                <li><strong>ខ. ដំណើរការនៃសៀគ្វី (ទ្វារ OR ដោយប្រើ Diode)៖</strong><br>
+                    សៀគ្វីនេះដំណើរការតាមតក្កវិទ្យា OR (ឬ) ដែលមានន័យថា អំពូល LED នឹងភ្លឺឱ្យតែកុងតាក់ណាមួយ ឬទាំងពីរស្ថិតនៅស្ថានភាព ១ (ភ្ជាប់ទៅប៉ូលបូក)។
+                    <ul>
+                        <li><strong>បើ SW2(0) និង SW3(0)៖</strong> កុងតាក់ទាំងពីរភ្ជាប់ទៅម៉ាស់ (Ground) នោះគ្មានតង់ស្យុងឆ្លងកាត់ឌីយ៉ូត D2 និង D3 ទេ។ ហេតុនេះគ្មានចរន្តហូរទៅកាន់អំពូលឡើយ $\implies$ <span style="color:#dc2626; font-weight:bold;">LED រលត់ (OFF)</span>។</li>
+                        <li><strong>បើ SW2(1) ឬ SW3(1) ឬទាំងពីរ (1)៖</strong> តង់ស្យុងបូក 9V នឹងជំរុញចរន្តឱ្យហូរឆ្លងកាត់ឌីយ៉ូត D2 (ឬ D3) ក្នុងទិសដៅចម្លង (Forward Bias) បន្តទៅចំណុច Q រួចឆ្លងកាត់រេស៊ីស្តង់ R1 និងអំពូល $\implies$ <span style="color:#059669; font-weight:bold;">LED ភ្លឺ (ON)</span>។</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('circuitCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let sw2State = 0; // 0 = (2) GND, 1 = (1) VCC
+    let sw3State = 0; // 0 = (2) GND, 1 = (1) VCC
+    let time = 0;
+
+    // --- កូអរដោនេខ្សែភ្លើង (Orthogonal Coordinates) ---
+    const BAT_X = 80;
+    const TOP_Y = 60, BOT_Y = 280;
+
+    // ទីតាំងខ្សែបញ្ឈរនៃចំណុច A និង B
+    const NODE_A_X = 140; // ខ្សែចុះមកក្រោមសម្រាប់ VCC
+    const NODE_B_X = 180; // ខ្សែឡើងទៅលើសម្រាប់ GND
+
+    const PIN_X = 260; // ទីតាំងជើងកុងតាក់ (1) និង (2)
+    const SW_POLE_X = 320; // ទីតាំងជើង Pole របស់កុងតាក់
+
+    // កុងតាក់ SW2
+    const SW2_PIN1_Y = 100; // (1) VCC
+    const SW2_POLE_Y = 120; 
+    const SW2_PIN2_Y = 140; // (2) GND
+
+    // កុងតាក់ SW3
+    const SW3_PIN1_Y = 200; // (1) VCC
+    const SW3_POLE_Y = 220; 
+    const SW3_PIN2_Y = 240; // (2) GND
+
+    // ឌីយ៉ូត
+    const D2_X = 400;
+    const D3_X = 400;
+
+    // ចំណុច Q
+    const NODE_Q_X = 480;
+    const Q_MID_Y = 170; // ចំណុចកណ្តាលនៃខ្សែបញ្ឈរ Q
+
+    // រេស៊ីស្តង់ និងអំពូល
+    const R1_X = 560;
+    const LED_X = 660;
+    const LED_Y = 220; // ទីតាំងតួអំពូល
+
+    function toggleSW2() {
+        sw2State = sw2State === 0 ? 1 : 0;
+        const btn = document.getElementById('btnSW2');
+        if (sw2State === 1) {
+            btn.innerText = "SW2: ភ្ជាប់ប៉ូលបូក (1)";
+            btn.classList.replace('off', 'on');
+        } else {
+            btn.innerText = "SW2: ភ្ជាប់ម៉ាស់ (0)";
+            btn.classList.replace('on', 'off');
+        }
+        updateLogic();
+    }
+
+    function toggleSW3() {
+        sw3State = sw3State === 0 ? 1 : 0;
+        const btn = document.getElementById('btnSW3');
+        if (sw3State === 1) {
+            btn.innerText = "SW3: ភ្ជាប់ប៉ូលបូក (1)";
+            btn.classList.replace('off', 'on');
+        } else {
+            btn.innerText = "SW3: ភ្ជាប់ម៉ាស់ (0)";
+            btn.classList.replace('on', 'off');
+        }
+        updateLogic();
+    }
+
+    function updateLogic() {
+        let isLedOn = (sw2State === 1) || (sw3State === 1);
+        const statusBox = document.getElementById('logicStatus');
+        
+        let ledText = isLedOn ? "ON (ភ្លឺ)" : "OFF (រលត់)";
+        statusBox.innerText = `ស្ថានភាពតក្កៈ៖ ${sw2State} OR ${sw3State} = LED ${ledText}`;
+        
+        if (isLedOn) {
+            statusBox.style.backgroundColor = "#d1fae5";
+            statusBox.style.color = "#065f46";
+            statusBox.style.borderColor = "#34d399";
+        } else {
+            statusBox.style.backgroundColor = "#fee2e2";
+            statusBox.style.color = "#b91c1c";
+            statusBox.style.borderColor = "#fca5a5";
+        }
+    }
+
+    function toggleSolution() {
+        const box = document.getElementById('solutionBox');
+        box.style.display = box.style.display === 'block' ? 'none' : 'block';
+        if (window.MathJax) MathJax.typesetPromise();
+    }
+
+    // --- អនុគមន៍គូសគំនូស (Drawing Functions) ---
+    function drawLine(x1, y1, x2, y2, color = '#374151', width = 2) {
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+        ctx.strokeStyle = color; ctx.lineWidth = width; ctx.stroke();
+    }
+
+    function drawNode(x, y, label="", offset = {x: 10, y: -10}) {
+        ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#111827'; ctx.fill();
+        if(label) {
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText(label, x + offset.x, y + offset.y);
+        }
+    }
+
+    function drawBattery(x, y) {
+        drawLine(x - 15, y - 10, x + 15, y - 10, '#111827', 2); // (+) Top
+        
+        ctx.beginPath(); ctx.setLineDash([2, 4]); ctx.moveTo(x, y - 5); ctx.lineTo(x, y + 5);
+        ctx.strokeStyle = '#111827'; ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]); 
+        
+        drawLine(x - 10, y + 10, x + 10, y + 10, '#111827', 4); // (-) Bottom
+        
+        ctx.fillStyle = '#111827'; ctx.font = '12px Arial';
+        ctx.fillText('B1', x + 20, y - 5);
+        ctx.fillText('9.0V', x + 20, y + 15);
+    }
+
+    function drawGround(x, y) {
+        drawLine(x, y, x, y + 15);
+        drawLine(x - 15, y + 15, x + 15, y + 15);
+        drawLine(x - 10, y + 20, x + 10, y + 20);
+        drawLine(x - 5, y + 25, x + 5, y + 25);
+    }
+
+    function drawResistor(x, y, label) {
+        drawLine(x - 30, y, x - 20, y);
+        ctx.strokeRect(x - 20, y - 8, 40, 16);
+        drawLine(x + 20, y, x + 30, y);
+        ctx.fillStyle = '#111827'; ctx.font = '12px Arial';
+        ctx.fillText(label.split(' ')[0], x - 10, y - 12);
+        ctx.fillText(label.split(' ')[1], x - 10, y + 22);
+    }
+
+    // ឌីយ៉ូតតម្រង់ទៅស្តាំ (Forward direction for OR gate)
+    function drawDiodeRight(x, y, label) {
+        drawLine(x - 15, y, x - 10, y); 
+        ctx.beginPath();
+        ctx.moveTo(x - 10, y - 10);
+        ctx.lineTo(x + 10, y); // Pointing Right
+        ctx.lineTo(x - 10, y + 10);
+        ctx.closePath();
+        ctx.fillStyle = '#1f2937'; ctx.fill();
+        
+        drawLine(x + 10, y - 10, x + 10, y + 10, '#1f2937', 3); // Bar on the RIGHT
+        drawLine(x + 10, y, x + 15, y); 
+        
+        ctx.fillStyle = '#111827'; ctx.font = '12px Arial';
+        ctx.fillText(label.split(' ')[0], x - 10, y - 15);
+        ctx.fillText(label.split(' ')[1], x - 20, y + 25);
+    }
+
+    function drawLED(x, y, isOn) {
+        ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 2); 
+        
+        if (isOn) {
+            ctx.beginPath(); ctx.arc(0, 0, 25, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.4)'; // ពណ៌បៃតងពេលភ្លឺ
+            ctx.fill();
+        }
+
+        ctx.beginPath(); ctx.moveTo(-10, -10); ctx.lineTo(10, 0); ctx.lineTo(-10, 10); ctx.closePath();
+        ctx.fillStyle = isOn ? '#10b981' : '#ffffff'; ctx.fill();
+        ctx.strokeStyle = '#374151'; ctx.stroke();
+        
+        drawLine(10, -10, 10, 10, '#374151', 3); // Cathode bar
+        ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI*2); ctx.stroke(); // Circle
+
+        if (isOn) { // គំនូសពន្លឺ
+            drawLine(12, 10, 20, 18, '#10b981', 2);
+            drawLine(15, 18, 20, 18, '#10b981', 2);
+            drawLine(20, 13, 20, 18, '#10b981', 2);
+        }
+        
+        ctx.restore();
+        ctx.fillStyle = '#111827'; ctx.font = 'bold 14px Arial';
+        ctx.fillText('LED', x + 25, y + 5);
+    }
+
+    function drawWireCurrent(path) {
+        ctx.save();
+        let p = (time * 3) % 1;
+        ctx.setLineDash([8, 12]);
+        ctx.lineDashOffset = -p * 20;
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)'; // Red active current
+        ctx.lineWidth = 3;
+        
+        ctx.beginPath(); ctx.moveTo(path[0].x, path[0].y);
+        for(let i=1; i<path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        time += 0.05;
+
+        let isLedOn = (sw2State === 1) || (sw3State === 1);
+
+        // --- SCHEMATIC WIRING ---
+        // Battery and Rails
+        drawLine(BAT_X, TOP_Y, BAT_X, 160);
+        drawLine(BAT_X, 180, BAT_X, BOT_Y);
+        drawBattery(BAT_X, 170);
+        
+        drawLine(BAT_X, BOT_Y, LED_X, BOT_Y); // Bottom Rail (GND)
+        drawLine(BAT_X, TOP_Y, NODE_A_X, TOP_Y); // Top Rail (VCC)
+
+        // Node A Line (VCC)
+        drawNode(NODE_A_X, TOP_Y, 'A', {x: 0, y: -10});
+        drawLine(NODE_A_X, TOP_Y, NODE_A_X, SW3_PIN1_Y); // ទម្លាក់ខ្សែ A ចុះក្រោម
+        
+        drawLine(NODE_A_X, SW2_PIN1_Y, PIN_X, SW2_PIN1_Y); drawNode(NODE_A_X, SW2_PIN1_Y);
+        drawLine(NODE_A_X, SW3_PIN1_Y, PIN_X, SW3_PIN1_Y); drawNode(NODE_A_X, SW3_PIN1_Y);
+
+        // Node B Line (GND)
+        drawNode(NODE_B_X, BOT_Y, 'B', {x: -20, y: -10});
+        drawGround(NODE_B_X, BOT_Y);
+        drawLine(NODE_B_X, BOT_Y, NODE_B_X, SW2_PIN2_Y); // ដំឡើងខ្សែ B ឡើងលើ
+        
+        drawLine(NODE_B_X, SW2_PIN2_Y, PIN_X, SW2_PIN2_Y); drawNode(NODE_B_X, SW2_PIN2_Y);
+        // ខ្សែ SW3_PIN2 ឆ្លងកាត់ខ្សែបញ្ឈរ A (គ្មានចំណុចតភ្ជាប់)
+        drawLine(NODE_B_X, SW3_PIN2_Y, PIN_X, SW3_PIN2_Y); drawNode(NODE_B_X, SW3_PIN2_Y);
+
+        // Terminals & Switches
+        // SW2
+        drawNode(PIN_X, SW2_PIN1_Y); ctx.font = '12px Arial'; ctx.fillText('(1)', PIN_X - 25, SW2_PIN1_Y + 4);
+        drawNode(PIN_X, SW2_PIN2_Y); ctx.fillText('(2)', PIN_X - 25, SW2_PIN2_Y + 4);
+        drawNode(SW_POLE_X, SW2_POLE_Y); ctx.font = 'bold 14px Arial'; ctx.fillText('SW2', SW_POLE_X + 10, SW2_POLE_Y - 15);
+        if (sw2State === 1) drawLine(SW_POLE_X, SW2_POLE_Y, PIN_X, SW2_PIN1_Y, '#3b82f6', 3);
+        else drawLine(SW_POLE_X, SW2_POLE_Y, PIN_X, SW2_PIN2_Y, '#3b82f6', 3);
+
+        // SW3
+        drawNode(PIN_X, SW3_PIN1_Y); ctx.font = '12px Arial'; ctx.fillText('(1)', PIN_X - 25, SW3_PIN1_Y + 4);
+        drawNode(PIN_X, SW3_PIN2_Y); ctx.fillText('(2)', PIN_X - 25, SW3_PIN2_Y + 4);
+        drawNode(SW_POLE_X, SW3_POLE_Y); ctx.font = 'bold 14px Arial'; ctx.fillText('SW3', SW_POLE_X + 10, SW3_POLE_Y - 15);
+        if (sw3State === 1) drawLine(SW_POLE_X, SW3_POLE_Y, PIN_X, SW3_PIN1_Y, '#3b82f6', 3);
+        else drawLine(SW_POLE_X, SW3_POLE_Y, PIN_X, SW3_PIN2_Y, '#3b82f6', 3);
+
+        // Diodes D2, D3
+        drawLine(SW_POLE_X, SW2_POLE_Y, D2_X - 15, SW2_POLE_Y);
+        drawDiodeRight(D2_X, SW2_POLE_Y, 'D2 1N4001');
+        drawLine(D2_X + 15, SW2_POLE_Y, NODE_Q_X, SW2_POLE_Y);
+
+        drawLine(SW_POLE_X, SW3_POLE_Y, D3_X - 15, SW3_POLE_Y);
+        drawDiodeRight(D3_X, SW3_POLE_Y, 'D3 1N4001');
+        drawLine(D3_X + 15, SW3_POLE_Y, NODE_Q_X, SW3_POLE_Y);
+
+        // Node Q & Output Stage
+        drawLine(NODE_Q_X, SW2_POLE_Y, NODE_Q_X, SW3_POLE_Y); // ភ្ជាប់ D2 និង D3
+        drawNode(NODE_Q_X, Q_MID_Y, 'Q', {x: 5, y: -15});
+        
+        drawLine(NODE_Q_X, Q_MID_Y, R1_X - 30, Q_MID_Y);
+        drawResistor(R1_X, Q_MID_Y, "R1 100R");
+        
+        drawLine(R1_X + 30, Q_MID_Y, LED_X, Q_MID_Y);
+        drawLine(LED_X, Q_MID_Y, LED_X, LED_Y - 20);
+        drawLED(LED_X, LED_Y, isLedOn);
+        drawLine(LED_X, LED_Y + 20, LED_X, BOT_Y);
+        drawNode(LED_X, BOT_Y);
+
+
+        // --- ANIMATED CURRENT FLOW ---
+        if (sw2State === 1 || sw3State === 1) {
+            // Main VCC supply to Node A
+            drawWireCurrent([{x: BAT_X, y: 160}, {x: BAT_X, y: TOP_Y}, {x: NODE_A_X, y: TOP_Y}]);
+            
+            // Path via SW2
+            if (sw2State === 1) {
+                drawWireCurrent([{x: NODE_A_X, y: TOP_Y}, {x: NODE_A_X, y: SW2_PIN1_Y}, {x: PIN_X, y: SW2_PIN1_Y}, {x: SW_POLE_X, y: SW2_POLE_Y}]);
+                drawWireCurrent([{x: SW_POLE_X, y: SW2_POLE_Y}, {x: D2_X, y: SW2_POLE_Y}, {x: NODE_Q_X, y: SW2_POLE_Y}, {x: NODE_Q_X, y: Q_MID_Y}]);
+            }
+            
+            // Path via SW3
+            if (sw3State === 1) {
+                drawWireCurrent([{x: NODE_A_X, y: TOP_Y}, {x: NODE_A_X, y: SW3_PIN1_Y}, {x: PIN_X, y: SW3_PIN1_Y}, {x: SW_POLE_X, y: SW3_POLE_Y}]);
+                drawWireCurrent([{x: SW_POLE_X, y: SW3_POLE_Y}, {x: D3_X, y: SW3_POLE_Y}, {x: NODE_Q_X, y: SW3_POLE_Y}, {x: NODE_Q_X, y: Q_MID_Y}]);
+            }
+
+            // Output Path
+            drawWireCurrent([{x: NODE_Q_X, y: Q_MID_Y}, {x: R1_X, y: Q_MID_Y}, {x: LED_X, y: Q_MID_Y}, {x: LED_X, y: LED_Y-20}]);
+            
+            // Return to Ground
+            drawWireCurrent([{x: LED_X, y: LED_Y+20}, {x: LED_X, y: BOT_Y}, {x: BAT_X, y: BOT_Y}, {x: BAT_X, y: 180}]);
+        }
+
+        requestAnimationFrame(render);
+    }
+
+    // ចាប់ផ្តើមដំណើរការ
+    updateLogic();
+    render();
+</script>
+</body>
+</html>

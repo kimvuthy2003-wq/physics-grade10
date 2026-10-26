@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charge Transfer Between Electroscopes</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        /* Custom Button Styling */
+        .step-btn {
+            transition: all 0.3s ease;
+            border: 1px solid #cbd5e1;
+            background-color: #ffffff;
+            color: #334155;
+        }
+        .step-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+            box-shadow: 0 4px 10px -2px rgba(59, 130, 246, 0.4);
+            transform: translateX(4px);
+        }
+        .step-btn:not(.active):hover {
+            background-color: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        /* Glass Bottle Styling */
+        .glass-bottle {
+            background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-bottom-width: 4px;
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.7), 0 10px 15px -3px rgba(0,0,0,0.1);
+            backdrop-filter: blur(4px);
+            border-top-left-radius: 4.5rem;
+            border-top-right-radius: 4.5rem;
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+        }
+
+        /* Leaf Animation */
+        .leaf {
+            transform-origin: top center;
+            transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Conductor Animation */
+        #conductor-group {
+            /* Transition for dropping down */
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Flying Charges (Electrons flowing) */
+        .flying-electron {
+            position: absolute;
+            color: #ef4444; /* Red for negative charges */
+            font-weight: 900;
+            font-size: 1.8rem;
+            line-height: 1;
+            pointer-events: none;
+            z-index: 50;
+            text-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+        }
+
+        /* Static Charges */
+        .static-charge {
+            position: absolute;
+            color: #ef4444;
+            font-weight: 800;
+            font-size: 1.5rem;
+            line-height: 1;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Info Alert Animation */
+        #info-alert {
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateY(-20px) scale(0.9);
+            opacity: 0;
+            pointer-events: none;
+        }
+        #info-alert.show {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen">
+
+    <!-- Left UI Panel -->
+    <div class="w-full md:w-[420px] h-full bg-white shadow-2xl z-20 flex flex-col p-6 border-r border-slate-200">
+        <h1 class="text-2xl font-bold text-slate-800 mb-2 leading-tight">បម្លែងបន្ទុកអគ្គិសនី<br>ទៅជាចរន្តអគ្គិសនី</h1>
+        <p class="text-sm text-slate-500 mb-6 pb-4 border-b border-slate-100">Charge Transfer (Perfect Alignment)</p>
+
+        <h3 class="text-base font-bold text-slate-700 mb-4 flex items-center gap-2">
+            <span>🕹️</span> ផ្ទាំងបញ្ជា (Controls)
+        </h3>
+        
+        <div class="flex flex-col space-y-3 mb-8">
+            <button id="btn-0" class="step-btn active text-left px-5 py-4 rounded-xl font-bold text-[15px]" onclick="setStep(0)">
+                ១. ស្ថានភាពដើម (Initial State)
+            </button>
+            <button id="btn-1" class="step-btn text-left px-5 py-4 rounded-xl font-bold text-[15px]" onclick="setStep(1)">
+                ២. ដាក់ខ្សែលួសភ្ជាប់គងពីលើ
+            </button>
+        </div>
+
+        <!-- Theory / Note Panel -->
+        <div class="mt-auto bg-blue-50/80 border border-blue-200 rounded-xl p-5 shadow-sm relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500 rounded-l-xl"></div>
+            <h4 class="text-blue-800 font-bold mb-3 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                ដំណើរការ
+            </h4>
+            <p class="text-[14px] text-blue-900 leading-relaxed text-justify">
+                នៅពេលខ្សែលួសចម្លងត្រូវបានទម្លាក់គងចំពីលើក្បាលថាសលោហៈទាំងពីរ អេឡិចត្រុង (<span class="font-bold text-red-600">-</span>) នឹងចាប់ផ្ដើមរត់តាមខ្សែលួសពីកន្លែងដែលមានបន្ទុកច្រើន ទៅកន្លែងដែលគ្មានបន្ទុក បង្កើតបានជាចរន្តអគ្គិសនីរយៈខ្លី។
+            </p>
+        </div>
+    </div>
+
+    <!-- Right Simulation Canvas (Fixed relative bounds for absolute precision) -->
+    <div class="flex-1 relative flex items-center justify-center bg-slate-50 overflow-hidden" id="sim-container">
+        
+        <!-- Animated Success Alert -->
+        <div id="info-alert" class="absolute top-10 flex flex-col items-center bg-green-50 border-2 border-green-400 text-green-800 px-8 py-3 rounded-2xl shadow-xl z-50">
+            <span class="font-bold text-lg">⚡ ចរន្តអគ្គិសនីស្ថិតបានកើតឡើង!</span>
+            <span class="text-sm font-medium opacity-80">(Static electric current generated!)</span>
+        </div>
+
+        <!-- Fixed Size Area (600x500) so coordinate math is perfectly stable -->
+        <div class="relative w-[600px] h-[500px]" id="sim-area">
+            
+            <!-- Conductor Group (The Wire with Handle) -->
+            <!-- Wire width spans from center of E1 (X=145) to center of E2 (X=455). Distance = 310px. -->
+            <!-- We make it 340px to overhang slightly. -->
+            <!-- Exact Drop Math: Plate top is at Y = 130px. Wire bottom should be at Y = 130px. -->
+            <!-- Handle height: 30px. Copper wire height: 6px. Total group height: 36px. -->
+            <!-- So dropped top Y = 130 - 36 = 94px. Hover Y = 30px. -->
+            <div id="conductor-group" class="absolute left-[130px] w-[340px] flex flex-col items-center z-40" style="top: 0px; transform: translateY(20px);">
+                <!-- Insulated Handle -->
+                <div class="w-12 h-[30px] bg-slate-800 rounded-t-xl rounded-b-sm border-b-2 border-slate-900 relative z-20 flex justify-center shadow-lg">
+                    <!-- Handle grip detail -->
+                    <div class="w-6 h-4 border-2 border-slate-600 rounded-md mt-2"></div>
+                </div>
+                <!-- Metal Wire (Copper/Gold color) -->
+                <div class="w-full h-[6px] bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 rounded-full shadow-md z-10 border border-yellow-700 relative">
+                    <!-- Sub-pixel adjustment to eliminate any gap -->
+                    <div class="absolute top-0 left-0 w-full h-[2px] bg-yellow-200 opacity-50 rounded-full"></div>
+                </div>
+                <!-- Label attached to wire -->
+                <div class="absolute top-[-25px] right-[10px] text-xs font-bold text-slate-500 bg-white/90 px-2 py-1 rounded-md shadow-sm border border-slate-200">ខ្សែលួសចម្លង</div>
+            </div>
+
+            <!-- ================= ELECTROSCOPE 1 (LEFT) ================= -->
+            <!-- Top: 130px, Left: 55px. Width: 180px -->
+            <div class="absolute top-[130px] left-[55px] w-[180px] h-[330px] flex flex-col items-center z-10">
+                
+                <!-- Plate (Head) -->
+                <!-- Plate is right at top: 0. Height: 16px. -->
+                <div id="e1-plate" class="relative w-[80px] h-[16px] bg-slate-400 rounded-full z-20 shadow-md border-b-2 border-slate-500">
+                    <!-- Static Charges Container -->
+                    <div id="e1-plate-charges" class="absolute w-full h-full"></div>
+                </div>
+                
+                <!-- Metal Rod -->
+                <!-- Start right below plate -->
+                <div class="w-[6px] h-[160px] bg-gradient-to-r from-slate-300 to-slate-400 z-10 border-r border-slate-500 mt-[-2px]"></div>
+                
+                <!-- Leaves Pivot -->
+                <div class="relative w-full flex justify-center z-20 mt-[-4px]">
+                    <div id="e1-leaf-left" class="leaf absolute w-[6px] h-[65px] bg-gradient-to-r from-slate-200 to-slate-400 rounded-b-md shadow-sm border-r border-slate-400" style="transform: rotate(45deg);"></div>
+                    <div id="e1-leaf-right" class="leaf absolute w-[6px] h-[65px] bg-gradient-to-l from-slate-200 to-slate-400 rounded-b-md shadow-sm border-l border-slate-400" style="transform: rotate(-45deg);"></div>
+                    <!-- Leaf static charges container -->
+                    <div id="e1-leaf-charges" class="absolute w-[80px] h-[80px] top-0 pointer-events-none"></div>
+                </div>
+                
+                <!-- Glass Bottle -->
+                <div class="absolute bottom-[10px] w-[150px] h-[210px] glass-bottle z-0"></div>
+                
+                <!-- Rubber Stopper -->
+                <div class="absolute top-[135px] w-[34px] h-[18px] bg-slate-800 rounded-sm z-10"></div>
+                
+                <!-- Base -->
+                <div class="absolute bottom-0 w-[170px] h-[14px] bg-slate-700 rounded-sm z-10 shadow-lg"></div>
+                
+                <!-- Label -->
+                <div class="absolute bottom-[-28px] font-bold text-slate-700 text-[15px]">អេឡិចត្រទូស្កុបទី១</div>
+            </div>
+
+            <!-- ================= ELECTROSCOPE 2 (RIGHT) ================= -->
+            <!-- Top: 130px, Left: 365px. Width: 180px -->
+            <div class="absolute top-[130px] left-[365px] w-[180px] h-[330px] flex flex-col items-center z-10">
+                
+                <!-- Plate (Head) -->
+                <div id="e2-plate" class="relative w-[80px] h-[16px] bg-slate-400 rounded-full z-20 shadow-md border-b-2 border-slate-500">
+                    <div id="e2-plate-charges" class="absolute w-full h-full"></div>
+                </div>
+                
+                <!-- Metal Rod -->
+                <div class="w-[6px] h-[160px] bg-gradient-to-r from-slate-300 to-slate-400 z-10 border-r border-slate-500 mt-[-2px]"></div>
+                
+                <!-- Leaves Pivot -->
+                <div class="relative w-full flex justify-center z-20 mt-[-4px]">
+                    <div id="e2-leaf-left" class="leaf absolute w-[6px] h-[65px] bg-gradient-to-r from-slate-200 to-slate-400 rounded-b-md shadow-sm border-r border-slate-400" style="transform: rotate(0deg);"></div>
+                    <div id="e2-leaf-right" class="leaf absolute w-[6px] h-[65px] bg-gradient-to-l from-slate-200 to-slate-400 rounded-b-md shadow-sm border-l border-slate-400" style="transform: rotate(0deg);"></div>
+                    <div id="e2-leaf-charges" class="absolute w-[80px] h-[80px] top-0 pointer-events-none"></div>
+                </div>
+                
+                <!-- Glass Bottle -->
+                <div class="absolute bottom-[10px] w-[150px] h-[210px] glass-bottle z-0"></div>
+                
+                <!-- Rubber Stopper -->
+                <div class="absolute top-[135px] w-[34px] h-[18px] bg-slate-800 rounded-sm z-10"></div>
+                
+                <!-- Base -->
+                <div class="absolute bottom-0 w-[170px] h-[14px] bg-slate-700 rounded-sm z-10 shadow-lg"></div>
+                
+                <!-- Label -->
+                <div class="absolute bottom-[-28px] font-bold text-slate-700 text-[15px]">អេឡិចត្រទូស្កុបទី២</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const conductor = document.getElementById('conductor-group');
+        const e1PlateCharges = document.getElementById('e1-plate-charges');
+        const e2PlateCharges = document.getElementById('e2-plate-charges');
+        const e1LeafCharges = document.getElementById('e1-leaf-charges');
+        const e2LeafCharges = document.getElementById('e2-leaf-charges');
+        
+        const e1LeafL = document.getElementById('e1-leaf-left');
+        const e1LeafR = document.getElementById('e1-leaf-right');
+        const e2LeafL = document.getElementById('e2-leaf-left');
+        const e2LeafR = document.getElementById('e2-leaf-right');
+        
+        const simArea = document.getElementById('sim-area');
+        const infoAlert = document.getElementById('info-alert');
+        
+        let isAnimating = false;
+
+        // Position sets for static charges
+        const e1InitialPlate = [
+            {top: '-28px', left: '-5px'}, {top: '-32px', left: '20px'}, 
+            {top: '-32px', left: '45px'}, {top: '-28px', left: '70px'},
+            {top: '4px', left: '-20px'}, {top: '4px', left: '85px'}
+        ];
+        
+        const sharedPlateLeft = [
+            {top: '-28px', left: '5px'}, {top: '-32px', left: '35px'}, {top: '4px', left: '-15px'}
+        ];
+        const sharedPlateRight = [
+            {top: '-28px', left: '35px'}, {top: '-28px', left: '60px'}, {top: '4px', left: '85px'}
+        ];
+
+        // Helper to render static minus signs
+        function renderCharges(container, positions) {
+            container.innerHTML = '';
+            positions.forEach(pos => {
+                const span = document.createElement('span');
+                span.className = 'static-charge';
+                span.innerText = '-';
+                span.style.top = pos.top;
+                span.style.left = pos.left;
+                container.appendChild(span);
+            });
+        }
+
+        // Set visual charges for state 0
+        function setInitialCharges() {
+            renderCharges(e1PlateCharges, e1InitialPlate);
+            renderCharges(e2PlateCharges, []);
+            
+            e1LeafCharges.innerHTML = `
+                <span class="static-charge" style="top: 25px; left: -10px;">-</span>
+                <span class="static-charge" style="top: 45px; left: -25px;">-</span>
+                <span class="static-charge" style="top: 25px; left: 75px;">-</span>
+                <span class="static-charge" style="top: 45px; left: 90px;">-</span>
+            `;
+            e2LeafCharges.innerHTML = '';
+        }
+
+        // Set visual charges for state after transfer
+        function setFinalCharges() {
+            renderCharges(e1PlateCharges, sharedPlateLeft);
+            renderCharges(e2PlateCharges, sharedPlateRight);
+            
+            // Leaves are now balanced at ~22 degrees
+            e1LeafCharges.innerHTML = `
+                <span class="static-charge" style="top: 30px; left: 0px;">-</span>
+                <span class="static-charge" style="top: 30px; left: 65px;">-</span>
+            `;
+            e2LeafCharges.innerHTML = `
+                <span class="static-charge" style="top: 30px; left: 0px;">-</span>
+                <span class="static-charge" style="top: 30px; left: 65px;">-</span>
+            `;
+        }
+
+        // Function to animate a single electron moving left to right
+        function animateElectronFlow(delay) {
+            setTimeout(() => {
+                const electron = document.createElement('div');
+                electron.className = 'flying-electron';
+                electron.innerText = '-';
+                
+                // Absolute positions relative to simArea (600x500)
+                // Center of plate 1 is X = 55 (left) + 40 (half plate) = 95px
+                // Center of plate 2 is X = 365 (left) + 40 (half plate) = 405px
+                // Y height where wire sits is Y = 130px - 20px for visual centering = 110px
+                const startX = 95;
+                const endX = 405;
+                const yPos = 95; // Slightly above the copper wire visual
+
+                electron.style.transform = `translate(${startX}px, ${yPos}px)`;
+                simArea.appendChild(electron);
+
+                electron.animate([
+                    { transform: `translate(${startX}px, ${yPos}px) scale(1)` },
+                    { transform: `translate(${(startX+endX)/2}px, ${yPos-15}px) scale(1.3)` }, // slight arc
+                    { transform: `translate(${endX}px, ${yPos}px) scale(1)` }
+                ], {
+                    duration: 600,
+                    easing: 'ease-in-out',
+                    fill: 'forwards'
+                }).onfinish = () => {
+                    electron.remove();
+                };
+            }, delay);
+        }
+
+        // Main Controller Function
+        window.setStep = function(step) {
+            if (isAnimating) return;
+
+            // UI Button styling
+            document.querySelectorAll('.step-btn').forEach((btn, idx) => {
+                if(idx === step) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+
+            if (step === 0) {
+                // RESET TO INITIAL
+                infoAlert.classList.remove('show');
+                
+                // Wire moves UP (Hovering above)
+                // Top=0, so translateY(30px) is high up.
+                conductor.style.transform = 'translateY(20px)'; 
+                
+                // Leaves reset to extremes
+                e1LeafL.style.transform = 'rotate(45deg)';
+                e1LeafR.style.transform = 'rotate(-45deg)';
+                e2LeafL.style.transform = 'rotate(0deg)';
+                e2LeafR.style.transform = 'rotate(0deg)';
+                
+                setInitialCharges();
+            } 
+            else if (step === 1) {
+                // DROP WIRE & TRANSFER
+                isAnimating = true;
+                
+                // 1. Drop the wire exactly on the plates.
+                // Plates are at Y=130px. Wire group height is 36px.
+                // To rest perfectly, translateY = 130 - 36 = 94px.
+                conductor.style.transform = 'translateY(94px)'; 
+
+                // 2. Wait for drop animation (800ms) to finish before flowing
+                setTimeout(() => {
+                    
+                    // 3. Fire a stream of electrons
+                    for(let i = 0; i < 6; i++) {
+                        animateElectronFlow(i * 120);
+                    }
+
+                    // 4. Update the leaves and static charges during the flow
+                    setTimeout(() => {
+                        // Balance leaves (both open halfway)
+                        e1LeafL.style.transform = 'rotate(22deg)';
+                        e1LeafR.style.transform = 'rotate(-22deg)';
+                        
+                        e2LeafL.style.transform = 'rotate(22deg)';
+                        e2LeafR.style.transform = 'rotate(-22deg)';
+                        
+                        setFinalCharges();
+                        
+                        // Show Success Alert
+                        infoAlert.classList.add('show');
+                        
+                        isAnimating = false;
+                    }, 500); // Update visually in the middle of electron flow
+
+                }, 850); 
+            }
+        };
+
+        // Init visually
+        setStep(0);
+    </script>
+</body>
+</html>

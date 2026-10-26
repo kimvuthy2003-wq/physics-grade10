@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>កម្មវិធីក្លែងធ្វើ ត្រង់ស៊ីស្ទ័រជាកុងតាក់ (Transistor as a Switch)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        .canvas-container {
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-color: #ffffff;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        /* Custom Button Styles */
+        .btn-toggle {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-toggle:active {
+            transform: scale(0.95);
+        }
+        .switch-radio:checked + label {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 lg:p-8">
+
+    <div class="max-w-5xl w-full bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+        
+        <!-- Header & Controls -->
+        <div class="bg-slate-50 border-b border-slate-200 p-6 lg:p-8 flex flex-col md:flex-row justify-between items-center gap-6 z-10 relative shadow-sm">
+            
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 mb-2">ការប្រើប្រាស់ត្រង់ស៊ីស្ទ័រជាកុងតាក់</h1>
+                <p class="text-sm text-slate-500">ស្វែងយល់ពីភាពខុសគ្នារវាង NPN និង PNP</p>
+            </div>
+
+            <div class="flex flex-col gap-4">
+                <!-- Circuit Type Toggle -->
+                <div class="flex bg-slate-200 p-1 rounded-xl w-full max-w-sm mx-auto">
+                    <input type="radio" id="npn" name="type" value="NPN" class="switch-radio hidden" checked onchange="updateSimType('NPN')">
+                    <label for="npn" class="flex-1 text-center py-2 px-4 rounded-lg cursor-pointer font-bold text-slate-600 transition-all">ត្រង់ស៊ីស្ទ័រ NPN (2N3904)</label>
+                    
+                    <input type="radio" id="pnp" name="type" value="PNP" class="switch-radio hidden" onchange="updateSimType('PNP')">
+                    <label for="pnp" class="flex-1 text-center py-2 px-4 rounded-lg cursor-pointer font-bold text-slate-600 transition-all">ត្រង់ស៊ីស្ទ័រ PNP (2N3906)</label>
+                </div>
+
+                <!-- Switch Control -->
+                <button id="btnSwitch" onclick="toggleSwitch()" class="btn-toggle w-full py-3 px-6 rounded-xl font-bold text-lg text-white bg-slate-700 shadow-lg hover:bg-slate-800 flex justify-center items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                    </svg>
+                    <span id="btnSwitchText">បិទកុងតាក់ (Close Switch)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Canvas Area -->
+        <div class="canvas-container w-full relative flex justify-center border-b border-slate-200">
+            <canvas id="circuitCanvas" width="800" height="450"></canvas>
+        </div>
+
+        <!-- Educational Text Panel -->
+        <div class="p-6 lg:p-8 bg-blue-50/50">
+            <h3 class="text-sm font-bold text-blue-800 uppercase tracking-wider mb-3">ការវិភាគ (Analysis):</h3>
+            <div id="explanationText" class="text-lg text-slate-700 font-bold leading-relaxed border-l-4 border-blue-500 pl-4">
+                <!-- Text populated by JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const canvas = document.getElementById('circuitCanvas');
+        const ctx = canvas.getContext('2d');
+        const btnSwitch = document.getElementById('btnSwitch');
+        const btnSwitchText = document.getElementById('btnSwitchText');
+        const explanationText = document.getElementById('explanationText');
+
+        // State Variables
+        let transistorType = 'NPN';
+        let isClosed = false;
+        
+        let lastTime = performance.now();
+        let dashOffset = 0;
+
+        // Visual Constants
+        const COLOR_WIRE = '#334155';
+        const COLOR_CURRENT = '#f59e0b';
+        const COLOR_LED_ON = '#ef4444';
+        const COLOR_LED_OFF = '#f1f5f9';
+        const LINE_WIDTH = 3;
+
+        // Layout Coordinates
+        const BAT_X = 100, Y_TOP = 80, Y_MID = 250, Y_BOT = 420;
+        const T_X = 600, T_Y = 250;
+        
+        function updateSimType(type) {
+            transistorType = type;
+            isClosed = false; // Reset switch on type change
+            updateUI();
+        }
+
+        function toggleSwitch() {
+            isClosed = !isClosed;
+            updateUI();
+        }
+
+        function updateUI() {
+            // Button styles
+            if (isClosed) {
+                btnSwitch.classList.replace('bg-slate-700', 'bg-blue-600');
+                btnSwitch.classList.replace('hover:bg-slate-800', 'hover:bg-blue-700');
+                btnSwitchText.innerText = "បើកកុងតាក់ (Open Switch)";
+            } else {
+                btnSwitch.classList.replace('bg-blue-600', 'bg-slate-700');
+                btnSwitch.classList.replace('hover:bg-blue-700', 'hover:bg-slate-800');
+                btnSwitchText.innerText = "បិទកុងតាក់ (Close Switch)";
+            }
+
+            // Update Educational Text
+            if (!isClosed) {
+                explanationText.innerHTML = `បើកកុងតាក់ (SW) គ្មានចរន្តឆ្លងកាត់ជើង <span class="text-blue-600">B</span> របស់ត្រង់ស៊ីស្ទ័រទេ។ ត្រង់ស៊ីស្ទ័រមិនដំណើរការ (មាននាទីជាកុងតាក់បើក) ធ្វើឱ្យអំពូល LED រលត់។`;
+            } else {
+                if (transistorType === 'NPN') {
+                    explanationText.innerHTML = `បិទកុងតាក់ (SW) ចរន្តតូចមួយឆ្លងកាត់ R1 ចូលជើង <span class="text-blue-600">B</span> ធ្វើឱ្យត្រង់ស៊ីស្ទ័រ NPN ដំណើរការ (ជាកុងតាក់បិទ)។ ចរន្តធំពីជើង <span class="text-blue-600">C</span> ធ្លាយទៅជើង <span class="text-blue-600">E</span> ធ្វើឱ្យអំពូល LED ភ្លឺ។ <br><span class="text-red-500 bg-red-50 px-2 py-1 rounded mt-2 inline-block font-mono">(I<sub>E</sub> = I<sub>B</sub> + I<sub>C</sub>)</span>`;
+                } else {
+                    explanationText.innerHTML = `បិទកុងតាក់ (SW) ចរន្តតូចមួយចេញពីជើង <span class="text-blue-600">B</span> ឆ្លងកាត់ R1 ធ្វើឱ្យត្រង់ស៊ីស្ទ័រ PNP ដំណើរការ (ជាកុងតាក់បិទ)។ ចរន្តធំពីជើង <span class="text-blue-600">E</span> ធ្លាយទៅជើង <span class="text-blue-600">C</span> ធ្វើឱ្យអំពូល LED ភ្លឺ។ <br><span class="text-red-500 bg-red-50 px-2 py-1 rounded mt-2 inline-block font-mono">(I<sub>E</sub> = I<sub>B</sub> + I<sub>C</sub>)</span>`;
+                }
+            }
+        }
+
+        // --- Drawing Helpers ---
+
+        function drawWire(points, isAnimated = false) {
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            
+            if (isAnimated && isClosed) {
+                ctx.strokeStyle = COLOR_CURRENT;
+                ctx.lineWidth = 4;
+                ctx.setLineDash([8, 12]);
+                ctx.lineDashOffset = dashOffset;
+                ctx.lineCap = 'round';
+            } else {
+                ctx.strokeStyle = COLOR_WIRE;
+                ctx.lineWidth = LINE_WIDTH;
+                ctx.setLineDash([]);
+                ctx.lineCap = 'square';
+            }
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset
+        }
+
+        function drawBattery(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = COLOR_WIRE;
+            
+            // Top (+), Bottom (-)
+            ctx.beginPath();
+            ctx.moveTo(-30, -170); ctx.lineTo(30, -170);
+            ctx.moveTo(-15, -150); ctx.lineTo(15, -150);
+            ctx.moveTo(-30, -10);  ctx.lineTo(30, -10);
+            ctx.moveTo(-15, 10);   ctx.lineTo(15, 10);
+            ctx.moveTo(0, -170);   ctx.lineTo(0, -190); // To top wire
+            ctx.moveTo(0, 10);     ctx.lineTo(0, 150);  // To bottom wire
+            
+            // Dashed connection between cells
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(0, -140); ctx.lineTo(0, -20);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.font = "bold 16px Arial";
+            ctx.fillStyle = COLOR_WIRE;
+            ctx.fillText("+", 40, -165);
+            ctx.fillText("-", 40, 15);
+            ctx.fillText("9V", -40, -80);
+            ctx.fillText("E", 40, -80);
+            
+            ctx.restore();
+        }
+
+        function drawResistor(x, y, label, isVertical = false) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = COLOR_WIRE;
+            
+            if (isVertical) {
+                ctx.rotate(Math.PI / 2);
+            }
+            
+            ctx.beginPath();
+            ctx.moveTo(-30, 0); ctx.lineTo(-20, 0);
+            // Zig zag
+            ctx.lineTo(-15, -8); ctx.lineTo(-5, 8);
+            ctx.lineTo(5, -8);   ctx.lineTo(15, 8);
+            ctx.lineTo(20, 0);   ctx.lineTo(30, 0);
+            ctx.stroke();
+            
+            ctx.font = "bold 14px Arial";
+            ctx.fillStyle = COLOR_WIRE;
+            if (isVertical) {
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillText(label, 15, 5);
+            } else {
+                ctx.textAlign = "center";
+                ctx.fillText(label, 0, 20);
+            }
+            ctx.restore();
+        }
+
+        function drawLED(x, y, isVertical = false) {
+            ctx.save();
+            ctx.translate(x, y);
+            if (isVertical) {
+                ctx.rotate(Math.PI / 2);
+            }
+            
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = COLOR_WIRE;
+            
+            // Wires
+            ctx.beginPath();
+            ctx.moveTo(-30, 0); ctx.lineTo(-20, 0);
+            ctx.moveTo(20, 0);  ctx.lineTo(30, 0);
+            ctx.stroke();
+
+            // Glow Effect
+            if (isClosed) {
+                ctx.beginPath();
+                ctx.arc(0, 0, 25, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.2)';
+                ctx.fill();
+                ctx.shadowColor = COLOR_LED_ON;
+                ctx.shadowBlur = 15;
+            }
+
+            // Circle
+            ctx.beginPath();
+            ctx.arc(0, 0, 20, 0, Math.PI * 2);
+            ctx.fillStyle = isClosed ? COLOR_LED_ON : COLOR_LED_OFF;
+            ctx.fill();
+            ctx.stroke();
+            ctx.shadowBlur = 0; // Reset
+            
+            // Triangle & Bar
+            ctx.beginPath();
+            ctx.moveTo(-10, -10); ctx.lineTo(10, 0); ctx.lineTo(-10, 10); ctx.closePath();
+            ctx.fillStyle = isClosed ? '#fff' : COLOR_WIRE;
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(10, -10); ctx.lineTo(10, 10);
+            ctx.strokeStyle = isClosed ? '#fff' : COLOR_WIRE;
+            ctx.stroke();
+
+            // Emission Arrows
+            ctx.strokeStyle = COLOR_WIRE;
+            ctx.beginPath();
+            ctx.moveTo(5, -25); ctx.lineTo(15, -35);
+            ctx.moveTo(15, -35); ctx.lineTo(10, -35);
+            ctx.moveTo(15, -35); ctx.lineTo(15, -30);
+            
+            ctx.moveTo(15, -20); ctx.lineTo(25, -30);
+            ctx.moveTo(25, -30); ctx.lineTo(20, -30);
+            ctx.moveTo(25, -30); ctx.lineTo(25, -25);
+            ctx.stroke();
+
+            if (isVertical) {
+                ctx.rotate(-Math.PI / 2);
+                ctx.textAlign = "left";
+                ctx.fillStyle = COLOR_WIRE;
+                ctx.font = "bold 14px Arial";
+                ctx.fillText("LED", 30, 5);
+            }
+            
+            ctx.restore();
+        }
+
+        function drawSwitch(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.lineWidth = LINE_WIDTH;
+            ctx.strokeStyle = COLOR_WIRE;
+            
+            ctx.beginPath();
+            ctx.moveTo(-40, 0); ctx.lineTo(-20, 0);
+            ctx.moveTo(20, 0); ctx.lineTo(40, 0);
+            ctx.stroke();
+
+            // Terminals
+            ctx.beginPath();
+            ctx.arc(-20, 0, 3, 0, Math.PI * 2);
+            ctx.arc(20, 0, 3, 0, Math.PI * 2);
+            ctx.fillStyle = COLOR_WIRE;
+            ctx.fill();
+            
+            // Lever
+            ctx.beginPath();
+            ctx.moveTo(-20, 0);
+            if (isClosed) {
+                ctx.lineTo(20, 0);
+            } else {
+                ctx.lineTo(15, -15);
+            }
+            ctx.stroke();
+
+            ctx.font = "bold 14px Arial";
+            ctx.fillText("SW", -10, -20);
+            ctx.restore();
+        }
+
+        function drawTransistor(x, y, type) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.lineWidth = LINE_WIDTH;
+            ctx.strokeStyle = COLOR_WIRE;
+            
+            // Base Wire
+            ctx.beginPath();
+            ctx.moveTo(-40, 0); ctx.lineTo(-15, 0);
+            // Vertical Bar
+            ctx.moveTo(-15, -25); ctx.lineTo(-15, 25);
+            // Collector & Emitter angled lines
+            ctx.moveTo(-15, -15); ctx.lineTo(15, -40);
+            ctx.moveTo(-15, 15);  ctx.lineTo(15, 40);
+            // External wires
+            ctx.moveTo(15, -40); ctx.lineTo(15, -50);
+            ctx.moveTo(15, 40);  ctx.lineTo(15, 50);
+            ctx.stroke();
+
+            // Circle
+            ctx.beginPath();
+            ctx.arc(0, 0, 35, 0, Math.PI*2);
+            ctx.stroke();
+
+            // Arrow
+            ctx.beginPath();
+            ctx.fillStyle = COLOR_WIRE;
+            if (type === 'NPN') {
+                // Arrow on Emitter pointing OUT (Down-Right)
+                // Positioned 2/3 down the emitter line
+                ctx.translate(5, 31.66);
+                ctx.rotate(Math.atan2(25, 30));
+                ctx.moveTo(8, 0);
+                ctx.lineTo(-7, -6);
+                ctx.lineTo(-7, 6);
+                ctx.closePath();
+                ctx.fill();
+            } else {
+                // Arrow on Emitter pointing IN (Up-Left)
+                // In PNP layout, Emitter is on TOP. Positioned 1/3 from the base line.
+                ctx.translate(-5, -23.33);
+                ctx.rotate(Math.atan2(-25, 30));
+                ctx.moveTo(-8, 0);
+                ctx.lineTo(7, -6);
+                ctx.lineTo(7, 6);
+                ctx.closePath();
+                ctx.fill();
+            }
+            ctx.restore();
+
+            // Labels
+            ctx.font = "bold 14px Arial";
+            ctx.fillStyle = COLOR_WIRE;
+            ctx.fillText("B", x - 35, y - 10);
+            if (type === 'NPN') {
+                ctx.fillText("C", x + 25, y - 30);
+                ctx.fillText("E", x + 25, y + 40);
+                ctx.fillText("Q1: 2N3904", x + 40, y + 10);
+            } else {
+                ctx.fillText("E", x + 25, y - 30);
+                ctx.fillText("C", x + 25, y + 40);
+                ctx.fillText("Q1: 2N3906", x + 40, y + 10);
+            }
+        }
+
+        // --- Render Loop ---
+
+        function render(time) {
+            let dt = (time - lastTime) / 1000;
+            if (dt > 0.1) dt = 0.1;
+            lastTime = time;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Animate offset: moves backwards to make dashes travel forwards
+            dashOffset -= 50 * dt; 
+
+            // Common Nodes
+            const N_BAT_TOP = {x: BAT_X, y: Y_TOP};
+            const N_BAT_BOT = {x: BAT_X, y: Y_BOT};
+            const N_T_B = {x: T_X - 40, y: T_Y};
+            const N_T_TOP = {x: T_X + 15, y: T_Y - 50};
+            const N_T_BOT = {x: T_X + 15, y: T_Y + 50};
+
+            if (transistorType === 'NPN') {
+                // --- NPN Paths ---
+                const P_BAT_SPLIT = {x: 300, y: Y_TOP};
+                const P_MID_SPLIT = {x: 300, y: Y_MID};
+                
+                // Static Background Wires
+                drawWire([N_BAT_TOP, {x: T_X + 15, y: Y_TOP}]); // Top rail
+                drawWire([N_BAT_BOT, {x: T_X + 15, y: Y_BOT}]); // Bottom rail
+                drawWire([P_BAT_SPLIT, P_MID_SPLIT, N_T_B]); // Base branch
+                drawWire([{x: T_X + 15, y: Y_TOP}, N_T_TOP]); // Collector branch
+                drawWire([N_T_BOT, {x: T_X + 15, y: Y_BOT}]); // Emitter branch
+
+                // Animated Flow
+                if (isClosed) {
+                    drawWire([N_BAT_TOP, P_BAT_SPLIT, P_MID_SPLIT, N_T_B], true); // To Base
+                    drawWire([N_BAT_TOP, {x: T_X + 15, y: Y_TOP}, N_T_TOP], true); // To Collector
+                    drawWire([N_T_BOT, {x: T_X + 15, y: Y_BOT}, N_BAT_BOT], true); // From Emitter
+                }
+
+                // Components Over Wires
+                drawSwitch(350, Y_MID);
+                drawResistor(480, Y_MID, "R1 1k", false);
+                drawLED(T_X + 15, 130, true);
+                drawResistor(T_X + 15, 180, "R2 220", true);
+
+            } else {
+                // --- PNP Paths ---
+                const P_MID_SPLIT = {x: 300, y: Y_MID};
+                const P_BOT_SPLIT = {x: 300, y: Y_BOT};
+
+                // Static Background Wires
+                drawWire([N_BAT_TOP, {x: T_X + 15, y: Y_TOP}]); // Top rail
+                drawWire([N_BAT_BOT, {x: T_X + 15, y: Y_BOT}]); // Bottom rail
+                drawWire([N_T_B, P_MID_SPLIT, P_BOT_SPLIT]); // Base branch
+                drawWire([{x: T_X + 15, y: Y_TOP}, N_T_TOP]); // Emitter branch
+                drawWire([N_T_BOT, {x: T_X + 15, y: Y_BOT}]); // Collector branch
+
+                // Animated Flow (Conventional current from Positive to Negative)
+                if (isClosed) {
+                    drawWire([N_BAT_TOP, {x: T_X + 15, y: Y_TOP}, N_T_TOP], true); // To Emitter
+                    drawWire([N_T_B, P_MID_SPLIT, P_BOT_SPLIT, N_BAT_BOT], true); // From Base
+                    drawWire([N_T_BOT, {x: T_X + 15, y: Y_BOT}, N_BAT_BOT], true); // From Collector
+                }
+
+                // Components Over Wires
+                drawResistor(480, Y_MID, "R1 1k", false);
+                drawSwitch(350, Y_MID);
+                drawResistor(T_X + 15, 320, "R2 220", true);
+                drawLED(T_X + 15, 370, true);
+            }
+
+            // Draw Core Shared Components
+            drawBattery(BAT_X, Y_MID + 20); // Center battery vertically
+            drawTransistor(T_X, T_Y, transistorType);
+            
+            // Draw Dots for intersections
+            ctx.fillStyle = COLOR_WIRE;
+            if(transistorType === 'NPN') {
+                ctx.beginPath(); ctx.arc(300, Y_TOP, 4, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(T_X + 15, Y_BOT, 4, 0, Math.PI*2); ctx.fill();
+            } else {
+                ctx.beginPath(); ctx.arc(300, Y_BOT, 4, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(T_X + 15, Y_BOT, 4, 0, Math.PI*2); ctx.fill();
+            }
+
+            requestAnimationFrame(render);
+        }
+
+        // Init
+        updateUI();
+        requestAnimationFrame(render);
+
+    </script>
+</body>
+</html>

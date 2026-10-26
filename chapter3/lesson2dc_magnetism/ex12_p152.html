@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ12 គណនាបរិមាណអគ្គិសនី</title>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Load Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Custom CSS (ជំនួស Tailwind CSS ដែលមិនដំណើរការ) -->
+    <style>
+        :root {
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --sky-50: #f0f9ff;
+            --sky-100: #e0f2fe;
+            --sky-500: #0ea5e9;
+            --sky-600: #0284c7;
+            --sky-700: #0369a1;
+            --rose-500: #f43f5e;
+            --rose-600: #e11d48;
+            --emerald-600: #059669;
+            --blue-400: #60a5fa;
+            --cyan-400: #22d3ee;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+        }
+
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: var(--slate-50);
+            color: var(--slate-800);
+            margin: 0;
+            padding: 1rem;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .max-w-7xl { max-width: 80rem; margin: 0 auto; }
+        .space-y-6 > * + * { margin-top: 1.5rem; }
+        .bg-white { background-color: #ffffff; }
+        .rounded-2xl { border-radius: 1rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .border { border-width: 1px; border-style: solid; }
+        .border-slate-200 { border-color: var(--slate-200); }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .font-bold { font-weight: 700; }
+        .text-sky-700 { color: var(--sky-700); }
+        .mb-4 { margin-bottom: 1rem; }
+        .border-b { border-bottom-width: 1px; border-style: solid; }
+        .border-slate-100 { border-color: var(--slate-100); }
+        .pb-2 { padding-bottom: 0.5rem; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .gap-2 { gap: 0.5rem; }
+        .text-gray-800 { color: var(--gray-800); }
+        .leading-relaxed { line-height: 1.625; }
+        .text-\[1\.1rem\] { font-size: 1.1rem; }
+        .text-justify { text-align: justify; }
+        .font-medium { font-weight: 500; }
+        .text-rose-600 { color: var(--rose-600); }
+        .text-emerald-600 { color: var(--emerald-600); }
+        
+        .grid { display: grid; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .gap-6 { gap: 1.5rem; }
+        @media (min-width: 1024px) {
+            .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .lg\:col-span-2 { grid-column: span 2 / span 2; }
+        }
+
+        .flex-col { flex-direction: column; }
+        .justify-between { justify-content: space-between; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+        .text-xs { font-size: 0.75rem; line-height: 1rem; }
+        .bg-sky-100 { background-color: var(--sky-100); }
+        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .rounded { border-radius: 0.25rem; }
+
+        .absolute { position: absolute; }
+        .top-4 { top: 1rem; }
+        .left-4 { left: 1rem; }
+        .bg-white\/90 { background-color: rgba(255, 255, 255, 0.9); }
+        .backdrop-blur { backdrop-filter: blur(8px); }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .pointer-events-none { pointer-events: none; }
+        .z-10 { z-index: 10; }
+        ul { list-style: none; padding: 0; margin: 0; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .w-3 { width: 0.75rem; }
+        .h-3 { height: 0.75rem; }
+        .rounded-full { border-radius: 9999px; }
+        .bg-blue-400 { background-color: var(--blue-400); }
+        .w-4 { width: 1rem; }
+        .h-1\.5 { height: 0.375rem; }
+        .bg-rose-500 { background-color: var(--rose-500); }
+        .border-2 { border-width: 2px; border-style: solid; }
+        .border-cyan-400 { border-color: var(--cyan-400); }
+        .bg-cyan-400\/30 { background-color: rgba(34, 211, 238, 0.3); }
+
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .text-gray-700 { color: var(--gray-700); }
+        .mt-auto { margin-top: auto; }
+        .bg-sky-50 { background-color: var(--sky-50); }
+        .p-5 { padding: 1.25rem; }
+        .border-sky-100 { border-color: var(--sky-100); }
+        .text-center { text-align: center; }
+        .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
+        .text-gray-600 { color: var(--gray-600); }
+
+        .w-full { width: 100%; }
+        .bg-sky-500 { background-color: var(--sky-500); }
+        .hover\:bg-sky-600:hover { background-color: var(--sky-600); }
+        .text-white { color: #ffffff; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .transition-colors { transition-property: background-color, border-color, color, fill, stroke; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+        .justify-center { justify-content: center; }
+        .w-5 { width: 1.25rem; }
+        .h-5 { height: 1.25rem; }
+        .transition-transform { transition-property: transform; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms; }
+        .bg-slate-50 { background-color: var(--slate-50); }
+        .mt-4 { margin-top: 1rem; }
+        .mb-5 { margin-bottom: 1.25rem; }
+        .pl-8 { padding-left: 2rem; }
+        .text-gray-400 { color: var(--gray-400); }
+        .ml-4 { margin-left: 1rem; }
+        .bg-sky-50 { background-color: var(--sky-50); }
+        .border-sky-100 { border-color: var(--sky-100); }
+        .border-t { border-top-width: 1px; border-style: solid; }
+        .border-dashed { border-style: dashed; }
+        .border-gray-300 { border-color: #d1d5db; }
+        .pt-4 { padding-top: 1rem; }
+        .text-\[1\.2rem\] { font-size: 1.2rem; }
+        .border-gray-200 { border-color: #e5e7eb; }
+        .my-6 { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+        .pt-6 { padding-top: 1.5rem; }
+        .flex-wrap { flex-wrap: wrap; }
+        .gap-3 { gap: 0.75rem; }
+        .text-\[1\.3rem\] { font-size: 1.3rem; }
+        .mt-8 { margin-top: 2rem; }
+        .border-sky-200 { border-color: #bae6fd; }
+        .mr-2 { margin-right: 0.5rem; }
+        button { border: none; cursor: pointer; font-family: inherit; }
+        
+        /* Custom Math Font Styles */
+        .math-font {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.35rem; 
+            letter-spacing: 0.05em;
+            color: var(--slate-800);
+        }
+        .math-result {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 2rem; 
+            font-weight: bold;
+            color: var(--sky-600);
+        }
+        .math-sub {
+            font-size: 0.75em;
+            vertical-align: sub;
+        }
+        .math-sup {
+            font-size: 0.75em;
+            vertical-align: super;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: var(--slate-200);
+            outline: none;
+            margin-top: 10px;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--sky-600);
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(2, 132, 199, 0.5);
+        }
+        #canvas-container {
+            width: 100%;
+            height: 450px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background: linear-gradient(to bottom, var(--slate-800), var(--slate-900));
+            position: relative;
+            touch-action: none;
+            cursor: grab;
+            border: 1px solid var(--slate-700);
+        }
+        #canvas-container:active { cursor: grabbing; }
+        canvas { display: block; outline: none; }
+        
+        .solution-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.5s ease-in-out;
+        }
+        .solution-content.open {
+            max-height: 1500px;
+            opacity: 1;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="max-w-7xl space-y-6">
+        
+        <!-- ========================================== -->
+        <!-- ប្រធានលំហាត់ -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 shadow-md border border-slate-200">
+            <h2 class="text-xl font-bold text-sky-700 mb-4 border-b border-slate-100 pb-2 flex items-center gap-2">
+                <svg class="w-6 h-6" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                លំហាត់លេខ12៖ គណនាបរិមាណអគ្គិសនី
+            </h2>
+            <p class="text-gray-800 leading-relaxed text-[1.1rem] text-justify font-medium">
+                អង្គធាតុចម្លងមួយឆ្លងកាត់ដោយចរន្ត <span class="math-font text-rose-600 font-bold" id="prob_i">I = 5.9 A</span> ។ គណនាបរិមាណអគ្គិសនីដែលឆ្លងកាត់មុខកាត់នៃអង្គធាតុចម្លងក្នុងរយៈពេល <span class="math-font text-emerald-600 font-bold" id="prob_t">t = 12.2 s</span> ។
+            </p>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 2. SIMULATOR (3D CANVAS & CONTROLS) -->
+        <!-- ========================================== -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- 3D Canvas Animation -->
+            <div class="lg:col-span-2 bg-white rounded-2xl p-4 shadow-md border border-slate-200 flex flex-col">
+                <div class="flex justify-between items-center mb-3 px-2">
+                    <h3 class="font-bold text-gray-800 text-lg">បន្ទុកអគ្គិសនីឆ្លងកាត់ខ្សែចម្លង</h3>
+                    <span class="text-xs bg-sky-100 text-sky-700 px-2 py-1 rounded font-bold">ម្រាមដៃអូសបង្វិល 360°</span>
+                </div>
+                <div id="canvas-container" class="shadow-inner">
+                    <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-2 rounded shadow text-sm text-gray-800 pointer-events-none z-10 border border-slate-200">
+                        <ul class="space-y-2">
+                            <li class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-blue-400" style="box-shadow: 0 0 8px #60a5fa;"></span> 
+                                <strong>បន្ទុកអគ្គិសនី (q)</strong> រត់ទៅស្តាំ
+                            </li>
+                            <li class="flex items-center gap-2"><span class="w-4 h-1.5 bg-rose-500"></span> <strong>ទិសដៅចរន្ត (I)</strong> រត់ទៅស្តាំ</li>
+                            <li class="flex items-center gap-2"><span class="w-3 h-3 rounded-full border-2 border-cyan-400 bg-cyan-400/30"></span> <strong>ផ្ទៃមុខកាត់ S</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls & Results -->
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-slate-200 flex flex-col gap-5">
+                <h3 class="text-lg font-bold text-sky-700 border-b border-slate-100 pb-2">ការកំណត់តម្លៃ</h3>
+                
+                <div class="space-y-6">
+                    <!-- ចរន្ត I -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700">ចរន្ត I (A)</label>
+                            <span id="iDisp" class="math-font text-rose-600 font-bold">5.9 A</span>
+                        </div>
+                        <input type="range" id="iSlider" min="1.0" max="15.0" value="5.9" step="0.1" class="slider">
+                    </div>
+
+                    <!-- រយៈពេល t -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700">រយៈពេល t (s)</label>
+                            <span id="tDisp" class="math-font text-emerald-600 font-bold">12.2 s</span>
+                        </div>
+                        <input type="range" id="tSlider" min="1.0" max="30.0" value="12.2" step="0.1" class="slider">
+                    </div>
+                </div>
+
+                <!-- លទ្ធផលជាក់ស្តែង -->
+                <div class="mt-auto bg-sky-50 p-5 rounded-xl border border-sky-100 text-center shadow-inner mt-4">
+                    <div class="text-sm font-bold text-gray-600 mb-2">បរិមាណអគ្គិសនី (q)</div>
+                    <div id="qResultDisplay" class="math-result">71.98 C</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 3. ដំណោះស្រាយ (SOLUTION TOGGLE) -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 shadow-md border border-slate-200">
+            <button id="toggleBtn" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-xl shadow transition-colors flex justify-center items-center gap-2">
+                <svg id="toggleIcon" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                <span id="btnText" class="text-lg">បង្ហាញដំណោះស្រាយលម្អិត</span>
+            </button>
+
+            <div id="solutionBox" class="solution-content bg-slate-50 border border-slate-200 rounded-xl p-6 mt-4">
+                <h3 class="font-bold text-sky-700 border-b border-slate-200 pb-2 mb-5 text-xl">ដំណោះស្រាយ</h3>
+                
+                <p class="font-bold text-gray-800 mb-4 text-lg">គណនាបរិមាណអគ្គិសនីដែលឆ្លងកាត់មុខកាត់នៃអង្គធាតុចម្លង (q)</p>
+                
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <p class="text-gray-700 text-lg mb-2">តាមរូបមន្តបរិមាណបន្ទុកអគ្គិសនី៖</p>
+                    <ul class="pl-8 space-y-3 mb-5 math-font">
+                        <li><span class="font-bold text-sky-700">q = I &times; t</span></li>
+                    </ul>
+
+                    <p class="text-lg font-bold text-gray-800 mt-6 border-t border-dashed border-gray-300 pt-4 mb-2">ដោយ៖</p>
+                    <ul class="pl-8 space-y-3 math-font text-[1.2rem]">
+                        <li><span class="text-rose-600 font-bold">I = <span id="sol_i">5.9</span> A</span></li>
+                        <li><span class="text-emerald-600 font-bold">t = <span id="sol_t">12.2</span> s</span></li>
+                    </ul>
+                    
+                    <div class="border-t border-gray-200 my-6 pt-6 flex flex-wrap items-center gap-3 math-font text-[1.3rem]">
+                        <span>គេបាន q = </span>
+                        <span class="font-bold" id="sol_calc">5.9 &times; 12.2</span>
+                    </div>
+                    
+                    <div class="mt-8 bg-sky-50 p-4 rounded-xl border border-sky-200 text-center">
+                        <span class="text-xl font-bold text-gray-800 mr-2">ដូចនេះ</span>
+                        <span class="math-result">q = <span id="sol_q_final">71.98</span> C</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- THREE.JS 3D APPLICATION CODE -->
+    <script>
+        // --- 1. Three.js Initialization ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        // Dark background for better glow contrast
+        scene.background = new THREE.Color(0x0f172a); 
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 8, 25); // Look from side-top
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        dirLight.position.set(10, 20, 15);
+        scene.add(dirLight);
+
+        // --- 2. Create 3D Objects ---
+        
+        // 2.1 The Wire (Transparent glass-like cylinder)
+        const wireLength = 30;
+        const wireRadius = 3;
+        const wireGeo = new THREE.CylinderGeometry(wireRadius, wireRadius, wireLength, 32);
+        // Make it horizontal along X-axis
+        wireGeo.rotateZ(Math.PI / 2); 
+        
+        const wireMat = new THREE.MeshPhysicalMaterial({ 
+            color: 0x94a3b8, // Slate color
+            transmission: 0.8, // Glass effect
+            opacity: 0.4,
+            transparent: true,
+            roughness: 0.2,
+            metalness: 0.1,
+            side: THREE.DoubleSide
+        });
+        const wire = new THREE.Mesh(wireGeo, wireMat);
+        scene.add(wire);
+
+        // 2.2 Cross Section Surface (S)
+        const crossGeo = new THREE.CylinderGeometry(wireRadius - 0.05, wireRadius - 0.05, 0.2, 32);
+        crossGeo.rotateZ(Math.PI / 2);
+        const crossMat = new THREE.MeshBasicMaterial({ 
+            color: 0x22d3ee, // Cyan
+            transparent: true, 
+            opacity: 0.4,
+            side: THREE.DoubleSide
+        });
+        const crossSection = new THREE.Mesh(crossGeo, crossMat);
+        scene.add(crossSection);
+        
+        // Cross Section Highlight Ring
+        const ringGeo = new THREE.TorusGeometry(wireRadius, 0.08, 16, 32);
+        ringGeo.rotateY(Math.PI / 2);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        scene.add(ring);
+
+        // 2.3 Current Arrow (I) pointing Right (+X)
+        const arrowGroup = new THREE.Group();
+        const arrowMat = new THREE.MeshPhongMaterial({ color: 0xf43f5e }); // Rose 500
+        
+        const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 5, 16), arrowMat);
+        shaft.rotation.z = -Math.PI / 2;
+        const head = new THREE.Mesh(new THREE.ConeGeometry(0.8, 2, 16), arrowMat);
+        head.rotation.z = -Math.PI / 2;
+        head.position.x = 3.5;
+        
+        arrowGroup.add(shaft);
+        arrowGroup.add(head);
+        arrowGroup.position.set(0, wireRadius + 2.5, 0); // Above wire
+        scene.add(arrowGroup);
+
+        // Current Label "I" (Sprite)
+        const canvasLabel = document.createElement('canvas');
+        canvasLabel.width = 128; canvasLabel.height = 128;
+        const ctxLabel = canvasLabel.getContext('2d');
+        ctxLabel.fillStyle = '#f43f5e';
+        ctxLabel.font = 'bold 80px "Times New Roman"';
+        ctxLabel.textAlign = 'center';
+        ctxLabel.textBaseline = 'middle';
+        ctxLabel.fillText('I', 64, 64);
+        const texLabel = new THREE.CanvasTexture(canvasLabel);
+        const spriteLabel = new THREE.Sprite(new THREE.SpriteMaterial({ map: texLabel }));
+        spriteLabel.scale.set(4, 4, 1);
+        spriteLabel.position.set(5, wireRadius + 2.5, 0);
+        scene.add(spriteLabel);
+
+        // Cross Section Label "S"
+        const sLabelCanvas = document.createElement('canvas');
+        sLabelCanvas.width = 128; sLabelCanvas.height = 128;
+        const sCtx = sLabelCanvas.getContext('2d');
+        sCtx.fillStyle = '#22d3ee';
+        sCtx.font = 'bold 70px "Times New Roman"';
+        sCtx.textAlign = 'center';
+        sCtx.textBaseline = 'middle';
+        sCtx.fillText('S', 64, 64);
+        const sTex = new THREE.CanvasTexture(sLabelCanvas);
+        const sSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: sTex }));
+        sSprite.scale.set(4, 4, 1);
+        sSprite.position.set(0, -wireRadius - 2, 0);
+        scene.add(sSprite);
+
+        // 2.4 Charges (q) Moving Right (+X)
+        const charges = [];
+        const numCharges = 60;
+        const chargeMat = new THREE.MeshBasicMaterial({ color: 0x60a5fa }); // Blue 400
+        const chargeGeo = new THREE.SphereGeometry(0.3, 16, 16);
+        
+        for (let i = 0; i < numCharges; i++) {
+            const charge = new THREE.Mesh(chargeGeo, chargeMat);
+            
+            // Random position inside the cylinder
+            // using polar coordinates for cross section
+            const r = Math.sqrt(Math.random()) * (wireRadius - 0.4);
+            const theta = Math.random() * 2 * Math.PI;
+            
+            charge.position.x = (Math.random() - 0.5) * wireLength;
+            charge.position.y = r * Math.cos(theta);
+            charge.position.z = r * Math.sin(theta);
+            
+            // Random speed multiplier
+            charge.userData.speedOffset = 0.8 + Math.random() * 0.4;
+            
+            scene.add(charge);
+            charges.push(charge);
+        }
+
+        // Add a PointLight to simulate charge glow
+        const glowLight = new THREE.PointLight(0x60a5fa, 1, 20);
+        scene.add(glowLight);
+
+        // --- 4. Logic & UI Update ---
+        const iSlider = document.getElementById('iSlider');
+        const tSlider = document.getElementById('tSlider');
+        let flowSpeed = 0.1;
+
+        function updateSimulation() {
+            const I = parseFloat(iSlider.value);
+            const t = parseFloat(tSlider.value);
+
+            // Calculate q
+            const q = (I * t).toFixed(2);
+
+            // Update UI Displays
+            document.getElementById('iDisp').innerHTML = `${I.toFixed(1)} A`;
+            document.getElementById('tDisp').innerHTML = `${t.toFixed(1)} s`;
+            
+            // Update Problem Statement
+            document.getElementById('prob_i').innerHTML = `I = ${I.toFixed(1)} A`;
+            document.getElementById('prob_t').innerHTML = `t = ${t.toFixed(1)} s`;
+            
+            // Update Result
+            document.getElementById('qResultDisplay').innerHTML = `${q} C`;
+
+            // Update Solution Box
+            document.getElementById('sol_i').textContent = I.toFixed(1);
+            document.getElementById('sol_t').textContent = t.toFixed(1);
+            
+            document.getElementById('sol_calc').innerHTML = `${I.toFixed(1)} &times; ${t.toFixed(1)}`;
+            document.getElementById('sol_q_final').innerHTML = q;
+
+            // Update Animation Speed (Charges move with Current)
+            flowSpeed = (I / 15) * 0.4; // Map slider (1-15) to appropriate 3D speed
+        }
+
+        // --- 5. Event Listeners ---
+        iSlider.addEventListener('input', updateSimulation);
+        tSlider.addEventListener('input', updateSimulation);
+
+        const toggleBtn = document.getElementById('toggleBtn');
+        const solutionBox = document.getElementById('solutionBox');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const btnText = document.getElementById('btnText');
+        let isOpen = false;
+
+        toggleBtn.addEventListener('click', () => {
+            isOpen = !isOpen;
+            if (isOpen) {
+                solutionBox.classList.add('open');
+                btnText.textContent = "លាក់ដំណោះស្រាយ";
+                toggleIcon.style.transform = "rotate(180deg)";
+            } else {
+                solutionBox.classList.remove('open');
+                btnText.textContent = "បង្ហាញដំណោះស្រាយលម្អិត";
+                toggleIcon.style.transform = "rotate(0deg)";
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // --- 6. Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // Move charges to the RIGHT (+X)
+            charges.forEach(c => {
+                c.position.x += flowSpeed * c.userData.speedOffset;
+                // Loop back to left side
+                if (c.position.x > wireLength/2) {
+                    c.position.x = -wireLength/2;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        // Initialize
+        updateSimulation();
+        animate();
+    </script>
+</body>
+</html>
+```<ElicitationsGroup></ElicitationsGroup>

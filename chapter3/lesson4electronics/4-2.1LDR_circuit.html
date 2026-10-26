@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDR Circuit Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* SVG Circuit Styling */
+        .wire {
+            fill: none;
+            stroke: #334155;
+            stroke-width: 4;
+            stroke-linejoin: round;
+        }
+        
+        .symbol-path {
+            fill: none;
+            stroke: #1e293b;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* LED Effects */
+        .led-glow {
+            fill: #ef4444;
+            filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8)) drop-shadow(0 0 30px rgba(239, 68, 68, 0.5));
+            transition: opacity 0.3s ease, fill 0.3s ease;
+        }
+
+        /* Current Flow Animation */
+        .current-flow {
+            fill: none;
+            stroke: #eab308; /* Yellow */
+            stroke-width: 4;
+            stroke-dasharray: 10 15;
+            stroke-linecap: round;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        @keyframes flow {
+            from { stroke-dashoffset: 50; }
+            to { stroke-dashoffset: 0; }
+        }
+
+        .flow-active {
+            opacity: 1;
+            /* Animation duration is set dynamically by JS */
+            animation: flow linear infinite;
+        }
+
+        /* Switch Animation */
+        .switch-arm {
+            transform-origin: 200px 100px;
+            transition: transform 0.2s ease;
+        }
+        .switch-open { transform: rotate(-30deg); }
+        .switch-closed { transform: rotate(0deg); }
+
+        /* Sun Rotation */
+        @keyframes spinSlow {
+            100% { transform: rotate(360deg); }
+        }
+        .sun-rays {
+            transform-origin: center;
+            animation: spinSlow 10s linear infinite;
+        }
+
+        /* Custom UI Elements */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10b981;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10b981;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #f59e0b;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            border: 2px solid white;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+        input[type=range]:focus::-webkit-slider-runnable-track {
+            background: #cbd5e1;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-3xl shadow-xl max-w-6xl w-full overflow-hidden border border-slate-200 flex flex-col lg:flex-row">
+        
+        <!-- Left: Circuit Schematic Area -->
+        <div class="p-6 lg:p-8 flex-[3] bg-slate-50 border-b lg:border-b-0 lg:border-r border-slate-200 flex flex-col items-center justify-center relative">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center w-full">សៀគ្វីអគ្គិសនី LDR & LED</h2>
+            
+            <div class="w-full relative flex justify-center items-center" style="min-height: 400px;">
+                <svg viewBox="0 0 800 600" class="w-full h-full max-h-[500px] drop-shadow-sm">
+                    <defs>
+                        <!-- LED Glow Filter -->
+                        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="5" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                        </filter>
+                    </defs>
+
+                    <!-- WIRES -->
+                    <!-- Top Wire -->
+                    <path d="M 100,250 L 100,100 L 200,100" class="wire" />
+                    <path d="M 300,100 L 600,100 L 600,250" class="wire" />
+                    <!-- Bottom Wire -->
+                    <path d="M 600,350 L 600,500 L 450,500" class="wire" />
+                    <path d="M 350,500 L 100,500 L 100,350" class="wire" />
+
+                    <!-- COMPONENTS -->
+                    
+                    <!-- 1. Battery (9V) -->
+                    <g transform="translate(100, 300)">
+                        <!-- Long line (+) -->
+                        <line x1="-30" y1="-50" x2="30" y2="-50" class="symbol-path" stroke-width="4"/>
+                        <!-- Short line (-) -->
+                        <line x1="-15" y1="-25" x2="15" y2="-25" class="symbol-path" stroke-width="6"/>
+                        
+                        <line x1="-30" y1="0" x2="30" y2="0" class="symbol-path" stroke-width="4"/>
+                        <line x1="-15" y1="25" x2="15" y2="25" class="symbol-path" stroke-width="6"/>
+                        <line x1="-30" y1="50" x2="30" y2="50" class="symbol-path" stroke-width="4"/>
+                        
+                        <text x="-45" y="-40" class="text-xl font-bold font-sans" fill="#ef4444">+</text>
+                        <text x="-45" y="55" class="text-xl font-bold font-sans" fill="#1e293b">-</text>
+                        <text x="-65" y="10" class="text-lg font-bold font-sans" fill="#1e293b">9V</text>
+                    </g>
+
+                    <!-- 2. Switch -->
+                    <g transform="translate(0, 0)">
+                        <circle cx="200" cy="100" r="6" fill="#1e293b"/>
+                        <circle cx="300" cy="100" r="6" fill="#1e293b"/>
+                        <!-- Switch Arm -->
+                        <line id="switch-arm" x1="200" y1="100" x2="295" y2="100" class="symbol-path switch-arm switch-open" stroke-width="5"/>
+                        <text x="250" y="70" class="text-sm font-bold text-slate-600" text-anchor="middle">កុងតាក់</text>
+                    </g>
+
+                    <!-- 3. LDR (Light Dependent Resistor) -->
+                    <g transform="translate(600, 300)">
+                        <!-- Outer Circle -->
+                        <circle cx="0" cy="0" r="50" class="symbol-path" fill="white"/>
+                        <!-- Resistor Zigzag -->
+                        <path d="M 0,-50 L 0,-30 L -15,-20 L 15,0 L -15,20 L 15,40 L 0,50" class="symbol-path"/>
+                        
+                        <!-- Incoming Light Arrows -->
+                        <g transform="translate(-80, -60)">
+                            <line x1="0" y1="0" x2="30" y2="30" class="symbol-path" stroke="#f59e0b"/>
+                            <polygon points="30,30 20,28 28,20" fill="#f59e0b"/>
+                            
+                            <line x1="-15" y1="15" x2="15" y2="45" class="symbol-path" stroke="#f59e0b"/>
+                            <polygon points="15,45 5,43 13,35" fill="#f59e0b"/>
+                        </g>
+                        <text x="65" y="5" class="text-lg font-bold font-sans" fill="#1e293b">LDR</text>
+                    </g>
+
+                    <!-- 4. Sun (Light Source) -->
+                    <g id="sun-graphic" transform="translate(730, 180)" style="opacity: 0.2; transform: scale(0.5);">
+                        <circle cx="0" cy="0" r="25" fill="#fbbf24"/>
+                        <g class="sun-rays" transform-origin="0 0">
+                            <line x1="0" y1="-35" x2="0" y2="-50" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>
+                            <line x1="0" y1="35" x2="0" y2="50" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>
+                            <line x1="-35" y1="0" x2="-50" y2="0" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>
+                            <line x1="35" y1="0" x2="50" y2="0" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>
+                            
+                            <line x1="-25" y1="-25" x2="-35" y2="-35" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>
+                            <line x1="25" y1="25" x2="35" y2="35" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>
+                            <line x1="-25" y1="25" x2="-35" y2="35" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>
+                            <line x1="25" y1="-25" x2="35" y2="-35" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>
+                        </g>
+                    </g>
+
+                    <!-- 5. LED -->
+                    <g transform="translate(400, 500)">
+                        <!-- Circle -->
+                        <circle cx="0" cy="0" r="45" class="symbol-path" fill="white"/>
+                        
+                        <!-- LED Active Glow Area -->
+                        <circle id="led-bulb" cx="0" cy="0" r="40" class="led-glow" fill="transparent" opacity="0"/>
+                        
+                        <!-- Triangle -->
+                        <polygon points="15,-20 -15,0 15,20" class="symbol-path" fill="none"/>
+                        <!-- Line -->
+                        <line x1="-15" y1="-20" x2="-15" y2="20" class="symbol-path"/>
+                        
+                        <!-- Wire pass-through inside circle -->
+                        <line x1="45" y1="0" x2="15" y2="0" class="symbol-path"/>
+                        <line x1="-15" y1="0" x2="-45" y2="0" class="symbol-path"/>
+
+                        <!-- Outward Arrows (Light emitting) -->
+                        <g transform="translate(-20, -55)">
+                            <line x1="0" y1="0" x2="-20" y2="-20" class="symbol-path" stroke="#ef4444"/>
+                            <polygon points="-20,-20 -10,-18 -18,-10" fill="#ef4444"/>
+                            
+                            <line x1="-15" y1="10" x2="-35" y2="-10" class="symbol-path" stroke="#ef4444"/>
+                            <polygon points="-35,-10 -25,-8 -33,-2" fill="#ef4444"/>
+                        </g>
+                        <text x="0" y="70" class="text-lg font-bold font-sans" text-anchor="middle" fill="#ef4444">LED</text>
+                    </g>
+
+                    <!-- CURRENT FLOW ANIMATION PATH -->
+                    <!-- Path traces the exact route of wires to animate moving dots -->
+                    <path id="current-path" class="current-flow" d="
+                        M 100,250 
+                        L 100,100 
+                        L 200,100 
+                        L 300,100 
+                        L 600,100 
+                        L 600,250
+                        M 600,350
+                        L 600,500
+                        L 450,500
+                        M 350,500
+                        L 100,500
+                        L 100,350
+                    "/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Right: Controls & Observation Area -->
+        <div class="p-6 lg:p-8 flex-[2] flex flex-col justify-center bg-white">
+            
+            <div class="bg-amber-50 border border-amber-200 text-amber-900 p-5 rounded-2xl mb-6 shadow-sm">
+                <h3 class="font-bold text-lg mb-1 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    ដំណើរការរេស៊ីស្តង់អាស្រ័យនឹងពន្លឺ
+                </h3>
+                <p class="text-sm">ស្វែងយល់ពីទំនាក់ទំនងរវាងកម្រិតពន្លឺ រេស៊ីស្តង់ LDR និងចរន្តអគ្គិសនីក្នុងសៀគ្វី។</p>
+            </div>
+
+            <!-- Power Switch -->
+            <div class="flex items-center justify-between bg-slate-50 border border-slate-200 p-5 rounded-2xl mb-6" id="panel-power">
+                <div>
+                    <div class="font-bold text-slate-800 text-lg">ប្រភពអគ្គិសនី (Power)</div>
+                    <div class="text-sm font-bold text-slate-500 mt-1" id="power-status-text">បិទ (OFF)</div>
+                </div>
+                
+                <div class="relative inline-block w-14 align-middle select-none">
+                    <input type="checkbox" id="power-toggle" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-all duration-300" style="top: -2px; border-color: #cbd5e1;"/>
+                    <label for="power-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300"></label>
+                </div>
+            </div>
+
+            <!-- Light Intensity Slider -->
+            <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl mb-6">
+                <label for="light-slider" class="flex justify-between items-center text-slate-800 font-bold mb-4 text-lg">
+                    <span>កម្រិតពន្លឺប៉ះ LDR</span>
+                    <span id="light-val-text" class="text-amber-600 bg-amber-100 px-3 py-1 rounded-full text-sm">0%</span>
+                </label>
+                
+                <input type="range" id="light-slider" min="0" max="100" value="0" class="w-full">
+                
+                <div class="flex justify-between text-xs text-slate-500 mt-3 font-bold px-1">
+                    <span>ងងឹត (0%)</span>
+                    <span>ពន្លឺខ្លាំង (100%)</span>
+                </div>
+            </div>
+
+            <!-- Observation Results -->
+            <div class="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex-grow">
+                <h4 class="text-blue-800 font-bold mb-3 uppercase tracking-wider text-sm">ការសង្កេត និងលទ្ធផល៖</h4>
+                <div id="observation-text" class="text-lg text-slate-700 font-bold leading-relaxed transition-all duration-300">
+                    សៀគ្វីចំហរ (កុងតាក់បិទ)
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const toggle = document.getElementById('power-toggle');
+        const slider = document.getElementById('light-slider');
+        const lightValText = document.getElementById('light-val-text');
+        const powerStatusText = document.getElementById('power-status-text');
+        const obsText = document.getElementById('observation-text');
+        
+        // SVG Elements
+        const switchArm = document.getElementById('switch-arm');
+        const ledBulb = document.getElementById('led-bulb');
+        const currentPath = document.getElementById('current-path');
+        const sunGraphic = document.getElementById('sun-graphic');
+
+        let isPowerOn = false;
+
+        function updateSimulation() {
+            let lightIntensity = parseInt(slider.value);
+            lightValText.innerText = lightIntensity + '%';
+
+            // Update Sun visual scaling and opacity based on slider
+            // Map 0-100 to scale 0.5-1.5 and opacity 0.2-1.0
+            let sunScale = 0.5 + (lightIntensity / 100);
+            let sunOpacity = 0.1 + (lightIntensity / 100) * 0.9;
+            sunGraphic.style.transform = `scale(${sunScale})`;
+            sunGraphic.style.opacity = sunOpacity;
+
+            if (!isPowerOn) {
+                // OFF State
+                switchArm.classList.remove('switch-closed');
+                switchArm.classList.add('switch-open');
+                
+                ledBulb.style.opacity = 0;
+                currentPath.classList.remove('flow-active');
+                
+                obsText.innerText = "សៀគ្វីចំហរ (កុងតាក់បិទ)";
+                obsText.className = "text-lg text-slate-500 font-bold leading-relaxed";
+                return;
+            }
+
+            // ON State
+            switchArm.classList.remove('switch-open');
+            switchArm.classList.add('switch-closed');
+
+            if (lightIntensity === 0) {
+                // Dark
+                ledBulb.style.opacity = 0;
+                currentPath.classList.remove('flow-active'); // No current
+                
+                obsText.innerText = "ងងឹត: មុខ LDR មិនត្រូវពន្លឺ អំពូល LED មិនភ្លឺ (រេស៊ីស្តង់ធំ)";
+                obsText.className = "text-lg text-slate-700 font-bold leading-relaxed";
+
+            } else if (lightIntensity > 0 && lightIntensity <= 50) {
+                // Dim Light
+                let brightness = 0.2 + (lightIntensity / 50) * 0.3; // 0.2 to 0.5
+                ledBulb.style.opacity = brightness;
+                
+                currentPath.classList.add('flow-active');
+                // Slower animation speed (3s to 1.5s)
+                let animSpeed = 3 - (lightIntensity / 50) * 1.5; 
+                currentPath.style.animationDuration = `${animSpeed}s`;
+
+                obsText.innerText = "ពន្លឺខ្សោយ: មុខ LDR ត្រូវពន្លឺខ្សោយ អំពូល LED ភ្លឺខ្សោយ (រេស៊ីស្តង់ថយចុះ)";
+                obsText.className = "text-lg text-blue-700 font-bold leading-relaxed";
+
+            } else {
+                // Bright Light (51-100)
+                let brightness = 0.6 + ((lightIntensity - 50) / 50) * 0.4; // 0.6 to 1.0
+                ledBulb.style.opacity = brightness;
+                
+                currentPath.classList.add('flow-active');
+                // Faster animation speed (1.4s to 0.4s)
+                let animSpeed = 1.4 - ((lightIntensity - 50) / 50) * 1.0;
+                currentPath.style.animationDuration = `${animSpeed}s`;
+
+                obsText.innerText = "ពន្លឺខ្លាំង: មុខ LDR ត្រូវពន្លឺខ្លាំង អំពូល LED ភ្លឺខ្លាំង (រេស៊ីស្តង់តូច)";
+                obsText.className = "text-lg text-red-600 font-bold leading-relaxed";
+            }
+        }
+
+        // Event Listeners
+        toggle.addEventListener('change', (e) => {
+            isPowerOn = e.target.checked;
+            powerStatusText.innerText = isPowerOn ? 'បើក (ON)' : 'បិទ (OFF)';
+            powerStatusText.className = isPowerOn ? 'text-sm font-bold text-emerald-600 mt-1' : 'text-sm font-bold text-slate-500 mt-1';
+            updateSimulation();
+        });
+
+        slider.addEventListener('input', updateSimulation);
+
+        // Initial render
+        updateSimulation();
+    </script>
+</body>
+</html>

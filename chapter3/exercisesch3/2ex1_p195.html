@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់៖ តង់ស្យុងរវាងចំណុច A, B, C</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Battambang:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #2563eb;
+            color: white;
+            padding: 16px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .problem-statement {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #1f2937;
+            margin-bottom: 24px;
+            padding: 16px;
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 700px;
+            height: auto;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .slider-row label {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #1e3a8a;
+            width: 80px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .val-display {
+            width: 60px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #b91c1c;
+            background-color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .solution-box {
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 24px;
+            color: #1e3a8a;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .solution-box h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #93c5fd;
+            padding-bottom: 8px;
+            color: #1d4ed8;
+            font-size: 1.25rem;
+        }
+
+        .math-line {
+            background-color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #3b82f6;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .math-result {
+            color: #047857;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>លំហាត់៖ តង់ស្យុងរវាងចំណុច A, B, C</h1>
+    </div>
+    
+    <div class="content">
+        <div class="problem-statement">
+            <strong>១. គេមានបីចំណុច A, B, C នៃសៀគ្វីអគ្គិសនីមួយៗ ។</strong><br>
+            គេវាស់តង់ស្យុង <span id="textVab" style="font-weight:bold; color:#b91c1c;">V<sub>AB</sub> = +10 V</span> និង 
+            <span id="textVbc" style="font-weight:bold; color:#b91c1c;">V<sub>BC</sub> = -6 V</span> ។<br>
+            ចូរគណនាតង់ស្យុង V<sub>BA</sub> , V<sub>CB</sub> , V<sub>CA</sub> ។
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="circuitCanvas" width="700" height="220"></canvas>
+        </div>
+
+        <div class="controls">
+            <div class="slider-row">
+                <label>V<sub>AB</sub> :</label>
+                <span>-20V</span>
+                <input type="range" id="sliderVab" min="-20" max="20" value="10" step="1" oninput="updateValues()">
+                <span>+20V</span>
+                <div class="val-display" id="valVab">10 V</div>
+            </div>
+            <div class="slider-row">
+                <label>V<sub>BC</sub> :</label>
+                <span>-20V</span>
+                <input type="range" id="sliderVbc" min="-20" max="20" value="-6" step="1" oninput="updateValues()">
+                <span>+20V</span>
+                <div class="val-display" id="valVbc">-6 V</div>
+            </div>
+            <button onclick="resetToProblem()" style="margin-top:10px; padding:8px; border:none; border-radius:4px; background-color:#3b82f6; color:white; font-family:'Khmer OS Battambang'; cursor:pointer; font-weight:bold;">កំណត់ដូចប្រធានដើម</button>
+        </div>
+
+        <div class="solution-box" id="solutionBox" style="margin-top: 24px;">
+            <h2>ដំណោះស្រាយ និងការគណនា</h2>
+            
+            <div class="math-line">
+                <span>1. រកតង់ស្យុង V<sub>BA</sub> ៖</span>
+                <span class="math-result">V<sub>BA</sub> = -V<sub>AB</sub> = -(<span id="calcVab">10</span>) = <span id="ansVba">-10 V</span></span>
+            </div>
+            
+            <div class="math-line">
+                <span>2. រកតង់ស្យុង V<sub>CB</sub> ៖</span>
+                <span class="math-result">V<sub>CB</sub> = -V<sub>BC</sub> = -(<span id="calcVbc">-6</span>) = <span id="ansVcb">6 V</span></span>
+            </div>
+            
+            <div class="math-line">
+                <span>3. រកតង់ស្យុង V<sub>CA</sub> ៖</span>
+                <span class="math-result">V<sub>CA</sub> = V<sub>CB</sub> + V<sub>BA</sub> = (<span id="calcVcb2">6</span>) + (<span id="calcVba2">-10</span>) = <span id="ansVca">-4 V</span></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('circuitCanvas');
+    const ctx = canvas.getContext('2d');
+    const Y_LINE = 110;
+
+    function drawLine(x1, y1, x2, y2, color = '#374151', width = 2) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+    }
+
+    function drawNode(x, y, label, yOffset = -15) {
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#111827';
+        ctx.fill();
+        
+        ctx.fillStyle = '#1e3a8a';
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText(label, x - 7, y + yOffset);
+    }
+
+    function drawMeasurementArrow(x1, x2, y, name1, name2, value, isBottom = false) {
+        if (Math.abs(x1 - x2) < 20) return; // Prevent drawing if points overlap
+
+        const midX = (x1 + x2) / 2;
+        const offset = isBottom ? 50 : -50;
+        const arrY = y + offset;
+
+        // Draw dimension lines
+        drawLine(x1, y + (isBottom ? 10 : -10), x1, arrY + (isBottom ? 5 : -5), '#9ca3af', 1);
+        drawLine(x2, y + (isBottom ? 10 : -10), x2, arrY + (isBottom ? 5 : -5), '#9ca3af', 1);
+        
+        // Draw main arrow line
+        drawLine(x1, arrY, x2, arrY, '#3b82f6', 2);
+
+        // Arrows heads
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath(); ctx.moveTo(x1, arrY); ctx.lineTo(x1+8, arrY-4); ctx.lineTo(x1+8, arrY+4); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x2, arrY); ctx.lineTo(x2-8, arrY-4); ctx.lineTo(x2-8, arrY+4); ctx.fill();
+
+        // Background for text
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(midX - 50, arrY - 12, 100, 24);
+
+        // Text format
+        ctx.fillStyle = '#b91c1c';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        let text = `V_${name1}${name2} = ${value > 0 ? '+'+value : value}V`;
+        ctx.fillText(text, midX, arrY + 5);
+        ctx.textAlign = 'left'; 
+    }
+
+    function updateValues() {
+        let vab = parseInt(document.getElementById('sliderVab').value);
+        let vbc = parseInt(document.getElementById('sliderVbc').value);
+
+        // Calculations for text
+        let vba = -vab;
+        let vcb = -vbc;
+        let vca = vcb + vba;
+
+        // Update UI displays
+        document.getElementById('valVab').innerText = vab + " V";
+        document.getElementById('valVbc').innerText = vbc + " V";
+        
+        document.getElementById('textVab').innerHTML = `V<sub>AB</sub> = ${vab > 0 ? '+'+vab : vab} V`;
+        document.getElementById('textVbc').innerHTML = `V<sub>BC</sub> = ${vbc > 0 ? '+'+vbc : vbc} V`;
+
+        document.getElementById('calcVab').innerText = vab;
+        document.getElementById('ansVba').innerText = vba + " V";
+        document.getElementById('calcVbc').innerText = vbc;
+        document.getElementById('ansVcb').innerText = vcb + " V";
+        document.getElementById('calcVcb2').innerText = vcb;
+        document.getElementById('calcVba2').innerText = vba;
+        document.getElementById('ansVca').innerText = vca + " V";
+
+        // --- DYNAMIC CANVAS DRAWING ---
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Determine Potentials relative to V_B = 0
+        let vb = 0;
+        let va = vab;
+        let vc = -vbc;
+
+        // Create array and Sort descending by potential (Higher potential = Left side)
+        let pts = [
+            {name: 'A', v: va},
+            {name: 'B', v: vb},
+            {name: 'C', v: vc}
+        ];
+        pts.sort((p1, p2) => p2.v - p1.v);
+
+        let maxV = pts[0].v;
+        let minV = pts[2].v;
+        let range = maxV - minV;
+        if (range === 0) range = 1; // Prevent div by 0
+
+        // Calculate Physical X based on Potential
+        pts.forEach(p => {
+            p.x = 100 + ((maxV - p.v) / range) * 500;
+        });
+
+        // Draw main wire
+        drawLine(50, Y_LINE, 650, Y_LINE, '#374151', 4);
+
+        // Draw nodes (offset text if points overlap to avoid unreadable text)
+        pts.forEach((p, i) => {
+            let yOffset = -15;
+            if (i > 0 && Math.abs(p.x - pts[i-1].x) < 15) {
+                yOffset = 25; // Push label down if overlapping with previous
+            }
+            drawNode(p.x, Y_LINE, p.name, yOffset);
+        });
+
+        // Draw measurement arrows automatically mapping physical gaps
+        // Top Left Gap
+        if (Math.abs(pts[0].x - pts[1].x) >= 10) {
+            drawMeasurementArrow(pts[0].x, pts[1].x, Y_LINE, pts[0].name, pts[1].name, pts[0].v - pts[1].v, false);
+        }
+        // Top Right Gap
+        if (Math.abs(pts[1].x - pts[2].x) >= 10) {
+            drawMeasurementArrow(pts[1].x, pts[2].x, Y_LINE, pts[1].name, pts[2].name, pts[1].v - pts[2].v, false);
+        }
+        // Full Bottom Gap
+        if (Math.abs(pts[0].x - pts[2].x) >= 10) {
+            drawMeasurementArrow(pts[0].x, pts[2].x, Y_LINE, pts[0].name, pts[2].name, pts[0].v - pts[2].v, true);
+        }
+    }
+
+    function resetToProblem() {
+        document.getElementById('sliderVab').value = 10;
+        document.getElementById('sliderVbc').value = -6;
+        updateValues();
+    }
+
+    // Initialize
+    updateValues();
+</script>
+</body>
+</html>

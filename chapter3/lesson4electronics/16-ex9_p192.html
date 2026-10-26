@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី ៩៖ សៀគ្វីចរន្តឆ្លាស់ និងចរន្តជាប់</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .canvas-container {
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-color: #ffffff;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .btn-push {
+            transition: all 0.1s;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        .btn-push:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0 0 #b91c1c;
+        }
+        .solution-enter {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex justify-center items-start">
+
+    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        
+        <!-- Header -->
+        <div class="bg-blue-600 text-white p-6 text-center shadow-md z-10 relative">
+            <h1 class="text-2xl md:text-3xl font-bold tracking-wide">លំហាត់ទី ៩៖ សៀគ្វីចរន្តឆ្លាស់ និងចរន្តជាប់</h1>
+            <p class="text-blue-100 mt-2">ការពិសោធន៍សូលេណូអ៊ិតជាមួយកុងតាក់ DPDT</p>
+        </div>
+
+        <div class="p-6 md:p-8">
+            <!-- Problem Statement -->
+            <div class="bg-slate-50 border-l-4 border-blue-500 p-5 rounded-r-lg mb-8 shadow-sm">
+                <p class="text-lg text-slate-800 font-bold mb-3">៩. គេដំឡើងសៀគ្វីដូចរូបខាងក្រោម ។</p>
+                <ul class="text-slate-700 space-y-2 list-none">
+                    <li><span class="font-bold">ក.</span> ចូររៀបរាប់ឈ្មោះគ្រឿងអេឡិចត្រូនិកដែលយកមកប្រើក្នុងដ្យាក្រាមនៃសៀគ្វីនេះ</li>
+                    <li><span class="font-bold">ខ.</span> ចូរបង្ហាញពីដំណើរការនៃសៀគ្វីនេះ ។</li>
+                    <li><span class="font-bold">គ.</span> បើសិនជាអាចចូរដំឡើងសៀគ្វីនេះលើបន្ទះសៀគ្វីជាក់ស្តែង ។</li>
+                </ul>
+            </div>
+
+            <!-- Canvas Simulator -->
+            <div class="canvas-container border border-slate-300 rounded-xl overflow-hidden shadow-inner mb-6">
+                <canvas id="circuitCanvas" width="800" height="400"></canvas>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center border-b border-slate-200 pb-8 mb-8">
+                <!-- Push Button -->
+                <button id="btnPush" class="btn-push bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-xl shadow-[0_4px_0_0_#b91c1c] text-lg w-full sm:w-auto flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                    </svg>
+                    ចុចបញ្ជូនចរន្ត (Hold to Push)
+                </button>
+
+                <!-- Toggle Switch -->
+                <button id="btnToggle" onclick="toggleSwitch()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-xl shadow-md text-lg w-full sm:w-auto transition-colors flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                    ប្ដូរទៅ DC (បច្ចុប្បន្ន: AC)
+                </button>
+            </div>
+
+            <!-- Solution Section -->
+            <div class="text-center">
+                <button onclick="toggleSolution()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-8 rounded-full shadow-md text-lg transition-transform active:scale-95">
+                    បង្ហាញដំណោះស្រាយ (Show Solution)
+                </button>
+            </div>
+
+            <div id="solutionBox" class="hidden mt-8 bg-emerald-50 border border-emerald-200 rounded-2xl p-6 md:p-8 text-emerald-900 shadow-sm">
+                <h2 class="text-xl font-bold text-emerald-700 border-b border-emerald-200 pb-3 mb-4">ដំណោះស្រាយលំហាត់លេខ ៩</h2>
+                <div class="space-y-4 text-[1.05rem] leading-relaxed">
+                    <div>
+                        <strong class="text-emerald-800">ក. ឈ្មោះគ្រឿងអេឡិចត្រូនិកដែលប្រើ៖</strong>
+                        <ul class="list-disc pl-6 mt-2 text-emerald-700 space-y-1">
+                            <li>ប្រភពចរន្តឆ្លាស់ (AC 12V Source)</li>
+                            <li>កុងតាក់កណ្ដឹង (Push Button Switch)</li>
+                            <li>ស្ពានឌីយ៉ូត 1N4004, 1A (Diode Bridge Rectifier)</li>
+                            <li>កុងតាក់ជើង ៦ (DPDT Switch)</li>
+                            <li>សូលេណូអ៊ិត ២០០០ ស្ពៀ (Solenoid Coil)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong class="text-emerald-800">ខ. ដំណើរការនៃសៀគ្វី៖</strong>
+                        <p class="mt-2 text-emerald-700">នៅពេលដែលយើងចុច "កុងតាក់កណ្ដឹង" ដើម្បីភ្ជាប់សៀគ្វី៖</p>
+                        <ul class="list-disc pl-6 mt-2 text-emerald-700 space-y-2">
+                            <li><span class="font-bold bg-blue-100 text-blue-800 px-1 rounded">បើកុងតាក់ជើង ៦ នៅទីតាំង AC៖</span> ចរន្តឆ្លាស់ (AC) នឹងរត់ផ្ទាល់ទៅកាន់សូលេណូអ៊ិត។ វានឹងបង្កើតដែនម៉ាញ៉េទិចឆ្លាស់ ដែលធ្វើឱ្យស្នូលដែករបស់សូលេណូអ៊ិតញ័រ (បង្កើតជាសំឡេងង៉ោងៗ)។</li>
+                            <li><span class="font-bold bg-red-100 text-red-800 px-1 rounded">បើកុងតាក់ជើង ៦ នៅទីតាំង DC៖</span> ចរន្តឆ្លាស់ (AC) ត្រូវរត់កាត់ស្ពានឌីយ៉ូតជាមុនសិន ដើម្បីបំប្លែងទៅជាចរន្តជាប់ (DC) ពាក់កណ្ដាលខួប។ បន្ទាប់មកចរន្តជាប់នេះហូរទៅកាន់សូលេណូអ៊ិត បង្កើតជាដែនម៉ាញ៉េទិចថេរ ធ្វើឱ្យវាទាញស្នូលដែកជាប់ស្ងៀម (មិនមានរំញ័រ)។</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong class="text-emerald-800">គ. ការដំឡើងជាក់ស្តែង៖</strong>
+                        <p class="mt-1 text-emerald-700">សិស្សអាចយកគ្រឿងបន្លាស់ខាងលើ មកដោតតភ្ជាប់គ្នានៅលើបន្ទះ Breadboard នៅក្នុងបន្ទប់ពិសោធន៍ផ្ទាល់។</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('circuitCanvas');
+        const ctx = canvas.getContext('2d');
+        const btnPush = document.getElementById('btnPush');
+
+        let isPressed = false;
+        let switchMode = 'AC'; // 'AC' or 'DC'
+        let time = 0;
+
+        // Coordinates
+        const AC_X = 100, AC_Y = 200;
+        const PB_X = 230, PB_Y = 100;
+        const BR_CX = 430, BR_CY = 200;
+        const SW_X = 580; // Specifically requested SW_X = 580
+        const SOL_X = 720;
+
+        // Button Listeners
+        function pressBtn() { isPressed = true; }
+        function releaseBtn() { isPressed = false; }
+        
+        btnPush.addEventListener('mousedown', pressBtn);
+        btnPush.addEventListener('mouseup', releaseBtn);
+        btnPush.addEventListener('mouseleave', releaseBtn);
+        btnPush.addEventListener('touchstart', (e) => { e.preventDefault(); pressBtn(); });
+        btnPush.addEventListener('touchend', (e) => { e.preventDefault(); releaseBtn(); });
+
+        function toggleSwitch() {
+            switchMode = switchMode === 'AC' ? 'DC' : 'AC';
+            const btn = document.getElementById('btnToggle');
+            if (switchMode === 'AC') {
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>ប្ដូរទៅ DC (បច្ចុប្បន្ន: AC)`;
+                btn.className = "bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-xl shadow-md text-lg w-full sm:w-auto transition-colors flex items-center justify-center gap-2";
+            } else {
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>ប្ដូរទៅ AC (បច្ចុប្បន្ន: DC)`;
+                btn.className = "bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-xl shadow-md text-lg w-full sm:w-auto transition-colors flex items-center justify-center gap-2";
+            }
+        }
+
+        function toggleSolution() {
+            const box = document.getElementById('solutionBox');
+            if (box.classList.contains('hidden')) {
+                box.classList.remove('hidden');
+                box.classList.add('solution-enter');
+            } else {
+                box.classList.add('hidden');
+                box.classList.remove('solution-enter');
+            }
+        }
+
+        // Drawing Functions
+        function drawLine(x1, y1, x2, y2, color = '#1e293b', width = 2) {
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color; ctx.lineWidth = width; ctx.stroke();
+        }
+
+        function drawCircle(x, y, r, color = '#1e293b', fill = '#ffffff') {
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = fill; ctx.fill();
+            ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+        }
+
+        function drawNode(x, y) {
+            ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#0f172a'; ctx.fill();
+        }
+
+        function drawDiode(x1, y1, x2, y2) {
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            const midX = (x1 + x2) / 2;
+            const midY = (y1 + y2) / 2;
+            ctx.save(); ctx.translate(midX, midY); ctx.rotate(angle);
+            drawLine(-20, 0, 20, 0); // Wire
+            ctx.beginPath(); ctx.moveTo(-10, -10); ctx.lineTo(10, 0); ctx.lineTo(-10, 10); ctx.closePath();
+            ctx.fillStyle = '#0f172a'; ctx.fill(); // Triangle
+            drawLine(10, -10, 10, 10, '#0f172a', 3); // Bar
+            ctx.restore();
+        }
+
+        function drawCurrent(path, type, progress) {
+            if (!isPressed) return;
+            ctx.save();
+            let p = progress % 1;
+            if (p < 0) p += 1;
+            
+            let dir = 1;
+            if (type === 'AC' && Math.sin(time * 0.1) < 0) { dir = -1; p = 1 - p; }
+
+            ctx.setLineDash([8, 16]);
+            ctx.lineDashOffset = -p * 24 * dir;
+            
+            ctx.beginPath(); ctx.moveTo(path[0].x, path[0].y);
+            for(let i=1; i<path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+            
+            ctx.strokeStyle = type === 'AC' ? 'rgba(59, 130, 246, 0.8)' : 'rgba(239, 68, 68, 0.8)';
+            ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawSolenoid(x, y, isActive, isAC) {
+            ctx.save(); ctx.translate(x, y);
+            
+            // Vibration
+            if (isActive && isAC) {
+                const offset = Math.sin(time * 1.5) * 3;
+                ctx.translate(offset, 0);
+            }
+
+            // Coil
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                ctx.arc(0, -40 + i * 20, 12, -Math.PI/2, Math.PI/2, false);
+            }
+            ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 3; ctx.stroke();
+            
+            // Core
+            ctx.fillStyle = (isActive && !isAC) ? '#ef4444' : '#94a3b8'; // Red if DC
+            ctx.fillRect(-6, -55, 12, 110);
+            ctx.restore();
+            
+            ctx.fillStyle = '#0f172a'; ctx.font = '14px Battambang'; ctx.textAlign = 'left';
+            ctx.fillText('សូលេណូអ៊ិត', x + 25, y - 10);
+            ctx.fillText('(2000 ស្ពៀ)', x + 25, y + 10);
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            time += 0.5;
+
+            // --- STATIC SCHEMATIC ---
+            
+            // AC Source
+            drawCircle(AC_X, AC_Y, 25);
+            ctx.beginPath(); ctx.moveTo(AC_X - 12, AC_Y); ctx.bezierCurveTo(AC_X - 4, AC_Y - 15, AC_X + 4, AC_Y + 15, AC_X + 12, AC_Y); ctx.stroke();
+            ctx.font = 'bold 16px Arial'; ctx.fillStyle = '#0f172a'; ctx.textAlign = 'center';
+            ctx.fillText('AC 12V', AC_X, AC_Y - 35);
+
+            // Wires from AC
+            drawLine(AC_X, AC_Y - 25, AC_X, 100); 
+            drawLine(AC_X, 100, PB_X - 30, 100); 
+            drawLine(AC_X, AC_Y + 25, AC_X, 300); 
+            drawLine(AC_X, 300, BR_CX, 300); 
+            
+            // Push Button
+            drawLine(PB_X - 30, 100, PB_X - 10, 100);
+            drawLine(PB_X + 30, 100, PB_X + 10, 100);
+            drawCircle(PB_X - 10, 100, 4); drawCircle(PB_X + 10, 100, 4);
+            const btnY = isPressed ? 100 : 85;
+            drawLine(PB_X - 15, btnY, PB_X + 15, btnY, '#0f172a', 4);
+            drawLine(PB_X, btnY, PB_X, btnY - 12, '#0f172a', 3);
+            ctx.fillRect(PB_X - 10, btnY - 16, 20, 4);
+            ctx.font = '14px Battambang'; ctx.fillText('កុងតាក់កណ្ដឹង', PB_X, 60);
+
+            // Wire after button
+            drawLine(PB_X + 30, 100, BR_CX, 100); 
+            drawLine(BR_CX, 100, SW_X, 100); 
+            drawLine(BR_CX, 300, SW_X, 300); 
+
+            // Bridge Rectifier
+            const brSize = 40;
+            drawLine(BR_CX, 100, BR_CX, BR_CY - brSize); drawNode(BR_CX, 100);
+            drawLine(BR_CX, 300, BR_CX, BR_CY + brSize); drawNode(BR_CX, 300);
+            drawDiode(BR_CX - brSize, BR_CY, BR_CX, BR_CY - brSize);
+            drawDiode(BR_CX, BR_CY + brSize, BR_CX - brSize, BR_CY);
+            drawDiode(BR_CX, BR_CY - brSize, BR_CX + brSize, BR_CY);
+            drawDiode(BR_CX, BR_CY + brSize, BR_CX + brSize, BR_CY);
+            
+            ctx.font = '14px Battambang'; ctx.textAlign = 'right';
+            ctx.fillText('ស្ពានឌីយ៉ូត', BR_CX - 25, BR_CY - 10);
+            ctx.font = '12px Arial'; ctx.fillText('1N4004 (1A)', BR_CX - 25, BR_CY + 10);
+
+            // DC Outputs from Bridge
+            drawLine(BR_CX + brSize, BR_CY, SW_X - 40, BR_CY); 
+            drawLine(SW_X - 40, BR_CY, SW_X - 40, 150);
+            drawLine(SW_X - 40, 150, SW_X, 150); 
+
+            drawLine(BR_CX - brSize, BR_CY, BR_CX - brSize - 20, BR_CY); 
+            drawLine(BR_CX - brSize - 20, BR_CY, BR_CX - brSize - 20, 320); 
+            drawLine(BR_CX - brSize - 20, 320, SW_X - 30, 320);
+            drawLine(SW_X - 30, 320, SW_X - 30, 250);
+            drawLine(SW_X - 30, 250, SW_X, 250); 
+            
+            // Switch Terminals & Outputs
+            drawCircle(SW_X, 100, 4); drawCircle(SW_X, 150, 4); 
+            drawCircle(SW_X, 250, 4); drawCircle(SW_X, 300, 4); 
+            drawCircle(SW_X + 50, 125, 4); drawCircle(SW_X + 50, 275, 4); 
+
+            // Switch Link
+            drawLine(SW_X + 25, 112, SW_X + 25, 287, '#cbd5e1', 1);
+            ctx.setLineDash([5, 5]); drawLine(SW_X + 25, 112, SW_X + 25, 287, '#94a3b8', 2); ctx.setLineDash([]);
+
+            // Switch Blades
+            if (switchMode === 'AC') {
+                drawLine(SW_X, 100, SW_X + 50, 125, '#3b82f6', 3);
+                drawLine(SW_X, 300, SW_X + 50, 275, '#3b82f6', 3);
+            } else {
+                drawLine(SW_X, 150, SW_X + 50, 125, '#ef4444', 3);
+                drawLine(SW_X, 250, SW_X + 50, 275, '#ef4444', 3);
+            }
+            
+            // *** CRUCIAL: Draw Red A, D, C, C explicitly as requested ***
+            ctx.fillStyle = '#ef4444'; 
+            ctx.font = 'bold 24px Arial'; 
+            ctx.textAlign = 'left';
+            ctx.fillText('A', SW_X + 15, 90); 
+            ctx.fillText('D', SW_X + 15, 155); 
+            ctx.fillText('C', SW_X + 15, 255); 
+            ctx.fillText('C', SW_X + 15, 315);
+
+            // Solenoid Wiring
+            drawLine(SW_X + 54, 125, SOL_X, 125); drawLine(SOL_X, 125, SOL_X, 150);
+            drawLine(SW_X + 54, 275, SOL_X, 275); drawLine(SOL_X, 275, SOL_X, 250);
+
+            drawSolenoid(SOL_X, 200, isPressed, switchMode === 'AC');
+
+            // --- ANIMATED CURRENT ---
+            if (isPressed) {
+                const speed = time * 0.5;
+                drawCurrent([{x: AC_X, y: AC_Y-25}, {x: AC_X, y: 100}, {x: PB_X-15, y: 100}], 'AC', speed);
+                drawCurrent([{x: PB_X+15, y: 100}, {x: BR_CX, y: 100}, {x: SW_X, y: 100}], 'AC', speed);
+                drawCurrent([{x: AC_X, y: AC_Y+25}, {x: AC_X, y: 300}, {x: SW_X, y: 300}], 'AC', speed);
+                drawCurrent([{x: AC_X, y: 300}, {x: BR_CX, y: 300}], 'AC', speed);
+
+                if (switchMode === 'AC') {
+                    drawCurrent([{x: SW_X, y: 100}, {x: SW_X+50, y: 125}, {x: SOL_X, y: 125}, {x: SOL_X, y: 150}], 'AC', speed);
+                    drawCurrent([{x: SW_X, y: 300}, {x: SW_X+50, y: 275}, {x: SOL_X, y: 275}, {x: SOL_X, y: 250}], 'AC', speed);
+                } else {
+                    drawCurrent([{x: BR_CX+brSize, y: BR_CY}, {x: SW_X-40, y: BR_CY}, {x: SW_X-40, y: 150}, {x: SW_X, y: 150}], 'DC', speed * 1.5);
+                    drawCurrent([{x: SW_X, y: 150}, {x: SW_X+50, y: 125}, {x: SOL_X, y: 125}, {x: SOL_X, y: 150}], 'DC', speed * 1.5);
+                    drawCurrent([{x: SOL_X, y: 250}, {x: SOL_X, y: 275}, {x: SW_X+50, y: 275}, {x: SW_X, y: 250}], 'DC', speed * 1.5);
+                    drawCurrent([{x: SW_X, y: 250}, {x: SW_X-30, y: 250}, {x: SW_X-30, y: 320}, {x: BR_CX-brSize-20, y: 320}, {x: BR_CX-brSize-20, y: BR_CY}, {x: BR_CX-brSize, y: BR_CY}], 'DC', speed * 1.5);
+                }
+            }
+
+            requestAnimationFrame(render);
+        }
+
+        render();
+    </script>
+</body>
+</html>

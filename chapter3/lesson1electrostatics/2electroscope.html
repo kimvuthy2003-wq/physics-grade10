@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ពិសោធន៍ និងកម្រងសំណួរ៖ អេឡិចត្រូទស្សន៍ (Electroscope Lab & Quiz)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Battambang&display=swap');
+        
+        body {
+            font-family: 'Khmer OS Battambang', Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { color: #2c3e50; text-align: center; margin-top: 10px; }
+        h2 { color: #006064; text-align: center; }
+        p.instructions { color: #555; text-align: center; max-width: 700px; font-size: 1.1em; margin-bottom: 20px; }
+
+        /* ================= Simulation Styles ================= */
+        #lab-container {
+            position: relative;
+            width: 500px;
+            height: 600px;
+            background-color: white;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            touch-action: none;
+            margin-bottom: 40px;
+        }
+
+        .rod {
+            position: absolute;
+            width: 24px;
+            height: 180px;
+            border-radius: 12px;
+            cursor: grab;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            font-weight: bold;
+            font-size: 20px;
+            z-index: 10;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            user-select: none;
+        }
+
+        .rod:active { cursor: grabbing; }
+
+        #glass-rod {
+            top: 50px; left: 40px;
+            background: linear-gradient(to right, #a1c4fd 0%, #c2e9fb 100%);
+            border: 2px solid #3498db; color: #d35400;
+        }
+
+        #ebonite-rod {
+            top: 50px; left: 90px;
+            background: linear-gradient(to right, #555555 0%, #222222 100%);
+            border: 2px solid #000; color: #3498db;
+        }
+
+        .electroscope-container {
+            position: absolute; bottom: 30px; left: 175px;
+            width: 150px; height: 350px;
+        }
+
+        .flask-body {
+            position: absolute; bottom: 0; left: -25px;
+            width: 200px; height: 200px;
+            background: rgba(173, 216, 230, 0.2);
+            border: 3px solid #7f8c8d;
+            border-bottom-left-radius: 40px; border-bottom-right-radius: 40px;
+            border-top-left-radius: 100px; border-top-right-radius: 100px;
+            z-index: 1;
+        }
+
+        .flask-neck {
+            position: absolute; bottom: 195px; left: 50px;
+            width: 50px; height: 60px;
+            background: rgba(173, 216, 230, 0.2);
+            border-left: 3px solid #7f8c8d; border-right: 3px solid #7f8c8d;
+            z-index: 1;
+        }
+
+        .stopper {
+            position: absolute; bottom: 245px; left: 45px;
+            width: 60px; height: 25px;
+            background-color: #7f8c8d; border-radius: 5px; z-index: 2;
+        }
+
+        .knob {
+            position: absolute; bottom: 320px; left: 55px;
+            width: 40px; height: 40px;
+            background: radial-gradient(circle at 15px 15px, #f39c12, #d35400);
+            border-radius: 50%; z-index: 3;
+            box-shadow: inset -3px -3px 5px rgba(0,0,0,0.2);
+        }
+
+        .metal-rod {
+            position: absolute; bottom: 120px; left: 72px;
+            width: 6px; height: 210px;
+            background-color: #95a5a6; z-index: 2;
+        }
+
+        .leaf {
+            position: absolute; bottom: 50px;
+            width: 12px; height: 75px;
+            background: linear-gradient(to right, #f1c40f, #f39c12);
+            transform-origin: top center; transition: transform 0.1s ease-out;
+            z-index: 2; border-radius: 2px;
+        }
+
+        #leaf-left { left: 65px; transform: rotate(0deg); }
+        #leaf-right { left: 73px; transform: rotate(0deg); }
+
+        .charges-indicator {
+            position: absolute; font-weight: bold; font-size: 16px;
+            opacity: 0; transition: opacity 0.2s; z-index: 5;
+        }
+
+        /* ================= Quiz Styles ================= */
+        .quiz-wrapper {
+            background-color: white; padding: 30px; border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            width: 100%; max-width: 650px; margin-bottom: 50px;
+        }
+
+        button {
+            background-color: #00bcd4; color: white; border: none;
+            padding: 12px 25px; border-radius: 8px; font-size: 16px;
+            font-family: 'Khmer OS Battambang'; cursor: pointer;
+            transition: background-color 0.3s; margin-top: 10px;
+        }
+
+        button:hover { background-color: #0097a7; }
+        button:disabled { background-color: #9e9e9e; cursor: not-allowed; }
+
+        #result-section { display: none; margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee; }
+
+        .question { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px dashed #ccc; }
+        .question-text { font-weight: bold; font-size: 1.1em; color: #333; margin-bottom: 10px; }
+
+        .options label {
+            display: block; margin: 8px 0; cursor: pointer; padding: 8px;
+            border-radius: 6px; transition: background-color 0.2s;
+        }
+        .options label:hover { background-color: #f5f5f5; }
+        input[type="radio"] { margin-right: 10px; }
+
+        .score-display { font-size: 2em; color: #d84315; text-align: center; font-weight: bold; margin: 20px 0; }
+        .feedback { text-align: center; font-size: 1.2em; margin-bottom: 20px; }
+        .divider { width: 100%; height: 2px; background-color: #e0e0e0; margin: 40px 0; max-width: 800px; }
+        
+        /* Highlight colors for answers */
+        .correct-answer { background-color: #e8f5e9 !important; color: #2e7d32; font-weight: bold; border: 1px solid #4caf50; }
+        .wrong-answer { background-color: #ffebee !important; color: #c62828; text-decoration: line-through; border: 1px solid #ef5350; }
+
+    </style>
+</head>
+<body>
+
+    <h1>ពិសោធន៍ និងកម្រងសំណួរ៖ អេឡិចត្រូទស្សន៍</h1>
+    
+    <!-- ផ្នែកទី១៖ ការពិសោធន៍ -->
+    <h2>ផ្នែកទី១៖ ការពិសោធន៍ផ្ទាល់</h2>
+    <p class="instructions">
+        សូមអូស <strong>ចង្កឹះកែវ (+) ពណ៌ផ្ទៃមេឃ</strong> ឬ <strong>ចង្កឹះអេបូនីត (-) ពណ៌ខ្មៅ</strong> 
+        មកដាក់ឲ្យកៀកនឹង <strong>ក្បាលអេឡិចត្រូទស្សន៍</strong> ដើម្បីសង្កេតមើលបាតុភូត និងត្រៀមខ្លួនសម្រាប់ធ្វើលំហាត់ខាងក្រោម។
+    </p>
+
+    <div id="lab-container">
+        <!-- Draggable Glass Rod (+) -->
+        <div id="glass-rod" class="rod"><span>+</span><span>+</span><span>+</span><span>+</span><span>+</span><span>+</span></div>
+        <!-- Draggable Ebonite Rod (-) -->
+        <div id="ebonite-rod" class="rod"><span>-</span><span>-</span><span>-</span><span>-</span><span>-</span><span>-</span></div>
+        <!-- Electroscope -->
+        <div class="electroscope-container">
+            <div class="flask-neck"></div><div class="flask-body"></div><div class="stopper"></div>
+            <div class="metal-rod"></div><div class="knob" id="knob"></div>
+            <div class="leaf" id="leaf-left"></div><div class="leaf" id="leaf-right"></div>
+            <!-- Dynamic charges -->
+            <div class="charges-indicator" id="leaf-charges-left" style="bottom: 70px; left: 45px;"></div>
+            <div class="charges-indicator" id="leaf-charges-right" style="bottom: 70px; left: 85px;"></div>
+            <div class="charges-indicator" id="knob-charges" style="bottom: 330px; left: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- បន្ទាត់ខណ្ឌចែក -->
+    <div class="divider"></div>
+
+    <!-- ផ្នែកទី២៖ កម្រងសំណួរ -->
+    <div class="quiz-wrapper" id="quizArea">
+        <!-- ផ្នែកសំណួរ -->
+        <div id="quiz-section">
+            <h2>កម្រងសំណួរអនុវត្តន៍</h2>
+            <form id="quizForm">
+                <div class="question">
+                    <div class="question-text">១. នៅពេលគេយកចង្កឹះកែវដែលមានបន្ទុកវិជ្ជមាន (+) មកដាក់កៀកនឹងក្បាលអេឡិចត្រូទស្សន៍ តើសន្លឹកលោហៈទាំងពីរនឹងមានប្រតិកម្មយ៉ាងដូចម្តេច? (១២.៥ ពិន្ទុ)</div>
+                    <div class="options">
+                        <label id="lbl-q1-a"><input type="radio" name="q1" value="a"> ក. ទាញចូលគ្នា</label>
+                        <label id="lbl-q1-b"><input type="radio" name="q1" value="b"> ខ. ច្រានគ្នាចេញ</label>
+                        <label id="lbl-q1-c"><input type="radio" name="q1" value="c"> គ. គ្មានប្រតិកម្មអ្វីទាំងអស់</label>
+                        <label id="lbl-q1-d"><input type="radio" name="q1" value="d"> ឃ. ឆេះសន្លឹកលោហៈ</label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">២. មូលហេតុអ្វីបានជាសន្លឹកលោហៈរបស់អេឡិចត្រូទស្សន៍ច្រានគ្នាចេញ? (១២.៥ ពិន្ទុ)</div>
+                    <div class="options">
+                        <label id="lbl-q2-a"><input type="radio" name="q2" value="a"> ក. ព្រោះវាមានផ្ទុកបន្ទុកអគ្គិសនីផ្ទុយគ្នា</label>
+                        <label id="lbl-q2-b"><input type="radio" name="q2" value="b"> ខ. ព្រោះវាអត់មានផ្ទុកបន្ទុកអគ្គិសនី</label>
+                        <label id="lbl-q2-c"><input type="radio" name="q2" value="c"> គ. ព្រោះវាមានផ្ទុកបន្ទុកអគ្គិសនីដូចគ្នា</label>
+                        <label id="lbl-q2-d"><input type="radio" name="q2" value="d"> ឃ. ព្រោះវាធ្វើពីលោហៈខុសប្រភេទគ្នា</label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">៣. ប្រសិនបើគេយកចង្កឹះអេបូនីតដែលមានបន្ទុកអវិជ្ជមាន (-) មកដាក់កៀកក្បាលអេឡិចត្រូទស្សន៍ តើសន្លឹកលោហៈខាងក្រោមនឹងមានផ្ទុកបន្ទុកអ្វី? (១២.៥ ពិន្ទុ)</div>
+                    <div class="options">
+                        <label id="lbl-q3-a"><input type="radio" name="q3" value="a"> ក. បន្ទុកវិជ្ជមាន (+)</label>
+                        <label id="lbl-q3-b"><input type="radio" name="q3" value="b"> ខ. បន្ទុកអវិជ្ជមាន (-)</label>
+                        <label id="lbl-q3-c"><input type="radio" name="q3" value="c"> គ. គ្មានបន្ទុកទេ</label>
+                        <label id="lbl-q3-d"><input type="radio" name="q3" value="d"> ឃ. បន្ទុកទាំងពីរ</label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">៤. តាមរយៈការពិសោធន៍ តើក្បាលអេឡិចត្រូទស្សន៍ និងសន្លឹកលោហៈខាងក្រោម នឹងមានបន្ទុកយ៉ាងដូចម្តេចនៅពេលរងឥទ្ធិពលពីចង្កឹះបន្ទុក? (១២.៥ ពិន្ទុ)</div>
+                    <div class="options">
+                        <label id="lbl-q4-a"><input type="radio" name="q4" value="a"> ក. មានបន្ទុកផ្ទុយគ្នាជានិច្ច</label>
+                        <label id="lbl-q4-b"><input type="radio" name="q4" value="b"> ខ. មានបន្ទុកដូចគ្នាជានិច្ច</label>
+                        <label id="lbl-q4-c"><input type="radio" name="q4" value="c"> គ. គ្មានបន្ទុកទាំងពីរ</label>
+                        <label id="lbl-q4-d"><input type="radio" name="q4" value="d"> ឃ. មិនអាចកំណត់បាន</label>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button type="button" id="submitBtn" onclick="submitQuiz()">បញ្ជូនចម្លើយ</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ផ្នែកលទ្ធផល -->
+        <div id="result-section">
+            <h2>លទ្ធផលរបស់អ្នក</h2>
+            <div class="score-display">
+                ពិន្ទុ៖ <span id="finalScore">0</span> / ៥០
+            </div>
+            <div class="feedback" id="feedbackText"></div>
+
+            <div style="text-align: center;">
+                <button onclick="restartQuiz()">ធ្វើលំហាត់ម្ដងទៀត</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= SCRIPT ================= -->
+    <script>
+        // --- Simulation Script (រក្សាទុកនៅដដែល) ---
+        const rods = document.querySelectorAll('.rod');
+        const glassRod = document.getElementById('glass-rod');
+        const eboniteRod = document.getElementById('ebonite-rod');
+        const knob = document.getElementById('knob');
+        const leafLeft = document.getElementById('leaf-left');
+        const leafRight = document.getElementById('leaf-right');
+        const container = document.getElementById('lab-container');
+        
+        const leafChargesLeft = document.getElementById('leaf-charges-left');
+        const leafChargesRight = document.getElementById('leaf-charges-right');
+        const knobCharges = document.getElementById('knob-charges');
+
+        let isDragging = false;
+        let activeRod = null;
+        let offsetX, offsetY;
+
+        const startDrag = (e, rod) => {
+            isDragging = true; activeRod = rod;
+            glassRod.style.zIndex = 10; eboniteRod.style.zIndex = 10; activeRod.style.zIndex = 11;
+            let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            const rect = activeRod.getBoundingClientRect();
+            offsetX = clientX - rect.left; offsetY = clientY - rect.top;
+        };
+
+        const endDrag = () => { isDragging = false; activeRod = null; };
+
+        const drag = (e) => {
+            if (!isDragging || !activeRod) return;
+            if (e.target.closest('#lab-container')) { e.preventDefault(); }
+            const containerRect = container.getBoundingClientRect();
+            let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            let newLeft = clientX - containerRect.left - offsetX;
+            let newTop = clientY - containerRect.top - offsetY;
+            if (newLeft < 0) newLeft = 0; if (newTop < 0) newTop = 0;
+            if (newLeft + activeRod.offsetWidth > containerRect.width) newLeft = containerRect.width - activeRod.offsetWidth;
+            if (newTop + activeRod.offsetHeight > containerRect.height) newTop = containerRect.height - activeRod.offsetHeight;
+            activeRod.style.left = newLeft + 'px'; activeRod.style.top = newTop + 'px';
+            calculateEffect();
+        };
+
+        rods.forEach(rod => {
+            rod.addEventListener('mousedown', (e) => startDrag(e, rod));
+            rod.addEventListener('touchstart', (e) => startDrag(e, rod), {passive: false});
+        });
+
+        document.addEventListener('mouseup', endDrag); document.addEventListener('touchend', endDrag);
+        document.addEventListener('mousemove', drag, {passive: false}); document.addEventListener('touchmove', drag, {passive: false});
+
+        function calculateEffect() {
+            const knobRect = knob.getBoundingClientRect();
+            const knobCenter = { x: knobRect.left + knobRect.width / 2, y: knobRect.top + knobRect.height / 2 };
+
+            function getDistance(rodElement) {
+                const rect = rodElement.getBoundingClientRect();
+                const bottomCenter = { x: rect.left + rect.width / 2, y: rect.bottom };
+                const dx = bottomCenter.x - knobCenter.x; const dy = bottomCenter.y - knobCenter.y;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            const distGlass = getDistance(glassRod); const distEbonite = getDistance(eboniteRod);
+            let closestDistance = Math.min(distGlass, distEbonite);
+            let activeType = distGlass < distEbonite ? 'positive' : 'negative';
+            const maxDistance = 250;
+            
+            if (closestDistance < maxDistance) {
+                let intensity = 1 - (closestDistance / maxDistance);
+                let angle = intensity * 40;
+                leafLeft.style.transform = `rotate(${angle}deg)`; leafRight.style.transform = `rotate(${-angle}deg)`;
+
+                if (closestDistance < 150) {
+                    leafChargesLeft.style.opacity = intensity; leafChargesRight.style.opacity = intensity; knobCharges.style.opacity = intensity;
+                    if (activeType === 'positive') {
+                        leafChargesLeft.innerText = '+++'; leafChargesRight.innerText = '+++';
+                        leafChargesLeft.style.color = '#c0392b'; leafChargesRight.style.color = '#c0392b';
+                        knobCharges.innerText = '---'; knobCharges.style.color = '#2980b9'; 
+                    } else {
+                        leafChargesLeft.innerText = '---'; leafChargesRight.innerText = '---';
+                        leafChargesLeft.style.color = '#2980b9'; leafChargesRight.style.color = '#2980b9';
+                        knobCharges.innerText = '+++'; knobCharges.style.color = '#c0392b'; 
+                    }
+                } else {
+                    leafChargesLeft.style.opacity = 0; leafChargesRight.style.opacity = 0; knobCharges.style.opacity = 0;
+                }
+            } else {
+                leafLeft.style.transform = `rotate(0deg)`; leafRight.style.transform = `rotate(0deg)`;
+                leafChargesLeft.style.opacity = 0; leafChargesRight.style.opacity = 0; knobCharges.style.opacity = 0;
+            }
+        }
+
+        // --- Quiz Script (បានកែសម្រួលដើម្បីបង្ហាញចម្លើយភ្លាមៗ) ---
+        const pointsPerQuestion = 12.5;
+        const correctAnswers = { q1: "b", q2: "c", q3: "b", q4: "a" };
+
+        function submitQuiz() {
+            let score = 0;
+            const form = document.getElementById("quizForm");
+            
+            // គណនាពិន្ទុ និងបង្ហាញចម្លើយត្រូវ/ខុស
+            for (let question in correctAnswers) {
+                const selectedOption = form.querySelector(`input[name="${question}"]:checked`);
+                const allOptions = form.querySelectorAll(`input[name="${question}"]`);
+                const correctVal = correctAnswers[question];
+
+                // ផ្តល់ពិន្ទុប្រសិនបើត្រូវ
+                if (selectedOption && selectedOption.value === correctVal) { 
+                    score += pointsPerQuestion; 
+                }
+
+                // បង្ហាញពណ៌ចម្លើយ
+                allOptions.forEach(opt => {
+                    opt.disabled = true; // បិទមិនឱ្យចុចដូរទៀត
+                    const label = opt.parentElement;
+                    if (opt.value === correctVal) {
+                        label.classList.add("correct-answer");
+                    } else if (selectedOption && opt === selectedOption && opt.value !== correctVal) {
+                        label.classList.add("wrong-answer");
+                    }
+                });
+            }
+
+            document.getElementById("submitBtn").disabled = true;
+            showResults(score);
+        }
+
+        function showResults(score) {
+            document.getElementById("result-section").style.display = "block";
+            document.getElementById("finalScore").innerText = score;
+
+            const feedbackElement = document.getElementById("feedbackText");
+            if (score === 50) {
+                feedbackElement.innerHTML = "🎉 អបអរសាទរ! អ្នកធ្វើបានល្អឥតខ្ចោះ!";
+                feedbackElement.style.color = "#2e7d32";
+            } else if (score >= 25) {
+                feedbackElement.innerHTML = "👍 ល្អណាស់! ប៉ុន្តែអ្នកអាចរៀនបន្ថែមបន្តិចទៀត។";
+                feedbackElement.style.color = "#f57c00";
+            } else {
+                feedbackElement.innerHTML = "💪 សូមខិតខំព្យាយាមម្ដងទៀត! អ្នកប្រាកដជាអាចធ្វើបាន។";
+                feedbackElement.style.color = "#c62828";
+            }
+            
+            // ទាញអេក្រង់ចុះមកមើលលទ្ធផលខាងក្រោម
+            document.getElementById("result-section").scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function restartQuiz() {
+            const form = document.getElementById("quizForm");
+            form.reset(); // លុបជម្រើសដែលបានគូស
+            
+            // បើកឱ្យចុចរើសឡើងវិញ និងលុបពណ៌ចម្លើយចេញ
+            const allOptions = form.querySelectorAll('input[type="radio"]');
+            allOptions.forEach(opt => {
+                opt.disabled = false;
+                opt.parentElement.classList.remove("correct-answer", "wrong-answer");
+            });
+
+            document.getElementById("submitBtn").disabled = false;
+            document.getElementById("result-section").style.display = "none";
+            document.getElementById("quizArea").scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

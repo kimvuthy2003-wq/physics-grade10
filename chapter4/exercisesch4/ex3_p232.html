@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី៣៖ មុំកម្រិតនៃព្រីសកែង និងចំណាំងផ្លាតទាំងស្រុង</title>
+    
+    <!-- បញ្ចូលបណ្ណាល័យ MathJax សម្រាប់បង្ហាញរូបមន្តគណិតវិទ្យា -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Battambang:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 920px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #2563eb;
+            color: white;
+            padding: 16px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .problem-statement {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding: 16px;
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+        }
+
+        .status-banner {
+            font-size: 1.15rem;
+            font-weight: bold;
+            padding: 12px 18px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.25s;
+        }
+        .status-tir {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #4ade80;
+        }
+        .status-refract {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fbbf24;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 15px;
+            position: relative;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            border: 1.5px solid #94a3b8;
+            border-radius: 8px;
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 680px;
+            background-color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .slider-row label {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #1e3a8a;
+            width: 260px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .val-display {
+            width: 120px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.15rem;
+            color: #1d4ed8;
+            background-color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button.action-btn {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .btn-ray { background-color: #059669; }
+        .btn-ray:hover { background-color: #047857; }
+
+        .btn-reset { background-color: #64748b; }
+        .btn-reset:hover { background-color: #475569; }
+        
+        .btn-solution { background-color: #2563eb; }
+        .btn-solution:hover { background-color: #1d4ed8; }
+
+        .solution-box {
+            display: block;
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 20px;
+            color: #1e3a8a;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>លំហាត់ទី៣៖ មុំកម្រិតនៃព្រីសកែង និងចំណាំងផ្លាតទាំងស្រុង</h1>
+    </div>
+    
+    <div class="content">
+        <div class="problem-statement">
+            <strong>៣. ពិនិត្យរូបខាងក្រោម រួចគណនាមុំកម្រិតនៃព្រីសកែងមួយដែលមានសន្ទស្សន៍ចំណាំងបែរ $1.5$ ។</strong>
+        </div>
+
+        <div id="statusBanner" class="status-banner status-tir">
+            បាតុភូត៖ ចំណាំងផ្លាតទាំងស្រុងក្នុងព្រីសកែង (ព្រោះមុំប៉ះខាងក្នុង 45° > មុំកម្រិត 41.81°)
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="simCanvas" width="800" height="440"></canvas>
+            
+            <div class="controls">
+                <div class="slider-row">
+                    <label>សន្ទស្សន៍ចំណាំងបែរព្រីស ($n$) :</label>
+                    <input type="range" id="sliderN" min="1.10" max="2.40" value="1.50" step="0.01" oninput="updateSimulation()">
+                    <div class="val-display" id="valN">1.50</div>
+                </div>
+                <div class="slider-row">
+                    <label>ទីតាំងកាំពន្លឺចាំងប៉ះលើព្រីស :</label>
+                    <input type="range" id="sliderPos" min="0.22" max="0.45" value="0.33" step="0.01" oninput="updateSimulation()">
+                    <div class="val-display" id="valPos">33%</div>
+                </div>
+                
+                <div class="slider-row" style="margin-top: 8px; padding-top: 12px; border-top: 2px dashed #cbd5e1;">
+                    <label style="color: #dc2626;">មុំកម្រិតនៃព្រីស ($\theta_c$) :</label>
+                    <div style="flex-grow: 1;"></div>
+                    <div class="val-display" id="valThetaC" style="color: #dc2626; border-color: #dc2626; font-size: 1.25rem; width: 135px;">41.81°</div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="action-btn btn-ray" onclick="toggleInternalPath()">លាក់/បង្ហាញផ្លូវកាំពន្លឺក្នុងព្រីស</button>
+                <button class="action-btn btn-reset" onclick="resetToProblem()">កំណត់ដូចប្រធានដើម (n = 1.50)</button>
+                <button class="action-btn btn-solution" onclick="toggleSolution()">លាក់/បង្ហាញដំណោះស្រាយ</button>
+            </div>
+        </div>
+
+        <div class="solution-box" id="solutionBox">
+            <h2 style="margin-top:0; border-bottom:2px solid #93c5fd; padding-bottom:8px; color: #1d4ed8;">ដំណោះស្រាយលំហាត់ទី៣</h2>
+            <div id="solutionContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let n = 1.50;
+    let thetaCDeg = 41.81;
+    let rayPosRatio = 0.33;
+    let showInternal = true;
+
+    function toggleInternalPath() {
+        showInternal = !showInternal;
+    }
+
+    function toggleSolution() {
+        const box = document.getElementById('solutionBox');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function resetToProblem() {
+        document.getElementById('sliderN').value = 1.50;
+        document.getElementById('sliderPos').value = 0.33;
+        showInternal = true;
+        updateSimulation();
+    }
+
+    function updateSimulation() {
+        n = parseFloat(document.getElementById('sliderN').value);
+        rayPosRatio = parseFloat(document.getElementById('sliderPos').value);
+
+        let sinThetaC = 1.0 / n;
+        let thetaCRad = Math.asin(Math.min(1, sinThetaC));
+        thetaCDeg = thetaCRad * 180 / Math.PI;
+
+        document.getElementById('valN').innerText = n.toFixed(2);
+        document.getElementById('valPos').innerText = Math.round(rayPosRatio * 100) + "%";
+        document.getElementById('valThetaC').innerText = thetaCDeg.toFixed(2) + "°";
+
+        const banner = document.getElementById('statusBanner');
+        let isTIR = 45.0 > thetaCDeg;
+        if (isTIR) {
+            banner.className = "status-banner status-tir";
+            banner.innerText = `បាតុភូត៖ ចំណាំងផ្លាតទាំងស្រុងក្នុងព្រីសកែង (ព្រោះមុំប៉ះខាងក្នុង 45° > មុំកម្រិត ${thetaCDeg.toFixed(2)}°)`;
+        } else {
+            banner.className = "status-banner status-refract";
+            banner.innerText = `បាតុភូត៖ កាំពន្លឺចាំងបែរចេញក្រៅព្រីស (ព្រោះមុំប៉ះខាងក្នុង 45° < មុំកម្រិត ${thetaCDeg.toFixed(2)}°)`;
+        }
+
+        let mathHTML = `
+            <p><strong>បម្រាប់៖</strong></p>
+            <ul>
+                <li>សន្ទស្សន៍ចំណាំងបែរនៃព្រីសកែង៖ $n_1 = n = ${n.toFixed(2)}$</li>
+                <li>សន្ទស្សន៍ចំណាំងបែរនៃខ្យល់៖ $n_2 = 1.00$</li>
+            </ul>
+            <p><strong>១. គណនាមុំកម្រិតនៃព្រីសកែង ($\\theta_c$) ៖</strong><br>
+            តាមរូបមន្តមុំកម្រិត៖
+            $$ \\sin\\theta_c = \\frac{n_2}{n_1} = \\frac{1}{n} $$
+            ជំនួសលេខ៖
+            $$ \\sin\\theta_c = \\frac{1}{${n.toFixed(2)}} \\approx ${sinThetaC.toFixed(4)} $$
+            $$ \\theta_c = \\arcsin(${sinThetaC.toFixed(4)}) \\approx \\mathbf{${thetaCDeg.toFixed(2)}^\\circ} $$
+            </p>
+            <p><strong>២. ការវិភាគដំណើរកាំពន្លឺក្នុងព្រីសកែង៖</strong><br>
+            កាំពន្លឺចាំងប៉ះកែង ($90^\\circ$) លើមុខទ្រុងវែងនៃព្រីសកែង ហើយឆ្លងកាត់ចូលក្នុងព្រីសដោយមិនងាកទិស ទៅប៉ះមុខឈរនៃព្រីសដោយមុំចំណាំងប៉ះខាងក្នុង $\\theta_i = 45^\\circ$។<br>
+            ${isTIR 
+                ? `ដោយសារ $\\theta_i = 45^\\circ > \\theta_c = ${thetaCDeg.toFixed(2)}^\\circ$ នោះកាំពន្លឺកើតមាន <strong>ចំណាំងផ្លាតទាំងស្រុង (Total Internal Reflection)</strong> នៅក្នុងព្រីសកែង។`
+                : `ដោយសារ $\\theta_i = 45^\\circ < \\theta_c = ${thetaCDeg.toFixed(2)}^\\circ$ នោះកាំពន្លឺមិនកើតមានចំណាំងផ្លាតទាំងស្រុងទេ គឺវា<strong>ចាំងបែរចេញទៅក្នុងខ្យល់វិញ</strong>។`
+            }</p>
+        `;
+
+        const solContainer = document.getElementById('solutionContent');
+        solContainer.innerHTML = mathHTML;
+
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([solContainer]);
+        }
+    }
+
+    function drawArrowOnSegment(x1, y1, x2, y2, frac, color) {
+        let ax = x1 + (x2 - x1) * frac;
+        let ay = y1 + (y2 - y1) * frac;
+        let angle = Math.atan2(y2 - y1, x2 - x1);
+
+        ctx.save();
+        ctx.translate(ax, ay);
+        ctx.rotate(angle);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(11, 0);
+        ctx.lineTo(-8, -8);
+        ctx.lineTo(-8, 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function drawClearText(text, x, y, font, fillColor, align = 'center', strokeColor = 'rgba(255,255,255,0.92)') {
+        ctx.save();
+        ctx.font = font;
+        ctx.textAlign = align;
+        ctx.textBaseline = 'middle';
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = strokeColor;
+        ctx.lineJoin = 'round';
+        ctx.strokeText(text, x, y);
+        ctx.fillStyle = fillColor;
+        ctx.fillText(text, x, y);
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // កូអរដោនេនៃព្រីសកែង A(កំពូលលើឆ្វេង), B(មុំកែងក្រោមឆ្វេង), C(មុំ 45° ក្រោមស្តាំ)
+        const L = 300;
+        const x0 = 210;
+        const y0 = 70;
+
+        const A = { x: x0, y: y0 };
+        const B = { x: x0, y: y0 + L };
+        const C = { x: x0 + L, y: y0 + L };
+
+        // ១. គូសតួព្រីសកែង
+        ctx.fillStyle = 'rgba(186, 230, 253, 0.55)';
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(A.x, A.y);
+        ctx.lineTo(B.x, B.y);
+        ctx.lineTo(C.x, C.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // ២. គូសសញ្ញាមុំកែង 90° នៅកំពូល B (ក្រោមឆ្វេង)
+        const sqSize = 24;
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 2.5;
+        ctx.strokeRect(B.x, B.y - sqSize, sqSize, sqSize);
+
+        // ៣. គូសធ្នូមុំ 45° នៅកំពូល C (ក្រោមស្តាំ) និងកំពូល A
+        ctx.beginPath();
+        ctx.arc(C.x, C.y, 58, Math.PI, Math.PI * 1.25);
+        ctx.stroke();
+        drawClearText('45°', C.x - 82, C.y - 26, 'bold 26px Arial', '#0f172a', 'center', 'rgba(224,242,254,0.9)');
+
+        // ៤. គណនាចំណុចប៉ះ P1 នៅលើមុខទ្រុងវែង AC
+        let t = rayPosRatio;
+        let P1 = {
+            x: A.x + t * L,
+            y: A.y + t * L
+        };
+
+        // គូសសញ្ញាកែង 90° នៅត្រង់ចំណុច P1 លើមុខទ្រុងវែង (ដូចក្នុងរូបប្រធានលំហាត់)
+        let uHyp = { x: 1 / Math.SQRT2, y: 1 / Math.SQRT2 };   // ទិសតាមទ្រុងវែង AC
+        let uNormOut = { x: 1 / Math.SQRT2, y: -1 / Math.SQRT2 }; // ទិសកែងចេញក្រៅ
+        let s = 18;
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(P1.x + uHyp.x * s, P1.y + uHyp.y * s);
+        ctx.lineTo(P1.x + uHyp.x * s + uNormOut.x * s, P1.y + uHyp.y * s + uNormOut.y * s);
+        ctx.lineTo(P1.x + uNormOut.x * s, P1.y + uNormOut.y * s);
+        ctx.stroke();
+
+        // ៥. គូសកាំពន្លឺចាំងប៉ះពីខាងក្រៅ (Incident Ray)
+        let extLen = 135;
+        let incStart = {
+            x: P1.x + uNormOut.x * extLen,
+            y: P1.y + uNormOut.y * extLen
+        };
+
+        ctx.strokeStyle = '#dc2626';
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        ctx.moveTo(incStart.x, incStart.y);
+        ctx.lineTo(P1.x, P1.y);
+        ctx.stroke();
+        drawArrowOnSegment(incStart.x, incStart.y, P1.x, P1.y, 0.48, '#dc2626');
+        drawClearText('កាំចាំងប៉ះ', incStart.x + 12, incStart.y - 10, 'bold 22px "Khmer OS Battambang"', '#dc2626', 'left');
+
+        // ៦. ដំណើរកាំពន្លឺនៅក្នុងព្រីសកែង
+        if (showInternal) {
+            // ចំណុចប៉ះ P2 នៅលើមុខឈរ AB (x = x0, y = y0 + 2*t*L)
+            let P2 = {
+                x: x0,
+                y: y0 + 2 * t * L
+            };
+
+            // កាំពន្លឺពី P1 ទៅ P2
+            ctx.strokeStyle = '#dc2626';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(P1.x, P1.y);
+            ctx.lineTo(P2.x, P2.y);
+            ctx.stroke();
+            drawArrowOnSegment(P1.x, P1.y, P2.x, P2.y, 0.55, '#dc2626');
+
+            // បន្ទាត់កែង (Normal) ត្រង់ P2
+            ctx.setLineDash([6, 5]);
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(P2.x - 75, P2.y);
+            ctx.lineTo(P2.x + 85, P2.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // ធ្នូមុំប៉ះខាងក្នុង 45° ត្រង់ P2
+            ctx.strokeStyle = '#dc2626';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(P2.x, P2.y, 42, -Math.PI / 4, 0);
+            ctx.stroke();
+            drawClearText('45°', P2.x + 62, P2.y - 22, 'bold 22px Arial', '#dc2626', 'center', 'rgba(224,242,254,0.9)');
+
+            let isTIR = 45.0 > thetaCDeg;
+
+            if (isTIR) {
+                // ចំណាំងផ្លាតទាំងស្រុងទៅប៉ះមុខដេក BC ត្រង់ P3
+                let P3 = {
+                    x: x0 + (1 - 2 * t) * L,
+                    y: y0 + L
+                };
+
+                ctx.strokeStyle = '#059669';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(P2.x, P2.y);
+                ctx.lineTo(P3.x, P3.y);
+                ctx.stroke();
+                drawArrowOnSegment(P2.x, P2.y, P3.x, P3.y, 0.55, '#059669');
+
+                // បន្ទាត់កែងត្រង់ P3
+                ctx.setLineDash([6, 5]);
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(P3.x, P3.y - 75);
+                ctx.lineTo(P3.x, P3.y + 45);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // ចំណាំងផ្លាតទាំងស្រុងលើកទី២ ចេញតាមមុខទ្រុងវែង AC ត្រង់ P4
+                let P4 = {
+                    x: x0 + (1 - t) * L,
+                    y: y0 + (1 - t) * L
+                };
+                let exitEnd = {
+                    x: P4.x + uNormOut.x * extLen,
+                    y: P4.y + uNormOut.y * extLen
+                };
+
+                ctx.strokeStyle = '#059669';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(P3.x, P3.y);
+                ctx.lineTo( exitEnd.x, exitEnd.y );
+                ctx.stroke();
+                drawArrowOnSegment(P3.x, P3.y, P4.x, P4.y, 0.55, '#059669');
+                drawArrowOnSegment(P4.x, P4.y, exitEnd.x, exitEnd.y, 0.55, '#059669');
+
+                drawClearText('កាំចាំងផ្លាតទាំងស្រុង', exitEnd.x + 10, exitEnd.y - 8, 'bold 21px "Khmer OS Battambang"', '#047857', 'left');
+            } else {
+                // ករណី n តូចជាង 1.41 (មុំកម្រិត > 45°) កាំពន្លឺចាំងបែរចេញតាមមុខឈរ AB ទៅខាងឆ្វេង
+                let sinRef = n * Math.sin(Math.PI / 4);
+                let refRad = Math.asin(Math.min(1, sinRef));
+                let outLen = 140;
+                let refOut = {
+                    x: P2.x - outLen * Math.cos(refRad),
+                    y: P2.y + outLen * Math.sin(refRad)
+                };
+
+                ctx.strokeStyle = '#d97706';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(P2.x, P2.y);
+                ctx.lineTo(refOut.x, refOut.y);
+                ctx.stroke();
+                drawArrowOnSegment(P2.x, P2.y, refOut.x, refOut.y, 0.55, '#d97706');
+                drawClearText(`កាំចាំងបែរ (${(refRad*180/Math.PI).toFixed(1)}°)`, refOut.x - 10, refOut.y + 15, 'bold 20px "Khmer OS Battambang"', '#b45309', 'center');
+            }
+        }
+
+        // ៧. ស្លាកព័ត៌មានធំច្បាស់នៅលើរូបភាព
+        drawClearText(`ព្រីសកែង (n = ${n.toFixed(2)})`, x0 + 145, y0 + 345, 'bold 25px "Khmer OS Battambang"', '#1e3a8a', 'center');
+        drawClearText(`មុំកម្រិត θc = ${thetaCDeg.toFixed(2)}°`, 620, 340, 'bold 26px "Khmer OS Battambang"', '#dc2626', 'center');
+
+        requestAnimationFrame(render);
+    }
+
+    updateSimulation();
+    render();
+</script>
+</body>
+</html>

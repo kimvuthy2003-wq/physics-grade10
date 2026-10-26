@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ដែនម៉ាញេទិចនៃចរន្តត្រង់ </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Load Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f0fdf4; 
+            color: #1f2937;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #cbd5e1;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #10b981;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+        }
+        #canvas-container {
+            width: 100%;
+            height: 500px;
+            cursor: grab;
+            border-radius: 1rem;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #e0f2fe, #f0fdf4);
+        }
+        #canvas-container:active {
+            cursor: grabbing;
+        }
+        .hand-rule-box {
+            transition: all 0.3s ease;
+        }
+        .thumb-up { transform: rotate(0deg); transition: transform 0.3s; }
+        .thumb-down { transform: rotate(180deg) scaleX(-1); transition: transform 0.3s; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <header class="text-center mb-6">
+        <h1 class="text-3xl md:text-4xl font-bold text-emerald-700 mb-2">ដែនម៉ាញេទិចដែលបង្កើតដោយចរន្តអគ្គិសនីត្រង់</h1>
+       
+    </header>
+
+    <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- ========================================== -->
+        <!-- 3D CANVAS SECTION (Left: 2 Columns) -->
+        <!-- ========================================== -->
+        <section class="lg:col-span-2 bg-white rounded-2xl p-4 shadow-lg border border-green-200">
+            <div class="flex justify-between items-center mb-4 px-2 border-b border-gray-100 pb-2">
+                <h2 class="font-bold text-gray-800">គំនូសបំព្រួញសៀគ្វី ៣វិមាត្រ</h2>
+                <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded">Orbit Control Enabled</span>
+            </div>
+            
+            <div id="canvas-container" class="border-2 border-slate-100 shadow-inner relative">
+                <div class="absolute bottom-4 left-4 bg-white/80 backdrop-blur px-3 py-2 rounded-lg shadow text-xs text-gray-600 pointer-events-none">
+                    - ចុចទាញ (Drag) ដើម្បីបង្វិល<br>
+                    - Scroll ដើម្បីពង្រីក/បង្រួម
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- CONTROLS & INFO SECTION (Right: 1 Column) -->
+        <!-- ========================================== -->
+        <section class="flex flex-col gap-6">
+            
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-green-200">
+                <h3 class="text-xl font-bold text-emerald-800 mb-4 border-b border-gray-100 pb-2">ការកំណត់ (Controls)</h3>
+                
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="font-bold text-gray-700">ចរន្តអគ្គិសនី I (A)</label>
+                            <span id="iDisp" class="font-bold text-rose-600 text-lg">10 A</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">ទាញទៅឆ្វេង (អវិជ្ជមាន) ដើម្បីប្តូរទិសដៅចរន្តចុះក្រោម</div>
+                        <input type="range" id="iSlider" min="-30" max="30" value="10" step="1" class="slider">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="font-bold text-gray-700">ចម្ងាយពីខ្សែ r (cm)</label>
+                            <span id="rDisp" class="font-bold text-slate-600 text-lg">5 cm</span>
+                        </div>
+                        <input type="range" id="rSlider" min="2" max="15" value="5" step="1" class="slider mt-2">
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                    <div class="text-sm text-gray-500 mb-1">អាំងតង់ស៊ីតេដែនម៉ាញេទិច B ត្រង់ M</div>
+                    <div id="bResultDisplay" class="text-2xl font-bold text-sky-600">B = 40.00 μT</div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-green-200 hand-rule-box flex-grow flex flex-col items-center justify-center">
+                <h3 class="text-lg font-bold text-emerald-800 mb-4 w-full text-center border-b border-gray-100 pb-2">វិធានដៃស្តាំ</h3>
+                
+                <div class="relative w-40 h-40 bg-green-50 rounded-full flex items-center justify-center border-4 border-green-100 mb-4">
+                    <svg id="bFieldArrows" class="absolute w-full h-full text-sky-400 opacity-70" viewBox="0 0 100 100">
+                        <defs>
+                            <marker id="arrowB2D" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+                            </marker>
+                        </defs>
+                        <path id="arcPath1" d="M 50 10 A 40 40 0 0 1 90 50" fill="none" stroke="currentColor" stroke-width="3" marker-end="url(#arrowB2D)"/>
+                        <path id="arcPath2" d="M 50 90 A 40 40 0 0 1 10 50" fill="none" stroke="currentColor" stroke-width="3" marker-end="url(#arrowB2D)"/>
+                    </svg>
+                    
+                    <svg id="handSvg" class="w-20 h-20 text-rose-500 thumb-up relative z-10" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
+                    </svg>
+                </div>
+
+                <div id="ruleText" class="text-sm text-gray-600 text-center px-4 font-bold">
+                    ចរន្តឡើងលើ (I>0)<br>មេដៃចង្អុលឡើង ម្រាម៤រុំស្របទ្រនិចនាឡិកា។
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- 1. Three.js Initialization ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0fdf4);
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(25, 15, 25);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 10);
+        scene.add(dirLight);
+
+        // --- 2. Create 3D Objects ---
+        
+        // Grid
+        const gridHelper = new THREE.GridHelper(30, 30, 0xcbd5e1, 0xe2e8f0);
+        scene.add(gridHelper);
+        
+        // Central Wire (Copper Color)
+        const wireGeo = new THREE.CylinderGeometry(0.4, 0.4, 40, 32);
+        const wireMat = new THREE.MeshStandardMaterial({ 
+            color: 0xb87333, // ទង់ដែង
+            metalness: 0.7, 
+            roughness: 0.3 
+        });
+        const wire = new THREE.Mesh(wireGeo, wireMat);
+        scene.add(wire);
+
+        // Custom 3D Arrow for Current (I) - ព្រួញចរន្តពណ៌ក្រហមធំ
+        const currentGroup = new THREE.Group();
+        const arrowMat = new THREE.MeshPhongMaterial({ color: 0xff0000 }); // ពណ៌ក្រហមឆ្អៅ
+        
+        const shaftGeo = new THREE.CylinderGeometry(0.35, 0.35, 6, 16);
+        const shaft = new THREE.Mesh(shaftGeo, arrowMat);
+        shaft.position.y = 0;
+        
+        const headGeo = new THREE.ConeGeometry(1.2, 2.5, 16);
+        const head = new THREE.Mesh(headGeo, arrowMat);
+        head.position.y = 4.25; // ពាក់កណ្តាលតួ (3) + ពាក់កណ្តាលក្បាល (1.25)
+        
+        currentGroup.add(shaft);
+        currentGroup.add(head);
+        scene.add(currentGroup);
+
+        // Magnetic Field Circle (Dashed Line)
+        const circleMaterial = new THREE.LineDashedMaterial({
+            color: 0x0ea5e9,
+            linewidth: 2,
+            scale: 1,
+            dashSize: 0.5,
+            gapSize: 0.5,
+        });
+        let circleGeometry = new THREE.BufferGeometry();
+        let bFieldCircle = new THREE.Line(circleGeometry, circleMaterial);
+        bFieldCircle.rotation.x = Math.PI / 2;
+        scene.add(bFieldCircle);
+
+        // Points O and M
+        const pointOGeo = new THREE.SphereGeometry(0.4, 16, 16);
+        const pointOMat = new THREE.MeshBasicMaterial({ color: 0x1f2937 });
+        const pointO = new THREE.Mesh(pointOGeo, pointOMat);
+        scene.add(pointO);
+
+        const pointMGeo = new THREE.SphereGeometry(0.5, 16, 16);
+        const pointMMat = new THREE.MeshBasicMaterial({ color: 0x0284c7 });
+        const pointM = new THREE.Mesh(pointMGeo, pointMMat);
+        scene.add(pointM);
+
+        // Magnetic Field Vector (B) at Point M (ក្បាលព្រួញធំជាងមុន)
+        const bVector = new THREE.ArrowHelper(
+            new THREE.Vector3(0, 0, -1),
+            new THREE.Vector3(5, 0, 0),
+            4,
+            0x0284c7,
+            1.8, // headLength ធំជាងមុន
+            1.2  // headWidth ធំជាងមុន
+        );
+        scene.add(bVector);
+
+        // --- 3. UI Logic and Updates ---
+        const iSlider = document.getElementById('iSlider');
+        const rSlider = document.getElementById('rSlider');
+        const iDisp = document.getElementById('iDisp');
+        const rDisp = document.getElementById('rDisp');
+        const bResultDisplay = document.getElementById('bResultDisplay');
+        const handSvg = document.getElementById('handSvg');
+        const ruleText = document.getElementById('ruleText');
+        const arcPath1 = document.getElementById('arcPath1');
+        const arcPath2 = document.getElementById('arcPath2');
+
+        const MU_0_OVER_2PI = 2e-7;
+
+        function updateSimulation() {
+            const I = parseFloat(iSlider.value);
+            const r_cm = parseFloat(rSlider.value);
+            const r_m = r_cm / 100;
+
+            iDisp.textContent = `${I} A`;
+            rDisp.textContent = `${r_cm} cm`;
+
+            let B = 0;
+            if (I !== 0) {
+                B = (MU_0_OVER_2PI * Math.abs(I)) / r_m;
+                const B_uT = B * 1e6;
+                bResultDisplay.textContent = `B = ${B_uT.toFixed(2)} μT`;
+            } else {
+                bResultDisplay.textContent = `B = 0.00 μT`;
+            }
+
+            const radius = r_cm;
+            
+            // ធ្វើបច្ចុប្បន្នភាពរង្វង់
+            const points = [];
+            for (let i = 0; i <= 64; i++) {
+                const theta = (i / 64) * Math.PI * 2;
+                points.push(new THREE.Vector3(Math.cos(theta) * radius, Math.sin(theta) * radius, 0));
+            }
+            bFieldCircle.geometry.dispose();
+            bFieldCircle.geometry = new THREE.BufferGeometry().setFromPoints(points);
+            bFieldCircle.computeLineDistances();
+
+            pointM.position.set(radius, 0, 0);
+
+            // ធ្វើបច្ចុប្បន្នភាពទិសដៅព្រួញ
+            if (I === 0) {
+                currentGroup.visible = false;
+                bVector.visible = false;
+            } else {
+                currentGroup.visible = true;
+                bVector.visible = true;
+
+                let visualLength = Math.max(3, Math.min(10, (Math.abs(I)/r_cm) * 3));
+                bVector.position.set(radius, 0, 0);
+                bVector.setLength(visualLength, 1.8, 1.2);
+
+                if (I > 0) {
+                    // ចរន្តឡើងលើ
+                    currentGroup.rotation.z = 0;
+                    currentGroup.position.set(1.5, 6, 0); // រំកិលចេញពីខ្សែបន្តិច
+                    
+                    bVector.setDirection(new THREE.Vector3(0, 0, -1));
+                    
+                    handSvg.className = "w-20 h-20 text-rose-500 thumb-up relative z-10";
+                    ruleText.innerHTML = "ចរន្តឡើងលើ (I > 0)<br><span class='text-emerald-600'>មេដៃចង្អុលឡើង ម្រាម៤រុំស្របទ្រនិចនាឡិកាច្រាស។</span>";
+                    arcPath1.setAttribute('d', 'M 90 50 A 40 40 0 0 0 50 10');
+                    arcPath2.setAttribute('d', 'M 10 50 A 40 40 0 0 0 50 90');
+                } else {
+                    // ចរន្តចុះក្រោម
+                    currentGroup.rotation.z = Math.PI;
+                    currentGroup.position.set(1.5, -6, 0); // រំកិលចេញពីខ្សែបន្តិច
+                    
+                    bVector.setDirection(new THREE.Vector3(0, 0, 1));
+                    
+                    handSvg.className = "w-20 h-20 text-sky-500 thumb-down relative z-10";
+                    ruleText.innerHTML = "ចរន្តចុះក្រោម (I < 0)<br><span class='text-sky-600'>មេដៃចង្អុលចុះ ម្រាម៤រុំស្របទ្រនិចនាឡិកា។</span>";
+                    arcPath1.setAttribute('d', 'M 50 10 A 40 40 0 0 1 90 50');
+                    arcPath2.setAttribute('d', 'M 50 90 A 40 40 0 0 1 10 50');
+                }
+            }
+        }
+
+        iSlider.addEventListener('input', updateSimulation);
+        rSlider.addEventListener('input', updateSimulation);
+
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        updateSimulation();
+        animate();
+    </script>
+</body>
+</html>

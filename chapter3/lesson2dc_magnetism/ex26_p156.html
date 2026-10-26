@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី២៦ ដែនម៉ាញេទិចនៃខ្សែត្រង់អានន្ត</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Load Three.js សម្រាប់ 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        /* ស្ទីលអក្សរខ្មែរទូទៅ */
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            margin: 0;
+            overflow-x: hidden;
+            font-size: 1.15rem; 
+            line-height: 1.8;
+        }
+        
+        .kh { font-family: 'Battambang', sans-serif; }
+
+        /* ស្ទីលសម្រាប់រូបមន្តគណិតវិទ្យា */
+        .math {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.35rem; 
+            letter-spacing: 0.03em;
+        }
+        .math-bold { font-weight: bold; }
+        .math-sub { font-size: 0.65em; vertical-align: -0.25em; }
+        .math-sup { font-size: 0.65em; vertical-align: super; }
+
+        .text-blue { color: #1d4ed8; }
+        .text-red { color: #dc2626; }
+        .text-emerald { color: #059669; }
+        .text-amber { color: #d97706; }
+        .text-purple { color: #7e22ce; }
+
+        /* ទម្រង់ប្រភាគដ៏រឹងមាំ */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.3em;
+            font-size: 0.95em;
+        }
+        .fraction > span { padding: 0.1em 0.3em; line-height: 1.2;}
+        .fraction .fdn { 
+            border-top: 1.5px solid currentColor; 
+            width: 100%; 
+            text-align: center; 
+        }
+
+        /* ប្រអប់ការពារការដាច់រូបមន្តបញ្ឈរ */
+        .equation-box {
+            display: flex;
+            flex-wrap: wrap; 
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .math-block {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: nowrap; 
+            overflow-x: auto; 
+            max-width: 100%;
+            padding-bottom: 0.2rem;
+            scrollbar-width: none; 
+        }
+        .math-block::-webkit-scrollbar { display: none; }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #cbd5e1;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #d97706; 
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(217, 119, 6, 0.5);
+        }
+        
+        #canvas-container {
+            width: 100%;
+            height: 450px;
+            border-radius: 0.75rem;
+            background: linear-gradient(to bottom, #87ceeb, #e0f6ff); /* ពណ៌មេឃ */
+            overflow: hidden;
+            position: relative;
+            cursor: grab;
+            border: 2px solid #cbd5e1;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        #canvas-container:active { cursor: grabbing; }
+        canvas { display: block; outline: none; }
+        
+        .solution-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.7s ease-in-out;
+        }
+        .solution-content.open {
+            max-height: 4000px;
+            opacity: 1;
+            margin-top: 1.5rem;
+        }
+
+        .toggle-checkbox:checked { right: 0; border-color: #3b82f6; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #3b82f6; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- ========================================== -->
+        <!-- 1. ប្រធានលំហាត់ -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <h2 class="text-2xl font-bold text-amber-700 mb-4 border-b border-slate-100 pb-3 flex items-center gap-2">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                លំហាត់ទី២៦
+            </h2>
+            <div class="text-justify font-medium space-y-4 kh">
+                <p>26. ខ្សែកាបបញ្ជូនអានុភាពអគ្គិសនីមួយឆ្លងកាត់ដោយចរន្ត <span class="math math-bold text-red">I = <span id="prob_i">95</span> A</span> មានទិសដៅទៅលិច នៅកម្ពស់ <span class="math math-bold text-blue">r = <span id="prob_r">8.0</span> m</span> ពីដី ។</p>
+                <ul class="pl-8 space-y-2">
+                    <li>ក. កំណត់អាំងតង់ស៊ីតេ និងទិសដៅដែនម៉ាញេទិចខាងក្រោមខ្សែកាបត្រង់ដី ។</li>
+                    <li>ខ. ប្រៀបធៀបដែនម៉ាញេទិចនេះទៅនឹងដែនម៉ាញេទិចផែនដី <span class="math math-bold text-amber">B<span class="math-sub">E</span> = 5.0 &times; 10<span class="math-sup">-5</span> T</span> ។</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 2. INTERACTIVE PANEL (3D CANVAS & CONTROLS) -->
+        <!-- ========================================== -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- 3D Canvas -->
+            <div class="lg:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col">
+                <div class="flex justify-between items-center mb-4 px-2 flex-wrap gap-4">
+                    <h3 class="font-bold text-gray-800 text-xl kh">ផ្ទាំងបង្ហាញលក្ខណៈរូបអន្តរកម្ម 3D</h3>
+                    <div class="flex items-center gap-3">
+                        <span class="kh text-sm font-bold bg-slate-100 text-slate-600 px-3 py-1 rounded-full shadow-sm">បង្វិលស្វ័យប្រវត្តិ</span>
+                        <div class="relative inline-block w-10 align-middle select-none">
+                            <input type="checkbox" id="toggleAutoRotate" checked class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer z-10 top-0 left-0 transition-all duration-300"/>
+                            <label for="toggleAutoRotate" class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300"></label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="canvas-container" class="flex-grow">
+                    <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-3 rounded-xl shadow-lg text-gray-800 pointer-events-none z-10 border border-white/50">
+                        <ul class="space-y-3 font-medium text-[0.95rem] kh">
+                            <li class="flex items-center gap-3"><span class="w-6 h-1 bg-slate-800 rounded-sm"></span> ខ្សែកាបបញ្ជូនអគ្គិសនី</li>
+                            <li class="flex items-center gap-3"><span class="w-4 h-4 rounded-full bg-red-500"></span> ចរន្ត <span class="math text-red-600 font-bold">I</span> (ទៅលិច)</li>
+                            <li class="flex items-center gap-3"><span class="w-4 h-1 bg-emerald-500"></span> វ៉ិចទ័រដែនម៉ាញេទិច <span class="math text-emerald-600 font-bold">B</span></li>
+                            <li class="flex items-center gap-3"><span class="w-4 h-1 border-t-2 border-dashed border-blue-600"></span> កម្ពស់ <span class="math text-blue-600 font-bold">r</span> ពីដី</li>
+                        </ul>
+                    </div>
+                    <!-- Compass Overlay -->
+                    <div class="absolute top-4 right-4 bg-white/80 backdrop-blur p-2 rounded-full shadow-md pointer-events-none border border-slate-200 w-16 h-16 flex justify-center items-center">
+                        <div class="relative w-full h-full text-xs font-bold text-slate-700 font-sans">
+                            <span class="absolute top-0 left-1/2 -translate-x-1/2">N (ជើង)</span>
+                            <span class="absolute bottom-0 left-1/2 -translate-x-1/2">S (ត្បូង)</span>
+                            <span class="absolute right-0 top-1/2 -translate-y-1/2">E (កើត)</span>
+                            <span class="absolute left-0 top-1/2 -translate-y-1/2">W (លិច)</span>
+                        </div>
+                    </div>
+                    <!-- Guide -->
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white/90 px-4 py-1.5 rounded-full text-sm backdrop-blur pointer-events-none kh border border-white/20 whitespace-nowrap">
+                        ប្រើម៉ៅស៍អូសបង្វិល 🔄 | Scroll ពង្រីក 🔍
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col gap-6">
+                <h3 class="text-xl font-bold text-amber-700 border-b border-slate-100 pb-3 kh">ការកំណត់តម្លៃ</h3>
+                
+                <div class="space-y-8">
+                    <!-- I Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">អាំងតង់ស៊ីតេចរន្ត <span class="math text-red-600">I</span></label>
+                            <span class="math math-bold text-red"><span id="iDisp">95.0</span> A</span>
+                        </div>
+                        <input type="range" id="iSlider" min="10" max="200" value="95" step="5" class="slider py-2 bg-red-400">
+                    </div>
+
+                    <!-- r Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">កម្ពស់ពីដី <span class="math text-blue-600">r</span></label>
+                            <span class="math math-bold text-blue"><span id="rDisp">8.0</span> m</span>
+                        </div>
+                        <input type="range" id="rSlider" min="2.0" max="20.0" value="8.0" step="0.5" class="slider py-2 bg-blue-400">
+                    </div>
+                </div>
+
+                <!-- Live Results -->
+                <div class="mt-auto space-y-4">
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 flex flex-col justify-center items-center shadow-sm h-28">
+                        <div class="font-bold text-emerald-800 kh text-[1rem]">ដែនម៉ាញេទិចនៅដី <span class="math">B</span></div>
+                        <div class="math math-bold text-emerald text-[1.8rem] mt-1" id="bDisp">0.24 &times; 10<span class="math-sup">-5</span> T</div>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded-xl border border-purple-100 text-center shadow-sm">
+                        <div class="font-bold text-purple-800 kh text-sm">ប្រៀបធៀបធៀបនឹង <span class="math">B<span class="math-sub">E</span></span></div>
+                        <div class="math math-bold text-purple-600 text-[1.4rem]" id="pctDisp">4.75 %</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 3. ដំណោះស្រាយ (SOLUTION TOGGLE) -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <button id="toggleBtn" class="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold py-4 px-6 rounded-xl shadow-md transition-colors flex justify-center items-center gap-3">
+                <svg id="toggleIcon" class="w-6 h-6 transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                <span id="btnText" class="text-xl kh">បង្ហាញដំណោះស្រាយលម្អិត</span>
+            </button>
+
+            <div id="solutionBox" class="solution-content bg-slate-50 border border-slate-200 rounded-xl p-6 md:p-10 mt-6">
+                <h3 class="font-bold text-[#d97706] border-b-2 border-slate-200 pb-3 mb-8 text-3xl inline-block border-b-[#f59e0b] kh">ដំណោះស្រាយ</h3>
+                
+                <div class="space-y-10">
+                    
+                    <!-- Part A -->
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-gray-800 text-2xl mb-6 kh">
+                            ក. កំណត់អាំងតង់ស៊ីតេ និងទិសដៅដែនម៉ាញេទិច <span class="math math-bold text-emerald-700">B</span>
+                        </h4>
+                        <div>
+                            <p class="kh text-gray-700 font-bold mb-2">❖ គណនាអាំងតង់ស៊ីតេដែនម៉ាញេទិច៖</p>
+                            <p class="kh text-gray-700">តាមរូបមន្តដែនម៉ាញេទិចបង្កើតដោយខ្សែចម្លងត្រង់វែងអានន្ត៖</p>
+                            
+                            <!-- ប្រអប់រូបមន្តរឹងមាំ (Robust Math Block) -->
+                            <div class="equation-box">
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap text-blue-700 font-bold">B = </span>
+                                    <div class="fraction math text-blue-700 font-bold">
+                                        <span>&mu;<span class="math-sub">0</span> &times; I</span>
+                                        <span class="fdn">2&pi; &times; r</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap text-blue-700 font-bold"> = </span>
+                                    <div class="fraction math text-blue-700 font-bold">
+                                        <span>4&pi; &times; 10<span class="math-sup">-7</span> &times; I</span>
+                                        <span class="fdn">2&pi; &times; r</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap text-blue-700 font-bold"> = 2 &times; 10<span class="math-sup">-7</span> &times; </span>
+                                    <div class="fraction math text-blue-700 font-bold">
+                                        <span>I</span>
+                                        <span class="fdn">r</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="equation-box mt-5">
+                                <span class="kh mr-2 font-medium">ជំនួសលេខ៖</span>
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">B = 2 &times; 10<span class="math-sup">-7</span> &times; </span>
+                                    <div class="fraction math">
+                                        <span id="sol_i">95</span>
+                                        <span class="fdn" id="sol_r">8.0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="equation-box mt-3">
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">B = </span>
+                                    <div class="fraction math">
+                                        <span><span id="sol_mult">190</span> &times; 10<span class="math-sup">-7</span></span>
+                                        <span class="fdn" id="sol_r_bot">8.0</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = <span id="sol_b_calc">23.75</span> &times; 10<span class="math-sup">-7</span> T</span>
+                                </div>
+                            </div>
+                            
+                            <div class="equation-box mt-3">
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">B = <span class="math-bold text-emerald" id="sol_b_final1">0.2375</span> &times; 10<span class="math-sup">-5</span> T</span>
+                                </div>
+                            </div>
+
+                            <p class="kh text-gray-700 font-bold mt-8 mb-2 border-t border-dashed border-gray-300 pt-6">❖ កំណត់ទិសដៅដែនម៉ាញេទិចត្រង់ដី៖</p>
+                            <p class="kh text-gray-700 leading-relaxed">
+                                តាម <strong>វិធានដៃស្តាំ</strong> មេដៃចង្អុលតាមទិសដៅចរន្ត (ទៅទិសខាងលិច) ម្រាមទាំងបួនក្តាប់ជុំវិញខ្សែ។ នៅត្រង់ទីតាំងដី (ខាងក្រោមខ្សែ) ម្រាមទាំងបួនចង្អុលទៅ <strong>ទិសខាងត្បូង</strong> ។
+                            </p>
+
+                            <div class="mt-6 flex flex-wrap items-center gap-4 bg-emerald-50 p-5 rounded-xl border border-emerald-100">
+                                <span class="kh font-bold text-xl">ដូចនេះ៖</span>
+                                <span class="math math-bold text-emerald-700 border-b-[3px] border-emerald-600 pb-1 text-[1.6rem]">B &approx; <span id="sol_b_round">0.24</span> &times; 10<span class="math-sup">-5</span> T , ទៅត្បូង</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Part B -->
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-gray-800 text-2xl mb-6 kh">
+                            ខ. ប្រៀបធៀប <span class="math math-bold text-emerald-700">B</span> ជាមួយដែនម៉ាញេទិចផែនដី <span class="math math-bold text-amber-600">B<span class="math-sub">E</span></span>
+                        </h4>
+                        <div>
+                            <p class="kh">យើងធ្វើផលធៀបរវាងដែនម៉ាញេទិចទាំងពីរ៖</p>
+                            
+                            <div class="equation-box mt-4">
+                                <div class="math-block">
+                                    <div class="fraction math">
+                                        <span>B</span>
+                                        <span class="fdn">B<span class="math-sub">E</span></span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = </span>
+                                    <div class="fraction math">
+                                        <span id="sol_ratio_top">0.2375 &times; 10<span class="math-sup">-5</span></span>
+                                        <span class="fdn">5.0 &times; 10<span class="math-sup">-5</span></span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = </span>
+                                    <div class="fraction math">
+                                        <span id="sol_ratio_num">0.2375</span>
+                                        <span class="fdn">5.0</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = <span class="math-bold text-purple" id="sol_ratio_calc">0.0475</span></span>
+                                </div>
+                            </div>
+                            
+                            <p class="kh mt-5">គិតជាភាគរយ៖ <span class="math">0.0475 &times; 100\% = <span class="math-bold text-purple" id="sol_pct">4.75</span>\%</span></p>
+
+                            <div class="mt-6 flex flex-wrap items-center gap-4 bg-purple-50 p-5 rounded-xl border border-purple-100">
+                                <span class="kh font-bold text-xl">សន្និដ្ឋាន៖</span>
+                                <span class="kh font-bold text-purple-800 text-[1.3rem] leading-relaxed">ដែនម៉ាញេទិចបង្កើតដោយខ្សែកាប មានតម្លៃប្រហែល <span class="math text-purple-700 text-[1.6rem]" id="sol_pct_final">5</span>% នៃដែនម៉ាញេទិចផែនដីប៉ុណ្ណោះ។</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- 3D Three.js Logic -->
+    <script>
+        const container = document.getElementById('canvas-container');
+        const iSlider = document.getElementById('iSlider');
+        const rSlider = document.getElementById('rSlider');
+        const toggleAutoRotate = document.getElementById('toggleAutoRotate');
+
+        // --- 1. Scene Setup ---
+        const scene = new THREE.Scene();
+        // Fog to blend ground into sky
+        scene.fog = new THREE.FogExp2(0xe0f6ff, 0.015);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        // Position camera to see East-West (X axis) and ground (XZ plane)
+        // X = East-West, Y = Up-Down, Z = North-South
+        camera.position.set(20, 15, 30);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.0;
+        // Limit rotation so we don't go below ground
+        controls.maxPolarAngle = Math.PI / 2 - 0.05; 
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 30, 20);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // --- 2. 3D Objects Construction ---
+        
+        // Ground Plane (XZ plane)
+        const groundGeo = new THREE.PlaneGeometry(200, 200);
+        const groundMat = new THREE.MeshStandardMaterial({ 
+            color: 0x86efac, // Greenish grass
+            roughness: 0.8,
+            metalness: 0.1
+        });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Grid Helper for ground
+        const gridHelper = new THREE.GridHelper(200, 40, 0x94a3b8, 0xcbd5e1);
+        scene.add(gridHelper);
+
+        // Compass Lines on Ground
+        // North-South (Z axis)
+        const nsLineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0.1, -20), new THREE.Vector3(0, 0.1, 20)]);
+        const nsLineMat = new THREE.LineBasicMaterial({ color: 0x64748b, linewidth: 2 });
+        scene.add(new THREE.Line(nsLineGeo, nsLineMat));
+        // East-West (X axis)
+        const ewLineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-20, 0.1, 0), new THREE.Vector3(20, 0.1, 0)]);
+        const ewLineMat = new THREE.LineBasicMaterial({ color: 0x64748b, linewidth: 2 });
+        scene.add(new THREE.Line(ewLineGeo, ewLineMat));
+
+        // Wire (Along X axis, East (+X) to West (-X))
+        const wireGeo = new THREE.CylinderGeometry(0.3, 0.3, 60, 16);
+        // Rotate cylinder to lay along X axis
+        wireGeo.rotateZ(Math.PI / 2);
+        const wireMat = new THREE.MeshStandardMaterial({ 
+            color: 0x334155, // Dark slate
+            metalness: 0.5,
+            roughness: 0.5 
+        });
+        const wire = new THREE.Mesh(wireGeo, wireMat);
+        wire.castShadow = true;
+        scene.add(wire);
+
+        // Electric Poles (just for visual context)
+        const poleGeo = new THREE.CylinderGeometry(0.4, 0.6, 20, 8);
+        const poleMat = new THREE.MeshStandardMaterial({ color: 0xa8a29e });
+        const pole1 = new THREE.Mesh(poleGeo, poleMat);
+        pole1.position.set(20, 10, 0); // Position will update based on r
+        pole1.castShadow = true;
+        scene.add(pole1);
+        const pole2 = new THREE.Mesh(poleGeo, poleMat);
+        pole2.position.set(-20, 10, 0);
+        pole2.castShadow = true;
+        scene.add(pole2);
+
+        // Current Animation (Red particles moving +X to -X)
+        const currentGroup = new THREE.Group();
+        scene.add(currentGroup);
+        const particleGeo = new THREE.SphereGeometry(0.6, 16, 16);
+        const particleMat = new THREE.MeshPhongMaterial({ 
+            color: 0xef4444, 
+            emissive: 0xdc2626,
+            shininess: 100
+        });
+        
+        const numParticles = 10;
+        for(let i=0; i<numParticles; i++) {
+            const p = new THREE.Mesh(particleGeo, particleMat);
+            p.position.x = 30 - (60 / numParticles) * i;
+            p.userData.offset = i;
+            currentGroup.add(p);
+        }
+
+        // Magnetic Field Elements
+        const fieldGroup = new THREE.Group();
+        scene.add(fieldGroup);
+
+        let fieldRing;
+        let rLine;
+        let vectorB_arrow;
+
+        const ringMat = new THREE.MeshBasicMaterial({ 
+            color: 0x34d399, 
+            transparent: true,
+            opacity: 0.4,
+            side: THREE.DoubleSide
+        });
+
+        // --- 3. Logic & UI Update ---
+        function formatSci_minus5(num) {
+            let val = num * 1e5;
+            return {
+                val: val,
+                html: `${val.toFixed(2)} &times; 10<span class="math-sup">-5</span>`
+            };
+        }
+
+        function updateSimulation() {
+            const I = parseFloat(iSlider.value);
+            const r_m = parseFloat(rSlider.value);
+
+            // Math Calculation
+            const B = (2e-7 * I) / r_m; // in Tesla
+            const B_format = formatSci_minus5(B);
+            
+            const BE = 5.0e-5;
+            const ratio = B / BE;
+            const pct = ratio * 100;
+
+            // UI Slider Texts
+            document.getElementById('iDisp').textContent = I.toFixed(1);
+            document.getElementById('rDisp').textContent = r_m.toFixed(1);
+            document.getElementById('bDisp').innerHTML = B_format.html + " T";
+            document.getElementById('pctDisp').textContent = pct.toFixed(2) + " %";
+
+            // Update Problem Texts
+            document.getElementById('prob_i').textContent = I.toFixed(0);
+            document.getElementById('prob_r').textContent = r_m.toFixed(1);
+
+            // Update Solution Texts
+            document.getElementById('sol_i').textContent = I.toFixed(0);
+            document.getElementById('sol_r').textContent = r_m.toFixed(1);
+            
+            const mult = I * 2;
+            document.getElementById('sol_mult').textContent = mult.toFixed(0);
+            document.getElementById('sol_r_bot').textContent = r_m.toFixed(1);
+            
+            let b_calc = mult / r_m; // 190 / 8 = 23.75
+            document.getElementById('sol_b_calc').textContent = b_calc.toFixed(2);
+            document.getElementById('sol_b_final1').textContent = B_format.val.toFixed(4);
+            document.getElementById('sol_b_round').textContent = B_format.val.toFixed(2);
+
+            document.getElementById('sol_ratio_top').innerHTML = B_format.html;
+            document.getElementById('sol_ratio_num').textContent = B_format.val.toFixed(4);
+            document.getElementById('sol_ratio_calc').textContent = ratio.toFixed(4);
+            
+            document.getElementById('sol_pct').textContent = pct.toFixed(2);
+            document.getElementById('sol_pct_final').textContent = Math.round(pct);
+
+            // --- Update 3D Scene ---
+            // Update Wire Height
+            wire.position.y = r_m;
+            currentGroup.position.y = r_m;
+            
+            // Adjust poles
+            pole1.scale.y = r_m / 20; // Default height was 20
+            pole1.position.y = r_m / 2;
+            pole2.scale.y = r_m / 20;
+            pole2.position.y = r_m / 2;
+
+            // Build Magnetic Field
+            if(fieldRing) fieldGroup.remove(fieldRing);
+            if(rLine) fieldGroup.remove(rLine);
+            if(vectorB_arrow) fieldGroup.remove(vectorB_arrow);
+
+            // Ring (YZ plane around the wire at X=0)
+            const ringGeo = new THREE.TorusGeometry(r_m, 0.05, 16, 100);
+            fieldRing = new THREE.Mesh(ringGeo, ringMat);
+            fieldRing.position.y = r_m; // Center of ring is on the wire
+            fieldRing.rotation.y = Math.PI / 2; // Face X axis
+            fieldGroup.add(fieldRing);
+
+            // Dashed Line for r (from wire down to ground at x=0, z=0)
+            const rLineGeo = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, r_m, 0),
+                new THREE.Vector3(0, 0, 0)
+            ]);
+            const rLineMat = new THREE.LineDashedMaterial({ 
+                color: 0x2563eb, // blue-600
+                linewidth: 2, 
+                dashSize: 0.5, 
+                gapSize: 0.5 
+            });
+            rLine = new THREE.Line(rLineGeo, rLineMat);
+            rLine.computeLineDistances(); 
+            fieldGroup.add(rLine);
+
+            // Vector B at the ground (y=0) directly below wire (x=0, z=0)
+            // Current flows East to West (+X to -X). 
+            // Thumb points -X.
+            // Fingers curl around. Below wire (at -Y relative to wire), fingers point +Z (South).
+            const dir = new THREE.Vector3(0, 0, 1).normalize(); // Pointing South
+            const origin = new THREE.Vector3(0, 0.2, 0); // Slightly above ground to be visible
+            
+            // Arrow length scales with B (visuall scaling)
+            // Max B is at I=200, r=2m -> B = 2e-5. B_format.val = 2.0
+            const max_val = 2.0;
+            const length = 2 + (B_format.val / max_val) * 4;
+
+            vectorB_arrow = new THREE.ArrowHelper(
+                dir, 
+                origin, 
+                length, 
+                0x10b981, // Emerald
+                length * 0.3, 
+                length * 0.2  
+            );
+            vectorB_arrow.line.material.linewidth = 4;
+            fieldGroup.add(vectorB_arrow);
+            
+            // Adjust Particle Speed
+            currentGroup.userData.speed = 0.1 + (I / 200) * 0.4;
+        }
+
+        // --- 4. Event Listeners ---
+        iSlider.addEventListener('input', updateSimulation);
+        rSlider.addEventListener('input', updateSimulation);
+
+        toggleAutoRotate.addEventListener('change', (e) => {
+            controls.autoRotate = e.target.checked;
+        });
+
+        // Solution Toggle
+        const toggleBtn = document.getElementById('toggleBtn');
+        const solutionBox = document.getElementById('solutionBox');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const btnText = document.getElementById('btnText');
+        let solutionOpen = false;
+
+        toggleBtn.addEventListener('click', () => {
+            solutionOpen = !solutionOpen;
+            if (solutionOpen) {
+                solutionBox.classList.add('open');
+                btnText.textContent = "លាក់ដំណោះស្រាយលម្អិត";
+                toggleIcon.style.transform = "rotate(0deg)";
+            } else {
+                solutionBox.classList.remove('open');
+                btnText.textContent = "បង្ហាញដំណោះស្រាយលម្អិត";
+                toggleIcon.style.transform = "rotate(180deg)";
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // --- 5. Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            const speed = currentGroup.userData.speed || 0.2;
+            currentGroup.children.forEach(p => {
+                p.position.x -= speed; // Move towards -X (West)
+                if (p.position.x < -30) {
+                    p.position.x = 30; 
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        updateSimulation();
+        animate();
+    </script>
+</body>
+</html>

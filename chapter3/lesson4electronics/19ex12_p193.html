@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី ១២៖ សៀគ្វីផ្គត់ផ្គង់តង់ស្យុង DC អាចលៃតម្រូវបាន (LM317)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Battambang:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 950px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #2563eb;
+            color: white;
+            padding: 16px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .problem-statement {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #1f2937;
+            margin-bottom: 24px;
+            padding: 16px;
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            border-radius: 4px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            max-width: 100%;
+            height: auto;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .top-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .switch-btn {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .switch-btn.off {
+            background-color: #ef4444;
+            box-shadow: 0 4px 0 #b91c1c;
+        }
+        .switch-btn.off:active { transform: translateY(4px); box-shadow: 0 0 0 #b91c1c; }
+
+        .switch-btn.on {
+            background-color: #10b981;
+            box-shadow: 0 4px 0 #059669;
+        }
+        .switch-btn.on:active { transform: translateY(4px); box-shadow: 0 0 0 #059669; }
+
+        .voltmeter {
+            background-color: #111827;
+            color: #10b981;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 3px solid #374151;
+            box-shadow: inset 0 0 10px rgba(0,255,0,0.2);
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background-color: #e2e8f0;
+            padding: 15px 25px;
+            border-radius: 8px;
+            width: 80%;
+        }
+
+        .slider-container label {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+        
+        .val-display {
+            width: 70px;
+            text-align: right;
+            font-weight: bold;
+            color: #1d4ed8;
+        }
+
+        .solution-btn-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .btn-solution {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #3b82f6;
+            color: white;
+            font-size: 1.1rem;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-solution:hover { background-color: #2563eb; }
+
+        .solution-box {
+            display: none;
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 20px;
+            color: #1e3a8a;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>លំហាត់ទី ១២៖ សៀគ្វីផ្គត់ផ្គង់តង់ស្យុង DC អាចលៃតម្រូវបាន</h1>
+    </div>
+    
+    <div class="content">
+        <div class="problem-statement">
+            <strong>១២. គេដំឡើងសៀគ្វីដូចរូបខាងក្រោម ។</strong><br><br>
+            ក. ចូររៀបរាប់ឈ្មោះគ្រឿងអេឡិចត្រូនិកដែលយកមកប្រើក្នុងដ្យាក្រាមនៃសៀគ្វីនេះ ។<br>
+            ខ. ចូរបង្ហាញពីដំណើរការនៃសៀគ្វីនេះ ។<br>
+            គ. បើសិនជាអាច ចូរដំឡើងសៀគ្វីនេះលើបន្ទះសៀគ្វីជាក់ស្តែង និងវាស់តង់ស្យុងចេញ ដើម្បីពិនិត្យដំណើរការរបស់វា។
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="circuitCanvas" width="900" height="380"></canvas>
+            
+            <div class="controls">
+                <div class="top-controls">
+                    <button class="switch-btn off" id="powerBtn" onclick="togglePower()">បិទកុងតាក់ (OFF)</button>
+                    <div class="voltmeter" id="voltmeterDisplay">0.00 V</div>
+                </div>
+                
+                <div class="slider-container">
+                    <label>រេស៊ីស្តង់ប៉ូតង់ស្យូម៉ែត្រ (5kΩ)៖</label>
+                    <span style="font-size:12px;">0Ω (Min)</span>
+                    <input type="range" id="potSlider" min="0" max="5000" value="2500" step="10" oninput="updateSimulation()">
+                    <span style="font-size:12px;">5kΩ (Max)</span>
+                    <span class="val-display" id="potValDisplay">2500 Ω</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="solution-btn-container">
+            <button class="btn-solution" onclick="toggleSolution()">បង្ហាញដំណោះស្រាយ</button>
+        </div>
+
+        <div class="solution-box" id="solutionBox">
+            <h2 style="margin-top:0; border-bottom:2px solid #93c5fd; padding-bottom:8px;">ដំណោះស្រាយលំហាត់លេខ ១២</h2>
+            <ul>
+                <li><strong>ក. ឈ្មោះគ្រឿងអេឡិចត្រូនិក៖</strong>
+                    <ul>
+                        <li>ប្រភពចរន្តឆ្លាស់ (AC 12V Source)</li>
+                        <li>ស្ពានឌីយ៉ូត (Bridge Rectifier)</li>
+                        <li>កុងដង់សាទ័រប៉ូល (Electrolytic Capacitors): C1 (2200μF), C3 (10μF), C5 (220μF)</li>
+                        <li>កុងដង់សាទ័រគ្មានប៉ូល (Ceramic Capacitors): C2 (0.1μF), C4 (0.1μF)</li>
+                        <li>IC បញ្ចុះតង់ស្យុង LM317 (Voltage Regulator)</li>
+                        <li>រេស៊ីស្តង់ថេរ R1 (240Ω) និង ប៉ូតង់ស្យូម៉ែត្រ (5kΩ)</li>
+                        <li>ឌីយ៉ូតការពារ D1, D2 (1N4001)</li>
+                    </ul>
+                </li>
+                <li><strong>ខ. ដំណើរការនៃសៀគ្វី៖</strong><br>
+                    សៀគ្វីនេះគឺជា <strong>DC Adjustable Power Supply</strong>៖
+                    <ul>
+                        <li><strong>បំប្លែង និងត្រង៖</strong> ចរន្ត AC 12V ត្រូវបំប្លែងជា DC ដោយស្ពានឌីយ៉ូត និងត្រងឱ្យរាបស្មើដោយ C1 និង C2។</li>
+                        <li><strong>រក្សាតង់ស្យុង (Regulation)៖</strong> IC LM317 រក្សាតង់ស្យុងចេញឱ្យថេរ ដោយផ្អែកលើការលៃតម្រូវរេស៊ីស្តង់ប៉ូតង់ស្យូម៉ែត្រ ធៀបនឹង R1។ រូបមន្តគណនាគឺ <code>Vout = 1.25V × (1 + R_pot / 240)</code>។</li>
+                        <li><strong>ការការពារ (Protection)៖</strong> D1 និង D2 ការពារ IC ពីការឆក់បញ្ច្រាសនៅពេលបិទសៀគ្វី (ការពារការបញ្ចេញបន្ទុកពី C3 និង C5 ត្រឡប់ចូល IC)។</li>
+                        <li><strong>តម្រងបញ្ចេញ (Output Filter)៖</strong> C4 និង C5 ជួយឱ្យតង់ស្យុងចេញកាន់តែរាបស្មើ និងកាត់បន្ថយរំខាន (Noise) មុនបញ្ជូនទៅកាន់ឧបករណ៍ប្រើប្រាស់។</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('circuitCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Simulation Variables
+    let isPowerOn = false;
+    let potValue = 2500; // Ohms
+    let time = 0;
+    let outVoltage = 0;
+
+    // --- ORTHOGONAL COORDINATES ---
+    const AC_X = 60, AC_Y = 190;
+    const BR_X = 180, BR_Y = 190, BR_S = 30; // Bridge
+    const TOP_Y = 120;  // VI and VO Rail
+    const BOT_Y = 280;  // GND Rail
+    const ADJ_Y = 170;  // ADJ Rail
+
+    const C1_X = 240, C2_X = 290;
+    
+    // LM317 Box
+    const REG_X = 350, REG_Y = 95, REG_W = 70, REG_H = 40;
+    const PIN_VI_X = 350, PIN_VI_Y = 120;
+    const PIN_VO_X = 420, PIN_VO_Y = 120;
+    const PIN_ADJ_X = 385, PIN_ADJ_Y = 135;
+
+    // Protection D2 Top Rail
+    const D2_Y = 50; 
+    const D2_X_LEFT = 330, D2_X_RIGHT = 450;
+    const D2_CENTER = (D2_X_LEFT + D2_X_RIGHT) / 2;
+
+    const R1_X = 480;
+    const D1_X = 530;
+    
+    const POT_X = 420; 
+    const POT_TOP_Y = ADJ_Y, POT_BOT_Y = BOT_Y;
+
+    const C3_X = 500; 
+    const C4_X = 600;
+    const C5_X = 670;
+    
+    const OUT_X = 750;
+
+    function togglePower() {
+        isPowerOn = !isPowerOn;
+        const btn = document.getElementById('powerBtn');
+        if (isPowerOn) {
+            btn.innerText = "បិទកុងតាក់ (ON)";
+            btn.classList.replace('off', 'on');
+        } else {
+            btn.innerText = "បិទកុងតាក់ (OFF)";
+            btn.classList.replace('on', 'off');
+        }
+        updateSimulation();
+    }
+
+    function updateSimulation() {
+        potValue = parseInt(document.getElementById('potSlider').value);
+        document.getElementById('potValDisplay').innerText = potValue + " Ω";
+
+        if (isPowerOn) {
+            let theoretical_V = 1.25 * (1 + (potValue / 240));
+            outVoltage = Math.min(theoretical_V, 13.5); 
+            document.getElementById('voltmeterDisplay').innerText = outVoltage.toFixed(2) + " V";
+            document.getElementById('voltmeterDisplay').style.color = "#10b981";
+            document.getElementById('voltmeterDisplay').style.boxShadow = "inset 0 0 15px rgba(16,185,129,0.4)";
+        } else {
+            outVoltage = 0;
+            document.getElementById('voltmeterDisplay').innerText = "0.00 V";
+            document.getElementById('voltmeterDisplay').style.color = "#4b5563";
+            document.getElementById('voltmeterDisplay').style.boxShadow = "none";
+        }
+    }
+
+    function toggleSolution() {
+        const box = document.getElementById('solutionBox');
+        box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // --- DRAWING UTILS ---
+    function drawLine(x1, y1, x2, y2, color = '#374151', width = 2) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+    }
+
+    function drawNode(x, y) {
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#111827';
+        ctx.fill();
+    }
+
+    function drawGround(x, y) {
+        drawLine(x, y, x, y + 15);
+        drawLine(x - 15, y + 15, x + 15, y + 15);
+        drawLine(x - 10, y + 20, x + 10, y + 20);
+        drawLine(x - 5, y + 25, x + 5, y + 25);
+    }
+
+    function drawDiode(x1, y1, x2, y2, label = "", isBridge = false) {
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        const midX = (x1 + x2) / 2;
+        const midY = (y1 + y2) / 2;
+        const dist = Math.hypot(x2 - x1, y2 - y1);
+        
+        ctx.save();
+        ctx.translate(midX, midY);
+        ctx.rotate(angle);
+        
+        // Draw the full wire connecting the two points exactly
+        drawLine(-dist/2, 0, dist/2, 0); 
+        
+        // Triangle (Anode)
+        ctx.beginPath();
+        ctx.moveTo(-8, -8);
+        ctx.lineTo(8, 0);
+        ctx.lineTo(-8, 8);
+        ctx.closePath();
+        ctx.fillStyle = '#1f2937';
+        ctx.fill();
+        
+        // Bar (Cathode)
+        drawLine(8, -8, 8, 8, '#1f2937', 3);
+        
+        ctx.restore();
+        
+        if (label && !isBridge) {
+            ctx.fillStyle = '#111827';
+            ctx.font = '12px Arial';
+            ctx.fillText(label, midX - 30, midY - 15); 
+        }
+    }
+
+    function drawBridgeRectifier(cx, cy, s) {
+        const nT = {x: cx, y: cy - s};
+        const nR = {x: cx + s, y: cy};
+        const nB = {x: cx, y: cy + s};
+        const nL = {x: cx - s, y: cy};
+
+        drawDiode(nL.x, nL.y, nT.x, nT.y, "", true); 
+        drawDiode(nB.x, nB.y, nL.x, nL.y, "", true); 
+        drawDiode(nR.x, nR.y, nT.x, nT.y, "", true); 
+        drawDiode(nB.x, nB.y, nR.x, nR.y, "", true); 
+        
+        drawNode(nT.x, nT.y); drawNode(nR.x, nR.y);
+        drawNode(nB.x, nB.y); drawNode(nL.x, nL.y);
+    }
+
+    // NEW: Perfectly connected Ceramic Capacitor
+    function drawCapacitorCeramic(x, yTop, yBot, label) {
+        const yMid = (yTop + yBot) / 2;
+        
+        // Solid wires from rails to plates
+        drawLine(x, yTop, x, yMid - 5);
+        drawLine(x, yBot, x, yMid + 5);
+        
+        // Parallel Plates
+        drawLine(x - 8, yMid - 5, x + 8, yMid - 5, '#374151', 3);
+        drawLine(x - 8, yMid + 5, x + 8, yMid + 5, '#374151', 3);
+        
+        ctx.fillStyle = '#111827';
+        ctx.font = '12px Arial';
+        if (label) {
+            let parts = label.split(' ');
+            ctx.fillText(parts[0], x + 15, yMid);
+            if (parts[1]) ctx.fillText(parts[1], x + 15, yMid + 15);
+        }
+    }
+
+    // NEW: Perfectly connected Electrolytic Capacitor
+    function drawCapacitorElectrolytic(x, yTop, yBot, label) {
+        const yMid = (yTop + yBot) / 2;
+        
+        // Solid wires from rails to plates
+        drawLine(x, yTop, x, yMid - 5);
+        drawLine(x, yBot, x, yMid + 5);
+        
+        // Positive plate (filled)
+        ctx.fillStyle = '#374151';
+        ctx.fillRect(x - 8, yMid - 5, 16, 4);
+        
+        // Negative plate (curve/stroke)
+        ctx.beginPath();
+        ctx.moveTo(x - 8, yMid + 5);
+        ctx.lineTo(x + 8, yMid + 5);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = '#111827';
+        ctx.font = '12px Arial';
+        if (label) {
+            let parts = label.split(' ');
+            ctx.fillText(parts[0], x + 15, yMid);
+            if (parts[1]) ctx.fillText(parts[1], x + 15, yMid + 15);
+        }
+        // Plus sign
+        ctx.fillText('+', x - 20, yMid - 10);
+    }
+
+    // NEW: Perfectly connected Resistor
+    function drawResistor(x, yTop, yBot, label = "") {
+        const yMid = (yTop + yBot) / 2;
+        
+        // Draw solid wires up to the resistor box
+        drawLine(x, yTop, x, yMid - 20);
+        drawLine(x, yBot, x, yMid + 20);
+        
+        ctx.save();
+        ctx.translate(x, yMid);
+        ctx.rotate(Math.PI / 2); // Vertical
+        
+        ctx.beginPath();
+        ctx.moveTo(-20, 0);
+        for(let i=0; i<5; i++) {
+            ctx.lineTo(-15 + i*8, -8);
+            ctx.lineTo(-11 + i*8, 8);
+        }
+        ctx.lineTo(20, 0);
+        ctx.strokeStyle = '#374151';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+        
+        if (label) {
+            ctx.fillStyle = '#111827';
+            ctx.font = '12px Arial';
+            ctx.fillText(label.split(' ')[0], x + 12, yMid);
+            ctx.fillText(label.split(' ')[1], x + 12, yMid + 15);
+        }
+    }
+
+    function drawPotentiometer(x, y_top, y_bot) {
+        let mid_y = (y_top + y_bot) / 2;
+        
+        // Main line
+        drawLine(x, y_top, x, y_bot);
+        
+        // Resistor Box
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(x - 8, mid_y - 20, 16, 40);
+        ctx.strokeRect(x - 8, mid_y - 20, 16, 40);
+        
+        // Wiper from ADJ line
+        drawLine(x, y_top, x - 25, y_top); // ADJ line left
+        drawLine(x - 25, y_top, x - 25, mid_y); // ADJ line down
+        drawLine(x - 25, mid_y, x - 10, mid_y); // Wiper to box
+        
+        // Arrow
+        ctx.beginPath();
+        ctx.moveTo(x - 10, mid_y);
+        ctx.lineTo(x - 15, mid_y - 4);
+        ctx.lineTo(x - 15, mid_y + 4);
+        ctx.fillStyle = '#374151';
+        ctx.fill();
+
+        ctx.fillStyle = '#111827';
+        ctx.font = '12px Arial';
+        ctx.fillText('5kΩ', x + 15, mid_y);
+    }
+
+    function drawCurrent(path, isDC) {
+        if (!isPowerOn) return;
+        ctx.save();
+        let p = (time * (isDC ? 2 : 1)) % 1;
+        
+        ctx.setLineDash([8, 12]);
+        ctx.lineDashOffset = -p * 20;
+        ctx.strokeStyle = isDC ? 'rgba(239, 68, 68, 0.8)' : 'rgba(59, 130, 246, 0.6)';
+        ctx.lineWidth = 3;
+        
+        ctx.beginPath();
+        ctx.moveTo(path[0].x, path[0].y);
+        for(let i=1; i<path.length; i++) {
+            ctx.lineTo(path[i].x, path[i].y);
+        }
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        time += 0.05;
+
+        // --- WIRING & COMPONENTS ---
+
+        // 1. AC Source & Lines to Bridge
+        ctx.beginPath();
+        ctx.arc(AC_X, AC_Y, 25, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff'; ctx.fill();
+        ctx.strokeStyle = '#374151'; ctx.lineWidth = 2; ctx.stroke();
+        // Sine wave
+        ctx.beginPath();
+        ctx.moveTo(AC_X - 15, AC_Y);
+        ctx.bezierCurveTo(AC_X - 5, AC_Y - 15, AC_X + 5, AC_Y + 15, AC_X + 15, AC_Y);
+        ctx.stroke();
+        ctx.fillStyle = '#111827'; ctx.font = '14px Arial';
+        ctx.fillText('AC 12V', AC_X - 25, AC_Y - 35);
+
+        // AC to Bridge Left
+        drawLine(AC_X, AC_Y - 25, AC_X, TOP_Y + 20);
+        drawLine(AC_X, TOP_Y + 20, BR_X - 60, TOP_Y + 20);
+        drawLine(BR_X - 60, TOP_Y + 20, BR_X - 60, BR_Y);
+        drawLine(BR_X - 60, BR_Y, BR_X - BR_S, BR_Y);
+
+        // AC to Bridge Right
+        drawLine(AC_X, AC_Y + 25, AC_X, BOT_Y - 20);
+        drawLine(AC_X, BOT_Y - 20, BR_X + 40, BOT_Y - 20);
+        drawLine(BR_X + 40, BOT_Y - 20, BR_X + 40, BR_Y);
+        drawLine(BR_X + 40, BR_Y, BR_X + BR_S, BR_Y);
+
+        // 2. Bridge Rectifier
+        drawBridgeRectifier(BR_X, BR_Y, BR_S);
+        
+        // DC Out from Bridge to Rails
+        drawLine(BR_X, BR_Y - BR_S, BR_X, TOP_Y); // DC+
+        drawLine(BR_X, BR_Y + BR_S, BR_X, BOT_Y); // DC-
+
+        // 3. Main Rails
+        drawLine(BR_X, TOP_Y, OUT_X, TOP_Y); // Top Rail (VI and VO line)
+        drawLine(BR_X, BOT_Y, OUT_X, BOT_Y); // Bottom Rail (GND)
+
+        // 4. Input Capacitors (FIXED GAPS)
+        drawCapacitorElectrolytic(C1_X, TOP_Y, BOT_Y, 'C1 2200uF');
+        drawNode(C1_X, TOP_Y); drawNode(C1_X, BOT_Y);
+
+        drawCapacitorCeramic(C2_X, TOP_Y, BOT_Y, 'C2 0.1uF');
+        drawNode(C2_X, TOP_Y); drawNode(C2_X, BOT_Y);
+
+        // 5. Regulator LM317 Box
+        ctx.fillStyle = '#9ca3af';
+        ctx.fillRect(REG_X, REG_Y, REG_W, REG_H);
+        ctx.strokeRect(REG_X, REG_Y, REG_W, REG_H);
+        ctx.fillStyle = '#111827';
+        ctx.font = '12px Arial';
+        ctx.fillText('LM317', REG_X + 15, REG_Y + 25);
+        ctx.fillText('3 VI', REG_X + 5, REG_Y + 15);
+        ctx.fillText('VO 1', REG_X + 35, REG_Y + 15);
+        ctx.fillText('2 ADJ', REG_X + 15, REG_Y + 35);
+        
+        // ADJ Pin connection
+        drawLine(PIN_ADJ_X, REG_Y + REG_H, PIN_ADJ_X, ADJ_Y);
+        drawLine(PIN_ADJ_X, ADJ_Y, D1_X, ADJ_Y); // ADJ Rail
+
+        // 6. Protection Diode D2 (VO to VI overhead)
+        drawLine(D2_X_LEFT, TOP_Y, D2_X_LEFT, D2_Y);
+        drawLine(D2_X_RIGHT, TOP_Y, D2_X_RIGHT, D2_Y);
+        drawDiode(D2_X_RIGHT, D2_Y, D2_X_LEFT, D2_Y, 'D2 1N4001');
+        drawNode(D2_X_LEFT, TOP_Y); drawNode(D2_X_RIGHT, TOP_Y);
+
+        // 7. R1 and Potentiometer (FIXED GAPS)
+        drawResistor(R1_X, TOP_Y, ADJ_Y, "R1 240Ω");
+        drawNode(R1_X, TOP_Y); drawNode(R1_X, ADJ_Y);
+
+        drawPotentiometer(POT_X, ADJ_Y, BOT_Y);
+        drawNode(POT_X, ADJ_Y); drawNode(POT_X, BOT_Y);
+
+        // 8. Diode D1 (ADJ to VO)
+        drawDiode(D1_X, ADJ_Y, D1_X, TOP_Y, 'D1 1N4001');
+        drawNode(D1_X, ADJ_Y); drawNode(D1_X, TOP_Y);
+
+        // 9. Output Capacitors (FIXED GAPS)
+        // C3 (10uF) ADJ to GND
+        drawCapacitorElectrolytic(C3_X, ADJ_Y, BOT_Y, 'C3 10uF');
+        drawNode(C3_X, ADJ_Y); drawNode(C3_X, BOT_Y);
+
+        // C4 (0.1uF) VO to GND
+        drawCapacitorCeramic(C4_X, TOP_Y, BOT_Y, 'C4 0.1uF');
+        drawNode(C4_X, TOP_Y); drawNode(C4_X, BOT_Y);
+
+        // C5 (220uF) VO to GND
+        drawCapacitorElectrolytic(C5_X, TOP_Y, BOT_Y, 'C5 220uF');
+        drawNode(C5_X, TOP_Y); drawNode(C5_X, BOT_Y);
+
+        // 10. Terminals & Ground
+        drawGround(BR_X + 180, BOT_Y);
+        drawNode(BR_X + 180, BOT_Y);
+
+        ctx.beginPath(); ctx.arc(OUT_X, TOP_Y, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(OUT_X, BOT_Y, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        
+        ctx.fillStyle = '#111827';
+        ctx.font = 'bold 16px Arial';
+        ctx.fillText('+', OUT_X + 15, TOP_Y + 5);
+        ctx.fillText('-', OUT_X + 15, BOT_Y + 5);
+        ctx.font = '14px Khmer OS Battambang';
+        ctx.fillText('តង់ស្យុងចេញ', OUT_X + 30, (TOP_Y+BOT_Y)/2);
+
+        // --- ANIMATED CURRENT FLOW ---
+        if (isPowerOn) {
+            // AC Input Current
+            drawCurrent([{x: AC_X, y: AC_Y - 25}, {x: AC_X, y: TOP_Y + 20}, {x: BR_X - 60, y: TOP_Y + 20}, {x: BR_X - 60, y: BR_Y}, {x: BR_X - BR_S, y: BR_Y}], false);
+            
+            // DC Positive Rail (Red)
+            drawCurrent([{x: BR_X, y: BR_Y - BR_S}, {x: BR_X, y: TOP_Y}, {x: OUT_X, y: TOP_Y}], true);
+            
+            // DC Ground Return
+            drawCurrent([{x: OUT_X, y: BOT_Y}, {x: BR_X, y: BOT_Y}, {x: BR_X, y: BR_Y + BR_S}], true);
+            
+            // Minor current through R1 and Pot
+            drawCurrent([{x: R1_X, y: TOP_Y}, {x: R1_X, y: ADJ_Y}], true);
+            drawCurrent([{x: R1_X, y: ADJ_Y}, {x: POT_X-25, y: ADJ_Y}, {x: POT_X-25, y: (ADJ_Y+BOT_Y)/2}, {x: POT_X-10, y: (ADJ_Y+BOT_Y)/2}], true);
+        }
+
+        requestAnimationFrame(render);
+    }
+
+    // Initialize display
+    updateSimulation();
+    render();
+</script>
+</body>
+</html>

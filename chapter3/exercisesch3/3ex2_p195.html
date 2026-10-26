@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី២៖ តង់ស្យុងរវាងចំណុច M, N, P, Q</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Battambang:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 850px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #2563eb;
+            color: white;
+            padding: 16px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .problem-statement {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #1f2937;
+            margin-bottom: 24px;
+            padding: 16px;
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 550px;
+            margin: 0 auto;
+            background-color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .slider-row label {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #1e3a8a;
+            width: 80px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .val-display {
+            width: 65px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #b91c1c;
+            background-color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .solution-box {
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 24px;
+            color: #1e3a8a;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .solution-box h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #93c5fd;
+            padding-bottom: 8px;
+            color: #1d4ed8;
+            font-size: 1.25rem;
+        }
+
+        .math-line {
+            background-color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #3b82f6;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 1.15rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .math-result {
+            color: #047857;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>លំហាត់ទី២៖ តង់ស្យុង ៤ ចំណុច M, N, P, Q</h1>
+    </div>
+    
+    <div class="content">
+        <div class="problem-statement">
+            <strong>២. គេមានបួនចំណុច M, N, P, Q នៃសៀគ្វីអគ្គិសនីមួយៗ ។</strong><br>
+            គេវាស់តង់ស្យុង 
+            <span id="textVmp" style="font-weight:bold; color:#b91c1c;">V<sub>MP</sub> = -5 V</span> , 
+            <span id="textVnq" style="font-weight:bold; color:#b91c1c;">V<sub>NQ</sub> = +10 V</span> និង 
+            <span id="textVmq" style="font-weight:bold; color:#b91c1c;">V<sub>MQ</sub> = 16 V</span> ។<br>
+            គណនាតង់ស្យុង V<sub>MN</sub> , V<sub>NP</sub> , V<sub>PQ</sub> ។
+        </div>
+
+        <div class="canvas-container">
+            <!-- បង្កើនកម្ពស់ Canvas ដើម្បីកុំឱ្យអក្សរបុកគ្នា -->
+            <canvas id="circuitCanvas" width="800" height="280"></canvas>
+        </div>
+
+        <div class="controls">
+            <div class="slider-row">
+                <label>V<sub>MP</sub> :</label>
+                <span>-30V</span>
+                <input type="range" id="sliderVmp" min="-30" max="30" value="-5" step="1" oninput="updateValues()">
+                <span>+30V</span>
+                <div class="val-display" id="valVmp">-5 V</div>
+            </div>
+            <div class="slider-row">
+                <label>V<sub>NQ</sub> :</label>
+                <span>-30V</span>
+                <input type="range" id="sliderVnq" min="-30" max="30" value="10" step="1" oninput="updateValues()">
+                <span>+30V</span>
+                <div class="val-display" id="valVnq">10 V</div>
+            </div>
+            <div class="slider-row">
+                <label>V<sub>MQ</sub> :</label>
+                <span>-30V</span>
+                <input type="range" id="sliderVmq" min="-30" max="30" value="16" step="1" oninput="updateValues()">
+                <span>+30V</span>
+                <div class="val-display" id="valVmq">16 V</div>
+            </div>
+            <button onclick="resetToProblem()" style="margin-top:10px; padding:8px; border:none; border-radius:4px; background-color:#3b82f6; color:white; font-family:'Khmer OS Battambang'; cursor:pointer; font-weight:bold;">កំណត់ដូចប្រធានដើម</button>
+        </div>
+
+        <div class="solution-box" id="solutionBox" style="margin-top: 24px;">
+            <h2>ដំណោះស្រាយ និងការគណនាជាជំហានៗ</h2>
+            
+            <div class="math-line">
+                <span>1. រក V<sub>MN</sub> ៖ V<sub>MQ</sub> = V<sub>MN</sub> + V<sub>NQ</sub> &rarr;</span>
+                <span class="math-result">V<sub>MN</sub> = V<sub>MQ</sub> - V<sub>NQ</sub> = (<span id="calcVmq1">16</span>) - (<span id="calcVnq1">10</span>) = <span id="ansVmn">6 V</span></span>
+            </div>
+            
+            <div class="math-line">
+                <span>2. រក V<sub>NP</sub> ៖ V<sub>MP</sub> = V<sub>MN</sub> + V<sub>NP</sub> &rarr;</span>
+                <span class="math-result">V<sub>NP</sub> = V<sub>MP</sub> - V<sub>MN</sub> = (<span id="calcVmp1">-5</span>) - (<span id="calcVmn1">6</span>) = <span id="ansVnp">-11 V</span></span>
+            </div>
+            
+            <div class="math-line">
+                <span>3. រក V<sub>PQ</sub> ៖ V<sub>MQ</sub> = V<sub>MP</sub> + V<sub>PQ</sub> &rarr;</span>
+                <span class="math-result">V<sub>PQ</sub> = V<sub>MQ</sub> - V<sub>MP</sub> = (<span id="calcVmq2">16</span>) - (<span id="calcVmp2">-5</span>) = <span id="ansVpq">21 V</span></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('circuitCanvas');
+    const ctx = canvas.getContext('2d');
+    const Y_LINE = 140; // តម្រឹមខ្សែនៅចំកណ្តាល Canvas
+
+    function drawLine(x1, y1, x2, y2, color = '#374151', width = 2) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+    }
+
+    function drawNode(x, y, label, yOffset = -15) {
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#111827';
+        ctx.fill();
+        
+        ctx.fillStyle = '#1e3a8a';
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText(label, x - 7, y + yOffset);
+    }
+
+    function drawMeasurementArrow(x1, x2, y, name1, name2, value, offsetDistance) {
+        if (Math.abs(x1 - x2) < 20) return; // មិនគូសបើចំណុចជាន់គ្នា
+
+        const midX = (x1 + x2) / 2;
+        const arrY = y + offsetDistance;
+
+        // គូសបន្ទាត់បញ្ឈរ (Dimension lines)
+        drawLine(x1, y + Math.sign(offsetDistance)*10, x1, arrY + Math.sign(offsetDistance)*5, '#9ca3af', 1);
+        drawLine(x2, y + Math.sign(offsetDistance)*10, x2, arrY + Math.sign(offsetDistance)*5, '#9ca3af', 1);
+        
+        // គូសបន្ទាត់ព្រួញផ្តេក
+        drawLine(x1, arrY, x2, arrY, '#3b82f6', 2);
+
+        // ក្បាលព្រួញសងខាង
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath(); ctx.moveTo(x1, arrY); ctx.lineTo(x1+8, arrY-4); ctx.lineTo(x1+8, arrY+4); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x2, arrY); ctx.lineTo(x2-8, arrY-4); ctx.lineTo(x2-8, arrY+4); ctx.fill();
+
+        // រៀបចំអក្សរ
+        let text = `V_${name1}${name2} = ${value > 0 ? '+'+value : value}V`;
+        ctx.font = 'bold 15px Arial';
+        let textWidth = ctx.measureText(text).width + 16;
+
+        // ប្រអប់ផ្ទៃខាងក្រោយអក្សរ ដើម្បីកុំឱ្យជាន់ខ្សែ
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(midX - textWidth/2, arrY - 12, textWidth, 24);
+
+        // សរសេរអក្សរ
+        ctx.fillStyle = '#b91c1c';
+        ctx.textAlign = 'center';
+        ctx.fillText(text, midX, arrY + 5);
+        ctx.textAlign = 'left'; 
+    }
+
+    function updateValues() {
+        let vmp = parseInt(document.getElementById('sliderVmp').value);
+        let vnq = parseInt(document.getElementById('sliderVnq').value);
+        let vmq = parseInt(document.getElementById('sliderVmq').value);
+
+        // ការគណនា
+        let vmn = vmq - vnq;
+        let vnp = vmp - vmn;
+        let vpq = vmq - vmp;
+
+        // ធ្វើបច្ចុប្បន្នភាពអក្សរនៅលើអេក្រង់
+        document.getElementById('valVmp').innerText = vmp + " V";
+        document.getElementById('valVnq').innerText = vnq + " V";
+        document.getElementById('valVmq').innerText = vmq + " V";
+        
+        document.getElementById('textVmp').innerHTML = `V<sub>MP</sub> = ${vmp > 0 ? '+'+vmp : vmp} V`;
+        document.getElementById('textVnq').innerHTML = `V<sub>NQ</sub> = ${vnq > 0 ? '+'+vnq : vnq} V`;
+        document.getElementById('textVmq').innerHTML = `V<sub>MQ</sub> = ${vmq > 0 ? '+'+vmq : vmq} V`;
+
+        document.getElementById('calcVmq1').innerText = vmq;
+        document.getElementById('calcVnq1').innerText = vnq;
+        document.getElementById('ansVmn').innerText = vmn + " V";
+
+        document.getElementById('calcVmp1').innerText = vmp;
+        document.getElementById('calcVmn1').innerText = vmn;
+        document.getElementById('ansVnp').innerText = vnp + " V";
+
+        document.getElementById('calcVmq2').innerText = vmq;
+        document.getElementById('calcVmp2').innerText = vmp;
+        document.getElementById('ansVpq').innerText = vpq + " V";
+
+        // --- គំនូស DYNAMIC CANVAS ---
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // កំណត់សក្តានុពលធៀបនឹង V_Q = 0
+        let vq = 0;
+        let vm = vmq;
+        let vn = vnq;
+        let vp = vm - vmp;
+
+        // តម្រៀបចំណុចតាមសក្តានុពលពីធំទៅតូច
+        let pts = [
+            {name: 'M', v: vm},
+            {name: 'N', v: vn},
+            {name: 'P', v: vp},
+            {name: 'Q', v: vq}
+        ];
+        pts.sort((p1, p2) => p2.v - p1.v);
+
+        let maxV = pts[0].v;
+        let minV = pts[3].v;
+        let range = maxV - minV;
+        if (range === 0) range = 1; // ការពារកុំឱ្យចែកនឹងសូន្យ
+
+        // គណនាទីតាំង X ជាក់ស្តែង
+        pts.forEach(p => {
+            p.x = 80 + ((maxV - p.v) / range) * 640;
+        });
+
+        // គូសខ្សែចម្លង
+        drawLine(40, Y_LINE, 760, Y_LINE, '#374151', 4);
+
+        // គូសចំណុចនីមួយៗ
+        pts.forEach((p, i) => {
+            let yOffset = -15;
+            if (i > 0 && Math.abs(p.x - pts[i-1].x) < 25) {
+                yOffset = 25; // រុញឈ្មោះចុះក្រោម បើចំណុចនៅកៀកគ្នាពេក
+            }
+            drawNode(p.x, Y_LINE, p.name, yOffset);
+        });
+
+        // គូសខ្សែរង្វាស់ (ប្រើកម្ពស់ ៤ កម្រិតដាច់ពីគ្នា ធានាមិនត្រួតស៊ីគ្នា)
+        let offsets = [-45, 50, -85]; // កម្រិត 1(លើជិត), កម្រិត 2(ក្រោមជិត), កម្រិត 3(លើឆ្ងាយ)
+        
+        for(let i=0; i<3; i++) {
+            let pLeft = pts[i];
+            let pRight = pts[i+1];
+            let val = pLeft.v - pRight.v; 
+            if (Math.abs(pLeft.x - pRight.x) >= 15) {
+                drawMeasurementArrow(pLeft.x, pRight.x, Y_LINE, pLeft.name, pRight.name, val, offsets[i]);
+            }
+        }
+        
+        // គូសខ្សែរង្វាស់សរុប (កម្រិត 4 ក្រោមឆ្ងាយ)
+        if (Math.abs(pts[0].x - pts[3].x) >= 15) {
+            drawMeasurementArrow(pts[0].x, pts[3].x, Y_LINE, pts[0].name, pts[3].name, pts[0].v - pts[3].v, 90);
+        }
+    }
+
+    function resetToProblem() {
+        document.getElementById('sliderVmp').value = -5;
+        document.getElementById('sliderVnq').value = 10;
+        document.getElementById('sliderVmq').value = 16;
+        updateValues();
+    }
+
+    // ចាប់ផ្តើមដំណើរការ
+    updateValues();
+</script>
+</body>
+</html>

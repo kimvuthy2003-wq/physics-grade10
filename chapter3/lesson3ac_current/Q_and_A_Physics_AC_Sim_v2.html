@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>សំណួរ និងចម្លើយ - ចរន្តឆ្លាស់</title>
+    <style>
+        body {
+            font-family: 'Khmer OS Siemreap', 'Suwannaphum', Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.8;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .qa-container {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+        .question {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .answer {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #27ae60;
+            border-radius: 4px;
+            color: #444;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.95em;
+            font-family: 'Khmer OS Siemreap', sans-serif;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-hide {
+            background-color: #e74c3c;
+        }
+        .btn-hide:hover {
+            background-color: #c0392b;
+        }
+        .simulator-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #34495e;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .sim-btn {
+            margin: 5px;
+            font-size: 1em;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>សំណួរ និងចម្លើយរូបវិទ្យា (ចរន្តឆ្លាស់)</h1>
+
+    <!-- Q1 -->
+    <div class="qa-container">
+        <div class="question">១. ដូចម្តេចហៅថាចរន្តឆ្លាស់? តើចរន្តជាប់និងចរន្តឆ្លាស់ខុសគ្នាដូចម្តេច?</div>
+        <button id="btn-1" onclick="toggleAnswer(1)">បង្ហាញចម្លើយ</button>
+        <div id="answer-1" class="answer">
+            <b>ចម្លើយ៖</b> <br>
+            - <b>ចរន្តឆ្លាស់ (AC)៖</b> គឺជាចរន្តអគ្គិសនីដែលមានទិសដៅប្រែប្រួលត្រឡប់ចុះឡើងឆ្លាស់គ្នាជានិច្ច និងមានអាំងតង់ស៊ីតេប្រែប្រួលតាមពេលវេលា។<br>
+            - <b>ភាពខុសគ្នា៖</b> ចរន្តជាប់ (DC) មានទិសដៅតែមួយគត់ និងអាំងតង់ស៊ីតេថេរ។ ចំណែកឯចរន្តឆ្លាស់ (AC) មានទិសដៅប្រែប្រួលចុះឡើងៗ និងមានអាំងតង់ស៊ីតេប្រែប្រួលជារលកស៊ីនុយសូអ៊ីត។
+        </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="qa-container">
+        <div class="question">២. តើចរន្តឆ្លាស់ផ្អែកទៅលើបាតុភូតអ្វី?</div>
+        <button id="btn-2" onclick="toggleAnswer(2)">បង្ហាញចម្លើយ</button>
+        <div id="answer-2" class="answer">
+            <b>ចម្លើយ៖</b> ចរន្តឆ្លាស់ ត្រូវបានបង្កើតឡើងដោយផ្អែកទៅលើបាតុភូត <b>អាំងឌុចស្យុងអេឡិចត្រូម៉ាញេទិច</b>។
+        </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="qa-container">
+        <div class="question">៣. តើឌីយ៉ូតអនុញ្ញាតឱ្យគេកំណត់ទិសដៅនៃចរន្តបានដែរឬទេ?</div>
+        <button id="btn-3" onclick="toggleAnswer(3)">បង្ហាញចម្លើយ</button>
+        <div id="answer-3" class="answer">
+            <b>ចម្លើយ៖</b> បាទ/ចាស អនុញ្ញាត។ ឌីយ៉ូតមានលក្ខណៈពិសេសមួយគឺ អនុញ្ញាតឱ្យចរន្តឆ្លងកាត់វាបានតែមួយទិសដៅប៉ុណ្ណោះ។ ដូច្នេះ គេអាចប្រើវាដើម្បីបញ្ជាក់ពីទិសដៅចរន្ត ឬប្រើសម្រាប់តម្រង់ចរន្តឆ្លាស់ឱ្យទៅជាចរន្តជាប់បាន។
+        </div>
+    </div>
+
+    <!-- Q4 With Fixed Parallel Simulator -->
+    <div class="qa-container">
+        <div class="question">៤. អាគុយជាប្រភពអគ្គិសនីផ្តល់តង់ស្យុង 3.0 V ។ គេរៀបចំសៀគ្វីអគ្គិសនី ដើម្បីបង្ហាញថា ចរន្តឆ្លាស់មានទិសដៅប្រែប្រួលតាមពេលវេលា។ តើអ្នកត្រូវការសម្ភារៈអ្វីខ្លះ? ហើយត្រូវធ្វើយ៉ាងដូចម្តេចដើម្បីបង្ហាញវា? ពន្យល់។</div>
+        <button id="btn-4" onclick="toggleAnswer(4)">បង្ហាញចម្លើយ</button>
+        <div id="answer-4" class="answer">
+            <b>ចម្លើយ៖</b><br>
+            - <b>សម្ភារៈត្រូវការ៖</b> អាគុយ 3V, កុងតាក់ប្តូរទិសដៅ (Reversing Switch), ឌីយ៉ូតបញ្ចេញពន្លឺ (LED) ចំនួន ២ គ្រាប់ (ពណ៌ខុសគ្នា ឧទាហរណ៍ ក្រហម និងបៃតង), រេស៊ីស្តង់ការពារ, និងខ្សែចម្លង។<br>
+            - <b>វិធីធ្វើ៖</b> តភ្ជាប់ LED ទាំងពីរជាលក្ខណៈប៉ារ៉ាឡែលបញ្ច្រាសប៉ូលគ្នា រួចភ្ជាប់ទៅកាន់ប្រភពអាគុយ តាមរយៈកុងតាក់ប្តូរទិសដៅ។<br>
+            - <b>ការពន្យល់៖</b> នៅពេលយើងចុចកុងតាក់ប្តូរទិសដៅប៉ូលបូក និងដក, LED ទី១ និងទី២ នឹងភ្លឺឆ្លាស់គ្នា។ សកម្មភាពប្រែប្រួលទិសដៅចរន្តនេះ គឺជាគំរូបង្ហាញពីលក្ខណៈនៃចរន្តឆ្លាស់ ដែលមានទិសដៅប្រែប្រួលតាមពេលវេលា។
+            
+            <!-- Simulator Inject -->
+            <div class="simulator-box">
+                <h4 style="color: white; margin-top: 0;">ស៊ីមូឡាទ័រ (Simulator) បង្ហាញពីចរន្តឆ្លាស់ (ភ្ជាប់ជាខ្នែង)</h4>
+                
+                <svg width="100%" height="220" viewBox="0 0 400 220" style="background: #2c3e50; border-radius: 8px;">
+                    <!-- Battery -->
+                    <rect x="20" y="80" width="40" height="60" fill="#ecf0f1" rx="5"/>
+                    <rect x="30" y="70" width="20" height="10" fill="#bdc3c7"/>
+                    <text id="bat-plus" x="40" y="100" fill="#e74c3c" font-size="22" font-weight="bold" text-anchor="middle">+</text>
+                    <text id="bat-minus" x="40" y="130" fill="#3498db" font-size="26" font-weight="bold" text-anchor="middle">-</text>
+                    <text x="40" y="160" fill="#ecf0f1" font-size="14" text-anchor="middle">3.0 V</text>
+
+                    <!-- Wires Main Rails -->
+                    <path id="wire-top" d="M 40 70 L 40 40 L 330 40" stroke="#e74c3c" stroke-width="4" fill="none" />
+                    <path id="wire-bottom" d="M 40 140 L 40 180 L 330 180" stroke="#3498db" stroke-width="4" fill="none" />
+
+                    <!-- Branch 1 (LED 1 - Points Down) -->
+                    <line id="branch1-top" x1="250" y1="40" x2="250" y2="95" stroke="#e74c3c" stroke-width="4" />
+                    <line id="branch1-bottom" x1="250" y1="125" x2="250" y2="180" stroke="#3498db" stroke-width="4" />
+                    
+                    <polygon id="led1-tri" points="235,95 265,95 250,125" fill="#e74c3c" />
+                    <line id="led1-line" x1="235" y1="125" x2="265" y2="125" stroke="#e74c3c" stroke-width="4" />
+                    <circle id="led1-glow" cx="250" cy="110" r="25" fill="red" opacity="0.6" />
+                    <text x="270" y="115" fill="white" font-size="14">LED 1</text>
+
+                    <!-- Branch 2 (LED 2 - Points Up) -->
+                    <line id="branch2-top" x1="330" y1="40" x2="330" y2="95" stroke="#e74c3c" stroke-width="4" />
+                    <line id="branch2-bottom" x1="330" y1="125" x2="330" y2="180" stroke="#3498db" stroke-width="4" />
+                    
+                    <polygon id="led2-tri" points="315,125 345,125 330,95" fill="#7f8c8d" />
+                    <line id="led2-line" x1="315" y1="95" x2="345" y2="95" stroke="#7f8c8d" stroke-width="4" />
+                    <circle id="led2-glow" cx="330" cy="110" r="25" fill="lime" opacity="0" />
+                    <text x="350" y="115" fill="white" font-size="14">LED 2</text>
+
+                    <!-- Direction Arrows Top & Bottom -->
+                    <g id="arrow-cw" opacity="1">
+                        <text x="130" y="30" fill="#f1c40f" font-size="18" font-weight="bold">&rarr; ចរន្ត &rarr;</text>
+                        <text x="130" y="200" fill="#f1c40f" font-size="18" font-weight="bold">&larr; ចរន្ត &larr;</text>
+                    </g>
+                    <g id="arrow-ccw" opacity="0">
+                        <text x="130" y="30" fill="#f1c40f" font-size="18" font-weight="bold">&larr; ចរន្ត &larr;</text>
+                        <text x="130" y="200" fill="#f1c40f" font-size="18" font-weight="bold">&rarr; ចរន្ត &rarr;</text>
+                    </g>
+                    
+                    <!-- Direction Arrows within Branches -->
+                    <text id="arrow-b1" x="225" y="116" fill="#f1c40f" font-size="20" font-weight="bold" opacity="1">&darr;</text>
+                    <text id="arrow-b2" x="305" y="116" fill="#f1c40f" font-size="20" font-weight="bold" opacity="0">&uarr;</text>
+
+                    <!-- Reversing Switch Box -->
+                    <rect x="110" y="80" width="80" height="60" fill="#2c3e50" stroke="#ecf0f1" stroke-width="2" stroke-dasharray="4"/>
+                    <text x="150" y="110" fill="#ecf0f1" font-size="14" text-anchor="middle">កុងតាក់</text>
+                    <text x="150" y="130" fill="#ecf0f1" font-size="14" text-anchor="middle">ប្តូរទិស</text>
+                </svg>
+
+                <div style="margin-top: 15px;">
+                    <button class="sim-btn" onclick="togglePolarity()" style="background-color: #e67e22;">ប្តូរទិសដៅដោយដៃ</button>
+                    <button class="sim-btn" onclick="toggleAutoSim()" id="btn-auto-sim" style="background-color: #27ae60;">ដំណើរការស្វ័យប្រវត្តិ (Auto)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Q5 to Q13 remain unchanged below -->
+
+    <!-- Q5 -->
+    <div class="qa-container">
+        <div class="question">៥. តើប្រេកង់នៃតង់ស្យុង និងប្រេកង់នៃចរន្តឆ្លាស់ដូចគ្នាដែរឬទេ?</div>
+        <button id="btn-5" onclick="toggleAnswer(5)">បង្ហាញចម្លើយ</button>
+        <div id="answer-5" class="answer">
+            <b>ចម្លើយ៖</b> បាទ/ចាស ដូចគ្នា។ នៅក្នុងសៀគ្វីចរន្តឆ្លាស់ ប្រេកង់នៃតង់ស្យុង និងប្រេកង់នៃចរន្តអគ្គិសនីដែលរត់កាត់សៀគ្វីនោះ គឺតែងតែមានតម្លៃស្មើគ្នា។
+        </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="qa-container">
+        <div class="question">៦. តើប្រេកង់នៃចរន្តឆ្លាស់និងខួបមានទំនាក់ទំនងគ្នាយ៉ាងដូចម្តេច?</div>
+        <button id="btn-6" onclick="toggleAnswer(6)">បង្ហាញចម្លើយ</button>
+        <div id="answer-6" class="answer">
+            <b>ចម្លើយ៖</b> ប្រេកង់ (f) គឺជាចម្រាសនៃខួប (T)។ ទំនាក់ទំនងរបស់វាគឺតំណាងដោយរូបមន្ត៖ <b>f = 1 / T</b> ឬ <b>T = 1 / f</b> ។
+        </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="qa-container">
+        <div class="question">៧. បើគេបង្កើនចំនួនជុំនៃបូប៊ីន ២ ដង ដោយរក្សាប្រេកង់ឱ្យនៅដដែល តើអាំភ្លីទុតតង់ស្យុងប្រែប្រួលដូចម្តេច?</div>
+        <button id="btn-7" onclick="toggleAnswer(7)">បង្ហាញចម្លើយ</button>
+        <div id="answer-7" class="answer">
+            <b>ចម្លើយ៖</b> អាំភ្លីទុតតង់ស្យុងនឹង <b>កើនឡើង ២ ដង</b> ដែរ។ ពីព្រោះអាំភ្លីទុតតង់ស្យុងឆ្លាស់ (U_m) សមាមាត្រផ្ទាល់ទៅនឹងចំនួនជុំនៃខ្សែរុំរបស់បូប៊ីន (N) តាមរូបមន្ត (U_m = N·B·S·ω)។
+        </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="qa-container">
+        <div class="question">៨. បើគេបង្កើនប្រេកង់នៃរ៉ូទ័រ តើអាំភ្លីទុតតង់ស្យុងប្រែប្រួលដែរឬទេ?</div>
+        <button id="btn-8" onclick="toggleAnswer(8)">បង្ហាញចម្លើយ</button>
+        <div id="answer-8" class="answer">
+            <b>ចម្លើយ៖</b> បាទ/ចាស ប្រែប្រួល (កើនឡើង)។ តាមរូបមន្ត U_m = N·B·S·ω ដោយសារល្បឿនមុំ ω = 2πf, ដូច្នេះអាំភ្លីទុតតង់ស្យុង (U_m) សមាមាត្រផ្ទាល់នឹងប្រេកង់ (f)។ កាលណាប្រេកង់កើនឡើង អាំភ្លីទុតតង់ស្យុងក៏កើនឡើងដែរ។
+        </div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="qa-container">
+        <div class="question">៩. តើចរន្តឆ្លាស់អនុវត្តក្នុងឧបករណ៍អគ្គិសនីអ្វីខ្លះ?</div>
+        <button id="btn-9" onclick="toggleAnswer(9)">បង្ហាញចម្លើយ</button>
+        <div id="answer-9" class="answer">
+            <b>ចម្លើយ៖</b> ចរន្តឆ្លាស់ត្រូវបានប្រើប្រាស់ជាទូទៅក្នុងបណ្តាញអគ្គិសនីតាមផ្ទះ និងឧបករណ៍ជាច្រើនដូចជា៖ ម៉ាស៊ីនត្រជាក់ ទូរទស្សន៍ ទូទឹកកក កង្ហារ ម៉ាស៊ីនបោកគក់ ម៉ាស៊ីនបូមទឹក ម៉ូទ័រអគ្គិសនី និងឧបករណ៍ប្រើប្រាស់ក្នុងផ្ទះស្ទើរតែទាំងអស់។
+        </div>
+    </div>
+
+    <!-- Q10 -->
+    <div class="qa-container">
+        <div class="question">១០. តើឧបករណ៍កត់ត្រា (តង់ស្យុង-ពេល) ក្នុងមន្ទីរពិសោធន៍អគ្គិសនីតម្រូវឱ្យធ្វើឡើងដោយវិធីអ្វីខ្លះ? ហើយមានដំណើរការដូចម្តេច?</div>
+        <button id="btn-10" onclick="toggleAnswer(10)">បង្ហាញចម្លើយ</button>
+        <div id="answer-10" class="answer">
+            <b>ចម្លើយ៖</b> ឧបករណ៍កត់ត្រាតង់ស្យុងតាមពេលវេលា ច្រើនធ្វើឡើងដោយការប្រើប្រាស់ <b>អូស៊ីឡូស្កុប (Oscilloscope)</b> ឬ <b>ប្រព័ន្ធ Data Logger (EXAO)</b> តភ្ជាប់នឹងកុំព្យូទ័រ។ <br>
+            - <b>ដំណើរការ៖</b> ឧបករណ៍នេះនឹងវាស់តម្លៃតង់ស្យុងអគ្គិសនីនៅគ្រប់ៗខណៈពេល រួចគូសបញ្ចេញជាក្រាហ្វិក (អូស៊ីឡូក្រាម) នៅលើអេក្រង់ ដោយឱ្យអ័ក្សដេកតំណាងឱ្យពេលវេលា (t) និងអ័ក្សឈរតំណាងឱ្យតង់ស្យុង (V)។
+        </div>
+    </div>
+
+    <!-- Q11 -->
+    <div class="qa-container">
+        <div class="question">១១. តើគេប្រើអូស៊ីឡូស្កុបដើម្បីអ្វី? តើគេសម្គាល់ដូចម្តេច ទើបដឹងថាជាអូស៊ីឡូក្រាមមួយបង្ហាញពីចរន្តជាប់ ឬ ចរន្តឆ្លាស់?</div>
+        <button id="btn-11" onclick="toggleAnswer(11)">បង្ហាញចម្លើយ</button>
+        <div id="answer-11" class="answer">
+            <b>ចម្លើយ៖</b> <br>
+            - <b>គេប្រើអូស៊ីឡូស្កុបដើម្បី៖</b> សិក្សាពីទម្រង់នៃសញ្ញាអគ្គិសនី វាស់តង់ស្យុងអតិបរមា វាស់ខួប និងទាញរកប្រេកង់នៃចរន្ត។<br>
+            - <b>ការសម្គាល់៖</b> បើអូស៊ីឡូក្រាមមានរាងជា <b>បន្ទាត់ត្រង់ដេក</b> ស្របនឹងអ័ក្សពេលវេលា នោះវាជា <b>ចរន្តជាប់</b>។ បើអូស៊ីឡូក្រាមមានរាងជា <b>រលកស៊ីនុយសូអ៊ីត</b> ដែលមានទម្រង់ឡើងចុះៗកាត់អ័ក្សសូន្យ នោះវាជា <b>ចរន្តឆ្លាស់</b>។
+        </div>
+    </div>
+
+    <!-- Q12 -->
+    <div class="qa-container">
+        <div class="question">១២. ចូររៀបរាប់ពីវិធានសុវត្ថិភាពក្នុងការប្រើប្រាស់ចរន្តអគ្គិសនីឆ្លាស់ផ្ទះ?</div>
+        <button id="btn-12" onclick="toggleAnswer(12)">បង្ហាញចម្លើយ</button>
+        <div id="answer-12" class="answer">
+            <b>ចម្លើយ៖</b> វិធានសុវត្ថិភាពមានដូចជា៖<br>
+            ១. ហាមប៉ះពាល់ខ្សែភ្លើងដែលដាច់ ឬ hởសាច់ស្ពាន់។<br>
+            ២. មិនត្រូវបិទ/បើក ឬដោតព្រីអគ្គិសនីនៅពេលដៃសើម ឬខ្លួនសើមឡើយ។<br>
+            ៣. ត្រូវប្រើប្រាស់ប្រព័ន្ធខ្សែម៉ាស (ខ្សែដី) និងឌីស្យុងទ័រ (CB ឬ RCBO) ដើម្បីផ្តាច់ចរន្តដោយស្វ័យប្រវត្តិពេលមានឆ្លងចរន្ត។<br>
+            ៤. ត្រូវបិទកុងតាក់ ឬផ្តាច់ចរន្តចេញពីប្រភពជានិច្ច មុនពេលជួសជុលឧបករណ៍អគ្គិសនី។
+        </div>
+    </div>
+
+    <!-- Q13 -->
+    <div class="qa-container">
+        <div class="question">១៣. គណនាប្រេកង់នៃតង់ស្យុងឆ្លាស់ដែលមានខួប 0.02 s, 0.1 ms, 100 ms ។</div>
+        <button id="btn-13" onclick="toggleAnswer(13)">បង្ហាញចម្លើយ</button>
+        <div id="answer-13" class="answer">
+            <b>ចម្លើយ៖</b> តាមរូបមន្តប្រេកង់ <b>f = 1 / T</b> (ខួប T គិតជាវិនាទី s):<br>
+            - ចំពោះ T = 0.02 s នាំឱ្យ f = 1 / 0.02 = <b>50 Hz</b><br>
+            - ចំពោះ T = 0.1 ms = 0.0001 s នាំឱ្យ f = 1 / 0.0001 = <b>10,000 Hz</b> (ឬ 10 kHz)<br>
+            - ចំពោះ T = 100 ms = 0.1 s នាំឱ្យ f = 1 / 0.1 = <b>10 Hz</b>
+        </div>
+    </div>
+
+    <script>
+        function toggleAnswer(id) {
+            var answerDiv = document.getElementById('answer-' + id);
+            var btn = document.getElementById('btn-' + id);
+            
+            if (answerDiv.style.display === 'none' || answerDiv.style.display === '') {
+                answerDiv.style.display = 'block';
+                btn.innerText = 'លាក់ចម្លើយ';
+                btn.classList.add('btn-hide');
+                
+                if (id === 4 && typeof updateSim === 'function') {
+                    updateSim();
+                }
+            } else {
+                answerDiv.style.display = 'none';
+                btn.innerText = 'បង្ហាញចម្លើយ';
+                btn.classList.remove('btn-hide');
+            }
+        }
+
+        // Simulator Logic
+        let isTopPositive = true;
+        let autoSimInterval = null;
+
+        function updateSim() {
+            const batPlus = document.getElementById('bat-plus');
+            const batMinus = document.getElementById('bat-minus');
+            
+            const wireTop = document.getElementById('wire-top');
+            const wireBottom = document.getElementById('wire-bottom');
+            const b1Top = document.getElementById('branch1-top');
+            const b1Bot = document.getElementById('branch1-bottom');
+            const b2Top = document.getElementById('branch2-top');
+            const b2Bot = document.getElementById('branch2-bottom');
+            
+            const led1Tri = document.getElementById('led1-tri');
+            const led1Line = document.getElementById('led1-line');
+            const led1Glow = document.getElementById('led1-glow');
+            
+            const led2Tri = document.getElementById('led2-tri');
+            const led2Line = document.getElementById('led2-line');
+            const led2Glow = document.getElementById('led2-glow');
+            
+            const arrowCW = document.getElementById('arrow-cw');
+            const arrowCCW = document.getElementById('arrow-ccw');
+            const arrowB1 = document.getElementById('arrow-b1');
+            const arrowB2 = document.getElementById('arrow-b2');
+
+            if (!batPlus) return;
+
+            if (isTopPositive) {
+                // Top is Positive (+), Bottom is Negative (-)
+                batPlus.setAttribute('y', '100');
+                batMinus.setAttribute('y', '130');
+
+                // Color lines by potential
+                wireTop.setAttribute('stroke', '#e74c3c');
+                wireBottom.setAttribute('stroke', '#3498db');
+                b1Top.setAttribute('stroke', '#e74c3c');
+                b1Bot.setAttribute('stroke', '#3498db');
+                b2Top.setAttribute('stroke', '#e74c3c');
+                b2Bot.setAttribute('stroke', '#3498db');
+
+                // LED 1 Conducts (Current flows Down)
+                led1Tri.setAttribute('fill', '#e74c3c');
+                led1Line.setAttribute('stroke', '#e74c3c');
+                led1Glow.setAttribute('opacity', '0.6');
+                
+                // LED 2 Blocks (Current tries to flow Down, but diode points Up)
+                led2Tri.setAttribute('fill', '#7f8c8d');
+                led2Line.setAttribute('stroke', '#7f8c8d');
+                led2Glow.setAttribute('opacity', '0');
+
+                // Arrows
+                arrowCW.setAttribute('opacity', '1');
+                arrowCCW.setAttribute('opacity', '0');
+                arrowB1.setAttribute('opacity', '1');
+                arrowB2.setAttribute('opacity', '0');
+                
+            } else {
+                // Top is Negative (-), Bottom is Positive (+)
+                batPlus.setAttribute('y', '130');
+                batMinus.setAttribute('y', '100');
+
+                // Color lines by potential
+                wireTop.setAttribute('stroke', '#3498db');
+                wireBottom.setAttribute('stroke', '#e74c3c');
+                b1Top.setAttribute('stroke', '#3498db');
+                b1Bot.setAttribute('stroke', '#e74c3c');
+                b2Top.setAttribute('stroke', '#3498db');
+                b2Bot.setAttribute('stroke', '#e74c3c');
+
+                // LED 1 Blocks (Current tries to flow Up, but diode points Down)
+                led1Tri.setAttribute('fill', '#7f8c8d');
+                led1Line.setAttribute('stroke', '#7f8c8d');
+                led1Glow.setAttribute('opacity', '0');
+                
+                // LED 2 Conducts (Current flows Up)
+                led2Tri.setAttribute('fill', '#2ecc71');
+                led2Line.setAttribute('stroke', '#2ecc71');
+                led2Glow.setAttribute('opacity', '0.6');
+
+                // Arrows
+                arrowCW.setAttribute('opacity', '0');
+                arrowCCW.setAttribute('opacity', '1');
+                arrowB1.setAttribute('opacity', '0');
+                arrowB2.setAttribute('opacity', '1');
+            }
+        }
+
+        function togglePolarity() {
+            if(autoSimInterval) {
+                clearInterval(autoSimInterval);
+                autoSimInterval = null;
+                document.getElementById('btn-auto-sim').innerText = 'ដំណើរការស្វ័យប្រវត្តិ (Auto)';
+            }
+            isTopPositive = !isTopPositive;
+            updateSim();
+        }
+
+        function toggleAutoSim() {
+            const btn = document.getElementById('btn-auto-sim');
+            if (autoSimInterval) {
+                clearInterval(autoSimInterval);
+                autoSimInterval = null;
+                btn.innerText = 'ដំណើរការស្វ័យប្រវត្តិ (Auto)';
+            } else {
+                btn.innerText = 'បញ្ឈប់ Auto';
+                updateSim();
+                autoSimInterval = setInterval(() => {
+                    isTopPositive = !isTopPositive;
+                    updateSim();
+                }, 600);
+            }
+        }
+    </script>
+</body>
+</html>

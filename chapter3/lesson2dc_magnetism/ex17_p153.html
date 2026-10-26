@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ផ្ទាំងអនុវត្តសៀគ្វីអគ្គិសនីអន្តរកម្ម</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ស្ទីលអក្សរខ្មែរទូទៅ */
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            margin: 0;
+            overflow-x: hidden;
+            font-size: 1.15rem; 
+            line-height: 1.8;
+        }
+        
+        .kh { font-family: 'Battambang', sans-serif; }
+
+        /* ស្ទីលសម្រាប់រូបមន្តគណិតវិទ្យា (Times New Roman ស្តង់ដារ) */
+        .math {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.35rem; 
+            letter-spacing: 0.03em;
+        }
+        .math-bold { font-weight: bold; }
+        .math-sub { font-size: 0.65em; vertical-align: -0.25em; }
+        .math-sup { font-size: 0.65em; vertical-align: super; }
+
+        /* ពណ៌សម្រាប់រូបមន្ត និងលទ្ធផល */
+        .text-blue { color: #1d4ed8; }
+        .text-red { color: #dc2626; }
+        .text-emerald { color: #059669; }
+        .text-amber { color: #d97706; }
+
+        /* ស្ទីលប្រភាគ (Fractions) ធានាមិនឱ្យដាច់គ្នា */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.3em;
+            font-size: 0.95em;
+        }
+        .fraction > span { padding: 0.1em 0.3em; }
+        .fraction .fdn { 
+            border-top: 1.5px solid currentColor; 
+            width: 100%; 
+            text-align: center; 
+        }
+
+        /* ដំណោះស្រាយសម្រាប់ទូរសព្ទដៃ (ការពារការលោតដាច់រូបមន្ត) */
+        .equation-box {
+            display: flex;
+            flex-wrap: wrap; /* អនុញ្ញាតឱ្យទម្លាក់ជួរនៅពេលអស់អេក្រង់ */
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .math-block {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: nowrap; /* ហាមដាច់រូបមន្តក្នុងប្រអប់តែមួយ */
+            overflow-x: auto; /* បើអេក្រង់តូចពេក អាចអូសបានកុំឱ្យខូចរាង */
+            max-width: 100%;
+            padding-bottom: 0.2rem;
+            scrollbar-width: none; /* លាក់របារអូសឱ្យស្អាត */
+        }
+        .math-block::-webkit-scrollbar { display: none; }
+
+        /* ស្ទីល Sliders */
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #cbd5e1;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #d97706; 
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(217, 119, 6, 0.5);
+        }
+        
+        /* ផ្ទៃគំនូសសៀគ្វី 2D */
+        #circuit-container {
+            width: 100%;
+            border-radius: 0.75rem;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        /* គំនូរជីវចលចរន្តអគ្គិសនី */
+        .flow-path {
+            fill: none;
+            stroke: #ef4444; 
+            stroke-width: 4;
+            stroke-dasharray: 10, 15;
+            stroke-linecap: round;
+        }
+        @keyframes flowAnim {
+            to { stroke-dashoffset: -25; }
+        }
+        
+        .solution-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.6s ease-in-out;
+        }
+        .solution-content.open {
+            max-height: 4000px;
+            opacity: 1;
+            margin-top: 1.5rem;
+        }
+
+        .toggle-checkbox:checked { right: 0; border-color: #ef4444; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #ef4444; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- ========================================== -->
+        <!-- 1. ប្រធានលំហាត់ -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <h2 class="text-2xl font-bold text-amber-700 mb-4 border-b border-slate-100 pb-3 flex items-center gap-2">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                លំហាត់គំរូទី១៧
+            </h2>
+            <div class="text-justify font-medium space-y-4 kh">
+                <p>17. គេឱ្យសៀគ្វីមួយដូចរូប ។ គេវាស់ <span class="math math-bold text-blue">V<span class="math-sub">3</span> = <span id="prob_v3">24.0</span> V</span>, <span class="math math-bold text-blue">V<span class="math-sub">2</span> = <span id="prob_v2">8.00</span> V</span>, <span class="math math-bold text-red">I = <span id="prob_i">1.60</span> A</span>, <span class="math math-bold text-emerald">E = <span id="prob_e">24.0</span> V</span>, <span class="math math-bold">R<span class="math-sub">1</span> = <span id="prob_r1">20.0</span> &Omega;</span>, <span class="math math-bold">R<span class="math-sub">2</span> = <span id="prob_r2">10.0</span> &Omega;</span> និង <span class="math math-bold">R<span class="math-sub">3</span> = <span id="prob_r3">30.0</span> &Omega;</span> ។</p>
+                <ul class="pl-8 space-y-2">
+                    <li>ក. តើ <span class="math math-bold">V<span class="math-sub">1</span></span> មានតម្លៃប៉ុន្មាន?</li>
+                    <li>ខ. តើចរន្តឆ្លងកាត់ <span class="math math-bold">R<span class="math-sub">1</span></span>, <span class="math math-bold">R<span class="math-sub">2</span></span> និង <span class="math math-bold">R<span class="math-sub">3</span></span> មានតម្លៃប៉ុន្មាន?</li>
+                    <li>គ. តើរេស៊ីស្តង់សមមូលនៃសៀគ្វីមានតម្លៃប៉ុន្មាន? (មិនគិតរេស៊ីស្តង់ក្នុងប្រភពនិងខ្សែចម្លង) ។</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 2. INTERACTIVE PANEL (2D CANVAS & CONTROLS) -->
+        <!-- ========================================== -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- 2D Circuit Drawing -->
+            <div class="lg:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col">
+                <div class="flex justify-between items-center mb-4 px-2 flex-wrap gap-4">
+                    <h3 class="font-bold text-gray-800 text-xl kh">គំនូសបំព្រួញសៀគ្វីអន្តរកម្ម</h3>
+                    <div class="flex items-center gap-3 bg-red-50 px-4 py-2 rounded-lg border border-red-100">
+                        <span class="kh font-bold text-red-700 text-[1rem]">បង្ហាញទិសដៅចរន្ត</span>
+                        <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" id="toggleFlow" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer z-10 top-0 left-0 transition-all duration-300"/>
+                            <label for="toggleFlow" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300"></label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="circuit-container" class="flex-grow min-h-[400px]">
+                    <svg width="100%" height="100%" viewBox="0 0 750 450" preserveAspectRatio="xMidYMid meet">
+                        <!-- ខ្សែសៀគ្វីគោល -->
+                        <path d="M 150 400 L 150 80 L 550 80 L 550 400 L 150 400" fill="none" stroke="#334155" stroke-width="3" />
+                        <path d="M 350 80 L 350 400" fill="none" stroke="#334155" stroke-width="3" />
+
+                        <!-- គំនូរជីវចលចរន្ត (លាក់ ឬបង្ហាញអាស្រ័យលើអថេរ) -->
+                        <g id="animationGroup">
+                            <path class="flow-path animLine" d="M 150 180 L 150 80 L 350 80" />
+                            <path class="flow-path animLine" d="M 350 80 L 350 400" />
+                            <path class="flow-path animLine" d="M 350 80 L 550 80" />
+                            <path class="flow-path animLine" d="M 550 80 L 550 400" />
+                            <path class="flow-path animLine" d="M 550 400 L 150 400 L 150 260" />
+                        </g>
+
+                        <!-- ប្រភពអគ្គិសនី E -->
+                        <rect x="130" y="160" width="40" height="120" fill="white" stroke="none" />
+                        <line x1="110" y1="180" x2="190" y2="180" stroke="#1e293b" stroke-width="3" />
+                        <text x="90" y="185" fill="#e11d48" font-size="22" font-weight="bold" font-family="'Times New Roman', serif">+</text>
+                        <line x1="130" y1="200" x2="170" y2="200" stroke="#1e293b" stroke-width="6" />
+                        <text x="190" y="205" fill="#0284c7" font-size="26" font-weight="bold" font-family="'Times New Roman', serif">-</text>
+                        <line x1="150" y1="205" x2="150" y2="235" stroke="#1e293b" stroke-width="2" stroke-dasharray="5,5" />
+                        <line x1="110" y1="240" x2="190" y2="240" stroke="#1e293b" stroke-width="3" />
+                        <line x1="130" y1="260" x2="170" y2="260" stroke="#1e293b" stroke-width="6" />
+                        <text x="210" y="210" fill="#059669" font-size="22" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">E</text>
+                        <text x="210" y="235" fill="#059669" font-size="18" font-family="'Times New Roman', serif" text-anchor="middle" id="svg_e">24.0 V</text>
+
+                        <!-- អំពែម៉ែត្រ I -->
+                        <circle cx="250" cy="80" r="35" fill="white" stroke="#334155" stroke-width="3" />
+                        <text x="250" y="70" fill="#dc2626" font-size="18" font-weight="bold" text-anchor="middle" font-family="'Times New Roman', serif" id="svg_i">+1.60</text>
+                        <text x="250" y="95" fill="#dc2626" font-size="16" font-weight="bold" text-anchor="middle" font-family="'Times New Roman', serif">Amps</text>
+                        <text x="195" y="70" fill="#334155" font-size="20" font-weight="bold" font-family="'Times New Roman', serif">+</text>
+                        <text x="295" y="70" fill="#334155" font-size="24" font-weight="bold" font-family="'Times New Roman', serif">-</text>
+
+                        <!-- រេស៊ីស្ទ័រ R1 -->
+                        <rect x="335" y="110" width="30" height="70" fill="white" stroke="#334155" stroke-width="3" />
+                        <text x="380" y="130" fill="#334155" font-size="20" font-weight="bold" font-family="'Times New Roman', serif">R<tspan baseline-shift="sub" font-size="0.75em">1</tspan></text>
+                        <text x="380" y="155" fill="#334155" font-size="16" font-family="'Times New Roman', serif" id="svg_r1">20&Omega;</text>
+
+                        <!-- រេស៊ីស្ទ័រ R2 -->
+                        <rect x="335" y="250" width="30" height="70" fill="white" stroke="#334155" stroke-width="3" />
+                        <text x="380" y="270" fill="#334155" font-size="20" font-weight="bold" font-family="'Times New Roman', serif">R<tspan baseline-shift="sub" font-size="0.75em">2</tspan></text>
+                        <text x="380" y="295" fill="#334155" font-size="16" font-family="'Times New Roman', serif" id="svg_r2">10&Omega;</text>
+
+                        <!-- វ៉ុលម៉ែត្រ V2 -->
+                        <path d="M 350 220 L 250 220 L 250 350 L 350 350" fill="none" stroke="#334155" stroke-width="2" />
+                        <circle cx="250" cy="285" r="35" fill="white" stroke="#334155" stroke-width="3" />
+                        <text x="250" y="275" fill="#1d4ed8" font-size="18" font-weight="bold" text-anchor="middle" font-family="'Times New Roman', serif" id="svg_v2">+8.00</text>
+                        <text x="250" y="300" fill="#1d4ed8" font-size="16" font-weight="bold" text-anchor="middle" font-family="'Times New Roman', serif">Volts</text>
+                        <text x="290" y="215" fill="#334155" font-size="20" font-weight="bold" font-family="'Times New Roman', serif">+</text>
+                        <text x="290" y="375" fill="#334155" font-size="24" font-weight="bold" font-family="'Times New Roman', serif">-</text>
+
+                        <!-- រេស៊ីស្ទ័រ R3 -->
+                        <rect x="535" y="190" width="30" height="80" fill="white" stroke="#334155" stroke-width="3" />
+                        <text x="480" y="220" fill="#334155" font-size="20" font-weight="bold" font-family="'Times New Roman', serif">R<tspan baseline-shift="sub" font-size="0.75em">3</tspan></text>
+                        <text x="480" y="245" fill="#334155" font-size="16" font-family="'Times New Roman', serif" id="svg_r3">30&Omega;</text>
+
+                        <!-- វ៉ុលម៉ែត្រ V3 -->
+                        <path d="M 550 150 L 650 150 L 650 310 L 550 310" fill="none" stroke="#334155" stroke-width="2" />
+                        <circle cx="650" cy="230" r="35" fill="white" stroke="#334155" stroke-width="3" />
+                        <text x="650" y="220" fill="#1d4ed8" font-size="18" font-weight="bold" text-anchor="middle" font-family="'Times New Roman', serif" id="svg_v3">+24.0</text>
+                        <text x="650" y="245" fill="#1d4ed8" font-size="16" font-weight="bold" text-anchor="middle" font-family="'Times New Roman', serif">Volts</text>
+                        <text x="590" y="145" fill="#334155" font-size="20" font-weight="bold" font-family="'Times New Roman', serif">+</text>
+                        <text x="590" y="335" fill="#334155" font-size="24" font-weight="bold" font-family="'Times New Roman', serif">-</text>
+
+                        <!-- Nodes -->
+                        <circle cx="350" cy="80" r="4" fill="#1e293b" />
+                        <circle cx="550" cy="80" r="4" fill="#1e293b" />
+                        <circle cx="350" cy="220" r="4" fill="#1e293b" />
+                        <circle cx="350" cy="350" r="4" fill="#1e293b" />
+                        <circle cx="350" cy="400" r="4" fill="#1e293b" />
+                        <circle cx="550" cy="400" r="4" fill="#1e293b" />
+                        <circle cx="550" cy="150" r="4" fill="#1e293b" />
+                        <circle cx="550" cy="310" r="4" fill="#1e293b" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col gap-6">
+                <h3 class="text-xl font-bold text-amber-700 border-b border-slate-100 pb-3 kh">ការកំណត់តម្លៃ</h3>
+                
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">កម្លាំងអគ្គិសនីចលករ <span class="math">E</span></label>
+                            <span class="math math-bold text-emerald"><span id="eDisp">24.0</span> V</span>
+                        </div>
+                        <input type="range" id="eSlider" min="12" max="48" value="24" step="2" class="slider py-2 bg-emerald-400">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">រេស៊ីស្តង់ <span class="math">R<span class="math-sub">1</span></span></label>
+                            <span class="math math-bold text-slate-700"><span id="r1Disp">20.0</span> &Omega;</span>
+                        </div>
+                        <input type="range" id="r1Slider" min="5" max="50" value="20" step="5" class="slider py-2">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">រេស៊ីស្តង់ <span class="math">R<span class="math-sub">2</span></span></label>
+                            <span class="math math-bold text-slate-700"><span id="r2Disp">10.0</span> &Omega;</span>
+                        </div>
+                        <input type="range" id="r2Slider" min="5" max="50" value="10" step="5" class="slider py-2">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">រេស៊ីស្តង់ <span class="math">R<span class="math-sub">3</span></span></label>
+                            <span class="math math-bold text-slate-700"><span id="r3Disp">30.0</span> &Omega;</span>
+                        </div>
+                        <input type="range" id="r3Slider" min="10" max="100" value="30" step="5" class="slider py-2">
+                    </div>
+                </div>
+
+                <div class="mt-auto">
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 flex justify-between items-center shadow-sm">
+                        <div class="font-bold text-amber-800 kh">រេស៊ីស្តង់សមមូល <span class="math">R<span class="math-sub">eq</span></span></div>
+                        <div class="math math-bold text-amber text-[1.6rem]"><span id="reqDisp">15.0</span> &Omega;</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 3. ដំណោះស្រាយ (SOLUTION TOGGLE) -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <button id="toggleBtn" class="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold py-4 px-6 rounded-xl shadow-md transition-colors flex justify-center items-center gap-3">
+                <svg id="toggleIcon" class="w-6 h-6 transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                <span id="btnText" class="text-xl kh">បង្ហាញដំណោះស្រាយ</span>
+            </button>
+
+            <div id="solutionBox" class="solution-content bg-slate-50 border border-slate-200 rounded-xl p-6 md:p-10 mt-6">
+                <h3 class="font-bold text-[#d97706] border-b-2 border-slate-200 pb-3 mb-8 text-3xl inline-block border-b-[#f59e0b] kh">ដំណោះស្រាយ</h3>
+                
+                <div class="space-y-10">
+                    <!-- Part A -->
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-gray-800 text-2xl mb-6 kh">
+                            ក. តើ <span class="math math-bold text-gray-800">V<span class="math-sub">1</span></span> មានតម្លៃប៉ុន្មាន?
+                        </h4>
+                        <div>
+                            <p class="kh">ដោយសារ <span class="math">R<span class="math-sub">1</span></span> និង <span class="math">R<span class="math-sub">2</span></span> តជាស៊េរី នោះតង់ស្យុងបូកបញ្ចូលគ្នា៖</p>
+                            
+                            <p class="math math-formula mt-4">V<span class="math-sub">12</span> = V<span class="math-sub">1</span> + V<span class="math-sub">2</span></p>
+                            
+                            <!-- ប្រអប់ Responsive ការពារការដាច់រូបមន្ត -->
+                            <div class="equation-box">
+                                <span class="kh font-medium">ទាញរក</span> 
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">V<span class="math-sub">1</span> = V<span class="math-sub">12</span> &minus; V<span class="math-sub">2</span> = <span id="sol_e2">24.0</span> &minus; <span id="sol_v2_val">8.00</span> = <span class="math-bold text-blue" id="sol_v1_calc">16.0</span> V</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 flex flex-wrap items-center gap-4">
+                                <span class="kh font-bold text-xl">ដូចនេះ៖</span>
+                                <span class="math math-bold text-blue border-b-[3px] border-blue-700 pb-1 text-[1.6rem]">V<span class="math-sub">1</span> = <span id="sol_v1_final">16.0</span> V</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Part B -->
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-gray-800 text-2xl mb-6 kh">
+                            ខ. តើចរន្តឆ្លងកាត់ <span class="math math-bold text-gray-800">R<span class="math-sub">1</span></span>, <span class="math math-bold text-gray-800">R<span class="math-sub">2</span></span> និង <span class="math math-bold text-gray-800">R<span class="math-sub">3</span></span> មានតម្លៃប៉ុន្មាន?
+                        </h4>
+                        <div>
+                            <p class="kh">ចំពោះមែកស្តាំដែលមាន <span class="math">R<span class="math-sub">3</span></span> គឺតស្របនឹងប្រភពអគ្គិសនី ដូចនេះតង់ស្យុងឆ្លងកាត់វា <span class="math math-formula whitespace-nowrap">V<span class="math-sub">3</span> = E = <span id="sol_v3_val">24.0</span> V</span> ។</p>
+                            
+                            <!-- Responsive Box -->
+                            <div class="equation-box">
+                                <span class="kh font-medium">តាមច្បាប់អូម៖</span>
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">I<span class="math-sub">3</span> = </span>
+                                    <div class="fraction math">
+                                        <span>V<span class="math-sub">3</span></span>
+                                        <span class="fdn">R<span class="math-sub">3</span></span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = </span>
+                                    <div class="fraction math">
+                                        <span id="sol_v3_top">24.0</span>
+                                        <span class="fdn" id="sol_r3_bot">30.0</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = <span class="math-bold text-red" id="sol_i3_calc">0.80</span> A</span>
+                                </div>
+                            </div>
+                            
+                            <p class="kh mt-8">ចំពោះមែកកណ្តាល <span class="math">R<span class="math-sub">1</span></span> និង <span class="math">R<span class="math-sub">2</span></span> តជាស៊េរី នោះចរន្តឆ្លងកាត់ពួកវាមានតម្លៃស្មើគ្នា៖ <span class="math math-formula whitespace-nowrap">I<span class="math-sub">1</span> = I<span class="math-sub">2</span></span> ។</p>
+                            
+                            <!-- Responsive Box -->
+                            <div class="equation-box">
+                                <span class="kh font-medium">យើងមាន៖</span>
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">I<span class="math-sub">2</span> = </span>
+                                    <div class="fraction math">
+                                        <span>V<span class="math-sub">2</span></span>
+                                        <span class="fdn">R<span class="math-sub">2</span></span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = </span>
+                                    <div class="fraction math">
+                                        <span id="sol_v2_top">8.00</span>
+                                        <span class="fdn" id="sol_r2_bot">10.0</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = <span class="math-bold text-red" id="sol_i2_calc">0.80</span> A</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 bg-rose-50 p-5 rounded-xl border border-rose-100 inline-block min-w-[200px]">
+                                <div class="kh font-bold text-gray-800 text-xl mb-3">ដូចនេះ៖</div>
+                                <div class="math math-bold text-red text-[1.6rem]">I<span class="math-sub">1</span> = I<span class="math-sub">2</span> = <span id="sol_i12_final">0.80</span> A</div>
+                                <div class="math math-bold text-red text-[1.6rem] mt-2">I<span class="math-sub">3</span> = <span id="sol_i3_final">0.80</span> A</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Part C -->
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-gray-800 text-2xl mb-6 kh">
+                            គ. តើរេស៊ីស្តង់សមមូលនៃសៀគ្វីមានតម្លៃប៉ុន្មាន?
+                        </h4>
+                        <div>
+                            <p class="kh font-bold text-gray-700">វិធីទី១ (តាមច្បាប់អូមសម្រាប់សៀគ្វីទាំងមូល)៖</p>
+                            <div class="equation-box">
+                                <span class="kh font-medium">ចរន្តសរុប</span>
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">I = I<span class="math-sub">1</span> + I<span class="math-sub">3</span> = <span id="sol_i_sum1">0.80</span> + <span id="sol_i_sum2">0.80</span> = <span id="sol_i_tot">1.60</span> A</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Responsive Box -->
+                            <div class="equation-box mt-4">
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">R<span class="math-sub">eq</span> = </span>
+                                    <div class="fraction math">
+                                        <span>E</span>
+                                        <span class="fdn">I</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = </span>
+                                    <div class="fraction math">
+                                        <span id="sol_e_top">24.0</span>
+                                        <span class="fdn" id="sol_i_bot">1.60</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = <span class="math-bold text-amber" id="sol_req_calc1">15.0</span> &Omega;</span>
+                                </div>
+                            </div>
+
+                            <p class="kh font-bold text-gray-700 mt-8 border-t border-dashed border-gray-300 pt-6">វិធីទី២ (តាមការគណនារេស៊ីស្តង់)៖</p>
+                            <div class="equation-box">
+                                <span class="kh font-medium">រេស៊ីស្តង់សមមូលមែកកណ្តាល៖</span>
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">R<span class="math-sub">12</span> = R<span class="math-sub">1</span> + R<span class="math-sub">2</span> = <span id="sol_r1_val">20.0</span> + <span id="sol_r2_val">10.0</span> = <span class="math-bold text-slate-700" id="sol_r12_val">30.0</span> &Omega;</span>
+                                </div>
+                            </div>
+                            
+                            <p class="kh mt-4">
+                                ដោយ <span class="math whitespace-nowrap">R<span class="math-sub">12</span></span> តស្របនឹង <span class="math whitespace-nowrap">R<span class="math-sub">3</span></span> ៖
+                            </p>
+                            
+                            <!-- Responsive Box -->
+                            <div class="equation-box">
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">R<span class="math-sub">eq</span> = </span>
+                                    <div class="fraction math">
+                                        <span>R<span class="math-sub">12</span> &times; R<span class="math-sub">3</span></span>
+                                        <span class="fdn">R<span class="math-sub">12</span> + R<span class="math-sub">3</span></span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = </span>
+                                    <div class="fraction math">
+                                        <span id="sol_r_mult">30.0 &times; 30.0</span>
+                                        <span class="fdn" id="sol_r_add">30.0 + 30.0</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = <span class="math-bold text-amber" id="sol_req_calc2">15.0</span> &Omega;</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-8 flex flex-wrap items-center gap-4">
+                                <span class="kh font-bold text-xl text-gray-800">ដូចនេះ៖</span>
+                                <span class="math math-bold text-amber border-b-[3px] border-amber-600 pb-1 text-[1.6rem]">R<span class="math-sub">eq</span> = <span id="sol_req_final">15.0</span> &Omega;</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const eSlider = document.getElementById('eSlider');
+        const r1Slider = document.getElementById('r1Slider');
+        const r2Slider = document.getElementById('r2Slider');
+        const r3Slider = document.getElementById('r3Slider');
+        
+        const animLines = document.querySelectorAll('.animLine');
+        const toggleFlow = document.getElementById('toggleFlow');
+
+        function updateCircuit() {
+            const E = parseFloat(eSlider.value);
+            const R1 = parseFloat(r1Slider.value);
+            const R2 = parseFloat(r2Slider.value);
+            const R3 = parseFloat(r3Slider.value);
+
+            const R12 = R1 + R2;
+            const Req = (R12 * R3) / (R12 + R3);
+            const I = E / Req;
+            const V3 = E;
+            const I3 = V3 / R3;
+            const I12 = E / R12;
+            const I1 = I12;
+            const I2 = I12;
+            const V1 = I1 * R1;
+            const V2 = I2 * R2;
+
+            document.getElementById('eDisp').textContent = E.toFixed(1);
+            document.getElementById('r1Disp').textContent = R1.toFixed(1);
+            document.getElementById('r2Disp').textContent = R2.toFixed(1);
+            document.getElementById('r3Disp').textContent = R3.toFixed(1);
+            document.getElementById('reqDisp').textContent = Req.toFixed(1);
+
+            document.getElementById('svg_e').textContent = `${E.toFixed(1)} V`;
+            document.getElementById('svg_i').textContent = `+${I.toFixed(2)}`;
+            document.getElementById('svg_v2').textContent = `+${V2.toFixed(2)}`;
+            document.getElementById('svg_v3').textContent = `+${V3.toFixed(1)}`;
+            document.getElementById('svg_r1').innerHTML = `${R1.toFixed(0)}&Omega;`;
+            document.getElementById('svg_r2').innerHTML = `${R2.toFixed(0)}&Omega;`;
+            document.getElementById('svg_r3').innerHTML = `${R3.toFixed(0)}&Omega;`;
+
+            document.getElementById('prob_e').textContent = E.toFixed(1);
+            document.getElementById('prob_i').textContent = I.toFixed(2);
+            document.getElementById('prob_v2').textContent = V2.toFixed(2);
+            document.getElementById('prob_v3').textContent = V3.toFixed(1);
+            document.getElementById('prob_r1').textContent = R1.toFixed(1);
+            document.getElementById('prob_r2').textContent = R2.toFixed(1);
+            document.getElementById('prob_r3').textContent = R3.toFixed(1);
+
+            document.getElementById('sol_e2').textContent = E.toFixed(1);
+            document.getElementById('sol_v2_val').textContent = V2.toFixed(2);
+            document.getElementById('sol_v1_calc').textContent = V1.toFixed(1);
+            document.getElementById('sol_v1_final').textContent = V1.toFixed(1);
+
+            document.getElementById('sol_v3_val').textContent = V3.toFixed(1);
+            document.getElementById('sol_v3_top').textContent = V3.toFixed(1);
+            document.getElementById('sol_r3_bot').textContent = R3.toFixed(1);
+            document.getElementById('sol_i3_calc').textContent = I3.toFixed(2);
+            
+            document.getElementById('sol_v2_top').textContent = V2.toFixed(2);
+            document.getElementById('sol_r2_bot').textContent = R2.toFixed(1);
+            document.getElementById('sol_i2_calc').textContent = I2.toFixed(2);
+
+            document.getElementById('sol_i12_final').textContent = I1.toFixed(2);
+            document.getElementById('sol_i3_final').textContent = I3.toFixed(2);
+
+            document.getElementById('sol_i_sum1').textContent = I1.toFixed(2);
+            document.getElementById('sol_i_sum2').textContent = I3.toFixed(2);
+            document.getElementById('sol_i_tot').textContent = I.toFixed(2);
+            
+            document.getElementById('sol_e_top').textContent = E.toFixed(1);
+            document.getElementById('sol_i_bot').textContent = I.toFixed(2);
+            document.getElementById('sol_req_calc1').textContent = Req.toFixed(1);
+
+            document.getElementById('sol_r1_val').textContent = R1.toFixed(1);
+            document.getElementById('sol_r2_val').textContent = R2.toFixed(1);
+            document.getElementById('sol_r12_val').textContent = R12.toFixed(1);
+
+            document.getElementById('sol_r_mult').innerHTML = `${R12.toFixed(1)} &times; ${R3.toFixed(1)}`;
+            document.getElementById('sol_r_add').textContent = `${R12.toFixed(1)} + ${R3.toFixed(1)}`;
+            document.getElementById('sol_req_calc2').textContent = Req.toFixed(1);
+            document.getElementById('sol_req_final').textContent = Req.toFixed(1);
+
+            const animDuration = Math.max(0.5, 3 / I); 
+            animLines.forEach(line => {
+                line.style.animation = `flowAnim ${animDuration}s linear infinite`;
+            });
+        }
+
+        eSlider.addEventListener('input', updateCircuit);
+        r1Slider.addEventListener('input', updateCircuit);
+        r2Slider.addEventListener('input', updateCircuit);
+        r3Slider.addEventListener('input', updateCircuit);
+
+        toggleFlow.addEventListener('change', (e) => {
+            if(e.target.checked) {
+                animLines.forEach(line => line.style.display = 'block');
+            } else {
+                animLines.forEach(line => line.style.display = 'none');
+            }
+        });
+
+        const toggleBtn = document.getElementById('toggleBtn');
+        const solutionBox = document.getElementById('solutionBox');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const btnText = document.getElementById('btnText');
+        let solutionOpen = false;
+
+        toggleBtn.addEventListener('click', () => {
+            solutionOpen = !solutionOpen;
+            if (solutionOpen) {
+                solutionBox.classList.add('open');
+                btnText.textContent = "លាក់ដំណោះស្រាយ";
+                toggleIcon.style.transform = "rotate(0deg)";
+            } else {
+                solutionBox.classList.remove('open');
+                btnText.textContent = "បង្ហាញដំណោះស្រាយលម្អិត";
+                toggleIcon.style.transform = "rotate(180deg)";
+            }
+        });
+
+        updateCircuit();
+    </script>
+</body>
+</html>
+```<ElicitationsGroup></ElicitationsGroup>

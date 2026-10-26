@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី៤៖ ពិសោធន៍កង់បង្វិលរបស់លោកហ្វីហ្សូ (Fizeau's Experiment)</title>
+    
+    <!-- បញ្ចូលបណ្ណាល័យ MathJax សម្រាប់បង្ហាញរូបមន្តគណិតវិទ្យា -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Battambang:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 920px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #2563eb;
+            color: white;
+            padding: 16px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .problem-statement {
+            font-size: 1.15rem;
+            line-height: 2.0;
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding: 18px 22px;
+            background-color: #f8fafc;
+            border-left: 5px solid #2563eb;
+            border-radius: 6px;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        .status-banner {
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 12px 18px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .status-blocked {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #f87171;
+        }
+        .status-passed {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #4ade80;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #0f172a;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+        }
+
+        canvas {
+            background-color: #0f172a;
+            border: 1.5px solid #334155;
+            border-radius: 8px;
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 18px;
+        }
+
+        .mode-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #475569;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .mode-btn.active {
+            background-color: #3b82f6;
+            color: #ffffff;
+            border-color: #60a5fa;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+            max-width: 700px;
+            background-color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .slider-row label {
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: #1e3a8a;
+            width: 250px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .val-display {
+            width: 145px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #1d4ed8;
+            background-color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 22px;
+        }
+
+        button.action-btn {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            padding: 11px 22px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .btn-pulse { background-color: #d97706; }
+        .btn-pulse:hover { background-color: #b45309; }
+
+        .btn-reset { background-color: #64748b; }
+        .btn-reset:hover { background-color: #475569; }
+        
+        .btn-solution { background-color: #2563eb; }
+        .btn-solution:hover { background-color: #1d4ed8; }
+
+        .solution-box {
+            display: none;
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 20px;
+            color: #1e3a8a;
+            line-height: 1.9;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>លំហាត់ទី៤៖ ពិសោធន៍វាស់ល្បឿនពន្លឺរបស់លោកហ្វីហ្សូ (Fizeau's Wheel)</h1>
+    </div>
+    
+    <div class="content">
+        <!-- ប្រធានលំហាត់នៅផ្នែកខាងលើ (ដកពាក្យខ្មែរចេញពីក្នុង MathJax ដើម្បីឱ្យអក្សរខ្មែរពេញតួស្អាត) -->
+        <div class="problem-statement">
+            <strong>៤.</strong> កង់បង្វិលរបស់លោកហ្វីហ្សូមានធ្មេញ $N = 360$ និងវិលដោយប្រេកង់ $W = 27.5$ ជុំក្នុង $1\text{ s}$ ។ កាលណាពន្លឺឆ្លងកាត់ធ្មេញ $O$ ពន្លឺដាលទៅដល់កញ្ចក់ រួចផ្លាតត្រឡប់មកវិញ ។ បើពេលវាផ្លាតត្រឡប់មកប៉ះធ្មេញ $B$ វាមិនអាចដាលឆ្លងកាត់កង់បានទេ ប៉ុន្តែបើវាមកឆ្លងកាត់ប្រហោងនោះវាអាចឆ្លងកាត់បាន ។ ចម្ងាយពីកង់ទៅកញ្ចក់គឺ $L = 7500\text{ m}$ ។ តើល្បឿនពន្លឺមានតម្លៃស្មើនឹងប៉ុន្មាន?
+        </div>
+
+        <div id="statusBanner" class="status-banner status-blocked">
+            ស្ថានភាពពិសោធន៍៖ ពន្លឺឆ្លងកាត់ប្រហោង O ទៅប៉ះកញ្ចក់ រួចផ្លាតមកប៉ះធ្មេញ B (មិនអាចឆ្លងកាត់ទៅភ្នែកអ្នកសង្កេតបានទេ)
+        </div>
+
+        <!-- ផ្នែកពិសោធន៍ (Simulator) -->
+        <div class="canvas-container">
+            <canvas id="simCanvas" width="840" height="400"></canvas>
+
+            <div class="mode-buttons">
+                <button class="mode-btn active" id="btnModeBlock" onclick="setMode('block')">
+                    🔴 ករណីទី១៖ ផ្លាតមកប៉ះធ្មេញ B (បាំងពន្លឺ - តាមប្រធានលំហាត់)
+                </button>
+                <button class="mode-btn" id="btnModePass" onclick="setMode('pass')">
+                    🟢 ករណីទី២៖ ផ្លាតមកចំប្រហោងបន្ទាប់ (ពន្លឺឆ្លងកាត់បាន)
+                </button>
+            </div>
+            
+            <div class="controls">
+                <div class="slider-row">
+                    <label>ចំនួនធ្មេញកង់បង្វិល ($N$) :</label>
+                    <input type="range" id="sliderN" min="100" max="720" value="360" step="10" oninput="updateSimulation()">
+                    <div class="val-display" id="valN">360 ធ្មេញ</div>
+                </div>
+                <div class="slider-row">
+                    <label>ប្រេកង់រង្វិល ($W$) :</label>
+                    <input type="range" id="sliderW" min="10" max="60" value="27.5" step="0.5" oninput="updateSimulation()">
+                    <div class="val-display" id="valW">27.5 ជុំ/s</div>
+                </div>
+                <div class="slider-row">
+                    <label>ចម្ងាយពីកង់ទៅកញ្ចក់ ($L$) :</label>
+                    <input type="range" id="sliderL" min="1000" max="15000" value="7500" step="100" oninput="updateSimulation()">
+                    <div class="val-display" id="valL">7500 m</div>
+                </div>
+                
+                <div class="slider-row" style="margin-top: 6px; padding-top: 12px; border-top: 2px dashed #cbd5e1;">
+                    <label style="color: #dc2626; font-size: 1.15rem;">ល្បឿនពន្លឺគណនាបាន ($c$) :</label>
+                    <div style="flex-grow: 1;"></div>
+                    <div class="val-display" id="valC" style="color: #dc2626; border-color: #dc2626; font-size: 1.2rem; width: 195px;">2.97 × 10⁸ m/s</div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="action-btn btn-pulse" onclick="launchPulse()">⚡ បាញ់កាំពន្លឺពិសោធន៍ម្ដងទៀត</button>
+                <button class="action-btn btn-reset" onclick="resetToProblem()">🔄 កំណត់ដូចប្រធានដើម</button>
+                <button class="action-btn btn-solution" id="btnToggleSol" onclick="toggleSolution()">📖 បង្ហាញដំណោះស្រាយ</button>
+            </div>
+        </div>
+
+        <!-- ប្រអប់ដំណោះស្រាយ -->
+        <div class="solution-box" id="solutionBox">
+            <h2 style="margin-top:0; border-bottom:2px solid #93c5fd; padding-bottom:8px; color: #1d4ed8;">ដំណោះស្រាយលំហាត់ទី៤</h2>
+            <div id="solutionContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let N = 360;
+    let W = 27.5;
+    let L = 7500;
+    let cSpeed = 4 * N * W * L;
+
+    let simMode = 'block';
+    let wheelAngle = 0;
+
+    let pulse = {
+        x: 260,
+        dir: 1,
+        state: 'outgoing'
+    };
+
+    function setMode(mode) {
+        simMode = mode;
+        document.getElementById('btnModeBlock').classList.toggle('active', mode === 'block');
+        document.getElementById('btnModePass').classList.toggle('active', mode === 'pass');
+
+        const banner = document.getElementById('statusBanner');
+        if (mode === 'block') {
+            banner.className = "status-banner status-blocked";
+            banner.innerText = "ស្ថានភាពពិសោធន៍៖ ពន្លឺឆ្លងកាត់ប្រហោង O ទៅប៉ះកញ្ចក់ រួចផ្លាតមកប៉ះធ្មេញ B (មិនអាចឆ្លងកាត់ទៅភ្នែកអ្នកសង្កេតបានទេ)";
+        } else {
+            banner.className = "status-banner status-passed";
+            banner.innerText = "ស្ថានភាពពិសោធន៍៖ ពន្លឺផ្លាតត្រឡប់មកចំប្រហោងបន្ទាប់នៃកង់បង្វិល (អាចដាលឆ្លងកាត់ទៅដល់ភ្នែកអ្នកសង្កេត)";
+        }
+        launchPulse();
+    }
+
+    function launchPulse() {
+        pulse.x = 260;
+        pulse.dir = 1;
+        pulse.state = 'outgoing';
+    }
+
+    function resetToProblem() {
+        document.getElementById('sliderN').value = 360;
+        document.getElementById('sliderW').value = 27.5;
+        document.getElementById('sliderL').value = 7500;
+        setMode('block');
+        updateSimulation();
+    }
+
+    function toggleSolution() {
+        const box = document.getElementById('solutionBox');
+        const btn = document.getElementById('btnToggleSol');
+        if (box.style.display === 'block') {
+            box.style.display = 'none';
+            btn.innerText = "📖 បង្ហាញដំណោះស្រាយ";
+        } else {
+            box.style.display = 'block';
+            btn.innerText = "🙈 លាក់ដំណោះស្រាយ";
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([document.getElementById('solutionContent')]);
+            }
+        }
+    }
+
+    function updateSimulation() {
+        N = parseFloat(document.getElementById('sliderN').value);
+        W = parseFloat(document.getElementById('sliderW').value);
+        L = parseFloat(document.getElementById('sliderL').value);
+
+        cSpeed = 4 * N * W * L;
+        let cIn10_8 = cSpeed / 1e8;
+
+        document.getElementById('valN').innerText = N + " ធ្មេញ";
+        document.getElementById('valW').innerText = W.toFixed(1) + " ជុំ/s";
+        document.getElementById('valL').innerText = L + " m";
+        document.getElementById('valC').innerText = cIn10_8.toFixed(2) + " × 10⁸ m/s";
+
+        // ដកអក្សរខ្មែរចេញពីក្នុង LaTeX ($...$) ទាំងអស់ ដើម្បីកុំឱ្យដាច់ស្រៈ ឬជើងអក្សរខ្មែរ
+        let mathHTML = `
+            <p><strong>បម្រាប់៖</strong></p>
+            <ul>
+                <li>ចំនួនធ្មេញរបស់កង់បង្វិល៖ $N = ${N}$</li>
+                <li>ប្រេកង់រង្វិលរបស់កង់៖ $W = ${W}$ ជុំក្នុង $1\\text{ s}$ ($27.5\\text{ s}^{-1}$)</li>
+                <li>ចម្ងាយពីកង់បង្វិលទៅកញ្ចក់ឆ្លុះ៖ $L = ${L}\\text{ m}$</li>
+            </ul>
+            <p><strong>១. រយៈពេលដែលពន្លឺដាលទៅដល់កញ្ចក់ រួចផ្លាតត្រឡប់មកដល់កង់វិញ ($t$) ៖</strong><br>
+            ចម្ងាយសរុបដែលពន្លឺធ្វើដំណើរទៅ និងមកគឺ $d = 2L$ ៖
+            $$ t = \\frac{2L}{c} $$
+            </p>
+            <p><strong>២. រយៈពេលដែលកង់បង្វិលវិលពីប្រហោង $O$ ទៅធ្មេញជាប់គ្នា $B$ ($t$) ៖</strong><br>
+            កង់មានធ្មេញ $N$ និងប្រហោង $N$ (សរុប $2N$ ចំណែកស្មើៗគ្នាក្នុង ១ ជុំ)។ រយៈពេលវិលពីប្រហោង $O$ មកធ្មេញ $B$ គឺស្មើនឹង $\\frac{1}{2N}$ នៃខួបរង្វិល $T = \\frac{1}{W}$ ៖
+            $$ t = \\frac{T}{2N} = \\frac{1}{2NW} $$
+            </p>
+            <p><strong>៣. គណនាល្បឿនពន្លឺ ($c$) ៖</strong><br>
+            ផ្ទឹមរយៈពេលទាំងពីរស្មើគ្នា៖
+            $$ \\frac{2L}{c} = \\frac{1}{2NW} \\implies c = 4NWL $$
+            ជំនួសលេខ៖
+            $$ c = 4 \\times ${N} \\times ${W}\\text{ s}^{-1} \\times ${L}\\text{ m} $$
+            $$ c = ${cSpeed.toLocaleString()}\\text{ m/s} = \\mathbf{${cIn10_8.toFixed(2)} \\times 10^8\\text{ m/s}} $$
+            </p>
+        `;
+
+        const solContainer = document.getElementById('solutionContent');
+        solContainer.innerHTML = mathHTML;
+
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([solContainer]);
+        }
+    }
+
+    function drawCogwheel(cx, cy, outerR, innerR, visualTeeth, angleOffset) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(angleOffset);
+
+        const step = (Math.PI * 2) / visualTeeth;
+        ctx.fillStyle = '#64748b';
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        for (let i = 0; i < visualTeeth; i++) {
+            let a1 = i * step;
+            let a2 = a1 + step * 0.48;
+            let a3 = a1 + step;
+
+            ctx.lineTo(innerR * Math.cos(a1), innerR * Math.sin(a1));
+            ctx.lineTo(outerR * Math.cos(a1), outerR * Math.sin(a1));
+            ctx.arc(0, 0, outerR, a1, a2);
+            ctx.lineTo(innerR * Math.cos(a2), innerR * Math.sin(a2));
+            ctx.arc(0, 0, innerR, a2, a3);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(0, 0, 22, 0, Math.PI * 2);
+        ctx.fillStyle = '#1e293b';
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    function drawClearLabel(text, x, y, font, color, align = 'center') {
+        ctx.save();
+        ctx.font = font;
+        ctx.textAlign = align;
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = color;
+        ctx.fillText(text, x, y);
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const wheelX = 280;
+        const wheelY = 235;
+        const outerR = 92;
+        const innerR = 72;
+        const beamY = wheelY - 82;
+        const mirrorX = 760;
+
+        wheelAngle += 0.0012 * W;
+
+        // ១. គូសប្រភពពន្លឺ និងភ្នែកអ្នកសង្កេត
+        ctx.fillStyle = '#facc15';
+        ctx.strokeStyle = '#ca8a04';
+        ctx.lineWidth = 2;
+        ctx.fillRect(35, beamY - 22, 70, 32);
+        ctx.strokeRect(35, beamY - 22, 70, 32);
+        drawClearLabel('ប្រភពពន្លឺ', 70, beamY - 38, 'bold 18px "Khmer OS Battambang"', '#fde047');
+
+        let eyeX = 85, eyeY = beamY + 26;
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(eyeX, eyeY, 14, -Math.PI * 0.25, Math.PI * 0.25);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(eyeX - 12, eyeY);
+        ctx.lineTo(eyeX + 10, eyeY - 9);
+        ctx.moveTo(eyeX - 12, eyeY);
+        ctx.lineTo(eyeX + 10, eyeY + 9);
+        ctx.stroke();
+        drawClearLabel('អ្នកសង្កេត', 85, eyeY + 26, 'bold 17px "Khmer OS Battambang"', '#38bdf8');
+
+        // ២. គូសកញ្ចក់ឆ្លុះនៅខាងស្តាំ
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(mirrorX, beamY - 55, 12, 130);
+        ctx.strokeStyle = '#bae6fd';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(mirrorX, beamY - 55, 12, 130);
+        for (let y = beamY - 50; y <= beamY + 70; y += 15) {
+            ctx.beginPath();
+            ctx.moveTo(mirrorX + 12, y);
+            ctx.lineTo(mirrorX + 22, y + 8);
+            ctx.stroke();
+        }
+        drawClearLabel('កញ្ចក់ឆ្លុះ', mirrorX - 5, beamY - 75, 'bold 20px "Khmer OS Battambang"', '#7dd3fc');
+
+        // ៣. គូសបន្ទាត់រង្វាស់ចម្ងាយ L = 7500 m
+        let dimY = 335;
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(wheelX, dimY);
+        ctx.lineTo(mirrorX, dimY);
+        ctx.moveTo(wheelX, dimY - 8);
+        ctx.lineTo(wheelX, dimY + 8);
+        ctx.moveTo(mirrorX, dimY - 8);
+        ctx.lineTo(mirrorX, dimY + 8);
+        ctx.stroke();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect((wheelX + mirrorX) / 2 - 95, dimY - 16, 190, 32);
+        drawClearLabel(`L = ${L} m`, (wheelX + mirrorX) / 2, dimY, 'bold 22px Arial', '#f8fafc');
+
+        // ៤. គូសកាំពន្លឺទៅ និងកាំពន្លឺផ្លាតមកវិញ
+        let outY = beamY - 6;
+        let retY = beamY + 12;
+
+        ctx.strokeStyle = 'rgba(250, 204, 21, 0.85)';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(105, outY);
+        ctx.lineTo(mirrorX, outY);
+        ctx.stroke();
+
+        ctx.strokeStyle = simMode === 'block' ? 'rgba(248, 113, 113, 0.9)' : 'rgba(74, 222, 128, 0.9)';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(mirrorX, outY);
+        ctx.lineTo(mirrorX, retY);
+        ctx.lineTo(simMode === 'block' ? wheelX + 12 : 110, retY);
+        ctx.stroke();
+
+        // ៥. គូសកង់បង្វិលរបស់លោកហ្វីហ្សូ
+        drawCogwheel(wheelX, wheelY, outerR, innerR, 18, wheelAngle);
+        drawClearLabel(`កង់បង្វិល (N = ${N})`, wheelX, wheelY + outerR + 30, 'bold 20px "Khmer OS Battambang"', '#e2e8f0');
+        drawClearLabel(`W = ${W} ជុំ/s`, wheelX, wheelY + outerR + 58, 'bold 18px "Khmer OS Battambang"', '#fbbf24');
+
+        drawClearLabel('ប្រហោង O និងធ្មេញ B', wheelX, beamY - 36, 'bold 19px "Khmer OS Battambang"', '#fde047');
+
+        // ៦. ចលនាគ្រាប់ពន្លឺរត់ទៅ-មក
+        const speedPx = 6.5;
+        if (pulse.state === 'outgoing') {
+            pulse.x += speedPx;
+            if (pulse.x >= mirrorX) {
+                pulse.x = mirrorX;
+                pulse.state = 'returning';
+            }
+        } else if (pulse.state === 'returning') {
+            pulse.x -= speedPx;
+            if (simMode === 'block' && pulse.x <= wheelX + 12) {
+                pulse.x = wheelX + 12;
+                pulse.state = 'blocked';
+                setTimeout(launchPulse, 900);
+            } else if (simMode === 'pass' && pulse.x <= 110) {
+                pulse.x = 110;
+                pulse.state = 'passed';
+                setTimeout(launchPulse, 900);
+            }
+        }
+
+        let py = (pulse.state === 'outgoing') ? outY : retY;
+        ctx.beginPath();
+        ctx.arc(pulse.x, py, 7, 0, Math.PI * 2);
+        ctx.fillStyle = pulse.state === 'outgoing' ? '#fef08a' : (simMode === 'block' ? '#ef4444' : '#4ade80');
+        ctx.fill();
+
+        if (pulse.state === 'blocked') {
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(wheelX + 12, retY, 16, 0, Math.PI * 2);
+            ctx.stroke();
+            drawClearLabel('ប៉ះធ្មេញ B (បាំងជិត)', wheelX + 115, retY + 26, 'bold 18px "Khmer OS Battambang"', '#f87171');
+        } else if (pulse.state === 'passed') {
+            drawClearLabel('ឆ្លងកាត់ប្រហោងបាន!', 175, retY + 28, 'bold 18px "Khmer OS Battambang"', '#4ade80');
+        }
+
+        let cIn10_8 = (4 * N * W * L) / 1e8;
+        drawClearLabel(`រូបមន្ត៖ c = 4NWL = ${cIn10_8.toFixed(2)} × 10⁸ m/s`, 545, 38, 'bold 21px "Khmer OS Battambang"', '#4ade80');
+
+        requestAnimationFrame(render);
+    }
+
+    updateSimulation();
+    render();
+</script>
+</body>
+</html>

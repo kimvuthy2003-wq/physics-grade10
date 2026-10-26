@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី ១១៖ សៀគ្វីអំពូលភ្លឺស្វ័យប្រវត្តិ (LDR)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Battambang:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #2563eb;
+            color: white;
+            padding: 16px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .problem-statement {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #1f2937;
+            margin-bottom: 24px;
+            padding: 16px;
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+        }
+
+        .dynamic-status {
+            font-size: 1.05rem;
+            color: #065f46;
+            background-color: #d1fae5;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #34d399;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            border-radius: 4px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            max-width: 100%;
+            height: auto;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .switch-btn {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .switch-btn.off {
+            background-color: #ef4444;
+            box-shadow: 0 4px 0 #b91c1c;
+        }
+        .switch-btn.off:active { transform: translateY(4px); box-shadow: 0 0 0 #b91c1c; }
+
+        .switch-btn.on {
+            background-color: #10b981;
+            box-shadow: 0 4px 0 #059669;
+        }
+        .switch-btn.on:active { transform: translateY(4px); box-shadow: 0 0 0 #059669; }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 80%;
+            background-color: #e2e8f0;
+            padding: 15px 20px;
+            border-radius: 8px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .slider-row label {
+            font-weight: bold;
+            white-space: nowrap;
+            width: 180px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+        
+        .val-display {
+            width: 60px;
+            text-align: right;
+            font-weight: bold;
+            color: #1d4ed8;
+        }
+
+        .solution-btn-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .btn-solution {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #3b82f6;
+            color: white;
+            font-size: 1.1rem;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-solution:hover { background-color: #2563eb; }
+
+        .solution-box {
+            display: none;
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 20px;
+            color: #1e3a8a;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>លំហាត់ទី ១១៖ សៀគ្វីអំពូលភ្លឺស្វ័យប្រវត្តិ (LDR)</h1>
+    </div>
+    
+    <div class="content">
+        <div class="problem-statement">
+            <strong>១១. គេដំឡើងសៀគ្វីដូចរូបខាងក្រោម ។</strong><br><br>
+            ក. ចូររៀបរាប់ឈ្មោះគ្រឿងអេឡិចត្រូនិកដែលយកមកប្រើក្នុងដ្យាក្រាមនៃសៀគ្វីនេះ ។<br>
+            ខ. ចូរបង្ហាញពីដំណើរការនៃសៀគ្វីនេះ ។<br>
+            គ. បើសិនជាអាច ចូរដំឡើងសៀគ្វីនេះលើបន្ទះសៀគ្វីជាក់ស្តែង និងពិនិត្យមើលដំណើរការវាជាក់ស្តែង។
+        </div>
+
+        <div class="dynamic-status" id="statusBox">
+            ស្ថានភាព៖ សូមចុចបើកកុងតាក់ ដើម្បីចាប់ផ្តើមសៀគ្វី!
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="circuitCanvas" width="800" height="380"></canvas>
+            
+            <div class="controls">
+                <button class="switch-btn off" id="powerBtn" onclick="togglePower()">បិទកុងតាក់ (OFF)</button>
+                
+                <div class="slider-group">
+                    <div class="slider-row">
+                        <label>ពន្លឺបរិស្ថាន (LDR)៖</label>
+                        <span style="font-size:12px;">ងងឹត</span>
+                        <input type="range" id="lightSlider" min="0" max="100" value="10" oninput="updateSimulation()">
+                        <span style="font-size:12px;">ភ្លឺ</span>
+                        <span class="val-display" id="lightValDisplay">10%</span>
+                    </div>
+                    <div class="slider-row">
+                        <label>កម្រិតប៉ូតង់ស្យូម៉ែត្រ៖</label>
+                        <span style="font-size:12px;">0Ω</span>
+                        <input type="range" id="potSlider" min="0" max="100" value="50" oninput="updateSimulation()">
+                        <span style="font-size:12px;">100kΩ</span>
+                        <span class="val-display" id="potValDisplay">50%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="solution-btn-container">
+            <button class="btn-solution" onclick="toggleSolution()">បង្ហាញដំណោះស្រាយ</button>
+        </div>
+
+        <div class="solution-box" id="solutionBox">
+            <h2 style="margin-top:0; border-bottom:2px solid #93c5fd; padding-bottom:8px;">ដំណោះស្រាយលំហាត់លេខ ១១</h2>
+            <ul>
+                <li><strong>ក. ឈ្មោះគ្រឿងអេឡិចត្រូនិក៖</strong>
+                    <ul>
+                        <li>ថ្មពិល 9V (BAT1)</li>
+                        <li>កុងតាក់ (SW)</li>
+                        <li>រេស៊ីស្តង់ថេរ R1 (220Ω) និង R2 (10kΩ)</li>
+                        <li>អំពូល LED</li>
+                        <li>ប៉ូតង់ស្យូម៉ែត្រ 100kΩ (Variable Resistor)</li>
+                        <li>សេនស័រពន្លឺ LDR (Light Dependent Resistor)</li>
+                        <li>ត្រង់ស៊ីស្ទ័រ NPN 2N3904 (Q1)</li>
+                    </ul>
+                </li>
+                <li><strong>ខ. ដំណើរការនៃសៀគ្វី៖</strong><br>
+                    សៀគ្វីនេះដើរតួជាកុងតាក់ស្វ័យប្រវត្តិបញ្ជាដោយពន្លឺ (Night Light)៖
+                    <ul>
+                        <li><strong>ពេលយប់ (ងងឹត)៖</strong> LDR គ្មានពន្លឺជះ ធ្វើឱ្យរេស៊ីស្តង់របស់វាមានតម្លៃធំខ្លាំង (រាប់រយគីឡូអូម)។ ដូចនេះ តង់ស្យុងនៅចន្លោះ R2 និង LDR មានកម្រិតខ្ពស់ ជំរុញឱ្យមានចរន្តរត់ឆ្លងកាត់ប៉ូតង់ស្យូម៉ែត្រចូលទៅជើង Base របស់ Q1។ Q1 ចាប់ផ្តើមចម្លងចរន្តពី Collector ទៅ Emitter ធ្វើឱ្យអំពូល LED ភ្លឺ។</li>
+                        <li><strong>ពេលថ្ងៃ (ភ្លឺ)៖</strong> ពន្លឺជះលើ LDR ធ្វើឱ្យរេស៊ីស្តង់របស់វាធ្លាក់ចុះទាប (ប្រហែល 1kΩ)។ វានឹងទាញតង់ស្យុងនៅចំណុចនោះធ្លាក់ចុះទៅរកម៉ាស់ (Ground) ធ្វើឱ្យគ្មានចរន្តហូរចូលជើង Base។ Q1 នឹងផ្តាច់ចរន្ត ជាហេតុធ្វើឱ្យ LED រលត់។</li>
+                        <li><strong>ប៉ូតង់ស្យូម៉ែត្រ (100kΩ)៖</strong> ប្រើសម្រាប់លៃតម្រូវ "ភាពញាប់ (Sensitivity)" ដើម្បីកំណត់ថាតើត្រូវងងឹតកម្រិតណាទើបអនុញ្ញាតឱ្យអំពូលភ្លឺ។</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('circuitCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Simulation Variables
+    let isPowerOn = false;
+    let lightLevel = 10; 
+    let potValue = 50; 
+    let time = 0;
+    
+    // Calculated states
+    let isLedOn = false;
+    let ledAlpha = 0;
+
+    // --- ORTHOGONAL COORDINATES ---
+    const BAT_X = 100, BAT_Y = 220;
+    const GND_Y = 320;
+    const TOP_Y = 100;
+    const MID_Y = 200;
+
+    const SW_X1 = 120, SW_X2 = 180;
+    const NODE_1_X = 240; // Split point
+
+    // Top Branch
+    const R1_X = 300; 
+    const LED_X = 420;
+    
+    // Middle Branch
+    const R2_X = 300;
+    const NODE_2_X = 360; // Above LDR, before Pot
+    
+    const POT_X = 440;
+    const LDR_X = 360, LDR_Y = 250;
+
+    // Transistor Q1 (NPN)
+    const Q1_CX = 560, Q1_CY = 200;
+    const Q1_B_X = 530, Q1_B_Y = 200;
+    const Q1_C_X = 560, Q1_C_Y = 170;
+    const Q1_E_X = 560, Q1_E_Y = 230;
+
+    function togglePower() {
+        isPowerOn = !isPowerOn;
+        const btn = document.getElementById('powerBtn');
+        if (isPowerOn) {
+            btn.innerText = "បើកកុងតាក់ (ON)";
+            btn.classList.replace('off', 'on');
+        } else {
+            btn.innerText = "បិទកុងតាក់ (OFF)";
+            btn.classList.replace('on', 'off');
+        }
+        updateSimulation();
+    }
+
+    function updateSimulation() {
+        lightLevel = parseInt(document.getElementById('lightSlider').value);
+        potValue = parseInt(document.getElementById('potSlider').value);
+        
+        document.getElementById('lightValDisplay').innerText = lightLevel + "%";
+        document.getElementById('potValDisplay').innerText = potValue + "%";
+
+        // Physics Calculation
+        if (isPowerOn) {
+            // LDR Resistance: Dark(0) = 500k, Light(100) = 1k
+            let ldrRes = 1000 + ((100 - lightLevel) / 100) * 499000; 
+            let potRes = (potValue / 100) * 100000; 
+            let r2 = 10000;
+            let vIn = 9;
+
+            // Voltage Divider at Node 2 (ignoring Base load for simple logic)
+            let vNode = vIn * (ldrRes / (r2 + ldrRes));
+            
+            // Base Current Threshold estimation
+            let ib = 0;
+            if (vNode > 0.7) {
+                ib = (vNode - 0.7) / (potRes + 1000); // Approximate Base input resistance
+            }
+
+            let ic = ib * 100; // hFE ~ 100
+            let ic_max = (9 - 2.0) / 220; // Max LED current ~ 31mA
+            
+            let ledCurrent = Math.min(ic, ic_max);
+            
+            if (ledCurrent > 0.001) {
+                isLedOn = true;
+                ledAlpha = Math.min(1, ledCurrent / 0.02); // Full brightness at 20mA
+                document.getElementById('statusBox').innerHTML = "ស្ថានភាព៖ ងងឹត! រេស៊ីស្តង់ LDR ធំ <br> <span style='color:#dc2626'>អំពូល LED កំពុងភ្លឺ (ON)</span>";
+                document.getElementById('statusBox').style.backgroundColor = "#fee2e2";
+                document.getElementById('statusBox').style.borderColor = "#f87171";
+                document.getElementById('statusBox').style.color = "#991b1b";
+            } else {
+                isLedOn = false;
+                ledAlpha = 0;
+                document.getElementById('statusBox').innerHTML = "ស្ថានភាព៖ ភ្លឺ! រេស៊ីស្តង់ LDR តូចទាញភ្លើងចុះម៉ាស់ <br> <span style='color:#4b5563'>អំពូល LED រលត់ (OFF)</span>";
+                document.getElementById('statusBox').style.backgroundColor = "#f3f4f6";
+                document.getElementById('statusBox').style.borderColor = "#9ca3af";
+                document.getElementById('statusBox').style.color = "#374151";
+            }
+        } else {
+            isLedOn = false;
+            ledAlpha = 0;
+            document.getElementById('statusBox').innerHTML = "ស្ថានភាព៖ សូមចុចបើកកុងតាក់ ដើម្បីចាប់ផ្តើមសៀគ្វី!";
+            document.getElementById('statusBox').style.backgroundColor = "#d1fae5";
+            document.getElementById('statusBox').style.borderColor = "#34d399";
+            document.getElementById('statusBox').style.color = "#065f46";
+        }
+    }
+
+    function toggleSolution() {
+        const box = document.getElementById('solutionBox');
+        box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // --- DRAWING UTILS ---
+    function drawLine(x1, y1, x2, y2, color = '#374151', width = 2) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+    }
+
+    function drawNode(x, y) {
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#111827';
+        ctx.fill();
+    }
+
+    function drawBattery(x, y) {
+        drawLine(x - 15, y - 15, x + 15, y - 15, '#111827', 2); // (+)
+        ctx.beginPath();
+        ctx.setLineDash([2, 4]);
+        ctx.moveTo(x, y - 10);
+        ctx.lineTo(x, y + 5);
+        ctx.strokeStyle = '#111827';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.setLineDash([]); 
+        drawLine(x - 10, y + 10, x + 10, y + 10, '#111827', 4); // (-)
+        
+        ctx.fillStyle = '#111827';
+        ctx.font = '12px Arial';
+        ctx.fillText('BAT1', x + 20, y - 5);
+        ctx.fillText('9V', x + 20, y + 10);
+    }
+
+    function drawResistor(x, y, isVertical = false, label = "") {
+        ctx.save();
+        ctx.translate(x, y);
+        if (isVertical) ctx.rotate(Math.PI / 2);
+        
+        ctx.beginPath();
+        ctx.moveTo(-20, 0);
+        for(let i=0; i<5; i++) {
+            ctx.lineTo(-15 + i*8, -8);
+            ctx.lineTo(-11 + i*8, 8);
+        }
+        ctx.lineTo(20, 0);
+        ctx.strokeStyle = '#374151';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+        
+        if (label) {
+            ctx.fillStyle = '#111827';
+            ctx.font = '12px Arial';
+            ctx.fillText(label, x - 15, y - 15);
+        }
+    }
+
+    function drawLED(x, y, isOn, alpha) {
+        ctx.save();
+        ctx.translate(x, y);
+        
+        // Glow
+        if (isOn) {
+            ctx.beginPath();
+            ctx.arc(0, 0, 20, 0, Math.PI*2);
+            ctx.fillStyle = `rgba(239, 68, 68, ${alpha * 0.4})`;
+            ctx.fill();
+        }
+
+        drawLine(-15, 0, -10, 0); // Left wire
+        drawLine(10, 0, 15, 0);   // Right wire
+        
+        ctx.beginPath();
+        ctx.moveTo(-10, -10);
+        ctx.lineTo(10, 0);
+        ctx.lineTo(-10, 10);
+        ctx.closePath();
+        ctx.fillStyle = isOn ? `rgba(239, 68, 68, ${alpha})` : '#fff';
+        ctx.fill();
+        ctx.strokeStyle = '#374151';
+        ctx.stroke();
+        
+        drawLine(10, -10, 10, 10, '#374151', 3); // Cathode line
+
+        // Light arrows (pointing out)
+        if (isOn) {
+            drawLine(-5, -12, 5, -20, '#ef4444', 2);
+            drawLine(0, -20, 5, -20, '#ef4444', 2);
+            drawLine(5, -15, 5, -20, '#ef4444', 2);
+            
+            drawLine(5, -12, 15, -20, '#ef4444', 2);
+            drawLine(10, -20, 15, -20, '#ef4444', 2);
+            drawLine(15, -15, 15, -20, '#ef4444', 2);
+        }
+        ctx.restore();
+        
+        ctx.fillStyle = '#111827';
+        ctx.font = '12px Arial';
+        ctx.fillText('LED', x - 10, y + 20);
+    }
+
+    function drawLDR(x, y) {
+        ctx.save();
+        ctx.translate(x, y);
+        
+        // Circle
+        ctx.beginPath();
+        ctx.arc(0, 0, 16, 0, Math.PI*2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.strokeStyle = '#374151';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Zigzag inside
+        ctx.beginPath();
+        ctx.moveTo(0, -10);
+        ctx.lineTo(-5, -5); ctx.lineTo(5, 0);
+        ctx.lineTo(-5, 5); ctx.lineTo(0, 10);
+        ctx.stroke();
+
+        // Light arrows IN
+        let arrowColor = '#eab308'; // Yellowish
+        drawLine(-25, -15, -12, -5, arrowColor, 2);
+        drawLine(-12, -5, -17, -5, arrowColor, 2);
+        drawLine(-12, -5, -12, -10, arrowColor, 2);
+
+        drawLine(-35, -5, -22, 5, arrowColor, 2);
+        drawLine(-22, 5, -27, 5, arrowColor, 2);
+        drawLine(-22, 5, -22, 0, arrowColor, 2);
+
+        ctx.restore();
+        ctx.fillStyle = '#111827';
+        ctx.font = '12px Arial';
+        ctx.fillText('LDR', x + 20, y + 5);
+        ctx.font = '10px Arial';
+        ctx.fillText('1', x + 5, y - 20);
+        ctx.fillText('2', x + 5, y + 25);
+    }
+
+    function drawPotentiometer(x, y) {
+        // Draw as a resistor box with a wiper line
+        ctx.strokeRect(x - 20, y - 8, 40, 16);
+        
+        // Wiper arrow from bottom
+        drawLine(x, y + 8, x, y + 20); // vertical drop
+        ctx.beginPath();
+        ctx.moveTo(x, y + 8);
+        ctx.lineTo(x - 4, y + 14);
+        ctx.lineTo(x + 4, y + 14);
+        ctx.fillStyle = '#374151';
+        ctx.fill();
+
+        ctx.fillStyle = '#111827';
+        ctx.font = '12px Arial';
+        ctx.fillText('100k', x - 12, y - 12);
+    }
+
+    function drawNPN(cx, cy) {
+        ctx.beginPath();
+        ctx.moveTo(cx - 30, cy); // Base pin
+        ctx.lineTo(cx - 15, cy);
+        ctx.moveTo(cx - 15, cy - 15); // Bar
+        ctx.lineTo(cx - 15, cy + 15);
+        ctx.lineWidth = 3; ctx.strokeStyle = '#374151'; ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - 30); // Collector pin
+        ctx.lineTo(cx, cy - 15);
+        ctx.lineTo(cx - 15, cy - 5);
+        ctx.moveTo(cx, cy + 30); // Emitter pin
+        ctx.lineTo(cx, cy + 15);
+        ctx.lineTo(cx - 15, cy + 5);
+        ctx.lineWidth = 2; ctx.stroke();
+
+        // Arrow OUT
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + 15);
+        ctx.lineTo(cx - 10, cy + 12);
+        ctx.lineTo(cx - 5, cy + 5);
+        ctx.fillStyle = '#374151'; ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(cx - 5, cy, 22, 0, Math.PI*2);
+        ctx.stroke();
+        
+        ctx.fillStyle = '#111827';
+        ctx.font = '12px Arial';
+        ctx.fillText('Q1 2N3904', cx + 20, cy + 5);
+    }
+
+    function drawCurrent(path, isDashed) {
+        if (!isPowerOn) return;
+        ctx.save();
+        
+        if (isDashed) {
+            let p = (time * 3) % 1;
+            ctx.setLineDash([8, 12]);
+            ctx.lineDashOffset = -p * 20;
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)'; // Red active current
+        } else {
+            ctx.setLineDash([4, 16]); // Slow, tiny leak current
+            ctx.lineDashOffset = -(time * 1) % 20;
+            ctx.strokeStyle = 'rgba(156, 163, 175, 0.6)'; // Grey inactive current
+        }
+        
+        ctx.beginPath();
+        ctx.moveTo(path[0].x, path[0].y);
+        for(let i=1; i<path.length; i++) {
+            ctx.lineTo(path[i].x, path[i].y);
+        }
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        time += 0.05;
+
+        // --- DRAW WIRING ---
+        // Battery Lines
+        drawLine(BAT_X, GND_Y, BAT_X, BAT_Y + 15);
+        drawLine(BAT_X, BAT_Y - 15, BAT_X, TOP_Y);
+        drawBattery(BAT_X, BAT_Y);
+
+        // Switch
+        drawLine(BAT_X, TOP_Y, SW_X1, TOP_Y);
+        drawNode(SW_X1, TOP_Y);
+        drawNode(SW_X2, TOP_Y);
+        ctx.fillText('SW', SW_X1 + 15, TOP_Y - 10);
+        if (isPowerOn) {
+            drawLine(SW_X1, TOP_Y, SW_X2, TOP_Y, '#10b981', 3);
+        } else {
+            drawLine(SW_X1, TOP_Y, SW_X2 - 10, TOP_Y - 15, '#374151', 2);
+        }
+
+        // To Node 1
+        drawLine(SW_X2, TOP_Y, NODE_1_X, TOP_Y);
+        drawNode(NODE_1_X, TOP_Y);
+
+        // --- TOP BRANCH (LED) ---
+        drawLine(NODE_1_X, TOP_Y, R1_X - 20, TOP_Y);
+        drawResistor(R1_X, TOP_Y, false, "R1");
+        ctx.fillText('220R', R1_X - 15, TOP_Y + 15);
+        
+        drawLine(R1_X + 20, TOP_Y, LED_X - 15, TOP_Y);
+        drawLED(LED_X, TOP_Y, isLedOn, ledAlpha);
+
+        drawLine(LED_X + 15, TOP_Y, Q1_C_X, TOP_Y);
+        drawLine(Q1_C_X, TOP_Y, Q1_C_X, Q1_C_Y); // Down to Collector
+
+        // --- MIDDLE BRANCH (Divider) ---
+        drawLine(NODE_1_X, TOP_Y, NODE_1_X, MID_Y); // Drop down
+        drawLine(NODE_1_X, MID_Y, R2_X - 20, MID_Y);
+        drawResistor(R2_X, MID_Y, false, "R2");
+        ctx.fillText('10k', R2_X - 10, MID_Y + 15);
+        
+        drawLine(R2_X + 20, MID_Y, NODE_2_X, MID_Y);
+        drawNode(NODE_2_X, MID_Y);
+
+        // Node 2 to LDR (Down)
+        drawLine(NODE_2_X, MID_Y, LDR_X, LDR_Y - 16);
+        drawLDR(LDR_X, LDR_Y);
+        drawLine(LDR_X, LDR_Y + 16, LDR_X, GND_Y);
+        drawNode(LDR_X, GND_Y);
+
+        // Node 2 to Potentiometer (Right)
+        drawLine(NODE_2_X, MID_Y, POT_X - 20, MID_Y);
+        drawPotentiometer(POT_X, MID_Y);
+        
+        // Pot to Q1 Base
+        drawLine(POT_X, MID_Y + 20, POT_X, MID_Y + 30); // Wire from wiper down
+        drawLine(POT_X, MID_Y + 30, Q1_B_X - 15, MID_Y + 30); // Right
+        drawLine(Q1_B_X - 15, MID_Y + 30, Q1_B_X - 15, Q1_B_Y); // Up to base level
+        drawLine(Q1_B_X - 15, Q1_B_Y, Q1_B_X, Q1_B_Y); // Into Base
+
+        // Draw Transistor
+        drawNPN(Q1_CX, Q1_CY);
+
+        // Q1 Emitter to GND
+        drawLine(Q1_E_X, Q1_E_Y, Q1_E_X, GND_Y);
+        drawNode(Q1_E_X, GND_Y);
+
+        // Bottom Ground Rail
+        drawLine(BAT_X, GND_Y, Q1_E_X, GND_Y);
+        
+        // Ground Symbol under LDR
+        drawLine(LDR_X, GND_Y, LDR_X, GND_Y + 15);
+        drawLine(LDR_X - 15, GND_Y + 15, LDR_X + 15, GND_Y + 15);
+        drawLine(LDR_X - 10, GND_Y + 20, LDR_X + 10, GND_Y + 20);
+        drawLine(LDR_X - 5, GND_Y + 25, LDR_X + 5, GND_Y + 25);
+
+
+        // --- ANIMATED CURRENT FLOW ---
+        if (isPowerOn) {
+            // Divider path always has tiny current
+            drawCurrent([{x: BAT_X, y: TOP_Y}, {x: NODE_1_X, y: TOP_Y}], true);
+            drawCurrent([{x: NODE_1_X, y: TOP_Y}, {x: NODE_1_X, y: MID_Y}, {x: NODE_2_X, y: MID_Y}], true);
+            drawCurrent([{x: NODE_2_X, y: MID_Y}, {x: LDR_X, y: LDR_Y-16}], true);
+            drawCurrent([{x: LDR_X, y: LDR_Y+16}, {x: LDR_X, y: GND_Y}, {x: BAT_X, y: GND_Y}], true);
+
+            // LED and Base path only if ON
+            if (isLedOn) {
+                // Base Current
+                drawCurrent([
+                    {x: NODE_2_X, y: MID_Y}, {x: POT_X, y: MID_Y}, 
+                    {x: POT_X, y: MID_Y+30}, {x: Q1_B_X-15, y: MID_Y+30}, {x: Q1_B_X-15, y: Q1_B_Y}
+                ], true);
+
+                // LED Main Current
+                drawCurrent([
+                    {x: NODE_1_X, y: TOP_Y}, {x: LED_X-15, y: TOP_Y}
+                ], true);
+                drawCurrent([
+                    {x: LED_X+15, y: TOP_Y}, {x: Q1_C_X, y: TOP_Y}, {x: Q1_C_X, y: Q1_C_Y}
+                ], true);
+                
+                // Emitter Return
+                drawCurrent([
+                    {x: Q1_E_X, y: Q1_E_Y}, {x: Q1_E_X, y: GND_Y}, {x: LDR_X, y: GND_Y}
+                ], true);
+            } else {
+                // Dim grey dashed line for inactive LED branch
+                drawCurrent([{x: NODE_1_X, y: TOP_Y}, {x: Q1_C_X, y: TOP_Y}, {x: Q1_C_X, y: Q1_C_Y}], false);
+            }
+        }
+
+        requestAnimationFrame(render);
+    }
+
+    // Initialize display
+    updateSimulation();
+    render();
+</script>
+</body>
+</html>

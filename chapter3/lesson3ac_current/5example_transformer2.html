@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់គំរូទី២៖ ត្រង់ស្វូ និង ទិន្នផល</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Google Font: Battambang -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        
+        /* Math formatting classes */
+        .math-text {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            font-size: 1.2em;
+        }
+
+        .math-sub {
+            font-style: normal;
+            font-size: 0.7em;
+        }
+
+        /* Fraction formatting */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            text-align: center;
+            vertical-align: middle;
+            margin: 0 0.3rem;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.2em;
+        }
+        .fraction .numerator {
+            border-bottom: 2px solid currentColor;
+            padding: 0 0.2rem;
+        }
+        .fraction .denominator {
+            padding: 0 0.2rem;
+        }
+
+        /* Smooth transition for the answer section */
+        #answer-section {
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transform: translateY(-10px);
+        }
+
+        #answer-section.show {
+            max-height: 2000px;
+            opacity: 1;
+            margin-top: 1.5rem;
+            transform: translateY(0);
+        }
+
+        /* Simulator animations */
+        .flux-line {
+            animation: dash 1.5s linear infinite;
+        }
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -20;
+            }
+        }
+        
+        .glow {
+            animation: pulse-glow 2s infinite alternate;
+        }
+        @keyframes pulse-glow {
+            0% { filter: drop-shadow(0 0 4px #fde047); }
+            100% { filter: drop-shadow(0 0 15px #eab308); }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased p-4 md:p-8 flex items-center justify-center min-h-screen">
+
+    <div class="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        
+        <!-- Header Section -->
+        <div class="bg-gradient-to-r from-indigo-700 to-indigo-500 px-6 py-6 border-b border-indigo-800 shadow-sm">
+            <h1 class="text-2xl md:text-3xl text-white font-bold text-center leading-relaxed drop-shadow-md">
+                លំហាត់គំរូទី២៖ ត្រង់ស្វូ និង ទិន្នផល
+            </h1>
+        </div>
+
+        <div class="p-5 md:p-8 space-y-8">
+            
+            <section class="relative">
+                <div class="absolute -left-4 top-0 w-1 h-full bg-indigo-500 rounded-r-md"></div>
+                <h2 class="text-xl font-bold text-slate-800 mb-3 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    ប្រធានលំហាត់
+                </h2>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 text-lg leading-loose text-slate-700 shadow-sm ring-1 ring-slate-100">
+                    <p class="text-justify mb-4">
+                        ត្រង់ស្វូមួយត្រូវបានភ្ជាប់ទៅនឹងអំពូលចង្កៀងមួយដែលមានកំណត់សម្គាល់ <span class="font-bold text-indigo-700">(6 V, 24 W)</span> ឲ្យឆេះភ្លឺធម្មតា ហើយត្រង់ស្វូនេះត្រូវបានភ្ជាប់នឹងប្រភពចរន្តឆ្លាស់ <span class="font-bold text-red-600">240 V</span> ។
+                    </p>
+                    <ul class="list-none space-y-2 ml-4">
+                        <li><span class="font-bold mr-2">ក.</span> បញ្ជាក់ពីប្រភេទត្រង់ស្វូ</li>
+                        <li><span class="font-bold mr-2">ខ.</span> គណនាផលធៀបចំនួនស្ពៀរ (ផលធៀបបំប្លែង <span class="math-text">k</span>)</li>
+                        <li><span class="font-bold mr-2">គ.</span> គណនាចរន្តនៅរបុំបឋម ដោយសន្មតត្រង់ស្វូផ្តល់ទិន្នផល <span class="font-bold text-emerald-600">80 %</span> ។</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="bg-slate-50 p-2 md:p-4 rounded-xl border border-slate-200 shadow-inner">
+                <h3 class="text-center font-bold text-slate-600 mb-2">គំនូសបំព្រួញប្រព័ន្ធត្រង់ស្វូ (Transformer Circuit Simulator)</h3>
+                <div class="w-full overflow-hidden bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <svg viewBox="0 0 800 450" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="iron-core" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#cbd5e1" />
+                                <stop offset="50%" stop-color="#94a3b8" />
+                                <stop offset="100%" stop-color="#64748b" />
+                            </linearGradient>
+                            <linearGradient id="wire-front" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#f59e0b" />
+                                <stop offset="50%" stop-color="#d97706" />
+                                <stop offset="100%" stop-color="#b45309" />
+                            </linearGradient>
+                            <linearGradient id="wire-back" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#b45309" />
+                                <stop offset="100%" stop-color="#78350f" />
+                            </linearGradient>
+                            <radialGradient id="bulb-glow" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#fef08a" stop-opacity="1" />
+                                <stop offset="70%" stop-color="#fde047" stop-opacity="0.8" />
+                                <stop offset="100%" stop-color="#fef08a" stop-opacity="0" />
+                            </radialGradient>
+                        </defs>
+
+                        <!-- Iron Core -->
+                        <path d="M 200 75 h 400 v 300 h -400 v -300 z M 275 150 v 150 h 250 v -150 h -250 z" fill="url(#iron-core)" stroke="#475569" stroke-width="4" fill-rule="evenodd" />
+
+                        <!-- Animated Magnetic Flux -->
+                        <rect x="237" y="112" width="326" height="226" fill="none" stroke="#6366f1" stroke-width="2" stroke-dasharray="10 10" class="flux-line" opacity="0.6"/>
+                        <rect x="250" y="125" width="300" height="200" fill="none" stroke="#6366f1" stroke-width="2" stroke-dasharray="10 10" class="flux-line" opacity="0.4"/>
+                        
+                        <!-- Primary Coil (Left) -->
+                        <g stroke-linejoin="round" fill="none">
+                            <circle cx="80" cy="225" r="25" fill="#f8fafc" stroke="#334155" stroke-width="3"/>
+                            <path d="M 65 225 Q 72 210, 80 225 T 95 225" stroke="#334155" stroke-width="3"/>
+                            
+                            <path d="M 80 200 L 80 150 L 200 150" stroke="url(#wire-front)" stroke-width="6" />
+                            <path d="M 80 250 L 80 300 L 200 300" stroke="url(#wire-front)" stroke-width="6" />
+
+                            <path d="M 275 160 C 295 165, 295 170, 200 175" stroke="url(#wire-back)" stroke-width="5"/>
+                            <path d="M 275 185 C 295 190, 295 195, 200 200" stroke="url(#wire-back)" stroke-width="5"/>
+                            <path d="M 275 210 C 295 215, 295 220, 200 225" stroke="url(#wire-back)" stroke-width="5"/>
+                            <path d="M 275 235 C 295 240, 295 245, 200 250" stroke="url(#wire-back)" stroke-width="5"/>
+                            <path d="M 275 260 C 295 265, 295 270, 200 275" stroke="url(#wire-back)" stroke-width="5"/>
+                            <path d="M 275 285 C 295 290, 295 295, 200 300" stroke="url(#wire-back)" stroke-width="5"/>
+
+                            <path d="M 200 150 L 275 160" stroke="url(#wire-front)" stroke-width="8"/>
+                            <path d="M 200 175 L 275 185" stroke="url(#wire-front)" stroke-width="8"/>
+                            <path d="M 200 200 L 275 210" stroke="url(#wire-front)" stroke-width="8"/>
+                            <path d="M 200 225 L 275 235" stroke="url(#wire-front)" stroke-width="8"/>
+                            <path d="M 200 250 L 275 260" stroke="url(#wire-front)" stroke-width="8"/>
+                            <path d="M 200 275 L 275 285" stroke="url(#wire-front)" stroke-width="8"/>
+                        </g>
+
+                        <!-- Secondary Coil (Right) -->
+                        <g stroke-linejoin="round" fill="none">
+                            <!-- Bulb -->
+                            <circle cx="725" cy="225" r="40" fill="url(#bulb-glow)" class="glow" />
+                            <circle cx="725" cy="225" r="25" fill="#fef9c3" stroke="#eab308" stroke-width="3"/>
+                            <line x1="707" y1="207" x2="743" y2="243" stroke="#ca8a04" stroke-width="3"/>
+                            <line x1="743" y1="207" x2="707" y2="243" stroke="#ca8a04" stroke-width="3"/>
+
+                            <path d="M 600 180 L 725 180 L 725 200" stroke="url(#wire-front)" stroke-width="6" />
+                            <path d="M 600 270 L 725 270 L 725 250" stroke="url(#wire-front)" stroke-width="6" />
+
+                            <path d="M 525 205 C 505 215, 505 225, 600 235" stroke="url(#wire-back)" stroke-width="7"/>
+                            <path d="M 525 240 C 505 250, 505 260, 600 270" stroke="url(#wire-back)" stroke-width="7"/>
+
+                            <path d="M 600 180 L 525 205" stroke="url(#wire-front)" stroke-width="10"/>
+                            <path d="M 600 235 L 525 240" stroke="url(#wire-front)" stroke-width="10"/>
+                        </g>
+
+                        <!-- Labels Overlay -->
+                        <rect x="30" y="30" width="160" height="85" rx="8" fill="#fee2e2" stroke="#fca5a5" opacity="0.9"/>
+                        <text x="110" y="55" font-family="Battambang" font-weight="bold" font-size="18" fill="#b91c1c" text-anchor="middle">របុំបឋម (Primary)</text>
+                        <text x="110" y="80" font-family="Times New Roman" font-size="18" fill="#7f1d1d" text-anchor="middle" font-style="italic">V<tspan dy="5" font-size="12" font-style="normal">1</tspan><tspan dy="-5"> = 240 V</tspan></text>
+                        <text x="110" y="105" font-family="Times New Roman" font-size="18" fill="#ef4444" text-anchor="middle" font-style="italic" font-weight="bold">I<tspan dy="5" font-size="12" font-style="normal">1</tspan><tspan dy="-5"> = ?</tspan></text>
+
+                        <rect x="610" y="30" width="160" height="105" rx="8" fill="#fef3c7" stroke="#fde047" opacity="0.9"/>
+                        <text x="690" y="55" font-family="Battambang" font-weight="bold" font-size="18" fill="#b45309" text-anchor="middle">របុំមធ្យម (Secondary)</text>
+                        <text x="690" y="80" font-family="Times New Roman" font-size="18" fill="#92400e" text-anchor="middle" font-style="italic">V<tspan dy="5" font-size="12" font-style="normal">2</tspan><tspan dy="-5"> = 6 V</tspan></text>
+                        <text x="690" y="105" font-family="Times New Roman" font-size="18" fill="#92400e" text-anchor="middle" font-style="italic">P<tspan dy="5" font-size="12" font-style="normal">2</tspan><tspan dy="-5"> = 24 W</tspan></text>
+                        <text x="690" y="125" font-family="Battambang" font-size="14" fill="#047857" text-anchor="middle">ទិន្នផល = 80%</text>
+                    </svg>
+                </div>
+            </section>
+
+            <div class="text-center pt-4">
+                <button id="toggleBtn" onclick="toggleAnswer()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center mx-auto ring-4 ring-indigo-100 hover:ring-indigo-200">
+                    <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span id="btnText">បង្ហាញចម្លើយ</span>
+                </button>
+            </div>
+
+            <section id="answer-section">
+                <div class="bg-slate-50 rounded-xl p-6 md:p-8 border border-slate-200 shadow-inner space-y-8">
+                    
+                    <!-- Answer A (Corrected) -->
+                    <div class="bg-white p-5 rounded-lg border-l-4 border-blue-500 shadow-sm">
+                        <h3 class="font-bold text-blue-800 text-lg mb-3">ក. បញ្ជាក់ពីប្រភេទត្រង់ស្វូ</h3>
+                        <p class="text-slate-700 leading-relaxed text-lg mb-2">
+                            យោងតាមបម្រាប់ តង់ស្យុងនៅរបុំមធ្យម <span class="math-text">V<sub class="math-sub">2</sub> = 6 V</span> តូចជាងតង់ស្យុងនៅរបុំបឋម <span class="math-text">V<sub class="math-sub">1</sub> = 240 V</span>។
+                        </p>
+                        <div class="flex items-center text-lg text-slate-800 my-2">
+                            <span>នាំឱ្យផលធៀបបំប្លែងតូចជាង ១ ៖</span>
+                            <div class="ml-4 flex items-center bg-blue-50 px-3 py-1 rounded">
+                                <span class="math-text font-bold text-blue-800 mr-2">k =</span>
+                                <div class="fraction text-blue-800 font-bold">
+                                    <span class="numerator">V<sub class="math-sub">2</sub></span>
+                                    <span class="denominator">V<sub class="math-sub">1</sub></span>
+                                </div>
+                                <span class="math-text font-bold text-blue-800 ml-2">< 1</span>
+                            </div>
+                        </div>
+                        <p class="text-slate-700 leading-relaxed text-lg mt-3">
+                            កាលណាផលធៀបបំប្លែងតូចជាង ១ <span class="math-text">(k < 1)</span> ដូចនេះវាជា <span class="font-bold text-blue-700 underline decoration-blue-400">ស៊ូវ៉ុលទ័រ</span> (ត្រង់ស្វូបន្ថយតង់ស្យុង) ។
+                        </p>
+                    </div>
+
+                    <!-- Answer B (Corrected) -->
+                    <div class="bg-white p-5 rounded-lg border-l-4 border-amber-500 shadow-sm">
+                        <h3 class="font-bold text-amber-800 text-lg mb-3">ខ. គណនាផលធៀបចំនួនស្ពៀរក្នុងរបុំបឋម និងរបុំមធ្យម</h3>
+                        <p class="text-slate-700 mb-2 text-lg">តាមរូបមន្តត្រង់ស្វូ ផលធៀបបំប្លែង <span class="math-text font-bold text-amber-700">k</span> សមាមាត្រនឹងផលធៀបចំនួនស្ពៀរ និងតង់ស្យុង៖</p>
+                        
+                        <div class="flex items-center text-xl text-slate-800 my-4 ml-4">
+                            <span class="math-text font-bold text-amber-700 mr-3 text-2xl">k =</span>
+                            <div class="fraction">
+                                <span class="numerator math-text font-bold text-amber-700">N<sub class="math-sub">2</sub></span>
+                                <span class="denominator math-text font-bold text-amber-700">N<sub class="math-sub">1</sub></span>
+                            </div>
+                            <span class="mx-3">=</span>
+                            <div class="fraction">
+                                <span class="numerator math-text font-bold text-amber-700">V<sub class="math-sub">2</sub></span>
+                                <span class="denominator math-text font-bold text-amber-700">V<sub class="math-sub">1</sub></span>
+                            </div>
+                        </div>
+                        
+                        <p class="text-slate-700 mb-2 text-lg">ជំនួសលេខចូល៖</p>
+                        
+                        <div class="flex items-center text-xl my-3 ml-4 bg-amber-50 w-max px-4 py-3 rounded-lg border border-amber-100">
+                            <span class="math-text font-bold text-amber-900 mr-3 text-2xl">k =</span>
+                            <div class="fraction">
+                                <span class="numerator text-slate-800">6</span>
+                                <span class="denominator text-slate-800">240</span>
+                            </div>
+                            <span class="mx-3">=</span>
+                            <div class="fraction">
+                                <span class="numerator text-slate-800">1</span>
+                                <span class="denominator text-slate-800">40</span>
+                            </div>
+                            <span class="mx-3 font-bold text-red-600">= 0.025</span>
+                        </div>
+                        
+                        <p class="mt-3 text-slate-700 text-lg">
+                            ដូចនេះ ផលធៀបបំប្លែង ឬផលធៀបចំនួនស្ពៀរ <span class="math-text text-amber-800">N<sub class="math-sub">2</sub>/N<sub class="math-sub">1</sub></span> គឺ <span class="font-bold text-red-600 text-xl">0.025</span> (ឬ <span class="math-text">1/40</span>) ។
+                        </p>
+                    </div>
+
+                    <!-- Answer C -->
+                    <div class="bg-white p-5 rounded-lg border-l-4 border-emerald-500 shadow-sm">
+                        <h3 class="font-bold text-emerald-800 text-lg mb-3">គ. គណនាចរន្តនៅរបុំបឋម ដោយសន្មតត្រង់ស្វូផ្តល់ទិន្នផល 80%</h3>
+                        
+                        <p class="text-slate-700 mb-3 text-lg">តាមរូបមន្តទិន្នផលត្រង់ស្វូ៖</p>
+                        <div class="flex items-center text-xl mb-4 ml-4">
+                            <span class="math-text font-bold text-emerald-700 mr-2">η =</span>
+                            <div class="fraction">
+                                <span class="numerator math-text font-bold text-emerald-700">P<sub class="math-sub">2</sub></span>
+                                <span class="denominator math-text font-bold text-emerald-700">P<sub class="math-sub">1</sub></span>
+                            </div>
+                            <span class="mx-4 text-base">ឬ</span>
+                            <span class="math-text font-bold text-emerald-700 mr-2">η =</span>
+                            <div class="fraction">
+                                <span class="numerator math-text font-bold text-emerald-700">P<sub class="math-sub">2</sub></span>
+                                <span class="denominator math-text font-bold text-emerald-700">V<sub class="math-sub">1</sub> &times; I<sub class="math-sub">1</sub></span>
+                            </div>
+                        </div>
+
+                        <p class="text-slate-700 mb-3 text-lg">ទាញរកអាំងតង់ស៊ីតេចរន្ត <span class="math-text">I<sub class="math-sub">1</sub></span> ៖</p>
+                        <div class="flex items-center text-xl mb-4 ml-4 bg-emerald-50 w-max px-4 py-2 rounded">
+                            <span class="math-text font-bold text-emerald-900 mr-2">I<sub class="math-sub">1</sub> =</span>
+                            <div class="fraction">
+                                <span class="numerator math-text font-bold text-emerald-900">P<sub class="math-sub">2</sub></span>
+                                <span class="denominator math-text font-bold text-emerald-900">η &times; V<sub class="math-sub">1</sub></span>
+                            </div>
+                        </div>
+
+                        <p class="text-slate-700 mb-3 text-lg">ដោយទិន្នផល <span class="math-text">η = 80% = 0.8</span>, ជំនួសលេខចូល៖</p>
+                        <div class="flex items-center text-xl mb-4 ml-4">
+                            <span class="math-text mr-2">I<sub class="math-sub">1</sub> =</span>
+                            <div class="fraction">
+                                <span class="numerator">24</span>
+                                <span class="denominator">0.8 &times; 240</span>
+                            </div>
+                            <span class="mx-3">=</span>
+                            <div class="fraction">
+                                <span class="numerator">24</span>
+                                <span class="denominator">192</span>
+                            </div>
+                            <span class="mx-3 font-bold text-red-600">= 0.125 A</span>
+                        </div>
+                        
+                        <div class="mt-6 pt-4 border-t border-emerald-100">
+                            <p class="font-bold text-xl text-emerald-800 flex items-center justify-center">
+                                ដូចនេះ ចរន្តនៅរបុំបឋមគឺ <span class="math-text mx-3 text-3xl text-red-600 drop-shadow-sm">I<sub class="math-sub">1</sub> = 0.125 A</span>
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        function toggleAnswer() {
+            const answerSection = document.getElementById('answer-section');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const button = document.getElementById('toggleBtn');
+            
+            answerSection.classList.toggle('show');
+            
+            if (answerSection.classList.contains('show')) {
+                btnText.textContent = 'លាក់ចម្លើយ';
+                button.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'ring-indigo-100', 'hover:ring-indigo-200');
+                button.classList.add('bg-slate-700', 'hover:bg-slate-800', 'ring-slate-200', 'hover:ring-slate-300');
+                
+                btnIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                `;
+
+                setTimeout(() => {
+                    answerSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300);
+
+            } else {
+                btnText.textContent = 'បង្ហាញចម្លើយ';
+                button.classList.remove('bg-slate-700', 'hover:bg-slate-800', 'ring-slate-200', 'hover:ring-slate-300');
+                button.classList.add('bg-indigo-600', 'hover:bg-indigo-700', 'ring-indigo-100', 'hover:ring-indigo-200');
+                
+                btnIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

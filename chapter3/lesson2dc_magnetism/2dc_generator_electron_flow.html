@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>មេរៀនទី២ចរន្តជាប់និងម៉ាញេទិច</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kantumruy Pro', sans-serif; overflow: hidden; background-color: #f8fafc; }
+        .btn-hover { transition: all 0.3s ease; }
+        .btn-active-1 { background-color: #fee2e2; border-color: #ef4444; color: #b91c1c; } 
+        .btn-active-2 { background-color: #fef9c3; border-color: #eab308; color: #a16207; } 
+        .btn-active-3 { background-color: #dbeafe; border-color: #3b82f6; color: #1d4ed8; } 
+    </style>
+</head>
+<body class="flex flex-col lg:flex-row h-screen">
+
+    <!-- Left Panel: Controls -->
+    <div class="w-full lg:w-1/3 h-2/5 lg:h-full bg-white shadow-[4px_0_24px_rgba(0,0,0,0.05)] z-10 flex flex-col p-6 lg:p-8 border-r border-slate-200 overflow-y-auto">
+        <div class="mb-4 lg:mb-6 border-b border-slate-100 pb-4">
+            <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 mb-2 leading-tight">ចរន្តអគ្គិសនីក្នុងអេឡិចត្រូលីត</h1>
+        </div>
+
+        <h3 class="text-lg lg:text-xl font-bold text-slate-700 mb-3">ផ្ទាំងបញ្ជា (Controls)</h3>
+        <div class="flex flex-col space-y-3">
+            <button id="btn-1" class="btn-hover btn-active-1 w-full text-left px-5 py-4 rounded-xl border-2 font-bold text-lg flex justify-between items-center" onclick="setMode(1)">
+                <span>១. ផ្តាច់សៀគ្វី (Open Switch)</span>
+                <span class="text-2xl">🔌</span>
+            </button>
+            <button id="btn-2" class="btn-hover bg-white border-slate-300 text-slate-700 w-full text-left px-5 py-4 rounded-xl border-2 font-bold text-lg flex justify-between items-center" onclick="setMode(2)">
+                <span>២. ភ្ជាប់សៀគ្វី (Close Switch)</span>
+                <span class="text-2xl">💡</span>
+            </button>
+            <button id="btn-3" class="btn-hover bg-white border-slate-300 text-slate-700 w-full text-left px-5 py-4 rounded-xl border-2 font-bold text-lg flex justify-between items-center" onclick="setMode(3)">
+                <span>៣. បង្ហាញប្រតិកម្មគីមី</span>
+                <span class="text-2xl">🧪</span>
+            </button>
+        </div>
+
+        <div class="mt-auto pt-6 lg:pt-8">
+            <div class="flex flex-col gap-2 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <div class="flex items-center gap-3">
+                    <div id="status-dot" class="w-4 h-4 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]"></div>
+                    <span id="status-text" class="text-base lg:text-lg font-semibold text-slate-700">សៀគ្វីត្រូវបានផ្តាច់...</span>
+                </div>
+                <p class="text-sm lg:text-base text-slate-500 mt-2">
+                    * អំពូលនឹងភ្លឺលុះត្រាតែគ្រាប់អេឡិចត្រុងឆ្លងកាត់សរសៃអំពូលពិតប្រាកដ។
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel: Canvas -->
+    <div class="w-full lg:w-2/3 h-3/5 lg:h-full relative flex items-center justify-center bg-[#f8fafc]">
+        <canvas id="simCanvas" class="w-full h-full"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let mode = 1; // 1: Open, 2: Closed, 3: Chem
+        let bulbGlowing = false;
+        let lastTime = 0;
+        
+        let electrons = [];
+        let reactionIons = [];
+
+        // Audio System
+        let audioCtx, osc, gainNode;
+        function initAudio() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            osc = audioCtx.createOscillator();
+            gainNode = audioCtx.createGain();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.value = 60; 
+            
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 200;
+
+            gainNode.gain.value = 0;
+            
+            osc.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+        }
+
+        function updateAudio() {
+            if (!audioCtx) return;
+            if (bulbGlowing) {
+                gainNode.gain.setTargetAtTime(0.15, audioCtx.currentTime, 0.05);
+            } else {
+                gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+            }
+        }
+
+        // UI Controls
+        const btn1 = document.getElementById('btn-1');
+        const btn2 = document.getElementById('btn-2');
+        const btn3 = document.getElementById('btn-3');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+
+        window.setMode = function(m) {
+            initAudio();
+            mode = m;
+            
+            [btn1, btn2, btn3].forEach(btn => {
+                btn.className = "btn-hover bg-white border-slate-300 text-slate-700 w-full text-left px-5 py-4 rounded-xl border-2 font-bold text-lg flex justify-between items-center";
+            });
+
+            if (mode === 1) {
+                btn1.classList.add('btn-active-1');
+                statusDot.className = "w-4 h-4 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]";
+                statusText.innerText = "សៀគ្វីត្រូវបានផ្តាច់ (គ្មានចរន្ត)";
+                statusText.className = "text-base lg:text-lg font-semibold text-red-600";
+            } else if (mode === 2) {
+                btn2.classList.add('btn-active-2');
+                statusDot.className = "w-4 h-4 rounded-full bg-yellow-400";
+                statusText.innerText = "រង់ចាំអេឡិចត្រុងរត់មកដល់អំពូល...";
+                statusText.className = "text-base lg:text-lg font-semibold text-slate-700";
+            } else if (mode === 3) {
+                btn3.classList.add('btn-active-3');
+                statusDot.className = "w-4 h-4 rounded-full bg-blue-500";
+                statusText.innerText = "បង្ហាញប្រតិកម្មគីមីក្នុងសូលុយស្យុង...";
+                statusText.className = "text-base lg:text-lg font-semibold text-blue-600";
+            }
+        }
+
+        function resize() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function drawMultiLineText(ctx, text, x, y, lineHeight) {
+            const lines = text.split('\n');
+            for (let i = 0; i < lines.length; i++) {
+                ctx.fillText(lines[i], x, y + (i * lineHeight));
+            }
+        }
+
+        // Main Animation Loop
+        function animate(timestamp) {
+            requestAnimationFrame(animate);
+            if (!lastTime) lastTime = timestamp;
+            const dt = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Responsive Scaling Logic for Mobile
+            const baseWidth = 600; 
+            const baseHeight = 550;
+            // Padds the canvas scaling slightly so it doesn't touch edges on mobile
+            const scale = Math.min(1, (canvas.width - 20) / baseWidth, (canvas.height - 20) / baseHeight);
+            
+            ctx.save();
+            ctx.scale(scale, scale);
+
+            // Calculate virtual center after scaling
+            const cx = (canvas.width / scale) / 2;
+            const cy = (canvas.height / scale) / 2 + 40; 
+
+            // Geometry
+            const beakerW = 480;
+            const beakerH = 240;
+            const beakerY = cy - 40;
+            
+            const elecW = 28;
+            const elecH = 180;
+            const elecA_X = cx - 150; // Left (+)
+            const elecB_X = cx + 122; // Right (-)
+            const elecY = beakerY - 30;
+            
+            const wireY = cy - 250; // Top horizontal wire
+
+            // --- 1. Beaker & Liquid ---
+            ctx.fillStyle = "#e2e8f0";
+            ctx.beginPath();
+            ctx.moveTo(cx - beakerW/2 + 5, beakerY + 30);
+            ctx.lineTo(cx + beakerW/2 - 5, beakerY + 30);
+            ctx.lineTo(cx + beakerW/2 - 5, beakerY + beakerH - 20);
+            ctx.quadraticCurveTo(cx + beakerW/2 - 5, beakerY + beakerH - 5, cx + beakerW/2 - 20, beakerY + beakerH - 5);
+            ctx.lineTo(cx - beakerW/2 + 20, beakerY + beakerH - 5);
+            ctx.quadraticCurveTo(cx - beakerW/2 + 5, beakerY + beakerH - 5, cx - beakerW/2 + 5, beakerY + beakerH - 20);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(cx - beakerW/2 + 2, beakerY + 30);
+            ctx.lineTo(cx + beakerW/2 - 2, beakerY + 30);
+            ctx.strokeStyle = "#94a3b8";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(cx - beakerW/2, beakerY);
+            ctx.lineTo(cx - beakerW/2, beakerY + beakerH - 20);
+            ctx.quadraticCurveTo(cx - beakerW/2, beakerY + beakerH, cx - beakerW/2 + 20, beakerY + beakerH);
+            ctx.lineTo(cx + beakerW/2 - 20, beakerY + beakerH);
+            ctx.quadraticCurveTo(cx + beakerW/2, beakerY + beakerH, cx + beakerW/2, beakerY + beakerH - 20);
+            ctx.lineTo(cx + beakerW/2, beakerY);
+            ctx.strokeStyle = "#334155";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.setLineDash([8, 6]);
+            ctx.moveTo(cx, beakerY + 30);
+            ctx.lineTo(cx, beakerY + beakerH);
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.setLineDash([]); 
+
+            // Static Scattered Ions (Bigger Fonts)
+            ctx.fillStyle = "#475569";
+            ctx.font = "bold 16px 'Kantumruy Pro', Arial";
+            ctx.textAlign = "center";
+            const aIons = [{x:-190, y:80}, {x:-180, y:140}, {x:-90, y:180}, {x:-50, y:170}, {x:-40, y:110}];
+            aIons.forEach(p => ctx.fillText("A+", cx + p.x, beakerY + p.y));
+            const bIons = [{x:30, y:60}, {x:80, y:80}, {x:50, y:120}, {x:30, y:160}, {x:190, y:60}, {x:180, y:130}, {x:150, y:170}, {x:90, y:190}];
+            bIons.forEach(p => ctx.fillText("B+", cx + p.x, beakerY + p.y));
+
+            // Center Text
+            ctx.font = "bold 20px 'Kantumruy Pro'";
+            ctx.fillText("អេឡិចត្រូលីត", cx, beakerY + 160);
+
+
+            // --- 2. Electrodes & Exact Labels ---
+            // Left Electrode A
+            ctx.fillStyle = "#f8fafc";
+            ctx.fillRect(elecA_X, elecY, elecW, elecH);
+            ctx.strokeStyle = "#0f172a";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(elecA_X, elecY, elecW, elecH);
+            
+            ctx.fillStyle = "#0f172a";
+            ctx.font = "bold 22px Arial";
+            ctx.fillText("A", elecA_X - 20, elecY + 80);
+            ctx.fillText("(+)", elecA_X + elecW/2, elecY - 15);
+            ctx.font = "bold 18px 'Kantumruy Pro'";
+            ctx.textAlign = "left";
+            ctx.fillText("អាណូត", elecA_X + elecW + 12, elecY + 45);
+
+            // Right Electrode B
+            ctx.fillStyle = "#f8fafc";
+            ctx.fillRect(elecB_X, elecY, elecW, elecH);
+            ctx.strokeRect(elecB_X, elecY, elecW, elecH);
+
+            ctx.textAlign = "center";
+            ctx.font = "bold 22px Arial";
+            ctx.fillText("B", elecB_X - 20, elecY + 80);
+            ctx.fillText("(-)", elecB_X + elecW/2, elecY - 15);
+            ctx.font = "bold 18px 'Kantumruy Pro'";
+            ctx.textAlign = "left";
+            ctx.fillText("កាតូត", elecB_X + elecW + 12, elecY + 45);
+
+
+            // --- 3. Wires & Voltmeter Text ---
+            ctx.strokeStyle = "#1e293b";
+            ctx.lineWidth = 3;
+            
+            ctx.beginPath();
+            ctx.moveTo(elecB_X + elecW/2, elecY);
+            ctx.lineTo(elecB_X + elecW/2, wireY);
+            ctx.lineTo(cx + 40, wireY);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(elecA_X + elecW/2, elecY);
+            ctx.lineTo(elecA_X + elecW/2, wireY);
+            ctx.lineTo(cx - 40, wireY);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(cx + 40, wireY, 4, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(cx + 25, wireY, 4, 0, Math.PI*2); 
+            ctx.fill();
+
+            // Switch Arm
+            ctx.beginPath();
+            ctx.moveTo(cx + 40, wireY);
+            if (mode === 1) {
+                ctx.lineTo(cx + 20, wireY - 25); // Open
+            } else {
+                ctx.lineTo(cx + 25, wireY); // Closed
+            }
+            ctx.stroke();
+
+            // Voltmeter Arrow 
+            ctx.textAlign = "center";
+            ctx.font = "bold 20px Arial";
+            ctx.fillText("V", cx, cy - 145);
+            
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(cx - 25, cy - 152);
+            ctx.lineTo(elecA_X + elecW/2 + 10, cy - 152);
+            ctx.lineTo(elecA_X + elecW/2 + 18, cy - 158);
+            ctx.moveTo(elecA_X + elecW/2 + 10, cy - 152);
+            ctx.lineTo(elecA_X + elecW/2 + 18, cy - 146);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(cx + 25, cy - 152);
+            ctx.lineTo(elecB_X + elecW/2 - 10, cy - 152);
+            ctx.lineTo(elecB_X + elecW/2 - 18, cy - 158);
+            ctx.moveTo(elecB_X + elecW/2 - 10, cy - 152);
+            ctx.lineTo(elecB_X + elecW/2 - 18, cy - 146);
+            ctx.stroke();
+
+
+            // --- 4. Curved Arrows & Text ---
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(elecB_X + elecW/2 + 30, wireY + 40);
+            ctx.quadraticCurveTo(elecB_X + elecW/2 + 30, wireY - 35, cx + 80, wireY - 35);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(cx + 80, wireY - 35);
+            ctx.lineTo(cx + 92, wireY - 43);
+            ctx.moveTo(cx + 80, wireY - 35);
+            ctx.lineTo(cx + 92, wireY - 27);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(cx - 80, wireY - 35);
+            ctx.quadraticCurveTo(elecA_X + elecW/2 - 30, wireY - 35, elecA_X + elecW/2 - 30, wireY + 40);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(elecA_X + elecW/2 - 30, wireY + 40);
+            ctx.lineTo(elecA_X + elecW/2 - 38, wireY + 28);
+            ctx.moveTo(elecA_X + elecW/2 - 30, wireY + 40);
+            ctx.lineTo(elecA_X + elecW/2 - 22, wireY + 28);
+            ctx.stroke();
+
+            ctx.font = "16px 'Kantumruy Pro'";
+            ctx.textAlign = "center";
+            drawMultiLineText(ctx, "ទិសដៅបម្លាស់ទី\nនៃអេឡិចត្រុង", elecB_X + 30, wireY - 70, 24);
+            drawMultiLineText(ctx, "ទិសដៅបម្លាស់ទី\nនៃអេឡិចត្រុង", elecA_X - 30, wireY - 70, 24);
+
+
+            // --- 5. Electrons Physics (B to A) ---
+            const path = [
+                {x: elecB_X + elecW/2, y: elecY + 80},
+                {x: elecB_X + elecW/2, y: wireY},
+                {x: elecA_X + elecW/2, y: wireY},
+                {x: elecA_X + elecW/2, y: elecY + 80}
+            ];
+
+            function getDist(p1, p2) { return Math.hypot(p2.x - p1.x, p2.y - p1.y); }
+            let totalPathLen = 0;
+            let segLens = [];
+            for(let i=0; i<path.length-1; i++) {
+                let d = getDist(path[i], path[i+1]);
+                segLens.push(d);
+                totalPathLen += d;
+            }
+
+            if ((mode === 2 || mode === 3) && Math.random() < 0.08) {
+                electrons.push({ dist: 0, speed: 180 });
+            }
+
+            let eInBulbThisFrame = false;
+
+            for (let i = electrons.length - 1; i >= 0; i--) {
+                let e = electrons[i];
+                e.dist += e.speed * dt;
+
+                if (e.dist >= totalPathLen) {
+                    electrons.splice(i, 1);
+                    continue;
+                }
+
+                let currentDist = e.dist;
+                let ex = 0, ey = 0;
+                for(let j=0; j<segLens.length; j++) {
+                    if (currentDist <= segLens[j]) {
+                        let t = currentDist / segLens[j];
+                        ex = path[j].x + (path[j+1].x - path[j].x) * t;
+                        ey = path[j].y + (path[j+1].y - path[j].y) * t;
+                        break;
+                    }
+                    currentDist -= segLens[j];
+                }
+
+                ctx.beginPath();
+                ctx.arc(ex, ey, 9, 0, Math.PI*2);
+                ctx.fillStyle = "#3b82f6";
+                ctx.fill();
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.fillStyle = "white";
+                ctx.font = "bold 11px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("e⁻", ex, ey + 1);
+
+                if (ex > cx - 20 && ex < cx + 25 && Math.abs(ey - wireY) < 10) {
+                    eInBulbThisFrame = true;
+                }
+            }
+
+            if (eInBulbThisFrame !== bulbGlowing) {
+                bulbGlowing = eInBulbThisFrame;
+                updateAudio();
+                
+                if (mode !== 1) {
+                    if (bulbGlowing) {
+                        statusDot.className = "w-4 h-4 rounded-full bg-yellow-400 animate-pulse shadow-[0_0_8px_#facc15]";
+                        statusText.innerText = "អំពូលកំពុងភ្លឺ (e⁻ ឆ្លងកាត់ពិតប្រាកដ)! 💡";
+                        statusText.className = "text-base lg:text-lg font-bold text-yellow-600";
+                    } else {
+                        statusDot.className = "w-4 h-4 rounded-full bg-emerald-500";
+                        statusText.innerText = "រង់ចាំ e⁻ រត់មកដល់អំពូល...";
+                        statusText.className = "text-base lg:text-lg font-bold text-emerald-600";
+                    }
+                }
+            }
+
+            // --- 6. Lightbulb Drawing ---
+            ctx.save();
+            ctx.translate(cx, wireY - 40);
+
+            if (bulbGlowing) {
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = "#facc15";
+                ctx.fillStyle = "#fef08a";
+                ctx.strokeStyle = "#eab308";
+                ctx.lineWidth = 3;
+                ctx.lineCap = "round";
+                for(let r=0; r<6; r++) {
+                    let angle = Math.PI + (Math.PI/5) * r;
+                    ctx.beginPath();
+                    ctx.moveTo(Math.cos(angle)*30, Math.sin(angle)*30);
+                    ctx.lineTo(Math.cos(angle)*45, Math.sin(angle)*45);
+                    ctx.stroke();
+                }
+            } else {
+                ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+            }
+
+            ctx.beginPath();
+            ctx.arc(0, -5, 24, 0, Math.PI*2);
+            ctx.fill();
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(-10, 12);
+            ctx.lineTo(-6, -6);
+            ctx.lineTo(0, -12);
+            ctx.lineTo(6, -6);
+            ctx.lineTo(10, 12);
+            ctx.strokeStyle = bulbGlowing ? "#ca8a04" : "#64748b";
+            ctx.stroke();
+
+            ctx.fillStyle = "#cbd5e1";
+            ctx.fillRect(-14, 16, 28, 14);
+            ctx.strokeRect(-14, 16, 28, 14);
+            ctx.fillStyle = "#475569";
+            ctx.fillRect(-20, 30, 40, 7);
+            
+            ctx.strokeStyle = "#1e293b";
+            ctx.beginPath();
+            ctx.moveTo(-28, 40);
+            ctx.lineTo(0, 40);
+            ctx.stroke();
+            
+            ctx.restore();
+
+
+            // --- 7. Chemistry Animations (Mode 3) ---
+            if (mode === 3) {
+                if (Math.random() < 0.04) {
+                    reactionIons.push({
+                        type: 'B+',
+                        x: elecB_X - 15,
+                        y: elecY + 50 + Math.random() * 100,
+                        vx: -20 - Math.random() * 25,
+                        vy: (Math.random() - 0.5) * 12,
+                        alpha: 1
+                    });
+                }
+                if (Math.random() < 0.04) {
+                    reactionIons.push({
+                        type: 'A+',
+                        x: elecA_X + elecW + 70,
+                        y: elecY + 50 + Math.random() * 100,
+                        vx: -25 - Math.random() * 20,
+                        vy: (Math.random() - 0.5) * 12,
+                        alpha: 1
+                    });
+                }
+            }
+
+            ctx.font = "bold 14px Arial";
+            for (let i = reactionIons.length - 1; i >= 0; i--) {
+                let ion = reactionIons[i];
+                ion.x += ion.vx * dt;
+                ion.y += ion.vy * dt;
+                ion.alpha -= dt * 0.4;
+
+                if (ion.alpha <= 0 || ion.x < elecA_X + elecW) {
+                    reactionIons.splice(i, 1);
+                    continue;
+                }
+
+                ctx.globalAlpha = Math.max(0, ion.alpha);
+                ctx.fillStyle = ion.type === 'A+' ? "#ef4444" : "#3b82f6";
+                ctx.fillText(ion.type, ion.x, ion.y);
+                ctx.globalAlpha = 1;
+            }
+
+            ctx.restore(); // Restore scale settings for the next frame
+        }
+
+        requestAnimationFrame(animate);
+
+    </script>
+</body>
+</html>

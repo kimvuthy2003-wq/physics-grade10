@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>មេរៀនទី២ចរន្តជាប់និងម៉ាញេទិច</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kantumruy Pro', sans-serif; background-color: #f1f5f9; }
+        #canvas-container { position: relative; width: 100%; height: 400px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
+        canvas { display: block; width: 100%; height: 100%; }
+        .formula-box { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center">
+
+    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
+        
+        <!-- Left Panel: Controls & Theory -->
+        <div class="w-full md:w-1/3 bg-slate-50 p-6 border-r border-slate-200 flex flex-col">
+            <h1 class="text-xl font-bold text-slate-800 mb-4 leading-tight">ទិសដៅចរន្តអគ្គិសនី និងបន្ទុក</h1>
+            
+            <p class="text-sm text-slate-600 mb-6">
+                នៅពេលប្ដូរប៉ូលថ្មពិល ទិសដៅរត់នៃអេឡិចត្រុង (e-) នឹងផ្លាស់ប្ដូរ ធ្វើឱ្យម៉ូទ័របង្វិលបញ្ច្រាសទិសគ្នា។
+            </p>
+
+            <div class="space-y-3 mb-6">
+                <button id="btn-power" class="w-full py-3 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 transition shadow-md flex justify-center items-center gap-2">
+                    ⚡ ភ្ជាប់សៀគ្វី (Power ON)
+                </button>
+                <button id="btn-polarity" class="w-full py-3 rounded-lg font-bold text-slate-700 bg-white border-2 border-slate-300 hover:bg-slate-100 transition shadow-sm flex justify-center items-center gap-2">
+                    🔄 ប្ដូរប៉ូលថ្មពិល
+                </button>
+            </div>
+
+            <div class="formula-box p-4 rounded-xl border border-sky-200 mt-auto">
+                <h3 class="font-bold text-sky-900 mb-2 border-b border-sky-300 pb-2">ការគណនាបន្ទុកអគ្គិសនី (Q)</h3>
+                <p class="text-sm text-sky-800 mb-2">រូបមន្ត៖ <strong>Q = n &times; |-e|</strong></p>
+                <p class="text-xs text-sky-700 mb-4">ដោយ |-e| = 1.6 &times; 10<sup>-19</sup> C</p>
+                
+                <div class="bg-white p-3 rounded-lg shadow-inner">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-slate-500">ចំនួនអេឡិចត្រុង (n):</span>
+                        <span id="n-value" class="font-bold text-slate-800">0</span>
+                    </div>
+                    <div class="flex justify-between text-sm items-center">
+                        <span class="text-slate-500">បរិមាណបន្ទុក (Q):</span>
+                        <span id="q-value" class="font-bold text-blue-600 text-lg">0 C</span>
+                    </div>
+                </div>
+                <button id="btn-reset" class="w-full mt-3 py-1.5 rounded bg-sky-200 text-sky-800 text-xs font-bold hover:bg-sky-300 transition">
+                    សម្អាតទិន្នន័យ (Reset)
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Panel: Canvas Simulator -->
+        <div class="w-full md:w-2/3 p-6 flex flex-col justify-center items-center bg-slate-200/50">
+            <div id="canvas-container">
+                <canvas id="simCanvas"></canvas>
+            </div>
+            <p class="text-xs text-slate-400 mt-3">គំនូរជីវចល 2D បង្ហាញពីលំហូរអេឡិចត្រុងក្នុងសៀគ្វីបិទ</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        // State Variables
+        let isPowerOn = false;
+        let polarity = 'normal'; // 'normal' or 'reversed'
+        let electronCount = 0;
+        let fanAngle = 0;
+        
+        // Resize Canvas to fit container
+        function resize() {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Audio Context for Motor Sound
+        let audioCtx;
+        let osc, filter;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playMotorSound() {
+            if (osc) return;
+            osc = audioCtx.createOscillator();
+            filter = audioCtx.createBiquadFilter();
+            osc.type = 'sawtooth';
+            osc.frequency.value = 45; // Low hum
+            filter.type = 'lowpass';
+            filter.frequency.value = 300;
+            
+            osc.connect(filter);
+            filter.connect(audioCtx.destination);
+            osc.start();
+        }
+
+        function stopMotorSound() {
+            if (osc) {
+                osc.stop();
+                osc.disconnect();
+                osc = null;
+            }
+        }
+
+        // DOM Elements
+        const btnPower = document.getElementById('btn-power');
+        const btnPolarity = document.getElementById('btn-polarity');
+        const btnReset = document.getElementById('btn-reset');
+        const nValue = document.getElementById('n-value');
+        const qValue = document.getElementById('q-value');
+
+        // Electrons array
+        const electrons = [];
+        for (let i = 0; i < 12; i++) {
+            electrons.push({ progress: i / 12, counted: false });
+        }
+
+        // Update Display
+        function updateStats() {
+            nValue.innerText = electronCount;
+            if(electronCount === 0) {
+                qValue.innerHTML = '0 C';
+            } else {
+                const q = (electronCount * 1.6).toFixed(1);
+                qValue.innerHTML = `${q} &times; 10<sup>-19</sup> C`;
+            }
+        }
+
+        // Events
+        btnPower.addEventListener('click', () => {
+            initAudio();
+            isPowerOn = !isPowerOn;
+            if (isPowerOn) {
+                audioCtx.resume();
+                playMotorSound();
+                btnPower.innerHTML = '🔌 ផ្តាច់សៀគ្វី (Power OFF)';
+                btnPower.classList.replace('bg-green-600', 'bg-red-500');
+                btnPower.classList.replace('hover:bg-green-700', 'hover:bg-red-600');
+            } else {
+                stopMotorSound();
+                btnPower.innerHTML = '⚡ ភ្ជាប់សៀគ្វី (Power ON)';
+                btnPower.classList.replace('bg-red-500', 'bg-green-600');
+                btnPower.classList.replace('hover:bg-red-600', 'hover:bg-green-700');
+            }
+        });
+
+        btnPolarity.addEventListener('click', () => {
+            polarity = polarity === 'normal' ? 'reversed' : 'normal';
+            // Reset counted state so they don't double count on reverse
+            electrons.forEach(e => e.counted = false); 
+        });
+
+        btnReset.addEventListener('click', () => {
+            electronCount = 0;
+            updateStats();
+        });
+
+        // Drawing Functions
+        function drawCircuit() {
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            const battX = w * 0.2;
+            const battY = h * 0.5;
+            const motorX = w * 0.75;
+            const motorY = h * 0.5;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw Wires
+            ctx.beginPath();
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 4;
+            // Top Wire
+            ctx.moveTo(battX, battY - 40);
+            ctx.lineTo(battX, battY - 120);
+            ctx.lineTo(motorX, battY - 120);
+            ctx.lineTo(motorX, motorY - 30);
+            // Bottom Wire
+            ctx.moveTo(battX, battY + 40);
+            ctx.lineTo(battX, battY + 120);
+            ctx.lineTo(motorX, battY + 120);
+            ctx.lineTo(motorX, motorY + 30);
+            ctx.stroke();
+
+            // Draw Battery
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(battX - 30, battY - 60, 60, 120);
+            ctx.fillStyle = '#94a3b8'; // Terminals
+            ctx.fillRect(battX - 15, battY - 70, 30, 10);
+            ctx.fillRect(battX - 15, battY + 60, 30, 10);
+            
+            // Battery Labels based on polarity
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            if (polarity === 'normal') {
+                ctx.fillText('+', battX, battY - 30); // Top is +
+                ctx.fillText('-', battX, battY + 30); // Bottom is -
+            } else {
+                ctx.fillText('-', battX, battY - 30); // Top is -
+                ctx.fillText('+', battX, battY + 30); // Bottom is +
+            }
+            // Voltage label
+            ctx.save();
+            ctx.translate(battX, battY);
+            ctx.rotate(-Math.PI/2);
+            ctx.font = '16px Kantumruy Pro';
+            ctx.fillText('1.5 V', 0, 0);
+            ctx.restore();
+
+            // Draw Motor
+            ctx.fillStyle = '#64748b';
+            ctx.fillRect(motorX - 40, motorY - 40, 80, 80);
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(motorX + 40, motorY - 10, 20, 20); // Shaft
+
+            // Draw Fan Propeller
+            ctx.save();
+            ctx.translate(motorX + 55, motorY);
+            ctx.rotate(fanAngle);
+            ctx.fillStyle = '#ef4444'; // Red fan
+            // Blade 1
+            ctx.beginPath();
+            ctx.ellipse(0, -30, 10, 30, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Blade 2
+            ctx.beginPath();
+            ctx.ellipse(0, 30, 10, 30, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Center nut
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.arc(0, 0, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            
+            // Draw Polarity Arrow (Direction hint)
+            ctx.fillStyle = '#ef4444';
+            ctx.font = '16px Kantumruy Pro';
+            ctx.fillText(polarity === 'normal' ? '↻ វិលស្ដាំ' : '↺ វិលឆ្វេង', motorX + 60, motorY + 80);
+        }
+
+        function getPathCoords(progress) {
+            const w = canvas.width;
+            const h = canvas.height;
+            const battX = w * 0.2;
+            const battY = h * 0.5;
+            const motorX = w * 0.75;
+
+            // Define points depending on polarity (electron flow: - to +)
+            let points = [];
+            if (polarity === 'normal') {
+                // Bottom(-) -> Bottom Wire -> Motor -> Top Wire -> Top(+)
+                points = [
+                    {x: battX, y: battY + 60},
+                    {x: battX, y: battY + 120},
+                    {x: motorX, y: battY + 120},
+                    {x: motorX, y: battY - 120},
+                    {x: battX, y: battY - 120},
+                    {x: battX, y: battY - 60}
+                ];
+            } else {
+                // Top(-) -> Top Wire -> Motor -> Bottom Wire -> Bottom(+)
+                points = [
+                    {x: battX, y: battY - 60},
+                    {x: battX, y: battY - 120},
+                    {x: motorX, y: battY - 120},
+                    {x: motorX, y: battY + 120},
+                    {x: battX, y: battY + 120},
+                    {x: battX, y: battY + 60}
+                ];
+            }
+
+            // Interpolate along the 5 segments
+            const segments = points.length - 1;
+            const scaledProgress = progress * segments;
+            const index = Math.floor(scaledProgress);
+            const t = scaledProgress - index;
+
+            if (index >= segments) return points[segments]; // End
+
+            const p1 = points[index];
+            const p2 = points[index + 1];
+
+            return {
+                x: p1.x + (p2.x - p1.x) * t,
+                y: p1.y + (p2.y - p1.y) * t
+            };
+        }
+
+        // Main Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            drawCircuit();
+
+            if (isPowerOn) {
+                // Fan Rotation
+                fanAngle += polarity === 'normal' ? 0.3 : -0.3;
+
+                // Electrons Animation & Counting
+                electrons.forEach(e => {
+                    e.progress += 0.003; // Speed of electrons
+                    
+                    // Count when passing through motor (progress roughly around 0.5)
+                    if (e.progress > 0.5 && !e.counted) {
+                        e.counted = true;
+                        electronCount++;
+                        updateStats();
+                    }
+
+                    if (e.progress >= 1) {
+                        e.progress = 0;
+                        e.counted = false;
+                    }
+                });
+            }
+
+            // Draw Electrons
+            electrons.forEach(e => {
+                const pos = getPathCoords(e.progress);
+                
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 8, 0, Math.PI * 2);
+                ctx.fillStyle = '#3b82f6'; // Blue dot
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('e-', pos.x, pos.y);
+            });
+        }
+
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>កម្មវិធីពិសោធន៍កាល់វ៉ាណូម៉ែត្រ (Galvanometer Simulator)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Kantumruy Pro & Lora -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+        .math-font {
+            font-family: 'Lora', serif;
+        }
+        .math-var {
+            font-family: 'Lora', serif;
+            font-style: italic;
+        }
+        
+        /* Solution Accordion Slide Animation */
+        .solution-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out;
+            opacity: 0;
+        }
+        .solution-content.open {
+            max-height: 3000px;
+            opacity: 1;
+        }
+
+        /* Needle Smooth Transition */
+        #needle {
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-origin: 200px 190px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center min-h-screen">
+
+    <div class="max-w-5xl w-full space-y-6">
+        
+        <!-- --- Header & Problem Description --- -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 md:p-8">
+                <div class="flex items-center gap-3 mb-4 border-b border-slate-100 pb-4">
+                    <div class="bg-indigo-100 p-2.5 rounded-xl text-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-slate-800">ពិសោធន៍កាល់វ៉ាណូម៉ែត្រ និងការគណនាអាំងតង់ស៊ីតេអគ្គិសនី</h1>
+                        <p class="text-sm text-slate-500">រូបមន្តគណនា៖ <span class="math-font text-indigo-600 font-semibold">I = Cal × (n / n₀)</span></p>
+                    </div>
+                </div>
+
+                <p class="text-slate-700 leading-relaxed text-base md:text-lg mb-4">
+                    អំពែម៉ែត្រ ឬកាល់វ៉ាណូម៉ែត្រមានកាលីប (Cal) គំនូសក្រិតសរុប (<span class="math-font italic">n₀</span>) និងចំនួនគំនូសក្រិតដែលទ្រនិចចង្អុល (<span class="math-font italic">n</span>) ។ 
+                    លោកអ្នកអាចកែតម្រូវប៉ារ៉ាម៉ែត្រទាំងនេះដោយផ្ទាល់ ឬជ្រើសរើសឧទាហរណ៍ពីតារាងខាងក្រោមដើម្បីពិនិត្យមើលលទ្ធផលគណនា និងចលនារបស់ទ្រនិច ។
+                </p>
+
+                <!-- Table Preview from textbook -->
+                <div class="overflow-x-auto my-4 border border-slate-200 rounded-xl">
+                    <table class="w-full text-center border-collapse text-sm md:text-base">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold">
+                                <th class="p-3 border-r border-slate-200">កាលីប (Cal)</th>
+                                <th class="p-3 bg-indigo-50/50 text-indigo-900 cursor-pointer hover:bg-indigo-100 transition" onclick="setPreset(5, 100, 24)">5 A (n = 24)</th>
+                                <th class="p-3 bg-indigo-50/50 text-indigo-900 cursor-pointer hover:bg-indigo-100 transition" onclick="setPreset(1, 100, 98)">1 A (n = 98)</th>
+                                <th class="p-3 bg-indigo-50/50 text-indigo-900 cursor-pointer hover:bg-indigo-100 transition" onclick="setPreset(0.1, 100, 63.5)">100 mA (n = 63.5)</th>
+                                <th class="p-3 bg-indigo-50/50 text-indigo-900 cursor-pointer hover:bg-indigo-100 transition" onclick="setPreset(0.005, 100, 15)">5 mA (n = 15)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="text-slate-600">
+                                <td class="p-3 font-semibold border-r border-slate-200 bg-slate-50">ប្រលោះក្រិត (n)</td>
+                                <td class="p-3 border-r border-slate-200">24</td>
+                                <td class="p-3 border-r border-slate-200">98</td>
+                                <td class="p-3 border-r border-slate-200">63.5</td>
+                                <td class="p-3">15</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- --- Toggle Solution Button Bar --- -->
+            <div class="px-6 md:px-8 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap gap-4 items-center justify-between">
+                <span class="text-sm text-slate-600 font-medium"></span>
+                <button id="btnToggleSol" class="text-indigo-600 hover:text-indigo-800 px-4 py-2 rounded-xl bg-white border border-indigo-200 hover:bg-indigo-50 transition font-semibold flex items-center gap-2 shadow-sm">
+                    <span id="solBtnText">បង្ហាញដំណោះស្រាយ</span>
+                    <svg id="solIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- --- Accordion Solution Content (Expands from Underneath) --- -->
+            <div id="solutionDiv" class="solution-content border-t border-slate-200 bg-slate-50/50">
+                <div class="p-6 md:p-8 space-y-6 text-slate-800">
+                    <h3 class="font-bold text-lg text-indigo-900 border-b pb-2 flex items-center gap-2">
+                        <span>✨ ដំណោះស្រាយលម្អិតតាមរូបមន្ត I = Cal × (n / n₀)</span>
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Case 1 -->
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                            <h4 class="font-bold text-indigo-700">១. ករណីទី១៖ កាលីប 5 A និង n = 24</h4>
+                            <p class="text-sm text-slate-600">គេប្រាប់៖ Cal = 5 A, n₀ = 100, n = 24</p>
+                            <div class="math-font bg-slate-50 p-3 rounded-lg border border-slate-100 text-sm space-y-1">
+                                <p>I = Cal × (n / n₀)</p>
+                                <p>I = 5 × (24 / 100)</p>
+                                <p>I = 5 × 0.24</p>
+                                <p class="font-bold text-indigo-600 mt-1">លទ្ធផល៖ I = 1.20 A</p>
+                            </div>
+                        </div>
+
+                        <!-- Case 2 -->
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                            <h4 class="font-bold text-indigo-700">២. ករណីទី២៖ កាលីប 1 A និង n = 98</h4>
+                            <p class="text-sm text-slate-600">គេប្រាប់៖ Cal = 1 A, n₀ = 100, n = 98</p>
+                            <div class="math-font bg-slate-50 p-3 rounded-lg border border-slate-100 text-sm space-y-1">
+                                <p>I = Cal × (n / n₀)</p>
+                                <p>I = 1 × (98 / 100)</p>
+                                <p>I = 1 × 0.98</p>
+                                <p class="font-bold text-indigo-600 mt-1">លទ្ធផល៖ I = 0.98 A</p>
+                            </div>
+                        </div>
+
+                        <!-- Case 3 -->
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                            <h4 class="font-bold text-indigo-700">៣. ករណីទី៣៖ កាលីប 100 mA និង n = 63.5</h4>
+                            <p class="text-sm text-slate-600">គេប្រាប់៖ Cal = 100 mA = 0.1 A, n₀ = 100, n = 63.5</p>
+                            <div class="math-font bg-slate-50 p-3 rounded-lg border border-slate-100 text-sm space-y-1">
+                                <p>I = Cal × (n / n₀)</p>
+                                <p>I = 0.1 × (63.5 / 100)</p>
+                                <p>I = 0.1 × 0.635</p>
+                                <p class="font-bold text-indigo-600 mt-1">លទ្ធផល៖ I = 0.0635 A (ឬ 63.5 mA)</p>
+                            </div>
+                        </div>
+
+                        <!-- Case 4 -->
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                            <h4 class="font-bold text-indigo-700">៤. ករណីទី៤៖ កាលីប 5 mA និង n = 15</h4>
+                            <p class="text-sm text-slate-600">គេប្រាប់៖ Cal = 5 mA = 0.005 A, n₀ = 100, n = 15</p>
+                            <div class="math-font bg-slate-50 p-3 rounded-lg border border-slate-100 text-sm space-y-1">
+                                <p>I = Cal × (n / n₀)</p>
+                                <p>I = 0.005 × (15 / 100)</p>
+                                <p>I = 0.005 × 0.15</p>
+                                <p class="font-bold text-indigo-600 mt-1">លទ្ធផល៖ I = 0.00075 A (ឬ 0.75 mA)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- --- Simulator & Controls Section --- -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left: Galvanometer Gauge Display (7 cols) -->
+            <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col items-center justify-between">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 self-start flex items-center gap-2">
+                    <span class="bg-indigo-100 text-indigo-800 p-2 rounded-lg">📊</span> កាល់វ៉ាណូម៉ែត្រ 
+                </h2>
+
+                <!-- SVG Gauge -->
+                <div class="relative w-full max-w-[420px] aspect-[4/3] bg-gradient-to-b from-slate-50 to-slate-100 rounded-2xl shadow-inner p-2 flex items-center justify-center border-2 border-slate-200">
+                    <svg viewBox="0 0 400 240" class="w-full h-full drop-shadow-sm">
+                        <!-- Arc background -->
+                        <path d="M 50 190 A 150 150 0 0 1 350 190" fill="none" stroke="#cbd5e1" stroke-width="12" stroke-linecap="round"/>
+                        
+                        <!-- Scale Marks Group -->
+                        <g id="scaleMarks"></g>
+
+                        <!-- Center Pivot -->
+                        <circle cx="200" cy="190" r="14" fill="#1e293b" stroke="#e2e8f0" stroke-width="3"/>
+                        <circle cx="200" cy="190" r="4" fill="#facc15"/>
+
+                        <!-- Needle -->
+                        <polygon id="needle" points="197,55 203,55 204,190 196,190" fill="#dc2626"/>
+                    </svg>
+
+                    <!-- Realtime Badges overlay -->
+                    <div class="absolute bottom-4 left-4 bg-slate-900/80 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full shadow">
+                        ប្រលោះក្រិត (<span class="math-var">n</span>): <span id="badgeN" class="font-bold text-yellow-400">24</span> / <span id="badgeN0" class="font-bold text-yellow-400">100</span>
+                    </div>
+                    <div class="absolute bottom-4 right-4 bg-indigo-900/80 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full shadow">
+                        កាលីប (Cal): <span id="badgeCal" class="font-bold text-yellow-400">5 A</span>
+                    </div>
+                </div>
+
+                <!-- Quick Presets -->
+                <div class="w-full mt-6">
+                    <p class="text-xs font-semibold text-slate-500 mb-2">ប៊ូតុងឧទាហរណ៍៖</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button onclick="setPreset(5, 100, 24)" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2 px-3 rounded-xl border border-indigo-200 transition">
+                            5 A <br><span class="text-slate-500 font-normal">n = 24</span>
+                        </button>
+                        <button onclick="setPreset(1, 100, 98)" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2 px-3 rounded-xl border border-indigo-200 transition">
+                            1 A <br><span class="text-slate-500 font-normal">n = 98</span>
+                        </button>
+                        <button onclick="setPreset(0.1, 100, 63.5)" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2 px-3 rounded-xl border border-indigo-200 transition">
+                            100 mA <br><span class="text-slate-500 font-normal">n = 63.5</span>
+                        </button>
+                        <button onclick="setPreset(0.005, 100, 15)" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2 px-3 rounded-xl border border-indigo-200 transition">
+                            5 mA <br><span class="text-slate-500 font-normal">n = 15</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Controls & Live Result (5 cols) -->
+            <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
+                <div class="space-y-4">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <span class="bg-indigo-100 text-indigo-800 p-2 rounded-lg">🎛️</span> កែតម្រូវប៉ារ៉ាម៉ែត្រ
+                    </h2>
+
+                    <!-- Calibration Selector -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">ជ្រើសរើស ឬកំណត់កាលីប (Cal):</label>
+                        <select id="calSelect" onchange="onCalChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-2">
+                            <option value="5">5 A</option>
+                            <option value="1">1 A</option>
+                            <option value="0.1">100 mA (0.1 A)</option>
+                            <option value="0.005">5 mA (0.005 A)</option>
+                            <option value="custom">កាលីបផ្ទាល់ខ្លួន (Custom)...</option>
+                        </select>
+                        <input type="number" id="customCalInput" placeholder="បញ្ចូលតម្លៃជាអាំប៉ែត (A)" step="any" class="hidden w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="calculate()">
+                    </div>
+
+                    <!-- Total Divisions (n0) Input -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">គំនូសក្រិតសរុប (<span class="math-var">n₀</span>):</label>
+                        <input type="number" id="n0Input" min="1" max="1000" value="100" oninput="onN0Change()" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+
+                    <!-- Graduation Slider (n) -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-sm font-semibold text-slate-700">គំនូសក្រិតដែលទ្រនិចចង្អុល (<span class="math-var">n</span>):</label>
+                            <span id="nValLabel" class="text-indigo-600 font-bold text-sm bg-indigo-50 px-2 py-0.5 rounded">24</span>
+                        </div>
+                        <input type="range" id="nSlider" min="0" max="100" step="0.5" value="24" oninput="onSliderInput()" class="w-full accent-indigo-600 cursor-pointer">
+                        <input type="number" id="nNumInput" min="0" step="any" value="24" oninput="onNumberInput()" class="mt-2 w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Real-time Calculated Result Box -->
+                <div class="bg-indigo-50/75 border border-indigo-100 p-4 rounded-xl text-center mt-6">
+                    <span class="text-xs text-slate-500 block mb-1">លទ្ធផលអាំងតង់ស៊ីតេអគ្គិសនី (<span class="math-var">I</span>)៖</span>
+                    <div id="liveResult" class="text-2xl font-extrabold text-indigo-700">1.20 A</div>
+                    <div id="liveFormula" class="text-xs text-slate-500 mt-1 math-font">I = 5 × (24 / 100) = 1.20 A</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // --- Solution Accordion Toggle ---
+        const btnToggleSol = document.getElementById('btnToggleSol');
+        const solutionDiv = document.getElementById('solutionDiv');
+        const solIcon = document.getElementById('solIcon');
+        const solBtnText = document.getElementById('solBtnText');
+
+        btnToggleSol.addEventListener('click', () => {
+            solutionDiv.classList.toggle('open');
+            if (solutionDiv.classList.contains('open')) {
+                solIcon.classList.add('rotate-180');
+                solBtnText.textContent = 'លាក់ដំណោះស្រាយ';
+            } else {
+                solIcon.classList.remove('rotate-180');
+                solBtnText.textContent = 'បង្ហាញដំណោះស្រាយ';
+            }
+        });
+
+        // --- Initialize Gauge Scale Marks ---
+        window.onload = function() {
+            createScaleMarks();
+            calculate();
+        };
+
+        function getN0() {
+            let val = parseFloat(document.getElementById('n0Input').value);
+            return (isNaN(val) || val <= 0) ? 100 : val;
+        }
+
+        function createScaleMarks() {
+            const svgGroup = document.getElementById('scaleMarks');
+            const n0 = getN0();
+            const cx = 200, cy = 190, rOuter = 150;
+            let html = '';
+
+            // Determine tick step based on n0 magnitude for clean display
+            let majorStep = n0 / 10;
+            let minorStep = n0 / 20;
+
+            for (let i = 0; i <= n0; i++) {
+                const angleDeg = -135 + (i / n0) * 270;
+                const angleRad = (angleDeg * Math.PI) / 180;
+                
+                let isMajor = (Math.abs(i % majorStep) < 0.001 || i === 0 || i === n0);
+                let isMedium = (Math.abs(i % minorStep) < 0.001 && !isMajor);
+                
+                let rInner = isMajor ? rOuter - 16 : (isMedium ? rOuter - 11 : rOuter - 6);
+                let strokeW = isMajor ? 2.5 : (isMedium ? 1.5 : 1);
+                let strokeColor = isMajor ? '#1e293b' : '#64748b';
+
+                let x1 = cx + rOuter * Math.cos(angleRad);
+                let y1 = cy + rOuter * Math.sin(angleRad);
+                let x2 = cx + rInner * Math.cos(angleRad);
+                let y2 = cy + rInner * Math.sin(angleRad);
+
+                html += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${strokeColor}" stroke-width="${strokeW}" stroke-linecap="round"/>`;
+
+                // Add numbers for major graduation marks
+                if (isMajor) {
+                    let rText = rOuter - 28;
+                    let tx = cx + rText * Math.cos(angleRad);
+                    let ty = cy + rText * Math.sin(angleRad);
+                    let labelVal = Number.isInteger(i) ? i : i.toFixed(1);
+                    html += `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" font-size="9" fill="#334155" font-weight="bold" text-anchor="middle" dominant-baseline="central">${labelVal}</text>`;
+                }
+            }
+            svgGroup.innerHTML = html;
+        }
+
+        function onN0Change() {
+            const n0 = getN0();
+            const slider = document.getElementById('nSlider');
+            slider.max = n0;
+            
+            let numInput = document.getElementById('nNumInput');
+            if (parseFloat(numInput.value) > n0) {
+                numInput.value = n0;
+                slider.value = n0;
+                document.getElementById('nValLabel').innerText = n0;
+            }
+            createScaleMarks();
+            calculate();
+        }
+
+        // --- Simulator Logic & Controls ---
+        function getCalValue() {
+            const select = document.getElementById('calSelect');
+            const customInput = document.getElementById('customCalInput');
+            if (select.value === 'custom') {
+                return parseFloat(customInput.value) || 0;
+            }
+            return parseFloat(select.value);
+        }
+
+        function onCalChange() {
+            const select = document.getElementById('calSelect');
+            const customInput = document.getElementById('customCalInput');
+            if (select.value === 'custom') {
+                customInput.classList.remove('hidden');
+            } else {
+                customInput.classList.add('hidden');
+            }
+            calculate();
+        }
+
+        function onSliderInput() {
+            const val = document.getElementById('nSlider').value;
+            document.getElementById('nNumInput').value = val;
+            document.getElementById('nValLabel').innerText = val;
+            calculate();
+        }
+
+        function onNumberInput() {
+            let n0 = getN0();
+            let val = parseFloat(document.getElementById('nNumInput').value);
+            if (isNaN(val)) val = 0;
+            if (val < 0) val = 0;
+            if (val > n0) val = n0;
+            document.getElementById('nSlider').value = val;
+            document.getElementById('nValLabel').innerText = val;
+            calculate();
+        }
+
+        function setPreset(cal, n0, n) {
+            document.getElementById('n0Input').value = n0;
+            document.getElementById('nSlider').max = n0;
+            createScaleMarks();
+
+            const select = document.getElementById('calSelect');
+            const customInput = document.getElementById('customCalInput');
+            
+            let matched = false;
+            for (let opt of select.options) {
+                if (opt.value !== 'custom' && Math.abs(parseFloat(opt.value) - cal) < 0.0001) {
+                    select.value = opt.value;
+                    customInput.classList.add('hidden');
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                select.value = 'custom';
+                customInput.classList.remove('hidden');
+                customInput.value = cal;
+            }
+
+            document.getElementById('nSlider').value = n;
+            document.getElementById('nNumInput').value = n;
+            document.getElementById('nValLabel').innerText = n;
+
+            calculate();
+        }
+
+        function calculate() {
+            const cal = getCalValue();
+            const n0 = getN0();
+            const n = parseFloat(document.getElementById('nNumInput').value) || 0;
+
+            // Core Formula: I = Cal * (n / n0)
+            const I = cal * (n / n0);
+
+            // Update Needle Rotation (-135deg to +135deg)
+            const angleDeg = -135 + (Math.min(Math.max(n, 0), n0) / n0) * 270;
+            document.getElementById('needle').style.transform = `rotate(${angleDeg}deg)`;
+
+            // Update Badges
+            document.getElementById('badgeN').innerText = n;
+            document.getElementById('badgeN0').innerText = n0;
+            
+            let select = document.getElementById('calSelect');
+            let calLabelStr = select.value === '5' ? "5 A" : (select.value === '1' ? "1 A" : (select.value === '0.1' ? "100 mA" : (select.value === '0.005' ? "5 mA" : cal + " A")));
+            document.getElementById('badgeCal').innerText = calLabelStr;
+
+            // Format Output Result
+            let resultText = "";
+            if (cal >= 1) {
+                resultText = I.toFixed(4).replace(/\.?0+$/, '') + " A";
+            } else {
+                let mA = I * 1000;
+                resultText = `${I.toFixed(5).replace(/\.?0+$/, '')} A (${mA.toFixed(2).replace(/\.?0+$/, '')} mA)`;
+            }
+
+            document.getElementById('liveResult').innerText = resultText;
+            document.getElementById('liveFormula').innerText = `I = ${cal} × (${n} / ${n0}) = ${I.toFixed(5).replace(/\.?0+$/, '')} A`;
+        }
+    </script>
+</body>
+</html>

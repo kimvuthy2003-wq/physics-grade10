@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ការពិសោធន៍៖ វិធីបង្កើត និងបំបាត់មេដែក (AC/DC)</title>
+
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; line-height: 1.6; margin: 0;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        .lesson-content {
+            background: #ffffff; padding: 25px; border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 20px; text-align: left;
+            border-top: 5px solid #3f51b5;
+        }
+        .lesson-content h2 { margin-top: 0; color: #1a237e; font-size: 24px; border-bottom: 2px solid #e8eaf6; padding-bottom: 10px; }
+        
+        .sim-area {
+            background: #ffffff; border: 2px solid #cfd8dc; border-radius: 12px;
+            padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); margin-bottom: 20px;
+            overflow-x: auto; text-align: center;
+        }
+
+        svg {
+            display: inline-block; width: 100%; max-width: 900px; height: auto;
+        }
+
+        .btn-group {
+            display: flex; gap: 15px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;
+        }
+        button {
+            color: white; padding: 15px 25px; font-size: 16px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            font-family: 'Siemreap', sans-serif; transition: all 0.3s;
+        }
+        button:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        button:active { transform: translateY(0); }
+        
+        .btn-power { background: #d32f2f; }
+        .btn-mode { background: #1976d2; }
+        .btn-reset { background: #546e7a; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+        .data-box {
+            background: #263238; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 15px; font-weight: bold; color: #fff;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 5px; font-family: 'Arial', sans-serif; color: #4fc3f7;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="lesson-content">
+        <h2>🧲 ការពិសោធន៍៖ វិធីបង្កើតមេដែក និងបំបាត់ភាពជាមេដែក</h2>
+        <p><strong>- ការបង្កើតមេដែក (Magnetization)៖</strong> ភ្ជាប់កុងតាក់ទៅ <strong>DC</strong> (ចរន្តជាប់)។ ចរន្តថេរនឹងរៀបចំម៉ូលេគុលម៉ាញេទិច (Domains) ក្នុងស្នូលដែកឱ្យស្របទិសគ្នា បង្កើតបានជាមេដែក។</p>
+        <p><strong>- ការបំបាត់មេដែក (Demagnetization)៖</strong> ភ្ជាប់កុងតាក់ទៅ <strong>AC</strong> (ចរន្តឆ្លាស់)។ ចរន្តត្រឡប់ទិសដៅលឿនៗ នឹងធ្វើឱ្យម៉ូលេគុលម៉ាញេទិចរាយប៉ាយច្របូកច្របល់ បាត់បង់លក្ខណៈមេដែក។</p>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-bottom: 4px solid #f44336;">កុងតាក់កណ្ដឹង (Power)<br><span id="dashPower" style="color:#ff8a80;">បិទ (OFF)</span></div>
+        <div class="data-box" style="border-bottom: 4px solid #2196f3;">ប្រភេទចរន្ត (Mode)<br><span id="dashMode" style="color:#81d4fa;">DC (ចរន្តជាប់)</span></div>
+        <div class="data-box" style="border-bottom: 4px solid #4caf50;">ស្ថានភាពស្នូលដែក<br><span id="dashState" style="color:#a5d6a7; font-family:'Siemreap';">ធម្មតា (មិនទាន់រៀបរយ)</span></div>
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="btn-group">
+        <button class="btn-power" id="btnPower">⚡ ចុចបើកកុងតាក់កណ្ដឹង</button>
+        <button class="btn-mode" id="btnMode">🔄 ប្តូរកុងតាក់ជើង៦ ទៅ AC</button>
+        <button class="btn-reset" id="btnReset">🗑️ រៀបចំសារជាថ្មី</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 900 400" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <!-- ពណ៌សម្រាប់ចរន្តរត់ -->
+                <linearGradient id="currentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#ff9800"/>
+                    <stop offset="100%" stop-color="#ffeb3b"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ===================== សៀគ្វីមូលដ្ឋាន ===================== -->
+            <!-- ប្រភព AC 220V -->
+            <circle cx="80" cy="200" r="30" fill="none" stroke="#37474f" stroke-width="3"/>
+            <path d="M 60 200 Q 70 180 80 200 T 100 200" fill="none" stroke="#37474f" stroke-width="3"/>
+            <text x="80" y="150" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#111">AC 220V</text>
+
+            <!-- ខ្សែភ្លើងគោល -->
+            <path d="M 80 170 L 80 80 L 150 80" fill="none" stroke="#b0bec5" stroke-width="4"/>
+            <path d="M 80 230 L 80 320 L 300 320 L 300 250" fill="none" stroke="#b0bec5" stroke-width="4"/>
+            <path d="M 230 80 L 300 80 L 300 150" fill="none" stroke="#b0bec5" stroke-width="4"/>
+            <path d="M 300 80 L 520 80 L 520 150" fill="none" stroke="#b0bec5" stroke-width="4"/>
+            <path d="M 300 320 L 520 320 L 520 250" fill="none" stroke="#b0bec5" stroke-width="4"/>
+
+            <!-- កុងតាក់កណ្ដឹង (Main Switch) -->
+            <circle cx="150" cy="80" r="4" fill="#37474f"/>
+            <circle cx="230" cy="80" r="4" fill="#37474f"/>
+            <line id="swMain" x1="150" y1="70" x2="230" y2="50" stroke="#d32f2f" stroke-width="4" stroke-linecap="round"/>
+            <rect x="175" y="35" width="30" height="8" fill="#111"/>
+            <text x="190" y="25" text-anchor="middle" font-family="Siemreap" font-weight="bold" font-size="14" fill="#111">ក្នុងតាក់កណ្ដឹង</text>
+
+            <!-- ស្ពានឌីយ៉ូត (Diode Bridge) -->
+            <g transform="translate(300, 200)">
+                <polygon points="0,-50 50,0 0,50 -50,0" fill="none" stroke="#37474f" stroke-width="3"/>
+                <!-- Diodes symbols -->
+                <polygon points="-25,-25 -15,-35 -15,-15" fill="#111"/> <line x1="-25" y1="-35" x2="-25" y2="-15" stroke="#111" stroke-width="3"/>
+                <polygon points="25,-25 15,-15 15,-35" fill="#111"/> <line x1="25" y1="-15" x2="25" y2="-35" stroke="#111" stroke-width="3"/>
+                <polygon points="-25,25 -15,15 -15,35" fill="#111"/> <line x1="-25" y1="15" x2="-25" y2="35" stroke="#111" stroke-width="3"/>
+                <polygon points="25,25 15,35 15,15" fill="#111"/> <line x1="25" y1="35" x2="25" y2="15" stroke="#111" stroke-width="3"/>
+            </g>
+            <text x="300" y="110" text-anchor="middle" font-family="Siemreap" font-weight="bold" font-size="14" fill="#111">ស្ពានឌីយ៉ូត 1N4004</text>
+
+            <!-- ខ្សែចេញពី Bridge (DC) -->
+            <path d="M 350 200 L 520 200" fill="none" stroke="#b0bec5" stroke-width="4"/>
+            <path d="M 250 200 L 230 200 L 230 280 L 520 280" fill="none" stroke="#b0bec5" stroke-width="4"/>
+
+            <!-- កុងតាក់ជើង ៦ (DPDT Switch) -->
+            <!-- Terminals -->
+            <circle cx="520" cy="150" r="5" fill="#37474f"/> <text x="500" y="145" font-family="Arial" font-size="14" font-weight="bold">AC</text>
+            <circle cx="520" cy="200" r="5" fill="#37474f"/> <text x="495" y="220" font-family="Arial" font-size="14" font-weight="bold">DC</text>
+            <circle cx="520" cy="250" r="5" fill="#37474f"/>
+            <circle cx="520" cy="280" r="5" fill="#37474f"/> <text x="495" y="300" font-family="Arial" font-size="14" font-weight="bold">DC</text>
+            <circle cx="520" cy="320" r="5" fill="#37474f"/> <text x="500" y="340" font-family="Arial" font-size="14" font-weight="bold">AC</text>
+            
+            <circle cx="580" cy="180" r="5" fill="#37474f"/>
+            <circle cx="580" cy="265" r="5" fill="#37474f"/>
+            
+            <!-- កាំបិតកុងតាក់ S -->
+            <line id="swS1" x1="580" y1="180" x2="520" y2="200" stroke="#1976d2" stroke-width="5" stroke-linecap="round"/>
+            <line id="swS2" x1="580" y1="265" x2="520" y2="280" stroke="#1976d2" stroke-width="5" stroke-linecap="round"/>
+            <line x1="550" y1="190" x2="550" y2="272" stroke="#1976d2" stroke-width="2" stroke-dasharray="5,5"/>
+            <text x="560" y="230" font-family="Arial" font-weight="bold" font-size="16" fill="#1976d2">S</text>
+            <text x="550" y="360" text-anchor="middle" font-family="Siemreap" font-weight="bold" font-size="14" fill="#111">កុងតាក់ជើង ៦</text>
+
+            <!-- ខ្សែភ្ជាប់ទៅសូឡេណូអ៊ីត -->
+            <path d="M 580 180 L 680 180" fill="none" stroke="#b0bec5" stroke-width="4"/>
+            <path d="M 580 265 L 680 265" fill="none" stroke="#b0bec5" stroke-width="4"/>
+
+            <!-- ===================== សូឡេណូអ៊ីត និងស្នូលដែក ===================== -->
+            <!-- ស្នូលដែក (Iron Core) -->
+            <rect x="700" y="160" width="120" height="120" fill="#cfd8dc" stroke="#90a4ae" stroke-width="3" rx="5"/>
+            <text x="760" y="145" text-anchor="middle" font-family="Siemreap" font-weight="bold" font-size="14" fill="#111">សូឡេណូអ៊ីត (6000 ស្ពែរ)</text>
+
+            <!-- ម៉ូលេគុលម៉ាញេទិច (Magnetic Domains) -->
+            <g id="domainsGroup" transform="translate(710, 175)"></g>
+
+            <!-- របុំខ្សែសូឡេណូអ៊ីត -->
+            <path d="M 680 180 L 700 180" fill="none" stroke="#b0bec5" stroke-width="4"/>
+            <path d="M 680 265 L 700 265" fill="none" stroke="#b0bec5" stroke-width="4"/>
+            <g id="coilWinding"></g>
+
+            <!-- ===================== Animation Paths (ចរន្តអគ្គិសនីរត់) ===================== -->
+            <!-- ចរន្តនៅលើសៀគ្វីទាំងមូល -->
+            <path id="flowAC1" d="M 80 170 L 80 80 L 150 80 M 230 80 L 300 80 L 520 80 L 520 150" fill="none" stroke="#ff9800" stroke-width="4" stroke-dasharray="10,10" opacity="0"/>
+            <path id="flowAC2" d="M 80 230 L 80 320 L 300 320 L 520 320" fill="none" stroke="#ff9800" stroke-width="4" stroke-dasharray="10,10" opacity="0"/>
+            
+            <path id="flowDC1" d="M 230 80 L 300 80 L 300 200 L 520 200" fill="none" stroke="#ff9800" stroke-width="4" stroke-dasharray="10,10" opacity="0"/>
+            <path id="flowDC2" d="M 520 280 L 230 280 L 230 200 L 250 200" fill="none" stroke="#ff9800" stroke-width="4" stroke-dasharray="10,10" opacity="0"/>
+            
+            <path id="flowToCoil1" d="M 520 200 L 580 180 L 680 180" fill="none" stroke="#ff9800" stroke-width="4" stroke-dasharray="10,10" opacity="0"/>
+            <path id="flowToCoil2" d="M 680 265 L 580 265 L 520 280" fill="none" stroke="#ff9800" stroke-width="4" stroke-dasharray="10,10" opacity="0"/>
+            
+            <path id="flowToCoilAC1" d="M 520 150 L 580 180 L 680 180" fill="none" stroke="#ff9800" stroke-width="4" stroke-dasharray="10,10" opacity="0"/>
+            <path id="flowToCoilAC2" d="M 680 265 L 580 265 L 520 320" fill="none" stroke="#ff9800" stroke-width="4" stroke-dasharray="10,10" opacity="0"/>
+
+        </svg>
+    </div>
+</div>
+
+<script>
+    var btnPower = document.getElementById('btnPower');
+    var btnMode = document.getElementById('btnMode');
+    var btnReset = document.getElementById('btnReset');
+
+    var swMain = document.getElementById('swMain');
+    var swS1 = document.getElementById('swS1');
+    var swS2 = document.getElementById('swS2');
+
+    var dashPower = document.getElementById('dashPower');
+    var dashMode = document.getElementById('dashMode');
+    var dashState = document.getElementById('dashState');
+
+    var flowAC1 = document.getElementById('flowAC1');
+    var flowAC2 = document.getElementById('flowAC2');
+    var flowDC1 = document.getElementById('flowDC1');
+    var flowDC2 = document.getElementById('flowDC2');
+    var flowToCoil1 = document.getElementById('flowToCoil1');
+    var flowToCoil2 = document.getElementById('flowToCoil2');
+    var flowToCoilAC1 = document.getElementById('flowToCoilAC1');
+    var flowToCoilAC2 = document.getElementById('flowToCoilAC2');
+
+    var domainsGroup = document.getElementById('domainsGroup');
+    var coilWinding = document.getElementById('coilWinding');
+
+    var isPowerOn = false;
+    var isDC = true; // true = DC, false = AC
+
+    var time = 0;
+    var dashOffset = 0;
+
+    // --- បង្កើត Domains (ម៉ូលេគុលម៉ាញេទិច) ---
+    var domains = [];
+    var cols = 4;
+    var rows = 4;
+    var spacingX = 25;
+    var spacingY = 25;
+
+    function initDomains() {
+        domainsGroup.innerHTML = '';
+        domains = [];
+        var r = 0;
+        while (r !== rows) {
+            var c = 0;
+            while (c !== cols) {
+                var g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("transform", "translate(" + (c * spacingX + 12) + "," + (r * spacingY + 8) + ")");
+                
+                // ព្រួញតំណាងឱ្យ Domain
+                var arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                arrow.setAttribute("d", "M -8 0 L 4 0 M 0 -4 L 8 0 L 0 4");
+                arrow.setAttribute("fill", "none");
+                arrow.setAttribute("stroke", "#d32f2f");
+                arrow.setAttribute("stroke-width", "2");
+                
+                g.appendChild(arrow);
+                domainsGroup.appendChild(g);
+
+                // មុំចៃដន្យដើម
+                var initAngle = Math.random() * 360;
+                domains.push({
+                    el: g,
+                    angle: initAngle,
+                    targetAngle: initAngle
+                });
+                
+                c++;
+            }
+            r++;
+        }
+    }
+
+    // --- បង្កើតរបុំសូឡេណូអ៊ីត ---
+    function initCoil() {
+        coilWinding.innerHTML = '';
+        var numTurns = 12;
+        var startX = 700;
+        var step = 120 / numTurns;
+        
+        var t = 0;
+        while(t !== numTurns) {
+            var cx = startX + (t * step) + (step/2);
+            var ellipse = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+            ellipse.setAttribute("cx", cx);
+            ellipse.setAttribute("cy", "220");
+            ellipse.setAttribute("rx", step/1.5);
+            ellipse.setAttribute("ry", "65");
+            ellipse.setAttribute("fill", "none");
+            ellipse.setAttribute("stroke", "#ffb74d");
+            ellipse.setAttribute("stroke-width", "3");
+            coilWinding.appendChild(ellipse);
+            t++;
+        }
+    }
+
+    // --- គ្រប់គ្រង Animation ---
+    function loopAnimation() {
+        time += 0.05;
+
+        if (isPowerOn === true) {
+            if (isDC === true) {
+                // DC ចរន្តរត់ទៅមុខរហូត
+                dashOffset -= 2;
+                
+                // Domains រៀបរយទៅមុំ 0 (ស្របគ្នា)
+                var d = 0;
+                while(d !== domains.length) {
+                    domains[d].targetAngle = 0;
+                    // Interpolation (Linear)
+                    domains[d].angle += (domains[d].targetAngle - domains[d].angle) * 0.1;
+                    domains[d].el.setAttribute("transform", "translate(" + ((d%cols) * spacingX + 12) + "," + (Math.floor(d/cols) * spacingY + 8) + ") rotate(" + domains[d].angle + ")");
+                    d++;
+                }
+
+            } else {
+                // AC ចរន្តរត់ចុះឡើង (Oscillate)
+                dashOffset += Math.sin(time) * 4;
+
+                // Domains រាយប៉ាយ (Randomize targets frequently)
+                var changeTarget = (Math.random() < 0.1);
+                var d = 0;
+                while(d !== domains.length) {
+                    if (changeTarget === true) {
+                        domains[d].targetAngle = Math.random() * 360;
+                    }
+                    domains[d].angle += (domains[d].targetAngle - domains[d].angle) * 0.2; // ញ័រលឿន
+                    domains[d].el.setAttribute("transform", "translate(" + ((d%cols) * spacingX + 12) + "," + (Math.floor(d/cols) * spacingY + 8) + ") rotate(" + domains[d].angle + ")");
+                    d++;
+                }
+            }
+
+            // Update Dash Offsets
+            flowAC1.setAttribute("stroke-dashoffset", dashOffset);
+            flowAC2.setAttribute("stroke-dashoffset", -dashOffset);
+            
+            if (isDC === true) {
+                flowDC1.setAttribute("stroke-dashoffset", dashOffset);
+                flowDC2.setAttribute("stroke-dashoffset", -dashOffset);
+                flowToCoil1.setAttribute("stroke-dashoffset", dashOffset);
+                flowToCoil2.setAttribute("stroke-dashoffset", -dashOffset);
+            } else {
+                flowToCoilAC1.setAttribute("stroke-dashoffset", dashOffset);
+                flowToCoilAC2.setAttribute("stroke-dashoffset", -dashOffset);
+            }
+        }
+
+        requestAnimationFrame(loopAnimation);
+    }
+
+    // --- ធ្វើបច្ចុប្បន្នភាព UI និង Physics ---
+    function updateState() {
+        // Main Switch Graphic
+        if (isPowerOn === true) {
+            swMain.setAttribute("y2", "80"); // ភ្ជាប់
+            dashPower.innerText = "បើក (ON)";
+            dashPower.style.color = "#00e676";
+            btnPower.innerText = "⏸️ ចុចបិទកុងតាក់កណ្ដឹង";
+            btnPower.style.background = "#f57c00";
+        } else {
+            swMain.setAttribute("y2", "50"); // ផ្តាច់
+            dashPower.innerText = "បិទ (OFF)";
+            dashPower.style.color = "#ff8a80";
+            btnPower.innerText = "⚡ ចុចបើកកុងតាក់កណ្ដឹង";
+            btnPower.style.background = "#d32f2f";
+        }
+
+        // Mode Switch Graphic
+        if (isDC === true) {
+            swS1.setAttribute("y2", "200");
+            swS2.setAttribute("y2", "280");
+            dashMode.innerText = "DC (ចរន្តជាប់)";
+            dashMode.style.color = "#81d4fa";
+            btnMode.innerText = "🔄 ប្តូរកុងតាក់ជើង៦ ទៅ AC";
+        } else {
+            swS1.setAttribute("y2", "150");
+            swS2.setAttribute("y2", "320");
+            dashMode.innerText = "AC (ចរន្តឆ្លាស់)";
+            dashMode.style.color = "#ffb74d";
+            btnMode.innerText = "🔄 ប្តូរកុងតាក់ជើង៦ ទៅ DC";
+        }
+
+        // Show/Hide Current Paths
+        flowAC1.setAttribute("opacity", (isPowerOn) ? "1" : "0");
+        flowAC2.setAttribute("opacity", (isPowerOn) ? "1" : "0");
+        
+        flowDC1.setAttribute("opacity", (isPowerOn && isDC) ? "1" : "0");
+        flowDC2.setAttribute("opacity", (isPowerOn && isDC) ? "1" : "0");
+        flowToCoil1.setAttribute("opacity", (isPowerOn && isDC) ? "1" : "0");
+        flowToCoil2.setAttribute("opacity", (isPowerOn && isDC) ? "1" : "0");
+        
+        flowToCoilAC1.setAttribute("opacity", (isPowerOn && !isDC) ? "1" : "0");
+        flowToCoilAC2.setAttribute("opacity", (isPowerOn && !isDC) ? "1" : "0");
+
+        // Dashboard State Text
+        if (isPowerOn === true) {
+            if (isDC === true) {
+                dashState.innerText = "ក្លាយជាមេដែក (រៀបរយ)";
+                dashState.style.color = "#ffeb3b";
+            } else {
+                dashState.innerText = "បាត់ភាពជាមេដែក (រាយប៉ាយ)";
+                dashState.style.color = "#ff8a80";
+            }
+        } else {
+            if (isDC === true) {
+                dashState.innerText = "រក្សាភាពជាមេដែក";
+                dashState.style.color = "#81c784";
+            } else {
+                dashState.innerText = "បាត់ភាពជាមេដែក (អចិន្ត្រៃយ៍)";
+                dashState.style.color = "#90a4ae";
+            }
+        }
+    }
+
+    // --- ចាប់ផ្តើម Event Listeners ---
+    btnPower.addEventListener('click', function() {
+        if (isPowerOn === false) isPowerOn = true;
+        else isPowerOn = false;
+        updateState();
+    });
+
+    btnMode.addEventListener('click', function() {
+        if (isDC === false) isDC = true;
+        else isDC = false;
+        updateState();
+    });
+
+    btnReset.addEventListener('click', function() {
+        isPowerOn = false;
+        isDC = true;
+        dashOffset = 0;
+        initDomains();
+        updateState();
+    });
+
+    // Initialization
+    initDomains();
+    initCoil();
+    updateState();
+    loopAnimation();
+
+</script>
+
+</body>
+</html>

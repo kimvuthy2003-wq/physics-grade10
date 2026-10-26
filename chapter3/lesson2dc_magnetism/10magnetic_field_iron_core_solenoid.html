@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ផ្ទាំងអនុវត្តសៀគ្វីអគ្គិសនីអន្តរកម្ម</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ស្ទីលអក្សរខ្មែរទូទៅ */
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            margin: 0;
+            overflow-x: hidden;
+            font-size: 1.15rem; 
+            line-height: 1.8;
+        }
+        
+        .kh { font-family: 'Battambang', sans-serif; }
+
+        /* ស្ទីលសម្រាប់រូបមន្តគណិតវិទ្យា */
+        .math {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.35rem; 
+            letter-spacing: 0.03em;
+        }
+        .math-bold { font-weight: bold; }
+        .math-sub { font-size: 0.65em; vertical-align: -0.25em; }
+        .math-sup { font-size: 0.65em; vertical-align: super; }
+
+        /* ពណ៌សម្រាប់រូបមន្ត និងលទ្ធផល */
+        .text-blue { color: #1d4ed8; }
+        .text-red { color: #dc2626; }
+        .text-emerald { color: #059669; }
+        .text-amber { color: #d97706; }
+        .text-purple { color: #7e22ce; }
+
+        /* ស្ទីលប្រភាគ (Fractions) ធានាមិនឱ្យដាច់គ្នា */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.3em;
+            font-size: 0.95em;
+        }
+        .fraction > span { padding: 0.1em 0.3em; }
+        .fraction .fdn { 
+            border-top: 1.5px solid currentColor; 
+            width: 100%; 
+            text-align: center; 
+        }
+
+        /* ដំណោះស្រាយសម្រាប់ទូរសព្ទដៃ (ការពារការលោតដាច់រូបមន្ត) */
+        .equation-box {
+            display: flex;
+            flex-wrap: wrap; 
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .math-block {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: nowrap; 
+            overflow-x: auto; 
+            max-width: 100%;
+            padding-bottom: 0.2rem;
+            scrollbar-width: none; 
+        }
+        .math-block::-webkit-scrollbar { display: none; }
+
+        /* ស្ទីល Sliders */
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #cbd5e1;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #d97706; 
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(217, 119, 6, 0.5);
+        }
+        
+        /* ផ្ទៃគំនូសសៀគ្វី 2D */
+        .interactive-panel {
+            width: 100%;
+            border-radius: 0.75rem;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        /* គំនូរជីវចលចរន្តអគ្គិសនី */
+        .flow-path {
+            fill: none;
+            stroke-width: 4;
+            stroke-dasharray: 10, 15;
+            stroke-linecap: round;
+            transition: stroke-opacity 0.3s;
+        }
+        .flow-main { stroke: #ef4444; } 
+
+        @keyframes flowAnimNormal { to { stroke-dashoffset: -25; } }
+        
+        .solution-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.7s ease-in-out;
+        }
+        .solution-content.open {
+            max-height: 6000px;
+            opacity: 1;
+            margin-top: 1.5rem;
+        }
+
+        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
+        
+        .toggle-blue:checked { right: 0; border-color: #3b82f6; }
+        .toggle-blue:checked + .toggle-label { background-color: #3b82f6; }
+
+        .solenoid-wire {
+            fill: none;
+            stroke: #b45309; 
+            stroke-width: 3;
+            transition: all 0.3s;
+        }
+        .iron-core {
+            transition: opacity 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- ========================================== -->
+        <!-- 1. ប្រធានលំហាត់ -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <h2 class="text-2xl font-bold text-amber-700 mb-4 border-b border-slate-100 pb-3 flex items-center gap-2">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                ៣. ទំនាក់ទំនងរវាងដែនម៉ាញេទិច និងអាំងតង់ស៊ីតេចរន្ត
+            </h2>
+            <div class="text-justify font-medium space-y-4 kh">
+                <p>យើងលើកយកតែករណីខ្សែរុំស៊ីឡាំង ឬសូលេណូអ៊ីត (Solenoid) មកសិក្សាប៉ុណ្ណោះ ។ តាមរយៈការពិសោធន៍ជាក់ស្តែង គេសង្កេតឃើញថា៖</p>
+                <ul class="pl-8 space-y-3 list-disc text-gray-700">
+                    <li>បើគេយកស្នូលដែកទៅដាក់ក្នុងសូលេណូអ៊ីត គេឃើញកម្ទេចដែក ឬដែកគោលឆក់ជាប់កាន់តែច្រើន ដែលបញ្ជាក់ថាការបន្ថែមស្នូលដែក ធ្វើឱ្យដែនម៉ាញេទិចកើនឡើង ។</li>
+                    <li>រក្សាចំនួនជុំនៃសូលេណូអ៊ីតនៅដដែល ប៉ុន្តែបង្កើនអាំងតង់ស៊ីតេចរន្តអគ្គិសនី <span class="math math-bold text-red">I</span> នោះដែនម៉ាញេទិចកើនឡើង ។</li>
+                    <li>រក្សាអាំងតង់ស៊ីតេចរន្តនិងស្នូលដែកឱ្យនៅដដែល ប៉ុន្តែប្តូរសូលេណូអ៊ីតដោយបង្កើនចំនួនជុំខ្សែ <span class="math math-bold text-blue">N</span> នោះដែនម៉ាញេទិចកើនឡើងជាងមុន ។</li>
+                </ul>
+                <p class="font-bold text-emerald-700 bg-emerald-50 p-4 rounded-xl mt-4 border border-emerald-100">
+                    សន្និដ្ឋាន៖ ដែនម៉ាញេទិចនៃសូលេណូអ៊ីត អាស្រ័យនឹងអាំងតង់ស៊ីតេចរន្តអគ្គិសនី ចំនួនជុំនៃសូលេណូអ៊ីត និងធម្មជាតិនៃស្នូលដែក ។
+                </p>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 2. INTERACTIVE PANEL (2D CANVAS) -->
+        <!-- ========================================== -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- 2D Circuit Drawing -->
+            <div class="lg:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col">
+                <div class="flex justify-between items-center mb-4 px-2 flex-wrap gap-4">
+                    <h3 class="font-bold text-gray-800 text-xl kh">ផ្ទាំងពិសោធន៍អន្តរកម្ម</h3>
+                    
+                    <div class="flex gap-4 flex-wrap">
+                        <!-- កុងតាក់ -->
+                        <div class="flex items-center gap-3 bg-emerald-50 px-4 py-2 rounded-lg border border-emerald-100">
+                            <span class="kh font-bold text-emerald-700 text-[1rem]">ភ្ជាប់កុងតាក់ចរន្ត</span>
+                            <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" id="toggleSwitch" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer z-10 top-0 left-0 transition-all duration-300"/>
+                                <label for="toggleSwitch" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300"></label>
+                            </div>
+                        </div>
+                        
+                        <!-- ស្នូលដែក -->
+                        <div class="flex items-center gap-3 bg-blue-50 px-4 py-2 rounded-lg border border-blue-100">
+                            <span class="kh font-bold text-blue-700 text-[1rem]">បញ្ចូលស្នូលដែក</span>
+                            <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" id="toggleCore" checked class="toggle-checkbox toggle-blue absolute block w-6 h-6 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer z-10 top-0 left-0 transition-all duration-300"/>
+                                <label for="toggleCore" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="interactive-panel min-h-[450px]">
+                    <svg width="100%" height="100%" viewBox="0 0 600 450" preserveAspectRatio="xMidYMid meet">
+                        
+                        <!-- ខ្សែសៀគ្វីគោល (ផ្តាច់ត្រង់ចន្លោះកុងតាក់ x=210 ដល់ x=270) -->
+                        <path d="M 100 210 L 100 80 L 250 80" fill="none" stroke="#334155" stroke-width="3" />
+                        <path d="M 310 80 L 400 80 L 400 130" fill="none" stroke="#334155" stroke-width="3" />
+                        
+                        <!-- ខ្សែសៀគ្វីផ្នែកខាងក្រោម (ដាច់ត្រង់កុងតាក់) -->
+                        <path d="M 400 310 L 400 350 L 270 350" fill="none" stroke="#334155" stroke-width="3" />
+                        <path d="M 210 350 L 100 350 L 100 240" fill="none" stroke="#334155" stroke-width="3" />
+                        
+                        <!-- ប្រភពអគ្គិសនី (ថ្មពិល DC) -->
+                        <line x1="80" y1="210" x2="120" y2="210" stroke="#1e293b" stroke-width="2" />
+                        <text x="60" y="215" fill="#e11d48" font-size="20" font-weight="bold" font-family="'Times New Roman', serif">+</text>
+                        
+                        <line x1="100" y1="210" x2="100" y2="240" stroke="#1e293b" stroke-width="2" stroke-dasharray="3,3"/>
+                        
+                        <line x1="90" y1="240" x2="110" y2="240" stroke="#1e293b" stroke-width="6" />
+                        <text x="65" y="245" fill="#0284c7" font-size="24" font-weight="bold" font-family="'Times New Roman', serif">-</text>
+
+                        <!-- រ៉េអូស្តាត (Rheostat) សម្រាប់បញ្ជាចរន្ត -->
+                        <rect x="230" y="65" width="80" height="30" fill="white" stroke="#334155" stroke-width="3" />
+                        <path id="rheoArrow" d="M 280 80 L 280 40 L 310 40 L 310 80" fill="none" stroke="#334155" stroke-width="3" />
+                        <polygon points="280,85 275,75 285,75" fill="#334155" />
+                        <polygon points="310,85 305,75 315,75" fill="#334155" />
+                        
+                        <!-- កុងតាក់ (Switch) ត្រង់ចន្លោះដែលផ្តាច់ -->
+                        <circle cx="210" cy="350" r="5" fill="#1e293b" />
+                        <circle cx="270" cy="350" r="5" fill="#1e293b" />
+                        <!-- ដែកកុងតាក់ (Blade) -->
+                        <line id="switchBlade" x1="210" y1="350" x2="270" y2="350" stroke="#1e293b" stroke-width="4" stroke-linecap="round" style="transform-origin: 210px 350px; transform: rotate(-25deg); transition: transform 0.3s;"/>
+                        
+                        <!-- អំពែម៉ែត្រ A -->
+                        <circle cx="100" cy="130" r="25" fill="white" stroke="#334155" stroke-width="3" />
+                        <text x="100" y="138" fill="#334155" font-size="24" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">A</text>
+
+                        <!-- សូលេណូអ៊ីត និង ស្នូលដែក -->
+                        <g id="solenoidGroup">
+                            <rect x="385" y="130" width="30" height="180" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1" />
+                            <rect id="ironCore" class="iron-core" x="387" y="125" width="26" height="190" fill="#64748b" />
+                            <g id="turnsGroup"></g>
+                        </g>
+
+                        <!-- កម្ទេចដែក / ដែកគោលតូចៗ -->
+                        <g id="clipsGroup"></g>
+
+                        <!-- គំនូរជីវចលចរន្ត -->
+                        <g id="animGroup" style="display: none;">
+                            <path class="flow-path flow-main animLine" d="M 100 210 L 100 80 L 250 80" />
+                            <path class="flow-path flow-main animLine" d="M 310 80 L 400 80 L 400 130" />
+                            <path class="flow-path flow-main animLine" d="M 400 310 L 400 350 L 100 350 L 100 240" />
+                        </g>
+                        
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col gap-8">
+                <h3 class="text-xl font-bold text-amber-700 border-b border-slate-100 pb-3 kh">ការកំណត់ប៉ារ៉ាម៉ែត្រ</h3>
+                
+                <div class="space-y-8">
+                    <!-- I Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">អាំងតង់ស៊ីតេចរន្ត <span class="math text-red-600">I</span></label>
+                            <span class="math math-bold text-red"><span id="iDisp">3.0</span> A</span>
+                        </div>
+                        <input type="range" id="iSlider" min="0.0" max="6.0" value="3.0" step="0.5" class="slider py-2 bg-red-400">
+                    </div>
+
+                    <!-- N Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">ចំនួនជុំខ្សែ <span class="math text-blue-600">N</span></label>
+                            <span class="math math-bold text-blue"><span id="nDisp">30</span> ជុំ</span>
+                        </div>
+                        <input type="range" id="nSlider" min="10" max="60" value="30" step="5" class="slider py-2 bg-blue-400">
+                    </div>
+                </div>
+
+                <!-- Live Results -->
+                <div class="mt-auto space-y-4">
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 flex flex-col justify-center items-center shadow-sm h-32">
+                        <div class="font-bold text-emerald-800 kh text-[1rem]">កម្លាំងដែនម៉ាញេទិច <span class="math">B</span></div>
+                        <div class="math math-bold text-emerald text-[2rem] mt-2"><span id="bDisp">0.0</span> mT</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 3. ដំណោះស្រាយ (SOLUTION TOGGLE) -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <button id="toggleBtn" class="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold py-4 px-6 rounded-xl shadow-md transition-colors flex justify-center items-center gap-3">
+                <svg id="toggleIcon" class="w-6 h-6 transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                <span id="btnText" class="text-xl kh">បង្ហាញសេចក្តីសន្និដ្ឋាននៃពិសោធន៍</span>
+            </button>
+
+            <div id="solutionBox" class="solution-content bg-slate-50 border border-slate-200 rounded-xl p-6 md:p-10 mt-6">
+                <h3 class="font-bold text-[#d97706] border-b-2 border-slate-200 pb-3 mb-8 text-3xl inline-block border-b-[#f59e0b] kh">ការពន្យល់តាមរូបមន្ត</h3>
+                
+                <div class="space-y-8">
+                    
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="kh leading-relaxed text-gray-700">កម្លាំងដែនម៉ាញេទិច <span class="math text-emerald-600 font-bold">B</span> នៅផ្នែកកណ្តាលនៃសូលេណូអ៊ីត អាចគណនាតាមរូបមន្ត៖</p>
+                        
+                        <div class="equation-box mt-4 justify-center bg-slate-50 py-4 rounded-xl border border-slate-200">
+                            <div class="math-block text-[1.8rem]">
+                                <span class="math text-emerald-600 font-bold">B = &mu;<span class="math-sub">0</span> &times; &mu;<span class="math-sub">r</span> &times; </span>
+                                <div class="fraction math text-emerald-600 font-bold">
+                                    <span>N</span>
+                                    <span class="fdn">L</span>
+                                </div>
+                                <span class="math text-emerald-600 font-bold"> &times; I</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 space-y-4">
+                            <p class="kh font-medium">ក្នុងនោះ៖</p>
+                            <ul class="pl-8 space-y-3 kh text-gray-700 list-disc">
+                                <li><span class="math font-bold">I</span> ៖ ជាអាំងតង់ស៊ីតេចរន្តឆ្លងកាត់ខ្សែ (គិតជា អំពែ <span class="math">A</span>)</li>
+                                <li><span class="math font-bold">N</span> ៖ ជាចំនួនជុំខ្សែនៃសូលេណូអ៊ីត</li>
+                                <li><span class="math font-bold">L</span> ៖ ជាប្រវែងសូលេណូអ៊ីត (ឧទាហរណ៍ <span class="math">L = 0.1 m</span>)</li>
+                                <li><span class="math font-bold">&mu;<span class="math-sub">0</span></span> ៖ ជាពែរមេអាប៊ីលីតេនៃសុញ្ញកាស (<span class="math">&approx; 4&pi; &times; 10<span class="math-sup">-7</span> T&middot;m/A</span>)</li>
+                                <li><span class="math font-bold">&mu;<span class="math-sub">r</span></span> ៖ ជាពែរមេអាប៊ីលីតេរ៉ឺឡាទីបនៃស្នូល (បើជាខ្យល់ <span class="math">&mu;<span class="math-sub">r</span> = 1</span>, បើជាដែក <span class="math">&mu;<span class="math-sub">r</span> &gg; 1</span> អាចដល់រាប់រយ)</li>
+                            </ul>
+                        </div>
+
+                        <div class="mt-8 bg-emerald-50 p-5 rounded-xl border border-emerald-100">
+                            <h4 class="font-bold text-emerald-800 text-xl kh mb-3">ការប្រែប្រួលតាមការពិសោធន៍ជាក់ស្តែង៖</h4>
+                            <div class="space-y-3 kh text-emerald-900 leading-relaxed">
+                                <p>១. កាលណា <strong><span id="sol_nVal" class="math text-blue-600 font-bold"></span> ជុំ</strong> (ថេរ), ចរន្ត <span class="math text-red-600 font-bold">I</span> កើនឡើង នោះដែន <span class="math text-emerald-600 font-bold">B</span> នឹងកើនឡើងសមាមាត្រ។</p>
+                                <p>២. កាលណា ចរន្ត <strong><span id="sol_iVal" class="math text-red-600 font-bold"></span> A</strong> (ថេរ), ចំនួនជុំ <span class="math text-blue-600 font-bold">N</span> កើនឡើង នោះដែន <span class="math text-emerald-600 font-bold">B</span> ក៏កើនឡើងដែរ។</p>
+                                <p>៣. បើបញ្ចូល <strong>ស្នូលដែក</strong> វានឹងធ្វើឱ្យគុណកថា <span class="math">&mu;<span class="math-sub">r</span></span> កើនឡើងយ៉ាងខ្លាំង ជាហេតុធ្វើឱ្យដែនម៉ាញេទិច <span class="math text-emerald-600 font-bold">B</span> កើនឡើងរាប់សិបដង អាចឆក់ទាញកម្ទេចដែកបានច្រើន។</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Constants & Config
+        const MU_0 = 4 * Math.PI * 1e-7;
+        const MU_IRON = 150; 
+        const L_SOLENOID = 0.1; 
+        const NUM_CLIPS = 60; 
+
+        // Elements
+        const toggleSwitch = document.getElementById('toggleSwitch');
+        const toggleCore = document.getElementById('toggleCore');
+        const switchBlade = document.getElementById('switchBlade');
+        const ironCore = document.getElementById('ironCore');
+        const animGroup = document.getElementById('animGroup');
+        const animLines = document.querySelectorAll('.animLine');
+        
+        const iSlider = document.getElementById('iSlider');
+        const nSlider = document.getElementById('nSlider');
+        
+        const turnsGroup = document.getElementById('turnsGroup');
+        const clipsGroup = document.getElementById('clipsGroup');
+
+        // State
+        let isSwitchOn = false;
+
+        function initClips() {
+            for(let i=0; i<NUM_CLIPS; i++) {
+                let clip = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                let gx = 350 + Math.random() * 100;
+                let gy = 360 + Math.random() * 30;
+                
+                clip.setAttribute('x1', gx);
+                clip.setAttribute('y1', gy);
+                clip.setAttribute('x2', gx + (Math.random() * 8 - 4));
+                clip.setAttribute('y2', gy + (Math.random() * 8 - 4));
+                
+                clip.setAttribute('stroke', '#475569'); 
+                clip.setAttribute('stroke-width', '2');
+                clip.setAttribute('stroke-linecap', 'round');
+                
+                clip.style.transition = "all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)";
+                
+                clip.dataset.gx = gx;
+                clip.dataset.gy = gy;
+                
+                clipsGroup.appendChild(clip);
+            }
+        }
+
+        let currentDrawN = 0;
+        function drawSolenoid(N) {
+            if (currentDrawN === N) return; 
+            currentDrawN = N;
+            
+            turnsGroup.innerHTML = ''; 
+            
+            const startY = 135;
+            const endY = 305;
+            const stepY = (endY - startY) / N;
+            const leftX = 385;
+            const rightX = 415;
+
+            for(let i=0; i<N; i++) {
+                let y1 = startY + i * stepY;
+                let y2 = y1 + stepY * 0.8;
+                
+                let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute('x1', leftX - 2);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', rightX + 2);
+                line.setAttribute('y2', y2);
+                line.setAttribute('class', 'solenoid-wire');
+                
+                turnsGroup.appendChild(line);
+            }
+        }
+
+        function updateSimulation() {
+            const I_set = parseFloat(iSlider.value);
+            const N = parseInt(nSlider.value);
+            const hasCore = toggleCore.checked;
+
+            // Switch Logic (Closed = 0deg, Open = -25deg)
+            const I = isSwitchOn ? I_set : 0.0;
+            if (isSwitchOn) {
+                switchBlade.style.transform = "rotate(0deg)"; 
+                if (I > 0) animGroup.style.display = "block";
+                else animGroup.style.display = "none";
+            } else {
+                switchBlade.style.transform = "rotate(-25deg)"; 
+                animGroup.style.display = "none";
+            }
+
+            document.getElementById('iDisp').textContent = I_set.toFixed(1);
+            document.getElementById('nDisp').textContent = N;
+            
+            document.getElementById('sol_iVal').textContent = I_set.toFixed(1);
+            document.getElementById('sol_nVal').textContent = N;
+
+            ironCore.style.opacity = hasCore ? "1" : "0.1";
+
+            drawSolenoid(N);
+
+            // Math Calculation for B
+            let mu_r = hasCore ? MU_IRON : 1;
+            let B_tesla = MU_0 * mu_r * (N / L_SOLENOID) * I;
+            let B_mT = B_tesla * 1000;
+            
+            document.getElementById('bDisp').textContent = B_mT.toFixed(2);
+
+            // Update Iron Clips Attraction
+            const maxB_for_visuals = 400; 
+            let attractedRatio = B_mT / maxB_for_visuals;
+            if (attractedRatio > 1) attractedRatio = 1;
+            
+            let numAttracted = Math.floor(attractedRatio * NUM_CLIPS);
+            
+            const clips = clipsGroup.children;
+            for(let i=0; i<NUM_CLIPS; i++) {
+                let clip = clips[i];
+                if (i < numAttracted) {
+                    let tx = 380 + Math.random() * 40;
+                    let ty = 310 + Math.random() * 20;
+                    clip.setAttribute('x1', tx);
+                    clip.setAttribute('y1', ty);
+                    clip.setAttribute('x2', tx + (Math.random() * 8 - 4));
+                    clip.setAttribute('y2', ty + (Math.random() * 8 - 4));
+                } else {
+                    let gx = clip.dataset.gx;
+                    let gy = clip.dataset.gy;
+                    clip.setAttribute('x1', gx);
+                    clip.setAttribute('y1', gy);
+                    clip.setAttribute('x2', parseFloat(gx) + 4);
+                    clip.setAttribute('y2', parseFloat(gy) + 4);
+                }
+            }
+
+            if (I > 0) {
+                const animDuration = Math.max(0.2, 2.0 / I); 
+                animLines.forEach(line => {
+                    line.style.animation = `flowAnimNormal ${animDuration}s linear infinite`;
+                });
+            }
+        }
+
+        iSlider.addEventListener('input', updateSimulation);
+        nSlider.addEventListener('input', updateSimulation);
+        
+        toggleSwitch.addEventListener('change', (e) => {
+            isSwitchOn = e.target.checked;
+            updateSimulation();
+        });
+
+        toggleCore.addEventListener('change', updateSimulation);
+
+        const toggleBtn = document.getElementById('toggleBtn');
+        const solutionBox = document.getElementById('solutionBox');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const btnText = document.getElementById('btnText');
+        let solutionOpen = false;
+
+        toggleBtn.addEventListener('click', () => {
+            solutionOpen = !solutionOpen;
+            if (solutionOpen) {
+                solutionBox.classList.add('open');
+                btnText.textContent = "លាក់សេចក្តីសន្និដ្ឋាននៃពិសោធន៍";
+                toggleIcon.style.transform = "rotate(0deg)";
+            } else {
+                solutionBox.classList.remove('open');
+                btnText.textContent = "បង្ហាញសេចក្តីសន្និដ្ឋាននៃពិសោធន៍";
+                toggleIcon.style.transform = "rotate(180deg)";
+            }
+        });
+
+        initClips();
+        updateSimulation();
+    </script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ17ទំព័រ168ការបញ្ជូនអគ្គិសនីនិងអានុភាពបាត់បង់</title>
+
+    <!-- បញ្ចូល Google Fonts សម្រាប់ Battambang -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Battambang', 'Khmer OS Battambang', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; line-height: 1.8; margin: 0;
+            font-size: 18px; /* បង្កើនទំហំអក្សរគោល */
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        .lesson-content {
+            background: #ffffff; padding: 25px; border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 20px; text-align: left;
+            border-top: 5px solid #2196f3;
+        }
+        .lesson-content h2 { margin-top: 0; color: #0d47a1; font-size: 28px; border-bottom: 2px solid #bbdefb; padding-bottom: 10px; margin-bottom: 15px;}
+        
+        .sim-layout {
+            display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px;
+        }
+
+        .sim-box {
+            background: #ffffff; border: 2px solid #cfd8dc; border-radius: 12px;
+            padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); text-align: center;
+        }
+        .sim-box h3 { margin-top: 0; color: #37474f; font-size: 24px; margin-bottom: 15px; border-bottom: 2px dashed #eceff1; padding-bottom: 10px;}
+
+        svg {
+            display: block; width: 100%; height: auto; max-height: 450px; margin: 0 auto;
+            background: #1e293b; border-radius: 8px;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 900px) {
+            .controls-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 500px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        
+        .slider-box {
+            background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;
+            font-weight: bold; text-align: left; font-size: 18px; /* បង្កើនទំហំអក្សរ */
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .dashboard {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;
+        }
+        .data-panel {
+            padding: 15px; border-radius: 8px; text-align: center; font-size: 20px; font-weight: bold; /* បង្កើនទំហំអក្សរ */
+        }
+        .panel-red { background: #fee2e2; border: 2px solid #ef4444; color: #991b1b; }
+        .panel-green { background: #dcfce7; border: 2px solid #10b981; color: #065f46; }
+        
+        .val-large { font-size: 32px; font-family: 'Arial', sans-serif; font-weight: 900; display: block; margin: 10px 0; }
+
+        .btn-sol { 
+            background: #0288d1; color: white; width: 100%; margin-top: 20px; font-size: 22px; padding: 15px; 
+            border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: bold; 
+            transition: background 0.3s; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        .btn-sol:hover { background: #01579b; }
+
+        .solution-box {
+            background: #f0f8ff; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 20px; border-left: 6px solid #0288d1;
+            font-size: 20px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* បង្កើនទំហំអក្សរ */
+        }
+        .solution-box h3 { margin-top: 0; color: #01579b; border-bottom: 2px solid #b3e5fc; padding-bottom: 10px; font-size: 24px; }
+        
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ប្រធានលំហាត់ -->
+    <div class="lesson-content">
+        <h2>📝 លំហាត់ទី១៧</h2>
+        <strong>១៧.</strong> រោងចក្រអគ្គិសនីមួយបញ្ជូនអានុភាពមធ្យម <span style="color:#d32f2f; font-weight:bold; font-family:Arial;">$P =$ <span id="probP">120</span> kW</span> ទៅកាន់ទីក្រុងតូចមួយដែលស្ថិតនៅចម្ងាយ 10 km ពីវា ។ ខ្សែបញ្ជូនមានរេស៊ីស្តង់សរុប <span style="color:#1976d2; font-weight:bold; font-family:Arial;">$R =$ <span id="probR">0.400</span> $\Omega$</span> ។ គណនាអានុភាពបាត់បង់ បើតង់ស្យុងបញ្ជូន៖<br>
+        ក. <span style="color:#ef4444; font-weight:bold; font-family:Arial;">$V_1 =$ <span id="probV1">240</span> V</span> &nbsp;&nbsp;&nbsp;&nbsp; ខ. <span style="color:#10b981; font-weight:bold; font-family:Arial;">$V_2 =$ <span id="probV2">24000</span> V</span>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box" style="border-top: 4px solid #f59e0b;">
+            អានុភាពបញ្ជូន $P$ (kW):<br>
+            <span id="valP" class="number-display" style="color: #d97706; font-size:24px;">120 kW</span>
+            <input type="range" id="sliderP" min="50" max="500" value="120" step="10">
+        </div>
+        <div class="slider-box" style="border-top: 4px solid #8b5cf6;">
+            រេស៊ីស្តង់ខ្សែ $R$ ($\Omega$):<br>
+            <span id="valR" class="number-display" style="color: #6d28d9; font-size:24px;">0.400 $\Omega$</span>
+            <input type="range" id="sliderR" min="0.1" max="2.0" value="0.4" step="0.05">
+        </div>
+        <div class="slider-box" style="border-top: 4px solid #ef4444;">
+            តង់ស្យុង ក. $V_1$ (V):<br>
+            <span id="valV1" class="number-display" style="color: #b91c1c; font-size:24px;">240 V</span>
+            <input type="range" id="sliderV1" min="100" max="1000" value="240" step="20">
+        </div>
+        <div class="slider-box" style="border-top: 4px solid #10b981;">
+            តង់ស្យុង ខ. $V_2$ (V):<br>
+            <span id="valV2" class="number-display" style="color: #047857; font-size:24px;">24000 V</span>
+            <input type="range" id="sliderV2" min="1000" max="50000" value="24000" step="1000">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងឧបករណ៍ពិសោធន៍ (2D SVG Simulator & Dashboard) -->
+    <div class="sim-box">
+        <h3>⚡ការបញ្ជូនអគ្គិសនីទៅទីក្រុង</h3>
+        
+        <svg viewBox="0 0 900 300" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <filter id="glowRed" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="5" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+            </defs>
+
+            <!-- ផ្ទៃខាងក្រោយ (រោងចក្រ និងទីក្រុង) -->
+            <!-- រោងចក្រអគ្គិសនី (Power Plant - Left) -->
+            <rect x="20" y="80" width="100" height="180" fill="#475569" rx="5"/>
+            <rect x="40" y="40" width="20" height="40" fill="#64748b"/>
+            <rect x="80" y="50" width="15" height="30" fill="#64748b"/>
+            <text x="70" y="160" text-anchor="middle" font-family="'Battambang', 'Khmer OS Battambang', sans-serif" font-size="18" fill="#f8fafc" font-weight="bold">រោងចក្រ</text>
+            <text id="lblSvgP" x="70" y="180" text-anchor="middle" font-family="Arial" font-size="20" fill="#facc15" font-weight="bold">120 kW</text>
+
+            <!-- ទីក្រុង (City - Right) -->
+            <rect x="780" y="100" width="100" height="160" fill="#3b82f6" rx="5"/>
+            <rect x="800" y="120" width="15" height="20" fill="#fef08a"/>
+            <rect x="840" y="150" width="15" height="20" fill="#fef08a"/>
+            <rect x="810" y="180" width="15" height="20" fill="#fef08a"/>
+            <text x="830" y="240" text-anchor="middle" font-family="'Battambang', 'Khmer OS Battambang', sans-serif" font-size="18" fill="#f8fafc" font-weight="bold">ទីក្រុង</text>
+
+            <!-- ===================== ខ្សែទី១៖ តង់ស្យុងទាប ===================== -->
+            <!-- បង្គោលភ្លើង -->
+            <line x1="120" y1="120" x2="120" y2="260" stroke="#94a3b8" stroke-width="4"/>
+            <line x1="780" y1="120" x2="780" y2="260" stroke="#94a3b8" stroke-width="4"/>
+            
+            <!-- ខ្សែបញ្ជូន (Low Voltage) -->
+            <line x1="120" y1="120" x2="780" y2="120" stroke="#ef4444" stroke-width="8" opacity="0.6"/>
+            <!-- ពណ៌កម្ដៅដែលភាយ (Glow representation of power loss) -->
+            <line id="heatGlow1" x1="120" y1="120" x2="780" y2="120" stroke="#ef4444" stroke-width="15" opacity="0.5" filter="url(#glowRed)"/>
+            <!-- ចលនាចរន្ត I1 -->
+            <line id="flowPath1" x1="120" y1="120" x2="780" y2="120" stroke="#fef08a" stroke-width="3" stroke-dasharray="10,15"/>
+            
+            <text id="lblSvgV1" x="450" y="100" text-anchor="middle" font-family="Arial" font-size="22" fill="#ef4444" font-weight="bold">V1 = 240 V</text>
+            <text id="lblSvgLoss1" x="450" y="145" text-anchor="middle" font-family="'Battambang', 'Khmer OS Battambang', sans-serif" font-size="20" fill="#fca5a5" font-weight="bold">បាត់បង់អានុភាពយ៉ាងច្រើន!</text>
+
+            <!-- ===================== ខ្សែទី២៖ តង់ស្យុងខ្ពស់ ===================== -->
+            <!-- បង្គោលភ្លើង -->
+            <line x1="120" y1="220" x2="120" y2="260" stroke="#94a3b8" stroke-width="4"/>
+            <line x1="780" y1="220" x2="780" y2="260" stroke="#94a3b8" stroke-width="4"/>
+            
+            <!-- ខ្សែបញ្ជូន (High Voltage) -->
+            <line x1="120" y1="220" x2="780" y2="220" stroke="#10b981" stroke-width="4"/>
+            <!-- មិនសូវមាន Glow ទេ ព្រោះខាតបង់តិច -->
+            <line id="heatGlow2" x1="120" y1="220" x2="780" y2="220" stroke="#ef4444" stroke-width="5" opacity="0" filter="url(#glowRed)"/>
+            <!-- ចលនាចរន្ត I2 -->
+            <line id="flowPath2" x1="120" y1="220" x2="780" y2="220" stroke="#fef08a" stroke-width="3" stroke-dasharray="20,40"/>
+            
+            <text id="lblSvgV2" x="450" y="200" text-anchor="middle" font-family="Arial" font-size="22" fill="#10b981" font-weight="bold">V2 = 24000 V</text>
+            <text id="lblSvgLoss2" x="450" y="245" text-anchor="middle" font-family="'Battambang', 'Khmer OS Battambang', sans-serif" font-size="20" fill="#6ee7b7" font-weight="bold">បាត់បង់អានុភាពតិចតួចបំផុត</text>
+        </svg>
+
+        <div class="dashboard">
+            <div class="data-panel panel-red">
+                ក. តង់ស្យុងទាប (240V)
+                <div style="font-size: 16px; font-weight: normal; margin-top: 5px;">ចរន្តរត់កាត់: $I_1 =$ <span id="dashI1">...</span></div>
+                <div class="val-large">$\Delta P_1 =$ <span id="dashPloss1">...</span></div>
+            </div>
+            <div class="data-panel panel-green">
+                ខ. តង់ស្យុងខ្ពស់ (24000V)
+                <div style="font-size: 16px; font-weight: normal; margin-top: 5px;">ចរន្តរត់កាត់: $I_2 =$ <span id="dashI2">...</span></div>
+                <div class="val-large">$\Delta P_2 =$ <span id="dashPloss2">...</span></div>
+            </div>
+        </div>
+
+        <button id="btnToggleSolution" class="btn-sol">📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត</button>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ (Solution Box) -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <h3>📝 ដំណោះស្រាយលម្អិត</h3>
+        <div id="mathContainer">
+            <p><strong>១. បម្រាប់ដែលគេឱ្យ៖</strong></p>
+            <ul>
+                <li id="mathValP">អានុភាពបញ្ជូន៖ \( P = 120 \text{ kW} = 120000 \text{ W} \)</li>
+                <li id="mathValR">រេស៊ីស្តង់ខ្សែបញ្ជូន៖ \( R = 0.400 \, \Omega \)</li>
+                <li id="mathValV1">តង់ស្យុង ក៖ \( V_1 = 240 \text{ V} \)</li>
+                <li id="mathValV2">តង់ស្យុង ខ៖ \( V_2 = 24000 \text{ V} \)</li>
+            </ul>
+
+            <p><strong>២. រូបមន្ត៖</strong></p>
+            <p>អាំងតង់ស៊ីតេចរន្តបញ្ជូន គណនាតាមរូបមន្ត៖ \( I = \frac{P}{V} \)</p>
+            <p>អានុភាពបាត់បង់ (ជាកម្ដៅលើខ្សែ) គណនាតាមរូបមន្ត៖ \( \Delta P = I^2 R \)</p>
+
+            <hr style="border: 0; border-top: 1px dashed #b3e5fc; margin: 15px 0;">
+
+            <p><strong>ក. ចំពោះតង់ស្យុងបញ្ជូន $V_1 = 240 \text{ V}$ ៖</strong></p>
+            <p>រកអាំងតង់ស៊ីតេចរន្តអគ្គិសនី $I_1$ ៖</p>
+            <div id="mathI1">$$ I_1 = \frac{120000}{240} = 500 \text{ A} $$</div>
+            <p>រកអានុភាពបាត់បង់ $\Delta P_1$ ៖</p>
+            <div id="mathPloss1">$$ \Delta P_1 = I_1^2 R = (500)^2 \times 0.400 = 100000 \text{ W} = 100 \text{ kW} $$</div>
+            
+            <hr style="border: 0; border-top: 1px dashed #b3e5fc; margin: 15px 0;">
+
+            <p><strong>ខ. ចំពោះតង់ស្យុងបញ្ជូន $V_2 = 24000 \text{ V}$ ៖</strong></p>
+            <p>រកអាំងតង់ស៊ីតេចរន្តអគ្គិសនី $I_2$ ៖</p>
+            <div id="mathI2">$$ I_2 = \frac{120000}{24000} = 5 \text{ A} $$</div>
+            <p>រកអានុភាពបាត់បង់ $\Delta P_2$ ៖</p>
+            <div id="mathPloss2">$$ \Delta P_2 = I_2^2 R = (5)^2 \times 0.400 = 10 \text{ W} = 0.01 \text{ kW} $$</div>
+
+            <div style="text-align: center; margin-top: 20px; color: #111; font-weight: bold; background: #e1f5fe; padding: 15px; border-radius: 8px;">
+                សន្និដ្ឋាន៖ ការបញ្ជូនអគ្គិសនីតាមរយៈ <span style="color:#10b981;">តង់ស្យុងខ្ពស់ (High Voltage)</span> ធ្វើឱ្យចរន្តមានតម្លៃតូច ដែលជួយកាត់បន្ថយការបាត់បង់អានុភាពតាមខ្សែបញ្ជូនបានយ៉ាងមានប្រសិទ្ធភាពបំផុត។
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var sP = document.getElementById('sliderP');
+    var sR = document.getElementById('sliderR');
+    var sV1 = document.getElementById('sliderV1');
+    var sV2 = document.getElementById('sliderV2');
+    
+    var flowPath1 = document.getElementById('flowPath1');
+    var flowPath2 = document.getElementById('flowPath2');
+    var heatGlow1 = document.getElementById('heatGlow1');
+    var heatGlow2 = document.getElementById('heatGlow2');
+    
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+    
+    var dashOffset1 = 0;
+    var dashOffset2 = 0;
+    var speed1 = 0;
+    var speed2 = 0;
+
+    btnToggleSolution.addEventListener('click', function() {
+        var isHidden = (solutionBox.style.display === 'none');
+        if (isHidden === true) {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    var mathTimeout;
+    function updatePhysics() {
+        var p_kw = parseFloat(sP.value);
+        var r_val = parseFloat(sR.value);
+        var v1_val = parseFloat(sV1.value);
+        var v2_val = parseFloat(sV2.value);
+        
+        var p_w = p_kw * 1000;
+
+        var i1 = p_w / v1_val;
+        var ploss1_w = i1 * i1 * r_val;
+        var ploss1_kw = ploss1_w / 1000;
+
+        var i2 = p_w / v2_val;
+        var ploss2_w = i2 * i2 * r_val;
+        var ploss2_kw = ploss2_w / 1000;
+
+        document.getElementById('valP').innerText = p_kw + " kW";
+        document.getElementById('valR').innerText = r_val.toFixed(3) + " Ω";
+        document.getElementById('valV1').innerText = v1_val + " V";
+        document.getElementById('valV2').innerText = v2_val + " V";
+        
+        document.getElementById('probP').innerText = p_kw;
+        document.getElementById('probR').innerText = r_val.toFixed(3);
+        document.getElementById('probV1').innerText = v1_val;
+        document.getElementById('probV2').innerText = v2_val;
+
+        document.getElementById('lblSvgP').innerText = p_kw + " kW";
+        document.getElementById('lblSvgV1').innerText = "V1 = " + v1_val + " V";
+        document.getElementById('lblSvgV2').innerText = "V2 = " + v2_val + " V";
+
+        document.getElementById('dashI1').innerText = i1.toFixed(1) + " A";
+        document.getElementById('dashPloss1').innerText = ploss1_kw.toFixed(2) + " kW";
+        document.getElementById('dashI2').innerText = i2.toFixed(2) + " A";
+        document.getElementById('dashPloss2').innerText = ploss2_kw.toFixed(3) + " kW";
+
+        var max_opacity1 = Math.min(ploss1_kw / p_kw, 1.0);
+        heatGlow1.setAttribute("opacity", (max_opacity1 * 0.8).toFixed(2));
+        
+        var max_opacity2 = Math.min(ploss2_kw / p_kw, 1.0);
+        heatGlow2.setAttribute("opacity", (max_opacity2 * 0.8).toFixed(2));
+
+        speed1 = Math.min(i1 * 0.05, 10); 
+        speed2 = Math.max(i2 * 0.05, 0.5); 
+
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            
+            document.getElementById('mathValP').innerHTML = "\\( P = " + p_kw + " \\text{ kW} = " + p_w + " \\text{ W} \\)";
+            document.getElementById('mathValR').innerHTML = "\\( R = " + r_val.toFixed(3) + " \\, \\Omega \\)";
+            document.getElementById('mathValV1').innerHTML = "\\( V_1 = " + v1_val + " \\text{ V} \\)";
+            document.getElementById('mathValV2').innerHTML = "\\( V_2 = " + v2_val + " \\text{ V} \\)";
+            
+            document.getElementById('mathI1').innerHTML = "$$ I_1 = \\frac{" + p_w + "}{" + v1_val + "} = " + i1.toFixed(1) + " \\text{ A} $$";
+            document.getElementById('mathPloss1').innerHTML = "$$ \\Delta P_1 = I_1^2 R = (" + i1.toFixed(1) + ")^2 \\times " + r_val.toFixed(3) + " = " + ploss1_w.toFixed(0) + " \\text{ W} = " + ploss1_kw.toFixed(2) + " \\text{ kW} $$";
+            
+            document.getElementById('mathI2').innerHTML = "$$ I_2 = \\frac{" + p_w + "}{" + v2_val + "} = " + i2.toFixed(2) + " \\text{ A} $$";
+            document.getElementById('mathPloss2').innerHTML = "$$ \\Delta P_2 = I_2^2 R = (" + i2.toFixed(2) + ")^2 \\times " + r_val.toFixed(3) + " = " + ploss2_w.toFixed(1) + " \\text{ W} = " + ploss2_kw.toFixed(4) + " \\text{ kW} $$";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    function loopAnimation() {
+        dashOffset1 -= speed1;
+        dashOffset2 -= speed2;
+        flowPath1.setAttribute("stroke-dashoffset", dashOffset1);
+        flowPath2.setAttribute("stroke-dashoffset", dashOffset2);
+        requestAnimationFrame(loopAnimation);
+    }
+
+    sP.addEventListener('input', updatePhysics);
+    sR.addEventListener('input', updatePhysics);
+    sV1.addEventListener('input', updatePhysics);
+    sV2.addEventListener('input', updatePhysics);
+
+    updatePhysics();
+    loopAnimation();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Van de Graaff Generator Simulator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Kantumruy Pro', sans-serif; background-color: #0b1121; margin: 0; overflow: hidden; color: white; }
+        .font-lora { font-family: 'Lora', serif; }
+        .btn-toggle { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* Custom Range Slider */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #38bdf8; cursor: pointer; margin-top: -10px; box-shadow: 0 0 10px rgba(56,189,248,0.8); border: 2px solid #fff; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #334155; border-radius: 4px; }
+        
+        /* Glassmorphism Header */
+        .glass-header {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <!-- Top UI Control Panel -->
+    <div class="glass-header w-full z-10 p-4 md:p-6 flex flex-col md:flex-row gap-4 items-center justify-between shadow-2xl">
+        <!-- Title -->
+        <div class="flex-shrink-0 text-center md:text-left">
+            <h1 class="text-xl md:text-2xl font-bold text-sky-400 leading-tight drop-shadow-md">ជនីតាវ៉ាន់ឌឺក្រាហ្វ</h1>
+            <p class="text-xs md:text-sm text-slate-400 font-lora">Van de Graaff Generator</p>
+        </div>
+
+        <!-- Controls Container -->
+        <div class="flex flex-col sm:flex-row w-full md:w-auto gap-4 items-center flex-1 justify-end max-w-4xl">
+            
+            <!-- Power Toggle -->
+            <button id="toggleBtn" onclick="toggleMachine()" class="btn-toggle bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-rose-900/50 border border-rose-400 w-full sm:w-auto min-w-[200px]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+                <span id="toggleText">ម៉ាស៊ីនកំពុងបិទ (OFF)</span>
+            </button>
+            
+            <!-- X-Ray Toggle -->
+            <button id="xrayBtn" onclick="toggleXRay()" class="btn-toggle bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm shadow-md border border-slate-500 w-full sm:w-auto min-w-[200px]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <span id="xrayText">ទិដ្ឋភាពខាងក្នុង (X-Ray: OFF)</span>
+            </button>
+
+            <!-- Distance Slider -->
+            <div class="bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-600 w-full sm:w-64 shadow-inner">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs text-slate-300 font-medium">ចម្ងាយស្វ៊ែរ៖</span>
+                    <span class="text-sky-300 font-bold text-sm font-lora" id="distLabel">200 mm</span>
+                </div>
+                <input type="range" id="distanceSlider" min="120" max="350" value="200" oninput="updateDistance(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Canvas Area -->
+    <div class="flex-1 relative w-full h-full" id="canvas-container">
+        <!-- Background Ambient Glow -->
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-800 via-[#0b1121] to-[#0b1121] pointer-events-none"></div>
+        <canvas id="simCanvas" class="block w-full h-full absolute inset-0 z-0"></canvas>
+    </div>
+
+    <script>
+        
+        // --- Web Audio API Setup ---
+        let audioCtx;
+        let motorOsc;
+        let motorFilter;
+        let motorGain;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function startMotorSound() {
+            initAudio();
+            if (motorOsc) return; // Already running
+
+            // Oscillator for the hum
+            motorOsc = audioCtx.createOscillator();
+            motorOsc.type = 'sawtooth';
+            motorOsc.frequency.setValueAtTime(50, audioCtx.currentTime); // 50Hz electrical hum
+
+            // Lowpass filter to muffle the harsh sawtooth
+            motorFilter = audioCtx.createBiquadFilter();
+            motorFilter.type = 'lowpass';
+            motorFilter.frequency.setValueAtTime(250, audioCtx.currentTime);
+
+            // Gain (Volume) node for fade in/out
+            motorGain = audioCtx.createGain();
+            motorGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            motorGain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 1.0); // Fade in over 1s
+
+            motorOsc.connect(motorFilter);
+            motorFilter.connect(motorGain);
+            motorGain.connect(audioCtx.destination);
+
+            motorOsc.start();
+        }
+
+        function stopMotorSound() {
+            if (motorGain && motorOsc) {
+                // Fade out smoothly
+                motorGain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 1.0);
+                
+                // Keep references to stop them later without immediately cutting off
+                const oldOsc = motorOsc;
+                setTimeout(() => {
+                    oldOsc.stop();
+                    oldOsc.disconnect();
+                }, 1100);
+                
+                motorOsc = null;
+            }
+        }
+
+        function playSparkSound(intensity) {
+            // intensity is from 0.0 to 1.0 based on distance
+            if (!audioCtx) return;
+
+            const bufferSize = audioCtx.sampleRate * 0.4; // 0.4 seconds of noise
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // Generate White Noise
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = buffer;
+
+            // Bandpass filter to make it sound "snappy" and "crackly"
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 800 + Math.random() * 1500; // Randomize pitch slightly per spark
+            filter.Q.value = 1.0;
+
+            // Envelope for sharp attack and quick decay
+            const gainNode = audioCtx.createGain();
+            const baseVol = 0.5;
+            const dynamicVol = intensity * 1.5; // Louder for larger sparks
+            const peakVol = baseVol + dynamicVol;
+            
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(peakVol, audioCtx.currentTime + 0.01); // Instant loud
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25); // Fast decay
+
+            noiseSource.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            noiseSource.start();
+        }
+
+
+        // --- Canvas & Rendering Setup ---
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        // UI Elements
+        const toggleBtn = document.getElementById('toggleBtn');
+        const toggleText = document.getElementById('toggleText');
+        const distLabel = document.getElementById('distLabel');
+        const xrayBtn = document.getElementById('xrayBtn');
+        const xrayText = document.getElementById('xrayText');
+
+        // State variables
+        let isMachineOn = false;
+        let isXRayOn = false;
+        let cw, ch;
+        
+        // Physics configuration
+        const cfg = {
+            largeSphereR: 90,
+            smallSphereR: 45,
+            largeCx: 0,
+            largeCy: 0,
+            smallCy: 0
+        };
+        
+        let targetSmallCx = 0;
+        let currentSmallCx = 0; 
+        
+        let charge = 0; // Charge buildup (0 to 1+)
+        let sparkFrames = 0; 
+        let currentSparkPath = [];
+
+        function resize() {
+            cw = container.clientWidth;
+            ch = container.clientHeight;
+            canvas.width = cw;
+            canvas.height = ch;
+            
+            const baseY = ch * 0.85; // Move base further down
+            
+            cfg.largeCx = cw * 0.35; // Large sphere on left side
+            cfg.largeCy = baseY - 320; 
+            cfg.smallCy = baseY - 220;
+            
+            const sliderVal = parseFloat(document.getElementById('distanceSlider').value);
+            targetSmallCx = cfg.largeCx + sliderVal;
+            if (currentSmallCx === 0) currentSmallCx = targetSmallCx;
+        }
+
+        window.addEventListener('resize', resize);
+
+        // --- UI Event Handlers ---
+        function toggleMachine() {
+            initAudio(); // Required to unlock audio context on user interaction
+            
+            isMachineOn = !isMachineOn;
+            if (isMachineOn) {
+                toggleBtn.className = "btn-toggle bg-emerald-500 hover:bg-emerald-400 text-slate-900 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-emerald-900/50 border border-emerald-300 w-full sm:w-auto min-w-[200px]";
+                toggleText.innerText = 'ម៉ាស៊ីនកំពុងដំណើរការ (ON)';
+                startMotorSound();
+            } else {
+                toggleBtn.className = "btn-toggle bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-rose-900/50 border border-rose-400 w-full sm:w-auto min-w-[200px]";
+                toggleText.innerText = 'ម៉ាស៊ីនកំពុងបិទ (OFF)';
+                stopMotorSound();
+            }
+        }
+
+        function toggleXRay() {
+            isXRayOn = !isXRayOn;
+            if (isXRayOn) {
+                xrayBtn.className = "btn-toggle bg-indigo-500 hover:bg-indigo-400 text-white flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm shadow-md shadow-indigo-900/50 border border-indigo-400 w-full sm:w-auto min-w-[200px]";
+                xrayText.innerText = 'X-Ray កំពុងបើក (ON)';
+            } else {
+                xrayBtn.className = "btn-toggle bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm shadow-md border border-slate-500 w-full sm:w-auto min-w-[200px]";
+                xrayText.innerText = 'ទិដ្ឋភាពខាងក្នុង (X-Ray: OFF)';
+            }
+        }
+
+        function updateDistance(val) {
+            distLabel.innerText = val + ' mm';
+            targetSmallCx = cfg.largeCx + parseFloat(val);
+        }
+
+        // --- Drawing Functions ---
+        function drawMetallicSphere(cx, cy, r, highlightOffsetX, highlightOffsetY) {
+            ctx.save();
+            if (isXRayOn) ctx.globalAlpha = 0.25; // Transparent for X-Ray
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            
+            const grd = ctx.createRadialGradient(
+                cx + highlightOffsetX, cy + highlightOffsetY, r * 0.15, 
+                cx, cy, r
+            );
+            grd.addColorStop(0, '#ffffff');    
+            grd.addColorStop(0.3, '#94a3b8');  
+            grd.addColorStop(0.75, '#334155');  
+            grd.addColorStop(1, '#020617');    
+            
+            ctx.fillStyle = grd;
+            ctx.fill();
+            
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawBaseAndColumn(x, y, width, height, type) {
+            ctx.save();
+            
+            // Base block
+            ctx.fillStyle = '#1e293b'; 
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetY = 10;
+            ctx.fillRect(x - width*1.3/2, y + height, width*1.3, 30);
+            ctx.shadowColor = 'transparent';
+            
+            // Column (Glass or Plastic tube)
+            if (isXRayOn && type === 'large') ctx.globalAlpha = 0.3;
+
+            const colGrd = ctx.createLinearGradient(x - width/2, 0, x + width/2, 0);
+            colGrd.addColorStop(0, '#0f172a');
+            colGrd.addColorStop(0.2, '#64748b'); // Highlight reflection
+            colGrd.addColorStop(0.5, '#334155');
+            colGrd.addColorStop(0.8, '#475569');
+            colGrd.addColorStop(1, '#020617');
+            
+            ctx.fillStyle = colGrd;
+            ctx.fillRect(x - width/2, y, width, height);
+
+            // Tube edges
+            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x - width/4, y); ctx.lineTo(x - width/4, y + height);
+            ctx.moveTo(x + width/4, y); ctx.lineTo(x + width/4, y + height);
+            ctx.stroke();
+            ctx.restore();
+
+            // Ground wire for small sphere
+            if (type === 'small') {
+                ctx.strokeStyle = '#10b981'; // Green wire
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(x, y + height + 15);
+                ctx.quadraticCurveTo(x + 30, y + height + 50, x, y + height + 150);
+                ctx.stroke();
+            }
+        }
+
+        function drawInternals(cx, cy, colWidth, colHeight) {
+            const beltW = colWidth * 0.65;
+            const topRollerY = cy;
+            const botRollerY = cy + colHeight - 15;
+            
+            // Belts (Left goes down, Right goes up)
+            ctx.fillStyle = '#0f172a'; // Darker part of belt
+            ctx.fillRect(cx - beltW/2, topRollerY, beltW/2, botRollerY - topRollerY);
+            
+            ctx.fillStyle = '#1e293b'; // Lighter part of belt coming up
+            ctx.fillRect(cx, topRollerY, beltW/2, botRollerY - topRollerY);
+
+            // Rollers
+            ctx.fillStyle = '#cbd5e1'; // Top Aluminum roller
+            ctx.beginPath(); ctx.arc(cx, topRollerY, beltW/2, 0, Math.PI*2); ctx.fill();
+            
+            ctx.fillStyle = '#f43f5e'; // Bottom Rubber roller
+            ctx.beginPath(); ctx.arc(cx, botRollerY, beltW/2, 0, Math.PI*2); ctx.fill();
+
+            // Bottom comb (creates positive charges)
+            ctx.strokeStyle = '#fbbf24'; // Copper color
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(cx + beltW/2 + 30, botRollerY); ctx.lineTo(cx + beltW/2 + 10, botRollerY);
+            ctx.moveTo(cx + beltW/2 + 10, botRollerY); ctx.lineTo(cx + beltW/2 + 2, botRollerY - 8);
+            ctx.moveTo(cx + beltW/2 + 10, botRollerY); ctx.lineTo(cx + beltW/2 + 2, botRollerY + 8);
+            ctx.stroke();
+
+            // Top comb (collects positive charges)
+            ctx.beginPath();
+            ctx.moveTo(cx - beltW/2 - 30, topRollerY); ctx.lineTo(cx - beltW/2 - 10, topRollerY);
+            ctx.moveTo(cx - beltW/2 - 10, topRollerY); ctx.lineTo(cx - beltW/2 - 2, topRollerY - 8);
+            ctx.moveTo(cx - beltW/2 - 10, topRollerY); ctx.lineTo(cx - beltW/2 - 2, topRollerY + 8);
+            ctx.stroke();
+            
+            // Wire connecting top comb to inner sphere wall
+            ctx.beginPath();
+            ctx.moveTo(cx - beltW/2 - 30, topRollerY); ctx.lineTo(cx, cy - cfg.largeSphereR * 0.85);
+            ctx.stroke();
+
+            // Animated charges on belt (moving up the right side)
+            if (isMachineOn) {
+                ctx.fillStyle = '#f87171'; // Red '+'
+                ctx.font = 'bold 18px "Lora"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                const speed = 150;
+                const spacing = 40;
+                const offset = (Date.now() / 1000 * speed) % spacing;
+                
+                for(let y = botRollerY - offset; y > topRollerY - 10; y -= spacing) {
+                    ctx.fillText('+', cx + beltW/4, y);
+                }
+            }
+        }
+
+        // --- Spark Physics ---
+        function generateSparkPath(x1, y1, x2, y2) {
+            let path = [];
+            let segments = 10 + Math.random() * 8; // Jaggedness
+            let dx = (x2 - x1) / segments;
+            let dy = (y2 - y1) / segments;
+            
+            path.push({x: x1, y: y1});
+            for(let i=1; i<segments; i++) {
+                let px = x1 + dx * i;
+                let py = y1 + dy * i;
+                let jitter = (Math.random() - 0.5) * 50; // Random zig-zag
+                path.push({x: px, y: py + jitter});
+            }
+            path.push({x: x2, y: y2});
+            return path;
+        }
+
+        function drawChargeSymbols() {
+            if (charge <= 0.05) return; // Only show if noticeable charge
+            
+            ctx.font = 'bold 22px "Lora"';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Large sphere (+)
+            ctx.fillStyle = `rgba(239, 68, 68, ${charge})`; 
+            const lR = cfg.largeSphereR + 18;
+            for(let a=0; a<Math.PI*2; a+=Math.PI/3) {
+                ctx.fillText('+', cfg.largeCx + Math.cos(a)*lR, cfg.largeCy + Math.sin(a)*lR);
+            }
+            
+            // Small sphere (-)
+            ctx.fillStyle = `rgba(56, 189, 248, ${charge})`; 
+            const sR = cfg.smallSphereR + 18;
+            for(let a=Math.PI/2; a<Math.PI*1.5; a+=Math.PI/3) { 
+                ctx.fillText('-', currentSmallCx + Math.cos(a)*sR, cfg.smallCy + Math.sin(a)*sR);
+            }
+        }
+
+
+        function animate() {
+            if (!cw || !ch) resize();
+
+            // Smooth sliding of small sphere
+            currentSmallCx += (targetSmallCx - currentSmallCx) * 0.15;
+
+            ctx.clearRect(0, 0, cw, ch);
+
+            const baseY = ch * 0.85;
+            const colHeightL = baseY - cfg.largeCy;
+            const colHeightS = baseY - cfg.smallCy;
+
+            // Physics Logic for Charging and Sparking
+            const distance = currentSmallCx - cfg.largeCx; 
+            // Max charge threshold scales with distance. Further = Needs more charge to jump
+            let intensityNormalized = (distance - 120) / 230; // 0 to 1 based on slider min/max
+            const maxChargeThreshold = Math.max(0.15, intensityNormalized * 1.2); 
+
+            if (isMachineOn) {
+                charge += 0.006; // Build up charge rate
+                if (charge >= maxChargeThreshold && sparkFrames === 0) {
+                    
+                    // -- TRIGGER SPARK --
+                    sparkFrames = 8; // Visible duration
+                    currentSparkPath = generateSparkPath(
+                        cfg.largeCx + cfg.largeSphereR, cfg.largeCy, 
+                        currentSmallCx - cfg.smallSphereR, cfg.smallCy
+                    );
+                    
+                    // Trigger Audio!
+                    playSparkSound(intensityNormalized);
+
+                    charge = 0; // Discharge completely
+                }
+            } else {
+                charge = Math.max(0, charge - 0.02); // Dissipate if off
+            }
+
+            // --- Rendering ---
+            
+            // 1. Bases and Columns
+            drawBaseAndColumn(cfg.largeCx, cfg.largeCy, 45, colHeightL, 'large');
+            drawBaseAndColumn(currentSmallCx, cfg.smallCy, 25, colHeightS, 'small');
+
+            // 2. X-Ray Internals
+            if (isXRayOn) {
+                drawInternals(cfg.largeCx, cfg.largeCy, 45, colHeightL);
+            }
+
+            // 3. The Spark
+            if (sparkFrames > 0) {
+                // Screen flash glow overlay
+                ctx.fillStyle = `rgba(224, 242, 254, ${sparkFrames/12})`;
+                ctx.fillRect(0, 0, cw, ch);
+
+                // Setup line path
+                ctx.beginPath();
+                ctx.moveTo(currentSparkPath[0].x, currentSparkPath[0].y);
+                for(let i=1; i<currentSparkPath.length; i++) {
+                    ctx.lineTo(currentSparkPath[i].x, currentSparkPath[i].y);
+                }
+                
+                // Outer Cyan Glow
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.9)';
+                ctx.lineWidth = 10 + Math.random() * 6;
+                ctx.lineJoin = 'miter';
+                ctx.stroke();
+
+                // Inner White Core
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                sparkFrames--;
+            }
+
+            // 4. Metal Spheres (Rendered last so spark is slightly behind/attached to edge)
+            drawMetallicSphere(cfg.largeCx, cfg.largeCy, cfg.largeSphereR, -30, -30);
+            drawMetallicSphere(currentSmallCx, cfg.smallCy, cfg.smallSphereR, -15, -15);
+
+            // 5. Charge Indicators (+ and -)
+            drawChargeSymbols();
+
+            requestAnimationFrame(animate);
+        }
+
+        // Init
+        resize();
+        requestAnimationFrame(animate);
+
+    </script>
+</body>
+</html>

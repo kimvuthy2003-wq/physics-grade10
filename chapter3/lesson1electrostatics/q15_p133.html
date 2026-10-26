@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ការពារគ្រោះថ្នាក់អគ្គិភ័យនៅស្ថានីយប្រេងឥន្ធនៈ</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            margin: 0;
+            background-color: #0f172a; 
+            color: #f8fafc;
+        }
+        .math-font { font-family: 'Lora', serif; }
+        
+        .step-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border-width: 1px;
+            border-color: #334155;
+            background-color: #1e293b;
+            color: #cbd5e1;
+        }
+        .step-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #60a5fa;
+            box-shadow: 0 4px 15px -3px rgba(59, 130, 246, 0.5);
+            transform: translateX(5px);
+        }
+        .step-btn:not(.active):hover {
+            background-color: #334155;
+            border-color: #475569;
+        }
+        .danger-btn.active {
+            background-color: #ef4444;
+            border-color: #f87171;
+            box-shadow: 0 4px 15px -3px rgba(239, 68, 68, 0.5);
+        }
+        .safe-btn.active {
+            background-color: #10b981;
+            border-color: #34d399;
+            box-shadow: 0 4px 15px -3px rgba(16, 185, 129, 0.5);
+        }
+        
+        #desktop-canvas {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            box-shadow: inset 10px 0 20px -10px rgba(0,0,0,0.5);
+        }
+        
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen overflow-x-hidden bg-slate-900">
+
+    <!-- Left UI Panel -->
+    <div class="w-full md:w-1/3 lg:w-[420px] h-auto md:h-screen bg-slate-900 shadow-2xl z-10 flex flex-col p-6 border-r border-slate-700 custom-scroll md:overflow-y-auto">
+        
+        <div class="mb-5">
+            <h1 class="text-xl font-bold text-white mb-1 leading-tight">អគ្គិសនីកម្មនៅស្ថានីយប្រេងឥន្ធនៈ</h1>
+            <p class="text-sm text-slate-400">Static Electricity Fire Hazard Simulator</p>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-6 shadow-md">
+            <div class="flex items-start gap-3">
+                <div class="text-lg font-bold math-font text-blue-400 mt-0.5">15.</div>
+                <div class="text-[14px] leading-relaxed text-slate-300">
+                    ក្នុងស្ថានីយចាក់សាំងដែលបម្រើសេវាកម្មដោយខ្លួនឯង នៅរដូវរងាដែលមានអាកាសធាតុស្ងួត វាងាយបង្កអគ្គិភ័យកើតឡើងដោយសារអគ្គិសនីកម្ម។ <br>
+                    <span class="text-blue-300 font-semibold">ចូរបកស្រាយថា ហេតុអ្វីបានជាដូច្នេះ?</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2">
+            <span>🕹️</span> ប៊ូតុងបញ្ជា (Controls):
+        </h3>
+        
+        <div class="flex flex-col space-y-2 mb-6">
+            <button id="btn-0" class="step-btn active text-left px-4 py-3 rounded-lg text-sm font-medium" onclick="setStep(0)">
+                ០. ស្ថានភាពដើម (អ្នកបើកបរក្នុងឡាន)
+            </button>
+            <button id="btn-1" class="step-btn text-left px-4 py-3 rounded-lg text-sm font-medium" onclick="setStep(1)">
+                ១. ចុះពីឡាន (កកិតបង្កើតបន្ទុក +)
+            </button>
+            <button id="btn-2" class="step-btn danger-btn text-left px-4 py-3 rounded-lg text-sm font-medium" onclick="setStep(2)">
+                ២. កាន់ទុយយោសាំងភ្លាមៗ (💥 គ្រោះថ្នាក់)
+            </button>
+            <button id="btn-3" class="step-btn safe-btn text-left px-4 py-3 rounded-lg text-sm font-medium" onclick="setStep(3)">
+                ៣. ប៉ះតួឡានសិនទើបកាន់ (✅ សុវត្ថិភាព)
+            </button>
+        </div>
+
+        <!-- MOBILE CANVAS: ទីតាំងបង្ហាញរូបភាពនៅលើទូរសព្ទ (នៅចន្លោះប៊ូតុង និងការពន្យល់) -->
+        <div id="mobile-canvas" class="block md:hidden w-full h-[400px] relative mb-6 rounded-xl overflow-hidden shadow-inner bg-slate-800 border border-slate-700">
+            <!-- រូបភាព Simulator នឹងលោតមកទីនេះពេលមើលលើទូរសព្ទ -->
+        </div>
+        
+        <div id="explanation-box" class="mt-auto bg-blue-900/30 border border-blue-800/50 rounded-xl p-4 text-sm text-blue-200 leading-relaxed transition-all duration-300">
+            <!-- Text updated via JS -->
+        </div>
+    </div>
+
+    <!-- DESKTOP CANVAS: ទីតាំងបង្ហាញរូបភាពនៅលើកុំព្យូទ័រ (ខាងស្តាំដៃ) -->
+    <div id="desktop-canvas" class="hidden md:block w-full md:h-screen md:flex-1 relative overflow-hidden">
+        <canvas id="simCanvas" class="block w-full h-full absolute inset-0"></canvas>
+    </div>
+
+    <script>
+        // --- Web Audio API Setup ---
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playZapSound() {
+            if(!audioCtx) return;
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(800, t);
+            osc.frequency.exponentialRampToValueAtTime(100, t + 0.1);
+            
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(0.5, t + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start(t);
+            osc.stop(t + 0.2);
+        }
+
+        function playFireSound() {
+            if(!audioCtx) return;
+            const t = audioCtx.currentTime;
+            const duration = 2.0;
+
+            const bufferSize = audioCtx.sampleRate * duration;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = buffer;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(400, t);
+            filter.frequency.linearRampToValueAtTime(1200, t + 0.2);
+            filter.frequency.linearRampToValueAtTime(300, t + duration);
+
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(1, t + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + duration);
+
+            noiseSource.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            noiseSource.start(t);
+        }
+
+        // --- Canvas Setup ---
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const explBox = document.getElementById('explanation-box');
+
+        let cw, ch, groundY;
+        let currentStep = 0;
+        let animationFrameId;
+        let lastTime = 0;
+
+        let car = { x: 0, width: 350, height: 120 };
+        let pump = { x: 0, width: 80, height: 180 };
+        let person = {
+            x: 0, targetX: 0, y: 0,
+            visible: false,
+            charges: 0, 
+            armAngle: Math.PI/2, targetArmAngle: Math.PI/2,
+            armLength: 40,
+            state: 'idle' 
+        };
+        
+        let vapor = { active: true, particles: [] };
+        let fire = { active: false, particles: [] };
+        let spark = { active: false, x: 0, y: 0, timer: 0 };
+
+        const explanations = [
+            "រថយន្តកំពុងចតនៅស្ថានីយ។ នៅរដូវរងា អាកាសធាតុស្ងួតខ្លាំង ធ្វើឱ្យសំណើមក្នុងខ្យល់មានកម្រិតទាប។ ខ្យល់ស្ងួតគឺជាអ៊ីសូឡង់ដ៏ល្អ ដែលមិនងាយបញ្ចេញបន្ទុកអគ្គិសនីចោលឡើយ។",
+            "ពេលអ្នកបើកបររំកិលខ្លួនចេញពីកៅអី ការកកិតរវាងសម្លៀកបំពាក់ និងពូកឡាន បានបង្កើតជាអគ្គិសនីកម្ម (Triboelectric effect) ធ្វើឱ្យរាងកាយអ្នកបើកបរផ្ទុកទៅដោយបន្ទុកអគ្គិសនីវិជ្ជមាន (+) យ៉ាងច្រើន។",
+            "គ្រោះថ្នាក់! ចំហាយសាំង (Vapor) តែងតែហុយចេញពីមាត់ធុង។ ពេលយកដៃដែលមានផ្ទុកបន្ទុកទៅកាន់ទុយយោសាំងដែលភ្ជាប់ម៉ាស កម្លាំងអគ្គិសនីបានបំបែកខ្យល់ បង្កើតជាផ្កាភ្លើងឆក់ (Spark) ដែលជាប្រភពកម្ដៅដុតរោលចំហាយសាំង បង្កជាអគ្គិភ័យភ្លាមៗ។",
+            "សុវត្ថិភាព! មុននឹងកាន់ទុយយោសាំង គាត់បានយកដៃទៅប៉ះតួឡាន (លោហៈ) នៅឆ្ងាយពីធុងសាំង។ បន្ទុកអគ្គិសនីនៅលើខ្លួនបានលោតផ្ទេរចូលតួឡានអស់ (Grounding)។ ក្រោយមក គាត់អាចចាក់សាំងដោយសុវត្ថិភាព គ្មានផ្កាភ្លើងទៀតទេ។"
+        ];
+
+        function resize() {
+            // កំណត់ទីតាំង Canvas ដោយស្វ័យប្រវត្តិ (Mobile vs Desktop)
+            const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+            const desktopContainer = document.getElementById('desktop-canvas');
+            const mobileContainer = document.getElementById('mobile-canvas');
+            
+            const activeContainer = isDesktop ? desktopContainer : mobileContainer;
+            
+            // ប្តូរទីតាំង HTML របស់ Canvas ចូលទៅក្នុងប្រអប់ដែលត្រូវនឹងទំហំអេក្រង់
+            if (canvas.parentElement !== activeContainer) {
+                activeContainer.appendChild(canvas);
+            }
+
+            cw = activeContainer.clientWidth || window.innerWidth - 48;
+            ch = activeContainer.clientHeight || 400;
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = cw * dpr;
+            canvas.height = ch * dpr;
+            ctx.scale(dpr, dpr);
+
+            groundY = ch * 0.8;
+            
+            // កែសម្រួលទំហំឡានដើម្បីឱ្យសមនឹងអេក្រង់ទូរសព្ទគ្រប់ប្រភេទ
+            if (cw < 450) {
+                car.width = 170;
+                car.x = 10;
+                pump.x = cw - 75;
+            } else if (cw < 768) {
+                car.width = 220;
+                car.x = 20;
+                pump.x = cw - 85;
+            } else {
+                car.width = 350;
+                car.x = cw * 0.3;
+                pump.x = cw * 0.75;
+            }
+            
+            person.y = groundY - 90;
+            if (currentStep === 0) {
+                person.x = car.x + (car.width/2);
+            }
+        }
+
+        function initVapor() {
+            for(let i=0; i<15; i++) {
+                vapor.particles.push({
+                    x: car.x + car.width - 20 + (Math.random()*40-20),
+                    y: groundY - 80 + (Math.random()*40-20),
+                    r: Math.random() * 15 + 10,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: Math.random() * -1 - 0.5,
+                    life: Math.random() * 100,
+                    maxLife: 100
+                });
+            }
+        }
+
+        function updateDrawVapor(dt) {
+            if(!vapor.active) return;
+            ctx.save();
+            ctx.globalCompositeOperation = 'screen';
+            vapor.particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= dt * 60;
+                
+                if (p.life <= 0) {
+                    p.x = car.x + car.width - 20 + (Math.random()*40-20);
+                    p.y = groundY - 80;
+                    p.life = p.maxLife;
+                }
+                
+                const alpha = Math.max(0, p.life / p.maxLife * 0.4);
+                ctx.fillStyle = `rgba(100, 200, 255, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+                ctx.fill();
+            });
+            
+            ctx.fillStyle = 'rgba(100, 200, 255, 0.7)';
+            ctx.font = '14px Kantumruy Pro';
+            ctx.fillText("ចំហាយសាំង (Vapor)", car.x + car.width + 10, groundY - 110);
+            ctx.restore();
+        }
+
+        function spawnFire() {
+            fire.active = true;
+            for(let i=0; i<100; i++) {
+                fire.particles.push({
+                    x: car.x + car.width - 20 + (Math.random()*60-30),
+                    y: groundY - 70 + (Math.random()*20),
+                    r: Math.random() * 20 + 10,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: Math.random() * -5 - 2,
+                    life: Math.random() * 100,
+                    color: Math.random() > 0.5 ? '#ef4444' : '#f59e0b'
+                });
+            }
+        }
+
+        function updateDrawFire(dt) {
+            if(!fire.active) return;
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            fire.particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.r *= 0.96;
+                p.life -= dt * 60;
+                
+                if(p.life > 0 && p.r > 1) {
+                    const alpha = Math.max(0, p.life / 100);
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = alpha;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            });
+            ctx.restore();
+        }
+
+        function drawScene() {
+            ctx.fillStyle = '#1e293b'; 
+            ctx.fillRect(0, groundY, cw, ch - groundY);
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(0, groundY); ctx.lineTo(cw, groundY); ctx.stroke();
+
+            ctx.fillStyle = '#b91c1c';
+            ctx.fillRect(pump.x, groundY - pump.height, pump.width, pump.height);
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(pump.x + 10, groundY - pump.height + 20, pump.width - 20, 40);
+            
+            ctx.strokeStyle = '#111827';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(pump.x + pump.width, groundY - pump.height + 80);
+            ctx.quadraticCurveTo(pump.x + pump.width + 30, groundY, pump.x + pump.width - 10, groundY - 60);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(pump.x - 15, groundY - 90, 20, 30);
+            
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = 'bold 16px Kantumruy Pro';
+            ctx.fillText("ម៉ាស៊ីនសាំង", pump.x + 5, groundY + 25);
+
+            ctx.fillStyle = '#475569'; 
+            ctx.beginPath();
+            ctx.roundRect(car.x, groundY - 50, car.width, 35, 10);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(car.x + (car.width * 0.17), groundY - 50);
+            ctx.lineTo(car.x + (car.width * 0.28), groundY - 100);
+            ctx.lineTo(car.x + (car.width * 0.62), groundY - 100);
+            ctx.lineTo(car.x + (car.width * 0.85), groundY - 50);
+            ctx.fill();
+            
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.moveTo(car.x + (car.width * 0.3), groundY - 90);
+            ctx.lineTo(car.x + (car.width * 0.45), groundY - 90);
+            ctx.lineTo(car.x + (car.width * 0.45), groundY - 50);
+            ctx.lineTo(car.x + (car.width * 0.21), groundY - 50);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(car.x + (car.width * 0.48), groundY - 90);
+            ctx.lineTo(car.x + (car.width * 0.61), groundY - 90);
+            ctx.lineTo(car.x + (car.width * 0.77), groundY - 50);
+            ctx.lineTo(car.x + (car.width * 0.48), groundY - 50);
+            ctx.fill();
+            
+            ctx.fillStyle = '#111827';
+            ctx.beginPath(); ctx.arc(car.x + (car.width * 0.17), groundY - 15, 20, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#94a3b8'; ctx.beginPath(); ctx.arc(car.x + (car.width * 0.17), groundY - 15, 8, 0, Math.PI*2); ctx.fill();
+            
+            ctx.fillStyle = '#111827';
+            ctx.beginPath(); ctx.arc(car.x + car.width - (car.width * 0.17), groundY - 15, 20, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#94a3b8'; ctx.beginPath(); ctx.arc(car.x + car.width - (car.width * 0.17), groundY - 15, 8, 0, Math.PI*2); ctx.fill();
+            
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(car.x + car.width - 40, groundY - 40, 15, 20);
+        }
+
+        function drawPerson() {
+            if(!person.visible) return;
+            
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            ctx.beginPath();
+            ctx.moveTo(person.x, person.y); 
+            ctx.lineTo(person.x, person.y + 40); 
+            ctx.stroke();
+            
+            ctx.fillStyle = '#e2e8f0';
+            ctx.beginPath();
+            ctx.arc(person.x, person.y - 15, 12, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(person.x, person.y + 40);
+            ctx.lineTo(person.x - 10, person.y + 80);
+            ctx.moveTo(person.x, person.y + 40);
+            ctx.lineTo(person.x + 10, person.y + 80);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(person.x, person.y + 10);
+            ctx.lineTo(person.x - 15, person.y + 35);
+            ctx.stroke();
+            
+            const handX = person.x + Math.cos(person.armAngle) * person.armLength;
+            const handY = person.y + 10 + Math.sin(person.armAngle) * person.armLength;
+            ctx.beginPath();
+            ctx.moveTo(person.x, person.y + 10);
+            ctx.lineTo(handX, handY);
+            ctx.stroke();
+
+            if (person.charges > 0) {
+                ctx.fillStyle = '#ef4444'; 
+                ctx.font = 'bold 18px Arial';
+                const chargePositions = [
+                    {dx: -15, dy: -25}, {dx: 15, dy: -20}, 
+                    {dx: -20, dy: 10}, {dx: 20, dy: 20},
+                    {dx: -15, dy: 50}, {dx: 15, dy: 60}
+                ];
+                for(let i=0; i<Math.min(person.charges, chargePositions.length); i++) {
+                    ctx.fillText('+', person.x + chargePositions[i].dx, person.y + chargePositions[i].dy);
+                }
+            }
+
+            if (spark.active && spark.timer > 0) {
+                ctx.strokeStyle = '#fbbf24'; 
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(handX, handY);
+                let cx = handX, cy = handY;
+                const steps = 3;
+                const dx = (spark.x - handX) / steps;
+                const dy = (spark.y - handY) / steps;
+                for(let i=0; i<steps; i++) {
+                    cx += dx + (Math.random()*10-5);
+                    cy += dy + (Math.random()*10-5);
+                    ctx.lineTo(cx, cy);
+                }
+                ctx.lineTo(spark.x, spark.y);
+                ctx.stroke();
+                
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.beginPath();
+                ctx.arc(spark.x, spark.y, spark.timer * 20, 0, Math.PI*2);
+                ctx.fill();
+            }
+        }
+
+        function triggerSpark(x, y, doFire) {
+            spark.active = true;
+            spark.x = x;
+            spark.y = y;
+            spark.timer = 1.0;
+            playZapSound();
+            
+            if(doFire) {
+                setTimeout(() => {
+                    spawnFire();
+                    playFireSound();
+                    person.charges = 0; 
+                }, 100);
+            } else {
+                person.charges = 0; 
+            }
+        }
+
+        function animate(timestamp) {
+            const dt = (timestamp - lastTime) / 1000 || 0;
+            lastTime = timestamp;
+
+            if(!cw) resize();
+            ctx.clearRect(0, 0, cw, ch);
+
+            person.x += (person.targetX - person.x) * (dt * 5);
+            person.armAngle += (person.targetArmAngle - person.armAngle) * (dt * 8);
+
+            if (spark.timer > 0) spark.timer -= dt * 5;
+            else spark.active = false;
+
+            const tankX = car.x + car.width;
+            const doorX = car.x + car.width/2;
+            
+            if (currentStep === 2 && person.state === 'moving_to_tank') {
+                if (Math.abs(person.x - tankX) < 50) {
+                    person.state = 'touching_nozzle';
+                    person.targetArmAngle = 0; 
+                    setTimeout(() => {
+                        if(currentStep === 2) { 
+                            triggerSpark(pump.x - 15, groundY - 75, true);
+                        }
+                    }, 300);
+                }
+            }
+            
+            if (currentStep === 3) {
+                if (person.state === 'moving_to_door') {
+                    if (Math.abs(person.x - doorX) < 5) {
+                        person.state = 'touching_door';
+                        person.targetArmAngle = Math.PI; 
+                        setTimeout(() => {
+                            if(currentStep === 3 && person.charges > 0) {
+                                triggerSpark(doorX - 20, groundY - 40, false);
+                                setTimeout(() => {
+                                    if(currentStep===3) {
+                                        person.state = 'moving_to_tank_safe';
+                                        person.targetX = tankX;
+                                        person.targetArmAngle = Math.PI/2;
+                                    }
+                                }, 1000);
+                            }
+                        }, 400);
+                    }
+                } else if (person.state === 'moving_to_tank_safe') {
+                    if (Math.abs(person.x - tankX) < 50) {
+                        person.state = 'touching_nozzle_safe';
+                        person.targetArmAngle = 0;
+                    }
+                }
+            }
+
+            drawScene();
+            updateDrawVapor(dt);
+            drawPerson();
+            updateDrawFire(dt);
+
+            if (currentStep === 1 && person.charges > 0) {
+                ctx.fillStyle = '#fbbf24';
+                ctx.font = '16px Kantumruy Pro';
+                ctx.fillText("រាងកាយផ្ទុកបន្ទុកវិជ្ជមាន (+)", person.x, person.y - 40);
+            }
+            if (currentStep === 3 && person.state === 'touching_door' && spark.active) {
+                ctx.fillStyle = '#10b981';
+                ctx.font = 'bold 18px Kantumruy Pro';
+                ctx.fillText("បញ្ជូនបន្ទុកចុះដីរួចរាល់", doorX, person.y - 40);
+            }
+            if (currentStep === 3 && person.state === 'touching_nozzle_safe') {
+                ctx.fillStyle = '#10b981';
+                ctx.font = 'bold 18px Kantumruy Pro';
+                ctx.fillText("✅ មានសុវត្ថិភាព", tankX + 10, person.y - 40);
+            }
+
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        window.setStep = function(step) {
+            initAudio(); 
+            currentStep = step;
+            explBox.innerHTML = explanations[step];
+            
+            document.querySelectorAll('.step-btn').forEach((btn, idx) => {
+                if(idx === step) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+
+            fire.active = false;
+            fire.particles = [];
+            spark.active = false;
+
+            const doorX = car.x + car.width/2;
+            const tankX = car.x + car.width;
+
+            switch(step) {
+                case 0:
+                    person.visible = false;
+                    person.x = doorX;
+                    person.targetX = doorX;
+                    person.charges = 0;
+                    person.state = 'idle';
+                    break;
+                case 1:
+                    person.visible = true;
+                    person.x = doorX;
+                    person.targetX = doorX + 40; 
+                    person.targetArmAngle = Math.PI/2;
+                    person.state = 'idle';
+                    person.charges = 0;
+                    let c = 0;
+                    const intId = setInterval(() => {
+                        c++;
+                        person.charges = c;
+                        if(c>=6) clearInterval(intId);
+                    }, 150);
+                    break;
+                case 2:
+                    person.visible = true;
+                    person.x = doorX + 40; 
+                    person.charges = 6;
+                    person.targetX = tankX;
+                    person.targetArmAngle = Math.PI/2;
+                    person.state = 'moving_to_tank';
+                    break;
+                case 3:
+                    person.visible = true;
+                    person.x = doorX + 80; 
+                    person.targetX = doorX; 
+                    person.targetArmAngle = Math.PI/2;
+                    person.charges = 6;
+                    person.state = 'moving_to_door';
+                    break;
+            }
+        };
+
+        window.addEventListener('resize', resize);
+        initVapor();
+        resize();
+        window.setStep(0); 
+        requestAnimationFrame(animate);
+
+    </script>
+</body>
+</html>

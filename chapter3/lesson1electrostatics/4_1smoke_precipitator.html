@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ម៉ាស៊ីនសម្អាតធូលីដោយអេឡិចត្រូស្តាទិច</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        body { 
+            font-family: 'Kantumruy Pro', sans-serif; 
+            background-color: #f8fafc; 
+            margin: 0; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
+        
+        .font-lora { font-family: 'Lora', serif; }
+        
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* Canvas scaling to fit container */
+        .canvas-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to bottom, #e0f2fe, #f1f5f9);
+            position: relative;
+            padding: 1rem;
+        }
+        
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            background-color: #ffffff;
+        }
+
+        /* Toggle Button Transitions */
+        .btn-toggle { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="flex flex-col lg:flex-row h-screen">
+
+    <!-- Left UI Panel -->
+    <div class="w-full lg:w-[450px] h-1/2 lg:h-full bg-white flex flex-col border-r border-slate-200 shadow-xl z-10 custom-scroll overflow-y-auto">
+        
+        <!-- Header -->
+        <div class="p-6 bg-slate-50 border-b border-slate-100">
+            <h1 class="text-xl font-bold text-slate-800 leading-snug">
+                ៤. ការអនុវត្តខ្លះៗនៃអេឡិចត្រូស្តាទិច<br>
+                <span class="text-blue-700 text-lg">៤.១. ការសម្អាតធាតុពុលចេញពីផ្សែងដែកនិងធូលី</span>
+            </h1>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6 flex-1 text-slate-700 text-sm leading-relaxed text-justify space-y-4">
+            <p>
+                ការអនុវត្តដ៏សំខាន់មួយគឺការសម្អាតផ្សែងលោហៈ និងធូលីចេញពីស្ថានីយថាមពលអគ្គិសនី ឬរោងចក្រ 
+                ដោយប្រើ <span class="font-bold text-slate-900">ម៉ាស៊ីនអេឡិចត្រូស្តាទិច (Electrostatic Precipitator)</span>។ 
+                ប្រសិនបើមិនអាចសម្អាតបានទេ ធូលីពុលទាំងនោះនឹងហើរចូលបរិយាកាស។
+            </p>
+
+            <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-4 shadow-sm">
+                <h2 class="font-bold text-blue-800 mb-2 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    គោលការណ៍ដំណើរការ
+                </h2>
+                <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                    <li>ផ្សែងកខ្វក់ហូរចូលពីខាងក្រោម កាត់តាមខ្សែលួសកណ្ដាលដែលមាន <span class="font-bold text-blue-600">បន្ទុកអវិជ្ជមាន (-)</span>។</li>
+                    <li>ខ្សែលួសបាញ់អេឡិចត្រុងទៅទាមធូលី ធ្វើឱ្យធូលីក្លាយជា <span class="font-bold text-blue-600">បន្ទុកអវិជ្ជមាន (-)</span>។</li>
+                    <li>ដោយកម្លាំងអគ្គិសនី ធូលី (-) ត្រូវបានទាញឱ្យទៅទាមស្អិតជាប់នឹងជញ្ជាំងសងខាងដែលមាន <span class="font-bold text-red-500">បន្ទុកវិជ្ជមាន (+)</span>។</li>
+                    <li>ខ្យល់ដែលហើរចេញទៅលើ ក្លាយជាខ្យល់ស្អាតគ្មានធូលី។</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="p-6 bg-slate-50 border-t border-slate-100">
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">ផ្ទាំងបញ្ជា (Controls)</h3>
+            
+            <div class="flex flex-col gap-3">
+                <!-- Power Toggle Button -->
+                <button id="toggleBtn" onclick="toggleMachine()" class="btn-toggle bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-lg shadow-md shadow-rose-200">
+                    <svg id="powerIcon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+                    <span id="toggleText">ម៉ាស៊ីនកំពុងបិទ (OFF)</span>
+                </button>
+                
+                <!-- Reset Dust Button -->
+                <button onclick="resetDust()" class="flex items-center justify-center gap-2 w-full py-3 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl font-medium transition-colors shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                    សម្អាតធូលីចេញពីជញ្ជាំង (Reset)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Canvas Area -->
+    <div class="canvas-container h-1/2 lg:h-full">
+        <!-- Increased internal resolution for crisper rendering of large text -->
+        <canvas id="simCanvas" width="800" height="1000"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const toggleText = document.getElementById('toggleText');
+
+        // Global State
+        let isMachineOn = false;
+        let particles = [];
+        let animationFrameId;
+
+        // Configuration Parameters
+        const cfg = {
+            cw: canvas.width,
+            ch: canvas.height,
+            wallWidth: 60,        // Slightly wider walls
+            leftWallX: 180,
+            rightWallX: 620,
+            wireX: 400,
+            spawnRate: 4,         // Dust particles per frame
+            chargeRadius: 100,    // Distance from wire to become charged
+            baseVy: -3.5,         // Upward speed
+            attractionForce: 0.35 // Horizontal pull strength
+        };
+
+        // Particle Class
+        class Particle {
+            constructor() {
+                // Spawn randomly at the bottom entrance
+                this.x = (cfg.cw / 2) - 100 + Math.random() * 200;
+                this.y = cfg.ch + 20 + Math.random() * 50;
+                this.radius = 2 + Math.random() * 3.5;
+                
+                // Initial Velocity
+                this.vx = (Math.random() - 0.5) * 1.5; // Slight horizontal wiggle
+                this.vy = cfg.baseVy - Math.random() * 2.0;
+                
+                // State properties
+                this.isCharged = false;
+                this.isStuck = false;
+                this.color = '#64748b'; // Default gray for neutral dust
+            }
+
+            update() {
+                if (this.isStuck) return;
+
+                // Move position
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Add slight random Brownian motion for realism
+                if (!this.isStuck) {
+                    this.vx += (Math.random() - 0.5) * 0.4;
+                    
+                    // Cap horizontal speed if not pulled by electric force
+                    if (!this.isCharged) {
+                        this.vx = Math.max(-2.0, Math.min(2.0, this.vx));
+                    }
+                }
+
+                // Physics logic if Machine is ON
+                if (isMachineOn) {
+                    if (!this.isCharged && !this.isStuck) {
+                        // Check if close enough to the center wire to get charged
+                        const distToWire = Math.abs(this.x - cfg.wireX);
+                        if (distToWire < cfg.chargeRadius && this.y > 150 && this.y < cfg.ch - 150) {
+                            this.isCharged = true;
+                            this.color = '#3b82f6'; // Turn blue to indicate negative charge
+                        }
+                    }
+
+                    // Apply electric attraction force towards the positive walls
+                    if (this.isCharged && !this.isStuck) {
+                        if (this.x < cfg.wireX) {
+                            this.vx -= cfg.attractionForce; // Pull left
+                        } else {
+                            this.vx += cfg.attractionForce; // Pull right
+                        }
+                    }
+                }
+
+                // Collision detection with the walls
+                const leftBoundary = cfg.leftWallX + cfg.wallWidth + this.radius;
+                const rightBoundary = cfg.rightWallX - this.radius;
+
+                if (this.x <= leftBoundary) {
+                    this.x = leftBoundary;
+                    if (isMachineOn && this.isCharged) {
+                        this.isStuck = true; // Stick to the wall
+                        this.vx = 0;
+                        this.vy = 0;
+                    } else {
+                        this.vx *= -0.8; // Bounce off if machine is off or neutral
+                    }
+                }
+
+                if (this.x >= rightBoundary) {
+                    this.x = rightBoundary;
+                    if (isMachineOn && this.isCharged) {
+                        this.isStuck = true; // Stick to the wall
+                        this.vx = 0;
+                        this.vy = 0;
+                    } else {
+                        this.vx *= -0.8; // Bounce off
+                    }
+                }
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function drawMachine() {
+            // Fill background inside chimney
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(cfg.leftWallX + cfg.wallWidth, 0, (cfg.rightWallX - cfg.leftWallX - cfg.wallWidth), cfg.ch);
+
+            // Draw Electric field glow effect if ON
+            if (isMachineOn) {
+                const gradient = ctx.createLinearGradient(cfg.wireX - 100, 0, cfg.wireX + 100, 0);
+                gradient.addColorStop(0, 'rgba(59, 130, 246, 0)');
+                gradient.addColorStop(0.5, 'rgba(59, 130, 246, 0.15)');
+                gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(cfg.wireX - 100, 0, 200, cfg.ch);
+            }
+
+            // Draw Left and Right Walls
+            ctx.fillStyle = '#94a3b8'; // slate-400
+            ctx.fillRect(cfg.leftWallX, 0, cfg.wallWidth, cfg.ch);
+            ctx.fillRect(cfg.rightWallX, 0, cfg.wallWidth, cfg.ch);
+
+            // Draw Center High-Voltage Wire
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(cfg.wireX, 0);
+            ctx.lineTo(cfg.wireX, cfg.ch);
+            ctx.stroke();
+
+            // Draw "+" and "-" charges if ON
+            if (isMachineOn) {
+                ctx.font = 'bold 36px Arial'; // MUCH LARGER charge signs
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                // Positive (+) on walls
+                ctx.fillStyle = '#ef4444'; // Red
+                for (let y = 80; y < cfg.ch; y += 120) {
+                    ctx.fillText('+', cfg.leftWallX + cfg.wallWidth / 2, y);
+                    ctx.fillText('+', cfg.rightWallX + cfg.wallWidth / 2, y);
+                }
+
+                // Negative (-) on center wire
+                ctx.fillStyle = '#3b82f6'; // Blue
+                for (let y = 140; y < cfg.ch; y += 120) {
+                    ctx.fillText('-', cfg.wireX, y);
+                }
+            }
+
+            // ==========================================
+            // CRITICAL CHANGE: VERY LARGE FONT FOR LABELS
+            // ==========================================
+            ctx.font = 'bold 28px "Kantumruy Pro"'; // Extremely visible font size
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'alphabetic';
+            
+            // Bottom Label (Dirty Gas Entry)
+            ctx.fillStyle = '#475569'; // slate-600
+            ctx.fillText('↑ ផ្សែងនិងធូលីចូល (Dirty Gas) ↑', cfg.cw / 2, cfg.ch - 40);
+            
+            // Top Label (Clean vs Dirty Exit)
+            if (isMachineOn) {
+                ctx.fillStyle = '#059669'; // emerald-600 (dark green for high contrast)
+                ctx.fillText('↑ ខ្យល់ស្អាតចេញ (Clean Air) ↑', cfg.cw / 2, 50);
+            } else {
+                ctx.fillStyle = '#475569'; // slate-600
+                ctx.fillText('↑ ផ្សែងនិងធូលីចេញ ↑', cfg.cw / 2, 50);
+            }
+        }
+
+        function gameLoop() {
+            // Clear entire canvas
+            ctx.clearRect(0, 0, cfg.cw, cfg.ch);
+
+            // Draw machine structures and LARGE TEXT
+            drawMachine();
+
+            // Spawn new particles continuously
+            for (let i = 0; i < cfg.spawnRate; i++) {
+                particles.push(new Particle());
+            }
+
+            // Update and render particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw(ctx);
+
+                // Remove particles that floated off the top of the screen
+                if (p.y < -30) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            // Cap the maximum number of particles to maintain performance
+            if (particles.length > 2000) {
+                particles.splice(0, particles.length - 2000);
+            }
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // --- UI Interactions ---
+
+        function toggleMachine() {
+            isMachineOn = !isMachineOn;
+            
+            if (isMachineOn) {
+                // Change button to ON state (Green)
+                toggleBtn.className = "btn-toggle bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-lg shadow-md shadow-emerald-200";
+                toggleText.innerText = 'ម៉ាស៊ីនកំពុងដំណើរការ (ON)';
+            } else {
+                // Change button to OFF state (Red)
+                toggleBtn.className = "btn-toggle bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-lg shadow-md shadow-rose-200";
+                toggleText.innerText = 'ម៉ាស៊ីនកំពុងបិទ (OFF)';
+                
+                // When turned off, charged floating particles neutralize
+                particles.forEach(p => {
+                    if (!p.isStuck) {
+                        p.isCharged = false;
+                        p.color = '#64748b'; // Revert back to gray
+                    }
+                });
+            }
+        }
+
+        function resetDust() {
+            // Keep only particles that are NOT stuck to the walls
+            particles = particles.filter(p => !p.isStuck);
+        }
+
+        // Wait for the font to load before starting the render to ensure the large text is correct immediately.
+        document.fonts.ready.then(() => {
+            gameLoop();
+        });
+
+    </script>
+</body>
+</html>

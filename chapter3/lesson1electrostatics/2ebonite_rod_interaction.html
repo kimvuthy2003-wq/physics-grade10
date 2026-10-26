@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D ពិសោធន៍៖ អន្តរកម្មរវាងបន្ទុកអគ្គិសនី</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS Styles -->
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .math-font { font-family: 'Lora', serif; }
+
+        .canvas-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* Conclusion Box Styling */
+        .conclusion-box {
+            background: linear-gradient(to right, #ecfdf5, #f0fdf4);
+            border-left: 6px solid #10b981;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen flex items-center justify-center">
+
+    <div class="max-w-4xl w-full bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+        
+        <!-- Header -->
+        <div class="bg-slate-800 text-white p-5 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <h1 class="text-xl md:text-2xl font-bold flex items-center gap-3">
+                <span class="text-amber-400">⚡</span> អន្តរកម្មរវាងបន្ទុកអគ្គិសនី
+            </h1>
+            
+            <!-- Scenario Selector -->
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <label for="scenarioSelect" class="text-sm text-slate-300 whitespace-nowrap">ជ្រើសរើសករណី៖</label>
+                <select id="scenarioSelect" onchange="changeScenario()" class="bg-slate-700 text-white border border-slate-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none transition-colors">
+                    <option value="ebonite_ebonite">១. អេបូនីត និង អេបូនីត ( - និង - )</option>
+                    <option value="glass_glass">២. កែវ និង កែវ ( + និង + )</option>
+                    <option value="glass_ebonite">៣. កែវ និង អេបូនីត ( + និង - )</option>
+                </select>
+            </div>
+        </div>
+
+
+        <!-- Conclusion Box -->
+        <div class="p-6 pb-2">
+            <div class="conclusion-box rounded-xl p-5 shadow-sm border border-emerald-100">
+                <h3 class="text-emerald-700 font-bold text-lg mb-2 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    សន្និដ្ឋាន
+                </h3>
+                <p class="text-slate-700 leading-relaxed text-[15px] md:text-base">
+                    តាមពិសោធន៍នេះ គេអាចសន្និដ្ឋានបានថា ចង្កឹះផ្ទុកបន្ទុកអគ្គិសនីមានសញ្ញា<span class="font-bold text-red-600">ដូចគ្នា ច្រានគ្នាចេញ</span>។ ចំណែកចង្កឹះដែលផ្ទុកបន្ទុកអគ្គិសនីមានសញ្ញា<span class="font-bold text-blue-600">ផ្ទុយគ្នា ទាញគ្នាចូល</span>។ នេះបញ្ជាក់ថាបន្ទុកអគ្គិសនីមានពីរប្រភេទគឺ បន្ទុកអគ្គិសនីវិជ្ជមាន និងបន្ទុកអគ្គិសនីអវិជ្ជមាន។
+                </p>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="px-6 py-3 flex items-center gap-2">
+            <div class="w-3 h-3 rounded-full bg-slate-400" id="status-indicator"></div>
+            <span id="status-text" class="font-medium text-slate-700">
+                ស្ថានភាព៖ រង់ចាំការត្រដុស
+            </span>
+        </div>
+
+        <!-- Canvas Area -->
+        <div class="px-6 pb-6 flex justify-center">
+            <div class="canvas-container border border-slate-300">
+                <!-- Canvas 800x450 (16:9 ratio) -->
+                <canvas id="simCanvas" width="800" height="450"></canvas>
+            </div>
+        </div>
+
+
+        <!-- Controls (Bottom) -->
+        <div class="p-6 bg-slate-50 border-t border-slate-200 flex flex-wrap justify-center gap-4">
+            <button id="btn-rub" onclick="startRubbing()" class="flex-1 min-w-[200px] flex justify-center items-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all shadow-md shadow-blue-200 hover:-translate-y-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span>១. ត្រដុសបញ្ចូលបន្ទុក</span>
+            </button>
+            
+            <button id="btn-bring" onclick="startInteraction()" disabled class="flex-1 min-w-[200px] flex justify-center items-center gap-2 px-6 py-3.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-semibold transition-all shadow-md shadow-amber-200 hover:-translate-y-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                <span>២. ដាក់ក្បែរគ្នា</span>
+            </button>
+
+            <button id="btn-reset" onclick="resetSim()" class="flex-none flex justify-center items-center gap-2 px-6 py-3.5 bg-white hover:bg-slate-100 border-2 border-slate-300 text-slate-700 rounded-xl font-semibold transition-all shadow-sm hover:-translate-y-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                <span>ត្រឡប់ដើម</span>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const cw = canvas.width;
+        const ch = canvas.height;
+
+        // UI Elements
+        const btnRub = document.getElementById('btn-rub');
+        const btnBring = document.getElementById('btn-bring');
+        const statusText = document.getElementById('status-text');
+        const statusIndicator = document.getElementById('status-indicator');
+        const scenarioSelect = document.getElementById('scenarioSelect');
+
+        // State Machine
+        // 0: Idle, 1: Rubbing, 2: Charged, 3: Moving close, 4: Interacting (Swinging)
+        let state = 0;
+        let timer = 0;
+        let chargeLevel = 0; // 0 to 1
+        let reqAnimFrame;
+        let lastTime = 0;
+
+        // Scenarios Configurations
+        const SCENARIOS = {
+            'ebonite_ebonite': { hangType: 'ebonite', handType: 'ebonite', interaction: 'repel' },
+            'glass_glass': { hangType: 'glass', handType: 'glass', interaction: 'repel' },
+            'glass_ebonite': { hangType: 'glass', handType: 'ebonite', interaction: 'attract' } // Hanging Glass, Hand Ebonite
+        };
+        
+        let currentScenario = 'ebonite_ebonite';
+
+
+        // Base Coordinates
+        const PIVOT_X = 250;
+        const PIVOT_Y = 50;
+        const STRING_LEN = 180;
+        const HAND_ROD_START_X = 700;
+        const HAND_ROD_TARGET_X = 430; // Close enough to interact
+        
+        // Physics Objects
+        let hangingRod = {
+            width: 140,
+            height: 20,
+            type: 'ebonite', // 'ebonite' | 'glass'
+            angle: 0, // Radian swing angle
+            targetAngle: 0
+        };
+
+        let handRod = {
+            width: 180,
+            height: 20,
+            x: HAND_ROD_START_X,
+            y: PIVOT_Y + STRING_LEN,
+            type: 'ebonite'
+        };
+
+        let cloth1 = { x: PIVOT_X, y: PIVOT_Y + STRING_LEN, visible: false, color: '#f59e0b' }; // Amber (Wool)
+        let cloth2 = { x: HAND_ROD_START_X - 20, y: PIVOT_Y + STRING_LEN, visible: false, color: '#f59e0b' }; 
+
+        // --- Helper Drawing Functions ---
+
+        function drawStand() {
+            ctx.fillStyle = '#64748b'; // slate-500
+            // Base
+            ctx.fillRect(PIVOT_X - 60, ch - 30, 120, 20);
+            ctx.fillRect(PIVOT_X - 50, ch - 40, 100, 10);
+            // Vertical Pole
+            ctx.fillRect(PIVOT_X - 8, PIVOT_Y - 20, 16, ch - 30 - (PIVOT_Y - 20));
+            // Horizontal Bar
+            ctx.fillRect(PIVOT_X - 10, PIVOT_Y - 10, 80, 12);
+            // Knob
+            ctx.beginPath();
+            ctx.arc(PIVOT_X - 10, PIVOT_Y - 4, 8, 0, Math.PI*2);
+            ctx.fillStyle = '#475569';
+            ctx.fill();
+        }
+
+        function getRodColors(type) {
+            if (type === 'ebonite') {
+                return { fill: '#1e293b', border: '#0f172a', chargeType: '-', chargeColor: '#ffffff' }; // Dark
+            } else {
+                return { fill: 'rgba(186, 230, 253, 0.7)', border: '#38bdf8', chargeType: '+', chargeColor: '#ef4444' }; // Glass
+            }
+        }
+
+        function drawCharges(ctx, width, config, opacity) {
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = config.chargeColor;
+            ctx.font = 'bold 20px Lora';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const step = 30;
+            for(let ix = -width/2 + 20; ix <= width/2 - 20; ix += step) {
+                ctx.fillText(config.chargeType, ix, 0);
+            }
+            ctx.restore();
+        }
+
+        function drawRod(x, y, width, height, type, angle = 0) {
+            ctx.save();
+            ctx.translate(x, y);
+            // Swing rotation is usually minimal for the rod itself if suspended by center, 
+            // but let's keep it horizontal for clean visuals, just translating it.
+            // ctx.rotate(angle); 
+            
+            const config = getRodColors(type);
+            
+            // Draw Body
+            ctx.fillStyle = config.fill;
+            ctx.strokeStyle = config.border;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(-width/2, -height/2, width, height, 10);
+            ctx.fill();
+            if (type === 'glass') ctx.stroke();
+
+            // Highlight
+            if (type === 'ebonite') {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.beginPath();
+                ctx.roundRect(-width/2 + 5, -height/2 + 2, width - 10, 5, 3);
+                ctx.fill();
+            }
+
+            // Draw Charges
+            if (chargeLevel > 0) {
+                drawCharges(ctx, width, config, chargeLevel);
+            }
+            
+            ctx.restore();
+        }
+
+        function drawHand(x, y) {
+            // Simple sleeve/cuff representing a hand holding the right rod
+            ctx.save();
+            ctx.translate(x + 50, y);
+            ctx.fillStyle = '#fcd34d'; // Skin tone
+            ctx.beginPath();
+            ctx.roundRect(-20, -15, 40, 30, 8);
+            ctx.fill();
+            
+            ctx.fillStyle = '#3b82f6'; // Blue Sleeve
+            ctx.beginPath();
+            ctx.roundRect(10, -20, 80, 40, 5);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawCloth(x, y, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            // Wavy shape
+            ctx.moveTo(-40, -20);
+            ctx.quadraticCurveTo(0, -30, 40, -20);
+            ctx.quadraticCurveTo(50, 0, 40, 20);
+            ctx.quadraticCurveTo(0, 30, -40, 20);
+            ctx.quadraticCurveTo(-50, 0, -40, -20);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawArrow(fromX, fromY, toX, toY) {
+            const headlen = 12; 
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.strokeStyle = '#ef4444'; // Red force vector
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+
+        function render() {
+            ctx.clearRect(0, 0, cw, ch);
+            drawStand();
+
+            // Calculate Hanging Rod Position based on pendulum angle
+            const hx = PIVOT_X + STRING_LEN * Math.sin(hangingRod.angle);
+            const hy = PIVOT_Y + STRING_LEN * Math.cos(hangingRod.angle);
+
+            // Draw String
+            ctx.beginPath();
+            ctx.moveTo(PIVOT_X, PIVOT_Y);
+            ctx.lineTo(hx, hy);
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw Hanging Rod
+            drawRod(hx, hy, hangingRod.width, hangingRod.height, hangingRod.type);
+
+            // Draw Hand Rod
+            drawRod(handRod.x, handRod.y, handRod.width, handRod.height, handRod.type);
+            drawHand(handRod.x, handRod.y);
+
+            // Draw Cloths
+            if (state === 1) {
+                if (cloth1.visible) drawCloth(cloth1.x, cloth1.y, cloth1.color);
+                if (cloth2.visible) drawCloth(cloth2.x, cloth2.y, cloth2.color);
+            }
+
+            // Draw Force Vectors
+            if (state === 4) {
+                // Vector opacity based on angle reaching target
+                const progress = Math.min(1, Math.abs(hangingRod.angle) / Math.abs(hangingRod.targetAngle));
+                ctx.globalAlpha = progress;
+                
+                const interaction = SCENARIOS[currentScenario].interaction;
+                if (interaction === 'repel') {
+                    // Repel arrows pointing outwards
+                    drawArrow(hx - 20, hy, hx - 80, hy);
+                    drawArrow(handRod.x - 20, handRod.y, handRod.x + 40, handRod.y);
+                } else {
+                    // Attract arrows pointing inwards
+                    drawArrow(hx + 20, hy, hx + 80, hy);
+                    drawArrow(handRod.x - 60, handRod.y, handRod.x - 120, handRod.y);
+                }
+                ctx.globalAlpha = 1.0;
+                
+                // Labels F
+                ctx.fillStyle = '#ef4444';
+                ctx.font = 'italic bold 18px Lora';
+                if (interaction === 'repel') {
+                    ctx.fillText('F', hx - 80, hy - 15);
+                    ctx.fillText('F', handRod.x + 40, handRod.y - 15);
+                } else {
+                    ctx.fillText('F', hx + 80, hy - 15);
+                    ctx.fillText('F', handRod.x - 120, handRod.y - 15);
+                }
+            }
+        }
+
+        function update(dt) {
+            if (state === 1) {
+                // Rubbing Animation
+                timer += dt;
+                cloth1.x = (PIVOT_X) + Math.sin(timer * 15) * 40;
+                cloth2.x = (HAND_ROD_START_X - 20) + Math.sin(timer * 15 + Math.PI) * 40;
+                
+                chargeLevel = Math.min(1, timer / 2); // 2s to fully charge
+                
+                if (timer > 2.5) {
+                    setStatus(2); // Charged
+                }
+            }
+            
+            if (state === 3) {
+                // Bringing Hand Rod Close
+                handRod.x += (HAND_ROD_TARGET_X - handRod.x) * 4 * dt;
+                
+                if (Math.abs(handRod.x - HAND_ROD_TARGET_X) < 2) {
+                    handRod.x = HAND_ROD_TARGET_X;
+                    setStatus(4); // Interacting
+                }
+            }
+
+            if (state === 4) {
+                // Swinging hanging rod
+                const interaction = SCENARIOS[currentScenario].interaction;
+                // Repel swings left (negative angle), Attract swings right (positive angle)
+                hangingRod.targetAngle = (interaction === 'repel') ? -0.2 : 0.2;
+                
+                // Spring-like interpolation for smooth swing
+                hangingRod.angle += (hangingRod.targetAngle - hangingRod.angle) * 3 * dt;
+            }
+        }
+
+        function gameLoop(timestamp) {
+            const dt = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+
+            if (dt < 0.1) {
+                update(dt);
+                render();
+            }
+            reqAnimFrame = requestAnimationFrame(gameLoop);
+        }
+
+        // --- Interaction Logic ---
+
+        function setStatus(s) {
+            state = s;
+            if (s === 0) {
+                statusText.innerText = "ស្ថានភាព៖ រង់ចាំការត្រដុស";
+                statusIndicator.className = "w-3 h-3 rounded-full bg-slate-400";
+                btnRub.disabled = false;
+                btnBring.disabled = true;
+            } else if (s === 1) {
+                statusText.innerText = "ស្ថានភាព៖ កំពុងត្រដុសបង្កើតបន្ទុក...";
+                statusIndicator.className = "w-3 h-3 rounded-full bg-blue-500 animate-pulse";
+                btnRub.disabled = true;
+                btnBring.disabled = true;
+            } else if (s === 2) {
+                statusText.innerText = "ស្ថានភាព៖ ចង្កឹះមានបន្ទុកអគ្គិសនី (ត្រៀមដាក់ក្បែរគ្នា)";
+                statusIndicator.className = "w-3 h-3 rounded-full bg-amber-500 animate-pulse";
+                btnRub.disabled = true;
+                btnBring.disabled = false;
+            } else if (s === 3) {
+                statusText.innerText = "ស្ថានភាព៖ កំពុងផ្លាស់ទីចង្កឹះ...";
+                statusIndicator.className = "w-3 h-3 rounded-full bg-green-500 animate-pulse";
+                btnRub.disabled = true;
+                btnBring.disabled = true;
+            } else if (s === 4) {
+                const interactText = SCENARIOS[currentScenario].interaction === 'repel' ? 'ច្រានគ្នាចេញ' : 'ទាញគ្នាចូល';
+                statusText.innerHTML = `ស្ថានភាព៖ មានកម្លាំងអគ្គិសនី <strong class="${SCENARIOS[currentScenario].interaction === 'repel' ? 'text-red-600' : 'text-blue-600'}">${interactText}</strong>`;
+                statusIndicator.className = "w-3 h-3 rounded-full bg-green-500";
+                btnRub.disabled = true;
+                btnBring.disabled = true;
+            }
+        }
+
+        function changeScenario() {
+            currentScenario = scenarioSelect.value;
+            const config = SCENARIOS[currentScenario];
+            
+            hangingRod.type = config.hangType;
+            handRod.type = config.handType;
+            
+            // Set cloth colors appropriately (Silk for glass, Wool for ebonite)
+            cloth1.color = (config.hangType === 'glass') ? '#fbbf24' : '#f59e0b'; // Lighter for silk
+            cloth2.color = (config.handType === 'glass') ? '#fbbf24' : '#f59e0b';
+
+            resetSim();
+        }
+
+        function startRubbing() {
+            if (state !== 0) return;
+            cloth1.visible = true;
+            cloth2.visible = true;
+            timer = 0;
+            setStatus(1);
+        }
+
+        function startInteraction() {
+            if (state !== 2) return;
+            cloth1.visible = false;
+            cloth2.visible = false;
+            setStatus(3);
+        }
+
+        function resetSim() {
+            cancelAnimationFrame(reqAnimFrame);
+            
+            hangingRod.angle = 0;
+            hangingRod.targetAngle = 0;
+            
+            handRod.x = HAND_ROD_START_X;
+            
+            cloth1.visible = false;
+            cloth2.visible = false;
+            cloth1.x = PIVOT_X;
+            cloth2.x = HAND_ROD_START_X - 20;
+
+            chargeLevel = 0;
+            timer = 0;
+            
+            setStatus(0);
+            
+            lastTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Init on load
+        window.onload = () => {
+            changeScenario(); // Initialize based on dropdown
+        };
+
+    </script>
+</body>
+</html>

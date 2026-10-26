@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>មេរៀនទី១ ជំពូក៣ ការបង្កើតបន្ទុកដោយការកកិត</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS Styles -->
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .math-font { font-family: 'Lora', serif; }
+
+        .canvas-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* Button States */
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen flex items-center justify-center">
+
+    <div class="max-w-4xl w-full bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+        
+        <!-- Header -->
+        <div class="bg-slate-800 text-white p-6 border-b border-slate-700 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold flex items-center gap-3">
+                <span class="text-amber-400">⚡</span> ពិសោធន៍៖ ការបង្កើតបន្ទុកដោយការកកិត
+            </h1>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-blue-500 animate-pulse" id="status-indicator"></div>
+                <span id="status-text" class="font-medium text-slate-700 text-base md:text-lg">
+                    ស្ថានភាព៖ ចង្កឹះគ្មានបន្ទុកអគ្គិសនី (អព្យាក្រឹត)
+                </span>
+            </div>
+            <div class="text-sm text-slate-500 hidden md:block">អនុវត្តតាមជំហាន ១ ទៅ ២</div>
+        </div>
+
+        <!-- Canvas Area -->
+        <div class="p-6 flex justify-center bg-white">
+            <div class="canvas-container border border-slate-300 shadow-sm">
+                <!-- Canvas 800x450 (16:9 ratio) -->
+                <canvas id="simCanvas" width="800" height="450"></canvas>
+            </div>
+        </div>
+
+        <!-- Controls (Bottom) -->
+        <div class="p-6 bg-slate-50 border-t border-slate-200 flex flex-wrap justify-center gap-4">
+            <button id="btn-rub" onclick="startRubbing()" class="flex-1 min-w-[200px] flex justify-center items-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all shadow-md shadow-blue-200 hover:-translate-y-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span>១. ត្រដុសបញ្ចូលបន្ទុក</span>
+            </button>
+            
+            <button id="btn-attract" onclick="startAttracting()" disabled class="flex-1 min-w-[200px] flex justify-center items-center gap-2 px-6 py-3.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-semibold transition-all shadow-md shadow-amber-200 hover:-translate-y-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="m17 17-5 5-5-5"></path><path d="m5 7 5-5 5 5"></path></svg>
+                <span>២. ដាក់ក្បែរក្រដាស</span>
+            </button>
+
+            <button id="btn-reset" onclick="resetSim()" class="flex-none flex justify-center items-center gap-2 px-6 py-3.5 bg-white hover:bg-slate-100 border-2 border-slate-300 text-slate-700 rounded-xl font-semibold transition-all shadow-sm hover:-translate-y-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                <span>ត្រឡប់ដើម</span>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const cw = canvas.width;
+        const ch = canvas.height;
+
+        // UI Elements
+        const btnRub = document.getElementById('btn-rub');
+        const btnAttract = document.getElementById('btn-attract');
+        const statusText = document.getElementById('status-text');
+        const statusIndicator = document.getElementById('status-indicator');
+
+        // Animation / State variables
+        let reqAnimFrame;
+        let lastTime = 0;
+        
+        // State Machine
+        // 0 = Initial (Neutral)
+        // 1 = Rubbing
+        // 2 = Charged (Ready to move)
+        // 3 = Moving & Attracting
+        // 4 = End (Papers stuck)
+        let state = 0; 
+        
+        let timer = 0;
+        let chargeLevel = 0; // 0 to 1
+
+        // --- Physics Objects ---
+        
+        // Ebonite Rod
+        const rod = {
+            width: 250,
+            height: 30,
+            x: cw / 2,
+            y: ch / 3, // Starting high up
+            targetY: ch / 3,
+            color: '#1e293b' // slate-800
+        };
+
+        // Wool Cloth
+        const cloth = {
+            width: 140,
+            height: 80,
+            x: cw / 2,
+            y: ch / 3,
+            targetX: cw / 2,
+            targetY: ch / 3,
+            color: '#f59e0b', // amber-500
+            visible: true
+        };
+
+        // Paper Scraps Class
+        class Paper {
+            constructor() {
+                // Spawn randomly on the table (center bottom)
+                this.x = cw/2 - 100 + Math.random() * 200;
+                this.y = ch - 30; // Resting on table
+                this.vx = 0;
+                this.vy = 0;
+                this.size = 8 + Math.random() * 8;
+                this.angle = Math.random() * Math.PI * 2;
+                this.rotSpeed = (Math.random() - 0.5) * 0.2;
+                this.stuck = false;
+                this.offsetX = 0; // Relative to rod when stuck
+                this.offsetY = 0;
+                this.color = ['#ffffff', '#f8fafc', '#f1f5f9', '#e2e8f0'][Math.floor(Math.random()*4)];
+            }
+            
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.fillStyle = this.color;
+                ctx.strokeStyle = '#cbd5e1'; // slate-300
+                ctx.lineWidth = 1;
+                
+                // Draw irregular polygon
+                ctx.beginPath();
+                ctx.moveTo(-this.size/2, -this.size/2);
+                ctx.lineTo(this.size/2, -this.size/2 + (Math.random()*2-1));
+                ctx.lineTo(this.size/2 - (Math.random()*2-1), this.size/2);
+                ctx.lineTo(-this.size/2, this.size/2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.restore();
+            }
+        }
+
+        let papers = [];
+
+        // --- Core Functions ---
+
+        function initPapers() {
+            papers = [];
+            for(let i = 0; i < 30; i++) {
+                papers.push(new Paper());
+            }
+        }
+
+        function setStatus(s) {
+            state = s;
+            if (s === 0) {
+                statusText.innerText = "ស្ថានភាព៖ ចង្កឹះគ្មានបន្ទុកអគ្គិសនី (អព្យាក្រឹត)";
+                statusIndicator.className = "w-3 h-3 rounded-full bg-slate-400";
+                btnRub.disabled = false;
+                btnAttract.disabled = true;
+            } else if (s === 1) {
+                statusText.innerText = "ស្ថានភាព៖ កំពុងត្រដុសបញ្ចូលបន្ទុកអគ្គិសនី...";
+                statusIndicator.className = "w-3 h-3 rounded-full bg-blue-500 animate-pulse";
+                btnRub.disabled = true;
+                btnAttract.disabled = true;
+            } else if (s === 2) {
+                statusText.innerText = "ស្ថានភាព៖ ចង្កឹះអេបូនីតមានបន្ទុកអវិជ្ជមាន (-)";
+                statusIndicator.className = "w-3 h-3 rounded-full bg-amber-500 animate-pulse";
+                btnRub.disabled = true;
+                btnAttract.disabled = false; // Ready to attract
+            } else if (s === 3) {
+                statusText.innerText = "ស្ថានភាព៖ កំពុងទាក់ទាញកម្ទេចក្រដាស";
+                statusIndicator.className = "w-3 h-3 rounded-full bg-green-500 animate-pulse";
+                btnRub.disabled = true;
+                btnAttract.disabled = true;
+            } else if (s === 4) {
+                statusText.innerText = "ស្ថានភាព៖ កម្ទេចក្រដាសតោងជាប់នឹងចង្កឹះ";
+                statusIndicator.className = "w-3 h-3 rounded-full bg-green-500";
+                btnRub.disabled = true;
+                btnAttract.disabled = true;
+            }
+        }
+
+        function resetSim() {
+            cancelAnimationFrame(reqAnimFrame);
+            
+            // Reset Objects
+            rod.x = cw / 2;
+            rod.y = ch / 4;
+            rod.targetY = ch / 4;
+            
+            cloth.x = cw / 2;
+            cloth.y = ch / 4;
+            cloth.targetX = cw / 2;
+            cloth.targetY = ch / 4;
+            cloth.visible = true;
+            
+            chargeLevel = 0;
+            timer = 0;
+            
+            initPapers();
+            setStatus(0);
+            
+            lastTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // --- Event Triggers ---
+
+        function startRubbing() {
+            if (state !== 0) return;
+            setStatus(1);
+            timer = 0;
+        }
+
+        function startAttracting() {
+            if (state !== 2) return;
+            setStatus(3);
+            // Lower the rod towards the table
+            rod.targetY = ch - 120;
+        }
+
+        // --- STREAMING_CHUNK:Drawing Functions... ---
+
+        function drawTable() {
+            // Table top
+            ctx.fillStyle = '#cbd5e1'; // slate-300
+            ctx.beginPath();
+            ctx.roundRect(150, ch - 20, 500, 20, [10, 10, 0, 0]);
+            ctx.fill();
+            
+            // Table legs
+            ctx.fillStyle = '#94a3b8'; // slate-400
+            ctx.fillRect(200, ch - 10, 15, 10);
+            ctx.fillRect(585, ch - 10, 15, 10);
+        }
+
+        function drawCharge(x, y, type, alpha) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = type === '-' ? '#ffffff' : '#b91c1c'; // white for minus, red for plus
+            ctx.font = 'bold 24px "Lora"';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(type, x, y);
+            ctx.restore();
+        }
+
+        function render() {
+            // Clear Canvas
+            ctx.clearRect(0, 0, cw, ch);
+
+            drawTable();
+
+            // Draw Papers
+            papers.forEach(p => p.draw(ctx));
+
+            // Draw Rod
+            ctx.save();
+            ctx.translate(rod.x, rod.y);
+            
+            // Rod Body
+            ctx.fillStyle = rod.color;
+            ctx.beginPath();
+            ctx.roundRect(-rod.width/2, -rod.height/2, rod.width, rod.height, 15);
+            ctx.fill();
+            
+            // Rod Highlight for 3D effect
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.beginPath();
+            ctx.roundRect(-rod.width/2 + 5, -rod.height/2 + 2, rod.width - 10, 8, 5);
+            ctx.fill();
+
+            // Draw Charges on Rod (Minus)
+            if (chargeLevel > 0) {
+                const step = 40;
+                for(let ix = -rod.width/2 + 25; ix <= rod.width/2 - 25; ix += step) {
+                    drawCharge(ix, 0, '-', chargeLevel);
+                }
+            }
+            ctx.restore();
+
+            // Draw Cloth
+            if (cloth.visible) {
+                ctx.save();
+                ctx.translate(cloth.x, cloth.y);
+                
+                // Cloth Body (wavy look using bezier curves)
+                ctx.fillStyle = cloth.color;
+                ctx.beginPath();
+                ctx.moveTo(-cloth.width/2, -cloth.height/2);
+                ctx.quadraticCurveTo(0, -cloth.height/2 - 10, cloth.width/2, -cloth.height/2);
+                ctx.quadraticCurveTo(cloth.width/2 + 10, 0, cloth.width/2, cloth.height/2);
+                ctx.quadraticCurveTo(0, cloth.height/2 + 15, -cloth.width/2, cloth.height/2);
+                ctx.quadraticCurveTo(-cloth.width/2 - 10, 0, -cloth.width/2, -cloth.height/2);
+                ctx.fill();
+                
+                // Cloth Texture lines
+                ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-40, -10); ctx.lineTo(40, -15);
+                ctx.moveTo(-30, 10); ctx.lineTo(50, 15);
+                ctx.stroke();
+
+                // Draw Charges on Cloth (Plus)
+                if (chargeLevel > 0) {
+                    drawCharge(-25, -15, '+', chargeLevel);
+                    drawCharge(25, -10, '+', chargeLevel);
+                    drawCharge(-15, 20, '+', chargeLevel);
+                    drawCharge(30, 15, '+', chargeLevel);
+                }
+                
+                ctx.restore();
+            }
+        }
+
+        // --- STREAMING_CHUNK:Physics Update Loop... ---
+
+        function update(dt) {
+            
+            if (state === 1) {
+                // Rubbing Animation
+                timer += dt;
+                
+                // Fast sine wave for rubbing left/right
+                cloth.x = (cw / 2) + Math.sin(timer * 15) * 80;
+                
+                // Increase charge level gradually over 2 seconds
+                chargeLevel = Math.min(1, timer / 2);
+                
+                // Transition out of rubbing
+                if (timer > 2.5) {
+                    // Move cloth away (up and right)
+                    cloth.targetX = cw + 100;
+                    cloth.targetY = -100;
+                    
+                    if (timer > 3) {
+                        setStatus(2); // Ready
+                    }
+                }
+            }
+            
+            // Move cloth smoothly to target (used when moving away)
+            if (state >= 1 && timer > 2.5) {
+                cloth.x += (cloth.targetX - cloth.x) * 5 * dt;
+                cloth.y += (cloth.targetY - cloth.y) * 5 * dt;
+                if (cloth.x > cw + 50) cloth.visible = false;
+            }
+
+            if (state === 3) {
+                // Rod moves down
+                rod.y += (rod.targetY - rod.y) * 2 * dt;
+                
+                let allStuck = true;
+
+                // Paper Attraction Logic
+                papers.forEach(p => {
+                    if (!p.stuck) {
+                        allStuck = false;
+                        const dx = rod.x - p.x;
+                        const dy = rod.y - p.y;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        
+                        // If rod is close enough, papers fly up
+                        if (dist < 200) {
+                            // Inverse square-like force
+                            const force = 3000 / (dist * dist); 
+                            
+                            p.vx += (dx / dist) * force;
+                            p.vy += (dy / dist) * force;
+                            p.vy -= 1.5; // Overcome gravity strongly
+                        }
+                        
+                        // Physics step
+                        p.vy += 0.5; // Gravity
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        
+                        // Damping / Friction
+                        p.vx *= 0.8;
+                        p.vy *= 0.9;
+                        
+                        // Floor collision bounds
+                        if (p.y > ch - 30) {
+                            p.y = ch - 30;
+                            p.vy = 0;
+                            p.vx *= 0.5;
+                        }
+
+                        // Check if it hit the rod
+                        if (Math.abs(p.x - rod.x) < rod.width/2 && p.y <= rod.y + rod.height/2 + 5) {
+                            p.stuck = true;
+                            // Calculate relative position to stick to the rod
+                            p.offsetX = p.x - rod.x;
+                            // Stick specifically to the bottom edge of the rod
+                            p.offsetY = rod.height/2 + (Math.random()*5);
+                            p.angle = (Math.random() - 0.5);
+                        }
+                    } else {
+                        // Keep stuck to rod
+                        p.x = rod.x + p.offsetX;
+                        p.y = rod.y + p.offsetY;
+                    }
+                });
+
+                // End state when all papers are stuck and rod reaches target
+                if (allStuck && Math.abs(rod.y - rod.targetY) < 1) {
+                    setStatus(4);
+                }
+            }
+        }
+
+        // Main Loop
+        function gameLoop(timestamp) {
+            const dt = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+
+            // Cap dt to prevent massive jumps if tab is inactive
+            if (dt < 0.1) {
+                update(dt);
+                render();
+            }
+            
+            reqAnimFrame = requestAnimationFrame(gameLoop);
+        }
+
+        // Init on load
+        window.onload = resetSim;
+
+    </script>
+</body>
+</html>

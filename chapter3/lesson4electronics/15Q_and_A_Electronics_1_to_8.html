@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>សំណួរ និងចម្លើយ - គ្រឿងអេឡិចត្រូនិក</title>
+    <style>
+        body {
+            font-family: 'Khmer OS Siemreap', 'Suwannaphum', Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.8;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .qa-container {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+        .question {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .answer {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #27ae60;
+            border-radius: 4px;
+            color: #444;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.95em;
+            font-family: 'Khmer OS Siemreap', sans-serif;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-hide {
+            background-color: #e74c3c;
+        }
+        .btn-hide:hover {
+            background-color: #c0392b;
+        }
+        .svg-container {
+            background-color: #ffffff;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+            margin-top: 15px;
+            padding: 10px;
+            text-align: center;
+            overflow-x: auto;
+        }
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>សំណួរ និងចម្លើយរូបវិទ្យា (មេរៀន គ្រឿងអេឡិចត្រូនិក)</h1>
+
+    <!-- Q1 -->
+    <div class="qa-container">
+        <div class="question">១. តើរេស៊ីស្តង់ និងប៉ូតង់ស្យូម៉ែត្រជាអ្វី? ហើយវាខុសគ្នាដូចម្តេច?</div>
+        <button id="btn-1" onclick="toggleAnswer(1)">បង្ហាញចម្លើយ</button>
+        <div id="answer-1" class="answer">
+            <b>ចម្លើយ៖</b><br>
+            - <b>រេស៊ីស្តង់ (Resistor)៖</b> ជាគ្រឿងអេឡិចត្រូនិកដែលមានតួនាទីសម្រាប់ទប់ស្កាត់ ឬកាត់បន្ថយចរន្តអគ្គិសនី ដែលរត់ឆ្លងកាត់នៅក្នុងសៀគ្វី។<br>
+            - <b>ប៉ូតង់ស្យូម៉ែត្រ (Potentiometer)៖</b> ជាប្រភេទរេស៊ីស្តង់អថេរ ដែលមានជើង ៣ ហើយគេអាចលៃតម្រូវ ឬប្រែប្រួលតម្លៃរេស៊ីស្តង់របស់វាបានដោយការមួល ឬរុញ។<br>
+            - <b>លក្ខណៈខុសគ្នា៖</b> រេស៊ីស្តង់ទូទៅមានតម្លៃកំណត់ថេរមិនអាចកែប្រែបានឡើយ ចំណែកឯប៉ូតង់ស្យូម៉ែត្រ អាចប្រែប្រួលតម្លៃរេស៊ីស្តង់បានតាមតម្រូវការជាក់ស្តែង។
+        </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="qa-container">
+        <div class="question">២. ចូររៀបរាប់ឈ្មោះឧបករណ៍ដែលប្រើប៉ូតង់ស្យូម៉ែត្រ ដែលអ្នកបានស្គាល់ឱ្យបានប្រាំ។</div>
+        <button id="btn-2" onclick="toggleAnswer(2)">បង្ហាញចម្លើយ</button>
+        <div id="answer-2" class="answer">
+            <b>ចម្លើយ៖</b> ឧបករណ៍ទាំង ៥ ដែលប្រើប្រាស់ប៉ូតង់ស្យូម៉ែត្រ មានដូចជា៖<br>
+            ១. វ៉ុលលីមវិទ្យុ ឬឧបាល័រ (Volume control សម្រាប់តម្លើង/បន្ថយសំឡេង)<br>
+            ២. កុងតាក់បញ្ជាល្បឿនកង្ហារ (Fan speed regulator)<br>
+            ៣. កុងតាក់ប្រែប្រួលពន្លឺអំពូល (Dimmer switch)<br>
+            ៤. ម៉ាស៊ីនផ្សារដែក (សម្រាប់លៃតម្រូវកម្រិតចរន្ត)<br>
+            ៥. ឧបករណ៍លៃតម្រូវសម្លេងអេកូ/បាស ក្នុងអំភ្លី (Equalizer / Tone control)
+        </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="qa-container">
+        <div class="question">៣. តើ LDR ជាអ្វី? និងចូរគូសសៀគ្វីងាយមួយដែលមានគ្រឿងអេឡិចត្រូនិកផ្សេងៗ និងមាន LDR ជាបំណែក រួចពន្យល់ពីដំណើរការនៃសៀគ្វីនោះ។</div>
+        <button id="btn-3" onclick="toggleAnswer(3)">បង្ហាញចម្លើយ</button>
+        <div id="answer-3" class="answer">
+            <b>ចម្លើយ៖</b><br>
+            - <b>LDR (Light Dependent Resistor ឬ Photoresistor)៖</b> ជារេស៊ីស្តង់ពឹងផ្អែកពន្លឺ ដែលតម្លៃរេស៊ីស្តង់របស់វាប្រែប្រួលទៅតាមកម្រិតពន្លឺដែលជះលើវា (ពន្លឺកាន់តែខ្លាំង រេស៊ីស្តង់កាន់តែតូច, ពេលងងឹត រេស៊ីស្តង់ធំ)។<br>
+            - <b>សៀគ្វីងាយដែលមាន LDR និងការពន្យល់ដំណើរការ៖</b>
+            <div class="svg-container">
+                <svg width="400" height="220" viewBox="0 0 400 220">
+                    <!-- Battery 9V -->
+                    <line x1="50" y1="80" x2="50" y2="140" stroke="#333" stroke-width="2"/>
+                    <line x1="40" y1="90" x2="60" y2="90" stroke="#333" stroke-width="3"/> <!-- + -->
+                    <line x1="45" y1="110" x2="55" y2="110" stroke="#333" stroke-width="5"/> <!-- - -->
+                    <line x1="40" y1="130" x2="60" y2="130" stroke="#333" stroke-width="3"/> <!-- + -->
+                    <text x="15" y="115" font-weight="bold">9V</text>
+                    <text x="45" y="75" font-weight="bold" fill="red">+</text>
+                    
+                    <!-- Top Wire -->
+                    <line x1="50" y1="80" x2="50" y2="40" stroke="#e74c3c" stroke-width="2"/>
+                    <line x1="50" y1="40" x2="130" y2="40" stroke="#e74c3c" stroke-width="2"/>
+                    
+                    <!-- Resistor -->
+                    <polyline points="130,40 135,30 145,50 155,30 165,50 175,30 185,40" stroke="#333" stroke-width="2" fill="none"/>
+                    <line x1="185" y1="40" x2="210" y2="40" stroke="#e74c3c" stroke-width="2"/>
+                    <text x="140" y="20" font-size="12">R1 (330&Omega;)</text>
+                    
+                    <!-- LDR -->
+                    <circle cx="240" cy="40" r="20" stroke="#333" fill="#fcf3cf" stroke-width="2"/>
+                    <polyline points="225,40 230,30 240,50 250,30 255,40" stroke="#333" stroke-width="2" fill="none"/>
+                    <line x1="210" y1="40" x2="220" y2="40" stroke="#e74c3c" stroke-width="2"/>
+                    <line x1="260" y1="40" x2="330" y2="40" stroke="#e74c3c" stroke-width="2"/>
+                    <text x="228" y="75" font-weight="bold">LDR</text>
+                    
+                    <!-- Light Arrows to LDR -->
+                    <line x1="200" y1="10" x2="215" y2="25" stroke="#f39c12" stroke-width="2"/>
+                    <polygon points="215,25 210,20 220,20" fill="#f39c12"/>
+                    <line x1="220" y1="5" x2="235" y2="20" stroke="#f39c12" stroke-width="2"/>
+                    <polygon points="235,20 230,15 240,15" fill="#f39c12"/>
+                    
+                    <!-- LED -->
+                    <line x1="330" y1="40" x2="330" y2="100" stroke="#e74c3c" stroke-width="2"/>
+                    <polygon points="320,100 340,100 330,120" fill="#e74c3c"/>
+                    <line x1="315" y1="120" x2="345" y2="120" stroke="#333" stroke-width="2"/>
+                    <line x1="330" y1="120" x2="330" y2="180" stroke="#3498db" stroke-width="2"/>
+                    <text x="345" y="115" font-weight="bold">LED</text>
+                    
+                    <!-- Light Arrows from LED -->
+                    <line x1="350" y1="90" x2="365" y2="75" stroke="#e74c3c" stroke-width="2"/>
+                    <line x1="360" y1="100" x2="375" y2="85" stroke="#e74c3c" stroke-width="2"/>
+                    
+                    <!-- Bottom Wire -->
+                    <line x1="330" y1="180" x2="50" y2="180" stroke="#3498db" stroke-width="2"/>
+                    <line x1="50" y1="180" x2="50" y2="140" stroke="#3498db" stroke-width="2"/>
+                    <text x="45" y="155" font-weight="bold" fill="blue">-</text>
+                </svg>
+            </div>
+            <b>ការពន្យល់ដំណើរការ៖</b> នេះជាសៀគ្វីងាយភ្ជាប់ជាស៊េរីដែលមាន ថ្មពិល(9V), រេស៊ីស្តង់ធម្មតា(R1), LDR, និងអំពូល LED។<br>
+            ១. នៅពេលមាន <b>ពន្លឺជះមកលើ LDR ខ្លាំង</b> តម្លៃរេស៊ីស្តង់របស់វានឹងធ្លាក់ចុះទាប ដែលអនុញ្ញាតឱ្យចរន្តអគ្គិសនីហូរឆ្លងកាត់បានច្រើន ធ្វើឱ្យអំពូល LED <b>ភ្លឺ</b>។<br>
+            ២. នៅពេល <b>ងងឹត (គ្មានពន្លឺ)</b> LDR នឹងមានតម្លៃរេស៊ីស្តង់កើនឡើងខ្ពស់ខ្លាំង ដែលរារាំងចរន្តមិនឱ្យហូរឆ្លងកាត់បាន ពេលនោះអំពូល LED នឹង <b>លត់</b>។
+        </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="qa-container">
+        <div class="question">៤. តើគេប្រើកុងដង់សាទ័រសម្រាប់ធ្វើអ្វីខ្លះ?</div>
+        <button id="btn-4" onclick="toggleAnswer(4)">បង្ហាញចម្លើយ</button>
+        <div id="answer-4" class="answer">
+            <b>ចម្លើយ៖</b> គេប្រើកុងដង់សាទ័រ (Capacitor) សម្រាប់៖<br>
+            - ផ្ទុក និងបញ្ចេញបន្ទុកអគ្គិសនី។<br>
+            - តម្រងចរន្ត (Filter) បំបាត់ភាពញ័រនៃចរន្តនៅក្នុងសៀគ្វីបម្លែងចរន្តឆ្លាស់ទៅជាប់ (Power Supply)។<br>
+            - ទប់ចរន្តជាប់ (DC Blocking) និងចម្លងចរន្តឆ្លាស់ (AC Coupling)។<br>
+            - ប្រើប្រាស់ក្នុងការបង្កើតរលកសញ្ញា (Oscillator) នៅក្នុងសៀគ្វីបញ្ជូននិងទទួលសញ្ញាវិទ្យុ។<br>
+            - បង្កើតតំណាក់កាល (Phase shift) ដើម្បីជួយបញ្ឆេះម៉ូទ័រអគ្គិសនីចរន្តឆ្លាស់។
+        </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="qa-container">
+        <div class="question">៥. តើឌីយ៉ូតជាអ្វី?</div>
+        <button id="btn-5" onclick="toggleAnswer(5)">បង្ហាញចម្លើយ</button>
+        <div id="answer-5" class="answer">
+            <b>ចម្លើយ៖</b> <b>ឌីយ៉ូត (Diode)</b> គឺជាគ្រឿងអេឡិចត្រូនិកដែលផ្សំឡើងពីសារធាតុពាក់កណ្តាលចម្លងប៉ូលពីរ (P និង N) ដែលមានលក្ខណៈពិសេសគឺ អនុញ្ញាតឱ្យចរន្តអគ្គិសនីរត់ឆ្លងកាត់វាបានតែមួយទិសដៅប៉ុណ្ណោះ (រត់ពីអាណូត ទៅកាតូត) និងរាំងខ្ទប់មិនឱ្យចរន្តរត់ត្រឡប់ថយក្រោយវិញបានឡើយ។ វាត្រូវបានគេប្រើជាទូទៅសម្រាប់បម្លែងចរន្តឆ្លាស់ (AC) ឱ្យទៅជាចរន្តជាប់ (DC)។
+        </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="qa-container">
+        <div class="question">៦. តើត្រង់ស៊ីស្ទ័រជាអ្វី? និងមានប៉ុន្មានប្រភេទ? ចូរពន្យល់ពីគោលការណ៍ដំណើរការរបស់វានីមួយៗ។</div>
+        <button id="btn-6" onclick="toggleAnswer(6)">បង្ហាញចម្លើយ</button>
+        <div id="answer-6" class="answer">
+            <b>ចម្លើយ៖</b><br>
+            - <b>ត្រង់ស៊ីស្ទ័រ (Transistor)៖</b> ជាគ្រឿងអេឡិចត្រូនិកពាក់កណ្តាលចម្លងមានជើង ៣ គឺ Base (B), Collector (C), និង Emitter (E) ដែលមានតួនាទីជាកុងតាក់អេឡិចត្រូនិក ឬសម្រាប់ពង្រីកសញ្ញាអគ្គិសនី។<br>
+            - <b>វាមាន ២ ប្រភេទគឺ៖ NPN និង PNP</b> ។<br>
+            - <b>គោលការណ៍ដំណើរការ៖</b><br>
+            &nbsp;&nbsp;<b>១. ប្រភេទ NPN៖</b> វាដំណើរការ (បញ្ជូនចរន្តពី C ទៅ E) លុះត្រាតែមានចរន្តតូចមួយ (ចរន្តបញ្ជា) រត់ចូលទៅក្នុងជើង Base (B មានប៉ូលបូកធៀបនឹង E)។<br>
+            &nbsp;&nbsp;<b>២. ប្រភេទ PNP៖</b> វាដំណើរការ (បញ្ជូនចរន្តពី E ទៅ C) លុះត្រាតែមានចរន្តតូចមួយរត់ចេញពីជើង Base (B មានប៉ូលដកធៀបនឹង E)។
+            <div class="svg-container" style="display:flex; justify-content: space-around;">
+                <!-- NPN -->
+                <svg width="150" height="150" viewBox="0 0 150 150">
+                    <circle cx="75" cy="75" r="40" stroke="#333" stroke-width="2" fill="none"/>
+                    <line x1="20" y1="75" x2="55" y2="75" stroke="#333" stroke-width="2"/> <!-- B -->
+                    <line x1="55" y1="50" x2="55" y2="100" stroke="#333" stroke-width="4"/> <!-- Base line -->
+                    <line x1="55" y1="65" x2="90" y2="40" stroke="#333" stroke-width="2"/> <!-- C -->
+                    <line x1="90" y1="40" x2="90" y2="20" stroke="#333" stroke-width="2"/>
+                    <line x1="55" y1="85" x2="90" y2="110" stroke="#333" stroke-width="2"/> <!-- E -->
+                    <line x1="90" y1="110" x2="90" y2="130" stroke="#333" stroke-width="2"/>
+                    <!-- Arrow for NPN (pointing out of E) -->
+                    <polygon points="85,106 93,113 80,113" fill="#333" transform="rotate(-30 90 110)"/>
+                    <text x="10" y="80" font-weight="bold">B</text>
+                    <text x="95" y="20" font-weight="bold">C</text>
+                    <text x="95" y="140" font-weight="bold">E</text>
+                    <text x="60" y="140" fill="blue">NPN</text>
+                </svg>
+                <!-- PNP -->
+                <svg width="150" height="150" viewBox="0 0 150 150">
+                    <circle cx="75" cy="75" r="40" stroke="#333" stroke-width="2" fill="none"/>
+                    <line x1="20" y1="75" x2="55" y2="75" stroke="#333" stroke-width="2"/> <!-- B -->
+                    <line x1="55" y1="50" x2="55" y2="100" stroke="#333" stroke-width="4"/> <!-- Base line -->
+                    <line x1="55" y1="65" x2="90" y2="40" stroke="#333" stroke-width="2"/> <!-- C -->
+                    <line x1="90" y1="40" x2="90" y2="20" stroke="#333" stroke-width="2"/>
+                    <line x1="55" y1="85" x2="90" y2="110" stroke="#333" stroke-width="2"/> <!-- E -->
+                    <line x1="90" y1="110" x2="90" y2="130" stroke="#333" stroke-width="2"/>
+                    <!-- Arrow for PNP (pointing into Base from E) -->
+                    <polygon points="75,95 85,95 80,85" fill="#333" transform="rotate(30 80 90)"/>
+                    <text x="10" y="80" font-weight="bold">B</text>
+                    <text x="95" y="20" font-weight="bold">C</text>
+                    <text x="95" y="140" font-weight="bold">E</text>
+                    <text x="60" y="140" fill="red">PNP</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="qa-container">
+        <div class="question">៧. ចូរពន្យល់ពីការវាស់រកជើងត្រង់ស៊ីស្ទ័រដើម្បីដឹងថាវាជាត្រង់ស៊ីស្ទ័រប្រភេទ NPN ឬ PNP ។</div>
+        <button id="btn-7" onclick="toggleAnswer(7)">បង្ហាញចម្លើយ</button>
+        <div id="answer-7" class="answer">
+            <b>ចម្លើយ៖</b> ការវាស់ដោយប្រើម៉ាល់ទីម៉ែត្រ (Multimeter) ក្នុងទម្រង់វាស់ឌីយ៉ូត៖<br>
+            ១. <b>រកជើង Base (B) ជាមុន៖</b> យើងយកទ្រនិចទាំងពីរ (ក្រហម និង ខ្មៅ) វាស់ឆ្លាស់គ្នាទៅលើជើងទាំង ៣ នៃត្រង់ស៊ីស្ទ័រ។ ជើងណាដែលយើងដាក់ទ្រនិចមួយនៅស្ងៀម ហើយយកទ្រនិចមួយទៀតទៅវាស់ជើង ២ ទៀតឡើងលេខ (ឬឡើងកុងទ័រ) ទាំងពីរដង នោះជើងដែលនៅស្ងៀមគឺជើង B។<br>
+            ២. <b>កំណត់ប្រភេទ NPN ឬ PNP៖</b><br>
+            &nbsp;&nbsp;- ប្រសិនបើទ្រនិចដែលដាក់នៅស្ងៀមលើជើង B នោះជា <b>ទ្រនិចក្រហម (+)</b> នោះវាជាប្រភេទ <b>NPN</b> ។<br>
+            &nbsp;&nbsp;- ប្រសិនបើទ្រនិចដែលដាក់នៅស្ងៀមលើជើង B នោះជា <b>ទ្រនិចខ្មៅ (-)</b> នោះវាជាប្រភេទ <b>PNP</b> ។
+        </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="qa-container">
+        <div class="question">៨. តើ SCR ឬទីរីស្ទ័រជាអ្វី? ចូរពន្យល់ពីគោលការណ៍និងដំណើរការរបស់វា។</div>
+        <button id="btn-8" onclick="toggleAnswer(8)">បង្ហាញចម្លើយ</button>
+        <div id="answer-8" class="answer">
+            <b>ចម្លើយ៖</b><br>
+            - <b>SCR (Silicon Controlled Rectifier) ឬទីរីស្ទ័រ (Thyristor)៖</b> គឺជាគ្រឿងអេឡិចត្រូនិកមានជើង ៣ គឺ អាណូត(A), កាតូត(K), និង Gate(G)។ វាមានដំណើរការចម្លងចរន្តតែមួយទិសដៅដូចឌីយ៉ូតដែរ ប៉ុន្តែវាទាមទារឱ្យមានការបញ្ជាទើបអាចដំណើរការបាន។<br>
+            - <b>គោលការណ៍ និងដំណើរការ៖</b> លក្ខខណ្ឌធម្មតា SCR មិនចម្លងចរន្តទេ (នៅស្ថានភាព Off) ទោះបីជាមានតង់ស្យុងបញ្ច្រាសរវាង A និង K ក៏ដោយ។ SCR នឹងចាប់ផ្តើមចម្លងចរន្តពី Anode ទៅ Cathode (ស្ថានភាព On) លុះត្រាតែគេផ្តល់ចរន្តអគ្គិសនីតូចមួយចូលទៅកេះ (Trigger) នៅជើង Gate។ លក្ខណៈពិសេសរបស់វាគឺ នៅពេលដែលវាចាប់ផ្តើមចម្លងហើយ វាបន្តចម្លងរហូតទោះបីជាគេផ្តាច់ចរន្តបញ្ជាពីជើង Gate វិញក៏ដោយ។ ដើម្បីបិទវា (Off) គេត្រូវផ្តាច់ចរន្តពី Anode ឬធ្វើឱ្យចរន្តធ្លាក់ចុះដល់សូន្យ។
+            <div class="svg-container">
+                <svg width="200" height="120" viewBox="0 0 200 120">
+                    <line x1="40" y1="60" x2="80" y2="60" stroke="#333" stroke-width="2"/> <!-- Anode line -->
+                    <polygon points="80,40 80,80 120,60" fill="#333"/> <!-- Diode triangle -->
+                    <line x1="120" y1="40" x2="120" y2="80" stroke="#333" stroke-width="2"/> <!-- Cathode bar -->
+                    <line x1="120" y1="60" x2="160" y2="60" stroke="#333" stroke-width="2"/> <!-- Cathode line -->
+                    
+                    <polyline points="100,70 100,100 130,100" stroke="#333" stroke-width="2" fill="none"/> <!-- Gate line -->
+                    
+                    <text x="20" y="65" font-weight="bold">A</text>
+                    <text x="170" y="65" font-weight="bold">K</text>
+                    <text x="140" y="105" font-weight="bold">G</text>
+                    <text x="80" y="115" fill="#7f8c8d">និមិត្តសញ្ញា SCR</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleAnswer(id) {
+            var answerDiv = document.getElementById('answer-' + id);
+            var btn = document.getElementById('btn-' + id);
+            
+            if (answerDiv.style.display === 'none' || answerDiv.style.display === '') {
+                answerDiv.style.display = 'block';
+                btn.innerText = 'លាក់ចម្លើយ';
+                btn.classList.add('btn-hide');
+            } else {
+                answerDiv.style.display = 'none';
+                btn.innerText = 'បង្ហាញចម្លើយ';
+                btn.classList.remove('btn-hide');
+            }
+        }
+    </script>
+</body>
+</html>

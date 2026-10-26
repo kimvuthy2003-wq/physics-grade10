@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ20ទំព័រ168 ការបញ្ជូនអគ្គិសនី និងអានុភាពបាត់បង់</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts សម្រាប់ Battambang -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Battambang', 'Khmer OS Battambang', sans-serif;
+            margin: 0;
+            background-color: #f4f6f9; 
+            color: #111;
+            font-size: 18px; /* ទំហំអក្សរធំ */
+        }
+
+        .container-custom {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ប៊ូតុង និង Input */
+        .action-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border-width: 1px;
+            border-color: #cbd5e1;
+            background-color: #ffffff;
+            color: #334155;
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .action-btn:hover {
+            background-color: #f8fafc;
+            border-color: #94a3b8;
+        }
+        .action-btn:active {
+            transform: translateY(2px);
+        }
+        
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 28px;
+            width: 28px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -10px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* SVG Simulator */
+        svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #cfd8dc;
+            margin: 0 auto;
+        }
+
+        /* រចនាប័ទ្មសម្រាប់អក្សររូបមន្ត (HTML Math សុវត្ថិភាព) */
+        .html-math { display: inline-flex; align-items: center; font-size: 20px; }
+        .html-fraction { display: inline-flex; flex-direction: column; align-items: center; margin: 0 8px; vertical-align: middle; }
+        .html-num { border-bottom: 2px solid #111; padding: 0 6px 4px 6px; }
+        .html-den { padding: 4px 6px 0 6px; }
+        .math-var { font-family: 'Times New Roman', Times, serif; font-style: italic; }
+        .math-sub { font-size: 0.75em; font-family: 'Arial', sans-serif; font-style: normal; vertical-align: sub; }
+        .dynamic-val { color: #d32f2f; font-weight: bold; border-bottom: 2px dashed #d32f2f; padding: 0 6px; font-size: 22px; font-family: 'Arial', sans-serif;}
+        .highlight { color: #10b981; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container-custom">
+    
+    <div class="mb-5 text-center">
+        <h1 class="text-3xl font-bold text-slate-800 mb-2 leading-tight">បណ្តាញបញ្ជូនអគ្គិសនី</h1>
+        <p class="text-lg text-slate-500">ការធ្លាក់តង់ស្យុង និងអានុភាពបាត់បង់</p>
+    </div>
+
+    <!-- ១. ប្រធានលំហាត់ -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6 shadow-sm text-slate-800">
+        <h3 class="text-xl font-bold text-orange-600 mb-4 border-b border-slate-200 pb-2">📝 លំហាត់ទី២០ទំព័រ168</h3>
+        <p class="mb-2 leading-relaxed text-lg">
+            ២០. រោងចក្រអគ្គិសនីមួយបញ្ជូនអានុភាព <span class="font-bold text-yellow-600" id="probP">35.0 MW</span> និងតង់ស្យុង (ប្រសិទ្ធ) <span class="font-bold text-emerald-600" id="probV">45.0 kV</span> បានទៅដល់ទីក្រុងមួយតាមខ្សែរកាបដែលមានរេស៊ីស្តង់សរុប <span class="font-bold text-blue-600" id="probR">5.00 Ω</span> ។ គណនា៖<br>
+            ក. កម្លាំងអគ្គិសនីចលករត្រង់ចុងខ្សែនៃជនីតា<br>
+            ខ. ផលធៀបនៃអានុភាពសរុប និងអានុភាពដែលបាត់បង់ក្នុងខ្សែ ។
+        </p>
+    </div>
+
+    <!-- ២. ផ្ទាំង Simulator -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+            <h2 class="text-2xl font-bold text-slate-800">⚡ ដ្យាក្រាមបញ្ជូនអគ្គិសនី</h2>
+            
+            <!-- Dashboard ខ្នាតតូច -->
+            <div class="flex flex-wrap gap-4 md:gap-6 bg-slate-50 px-4 py-3 rounded-lg border border-slate-200 shadow-sm w-full md:w-auto justify-center">
+                <div class="text-center">
+                    <div class="text-sm text-slate-500">EMF ជនីតា ($E$)</div>
+                    <div class="text-xl font-bold text-red-600" id="dashE">... kV</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm text-slate-500">អានុភាពបាត់បង់ ($\Delta P$)</div>
+                    <div class="text-xl font-bold text-orange-600" id="dashPloss">... MW</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm text-slate-500">ភាគរយបាត់បង់ (% Loss)</div>
+                    <div class="text-xl font-bold text-purple-600" id="dashRatio">... %</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="relative w-full flex items-center justify-center bg-slate-50 border border-slate-200 rounded-xl shadow-sm p-4">
+            <svg id="circuitSvg" viewBox="0 0 1000 350" preserveAspectRatio="xMidYMid meet">
+                
+                <!-- ផ្ទៃខាងក្រោយ -->
+                <!-- រោងចក្រអគ្គិសនី (Generator) -->
+                <rect x="50" y="80" width="120" height="180" fill="#475569" rx="8"/>
+                <rect x="70" y="40" width="30" height="40" fill="#64748b"/>
+                <rect x="120" y="50" width="20" height="30" fill="#64748b"/>
+                <text x="110" y="150" text-anchor="middle" font-family="'Battambang', sans-serif" font-size="20" fill="#f8fafc" font-weight="bold">រោងចក្រអគ្គិសនី</text>
+                <text x="110" y="180" text-anchor="middle" font-family="Arial" font-size="16" fill="#cbd5e1">(ជនីតា)</text>
+                <text id="svgEgen" x="110" y="220" text-anchor="middle" font-family="Arial" font-size="20" fill="#fca5a5" font-weight="bold">E = 48.9 kV</text>
+
+                <!-- ទីក្រុង (City Load) -->
+                <rect x="800" y="100" width="140" height="160" fill="#3b82f6" rx="8"/>
+                <rect x="820" y="120" width="25" height="30" fill="#fef08a"/>
+                <rect x="860" y="160" width="25" height="30" fill="#fef08a"/>
+                <rect x="890" y="130" width="25" height="30" fill="#fef08a"/>
+                <rect x="830" y="200" width="25" height="30" fill="#fef08a"/>
+                <text x="870" y="285" text-anchor="middle" font-family="'Battambang', sans-serif" font-size="20" fill="#1e293b" font-weight="bold">ទីក្រុង</text>
+                
+                <text id="svgPcity" x="870" y="60" text-anchor="middle" font-family="Arial" font-size="20" fill="#ca8a04" font-weight="bold">P = 35.0 MW</text>
+                <text id="svgVcity" x="870" y="85" text-anchor="middle" font-family="Arial" font-size="20" fill="#059669" font-weight="bold">V = 45.0 kV</text>
+
+                <!-- ខ្សែបញ្ជូន (Transmission Line) -->
+                <!-- បង្គោលភ្លើង -->
+                <line x1="300" y1="120" x2="300" y2="300" stroke="#94a3b8" stroke-width="6"/>
+                <line x1="260" y1="140" x2="340" y2="140" stroke="#94a3b8" stroke-width="4"/>
+                <line x1="600" y1="120" x2="600" y2="300" stroke="#94a3b8" stroke-width="6"/>
+                <line x1="560" y1="140" x2="640" y2="140" stroke="#94a3b8" stroke-width="4"/>
+                
+                <!-- ខ្សែអគ្គិសនី (Wire) -->
+                <line x1="170" y1="130" x2="800" y2="130" stroke="#64748b" stroke-width="8"/>
+                <line x1="170" y1="150" x2="800" y2="150" stroke="#64748b" stroke-width="8"/>
+                
+                <!-- ចលនាចរន្ត (Current Flow) -->
+                <line id="flowLine" x1="170" y1="140" x2="800" y2="140" stroke="#facc15" stroke-width="4" stroke-dasharray="15,20"/>
+                
+                <!-- រេស៊ីស្តង់ខ្សែ (Line Resistance Label) -->
+                <rect x="420" y="100" width="60" height="25" fill="#ffffff" stroke="#3b82f6" stroke-width="2" rx="4"/>
+                <text id="svgR" x="450" y="118" text-anchor="middle" font-family="Arial" font-size="18" fill="#3b82f6" font-weight="bold">R=5Ω</text>
+                
+                <!-- តង់ស្យុងធ្លាក់លើខ្សែ (Voltage Drop) -->
+                <path d="M 300 170 Q 450 200 600 170" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="6,4"/>
+                <text id="svgVdrop" x="450" y="210" text-anchor="middle" font-family="Arial" font-size="18" fill="#ef4444" font-weight="bold">ΔV = 3.89 kV</text>
+                
+            </svg>
+        </div>
+    </div>
+
+    <!-- ៣. ផ្ទាំងបញ្ជាទិន្នន័យ (Sliders) -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6 shadow-sm">
+        <h3 class="text-xl font-bold text-slate-800 mb-4">⚙️ ផ្ទាំងគ្រប់គ្រងទិន្នន័យ</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block text-lg font-bold text-slate-700 mb-3">អានុភាពទីក្រុង (<span class="math-var">P</span>): <span id="lblP" class="text-yellow-600 text-2xl ml-2">35.0 MW</span></label>
+                <input type="range" id="sliderP" min="10" max="100" value="35" step="1">
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block text-lg font-bold text-slate-700 mb-3">តង់ស្យុងទីក្រុង (<span class="math-var">V</span>): <span id="lblV" class="text-emerald-600 text-2xl ml-2">45.0 kV</span></label>
+                <input type="range" id="sliderV" min="10" max="100" value="45" step="1">
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block text-lg font-bold text-slate-700 mb-3">រេស៊ីស្តង់ខ្សែ (<span class="math-var">R</span>): <span id="lblR" class="text-blue-600 text-2xl ml-2">5.00 Ω</span></label>
+                <input type="range" id="sliderR" min="1.0" max="20.0" value="5.0" step="0.5">
+            </div>
+        </div>
+        
+        <button id="btnToggleSol" class="action-btn w-full mt-6 py-4 rounded-xl font-bold border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 text-xl">
+            📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត
+        </button>
+    </div>
+
+    <!-- ៤. ដំណោះស្រាយ -->
+    <div id="solutionBox" class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-lg text-slate-800 leading-relaxed hidden mb-6 shadow-sm">
+        <h3 class="text-2xl font-bold text-blue-700 mb-4 border-b border-blue-200 pb-3">📝 ដំណោះស្រាយលម្អិត</h3>
+        
+        <p class="text-slate-600 mb-4 text-base italic">* ចំណាំ៖ ផ្អែកតាមបរិបទប្រធាន អានុភាព 35.0 MW និងតង់ស្យុង 45.0 kV គឺជាតម្លៃដែលបានបញ្ជូនទៅដល់ទីក្រុង (តម្លៃចុងខ្សែ)។</p>
+
+        <p class="font-bold text-slate-800 mt-4 text-xl">ក. កម្លាំងអគ្គិសនីចលករត្រង់ចុងខ្សែនៃជនីតា ($E$) ៖</p>
+        <p>រកអាំងតង់ស៊ីតេចរន្តឆ្លងកាត់ខ្សែបញ្ជូន ($I$)៖</p>
+        <div class="html-math my-4 w-full justify-center">
+            <span class="math-var">I</span> = 
+            <div class="html-fraction">
+                <div class="html-num"><span class="math-var">P</span></div>
+                <div class="html-den"><span class="math-var">V</span></div>
+            </div>
+            =
+            <div class="html-fraction">
+                <div class="html-num"><span id="mathP">35.0 &times; 10<sup class="math-sub">6</sup></span></div>
+                <div class="html-den"><span id="mathV">45.0 &times; 10<sup class="math-sub">3</sup></span></div>
+            </div>
+            = <span id="mathI" class="dynamic-val">777.78</span> A
+        </div>
+        
+        <p>រកតង់ស្យុងធ្លាក់លើខ្សែបញ្ជូន ($\Delta V$)៖</p>
+        <div class="html-math my-3 w-full justify-center">
+            &Delta;<span class="math-var">V</span> = <span class="math-var">I</span> &times; <span class="math-var">R</span> = <span id="mathI_sub1">777.78</span> &times; <span id="mathR">5.00</span> = <span id="mathVdrop">3888.89</span> V &approx; <span id="mathVdropKV" class="dynamic-val">3.89</span> kV
+        </div>
+
+        <p>កម្លាំងអគ្គិសនីចលករត្រង់ជនីតា ($E$)៖</p>
+        <div class="html-math my-3 w-full justify-center">
+            <span class="math-var">E</span> = <span class="math-var">V</span> + &Delta;<span class="math-var">V</span> = <span id="mathV_sub1">45.0</span> + <span id="mathVdropKV_sub">3.89</span> = <span id="mathE" class="dynamic-val">48.89</span> kV
+        </div>
+        <p class="mt-2">ដូចនេះ កម្លាំងអគ្គិសនីចលករត្រង់ជនីតាគឺ <span class="highlight text-xl bg-white px-3 py-1 rounded border border-blue-200"><span id="ansE">48.89</span> kV</span> ។</p>
+
+        <hr class="border-blue-200 my-6">
+
+        <p class="font-bold text-slate-800 text-xl">ខ. ផលធៀបនៃអានុភាពដែលបាត់បង់ក្នុងខ្សែធៀបនឹងអានុភាពសរុប ៖</p>
+        <p>រកអានុភាពដែលបាត់បង់ក្នុងខ្សែជាកម្ដៅ ($\Delta P$)៖</p>
+        <div class="html-math my-3 w-full justify-center">
+            &Delta;<span class="math-var">P</span> = <span class="math-var">I</span><sup class="math-sub">2</sup> &times; <span class="math-var">R</span> = (<span id="mathI_sub2">777.78</span>)<sup class="math-sub">2</sup> &times; <span id="mathR_sub">5.00</span> = <span id="mathPlossW">3024691</span> W &approx; <span id="mathPlossMW" class="dynamic-val">3.02</span> MW
+        </div>
+
+        <p>រកអានុភាពសរុបផលិតដោយជនីតា ($P_{total}$)៖</p>
+        <div class="html-math my-3 w-full justify-center">
+            <span class="math-var">P</span><sub class="math-sub">total</sub> = <span class="math-var">P</span> + &Delta;<span class="math-var">P</span> = <span id="mathP_sub1">35.0</span> + <span id="mathPlossMW_sub">3.02</span> = <span id="mathPtotal" class="dynamic-val">38.02</span> MW
+        </div>
+
+        <p>ភាគរយនៃអានុភាពបាត់បង់ ($K$)៖</p>
+        <div class="html-math my-4 w-full justify-center">
+            <span class="math-var">K</span> = 
+            <div class="html-fraction">
+                <div class="html-num">&Delta;<span class="math-var">P</span></div>
+                <div class="html-den"><span class="math-var">P</span><sub class="math-sub">total</sub></div>
+            </div>
+            &times; 100% =
+            <div class="html-fraction">
+                <div class="html-num"><span id="mathPlossMW_sub2">3.02</span></div>
+                <div class="html-den"><span id="mathPtotal_sub">38.02</span></div>
+            </div>
+            &times; 100% = <span id="mathRatioPct" class="dynamic-val ml-2">7.94</span> %
+        </div>
+        <p class="mt-2">ដូចនេះ ភាគរយដែលបាត់បង់គឺ <span class="highlight text-xl bg-white px-3 py-1 rounded border border-blue-200"><span id="ansRatio">7.94 %</span></span> ។</p>
+    </div>
+
+</div>
+
+<script>
+    // អថេរ UI
+    var sliderP = document.getElementById('sliderP');
+    var sliderV = document.getElementById('sliderV');
+    var sliderR = document.getElementById('sliderR');
+    
+    var btnToggleSol = document.getElementById('btnToggleSol');
+    var solutionBox = document.getElementById('solutionBox');
+    
+    // អថេរ SVG
+    var flowLine = document.getElementById('flowLine');
+    var dashOffset = 0;
+    var animSpeed = 0;
+
+    btnToggleSol.addEventListener('click', function() {
+        if (solutionBox.classList.contains('hidden')) {
+            solutionBox.classList.remove('hidden');
+        } else {
+            solutionBox.classList.add('hidden');
+        }
+    });
+
+    function updatePhysics() {
+        var p_mw = parseFloat(sliderP.value);
+        var v_kv = parseFloat(sliderV.value);
+        var r_ohm = parseFloat(sliderR.value);
+        
+        var p_w = p_mw * 1000000;
+        var v_v = v_kv * 1000;
+
+        // គណនា
+        var i_a = p_w / v_v;
+        var v_drop_v = i_a * r_ohm;
+        var v_drop_kv = v_drop_v / 1000;
+        
+        var e_gen_kv = v_kv + v_drop_kv;
+        
+        var p_loss_w = i_a * i_a * r_ohm;
+        var p_loss_mw = p_loss_w / 1000000;
+        
+        var p_total_mw = p_mw + p_loss_mw;
+        
+        // គណនាភាគរយបាត់បង់ K = (Ploss / Ptotal) * 100
+        var ratio = p_loss_mw / p_total_mw;
+        var ratioPct = ratio * 100;
+
+        // ធ្វើបច្ចុប្បន្នភាពអក្សរលើ UI
+        document.getElementById('lblP').innerText = p_mw.toFixed(1) + " MW";
+        document.getElementById('lblV').innerText = v_kv.toFixed(1) + " kV";
+        document.getElementById('lblR').innerText = r_ohm.toFixed(2) + " Ω";
+        
+        document.getElementById('probP').innerText = p_mw.toFixed(1) + " MW";
+        document.getElementById('probV').innerText = v_kv.toFixed(1) + " kV";
+        document.getElementById('probR').innerText = r_ohm.toFixed(2) + " Ω";
+
+        document.getElementById('dashE').innerText = e_gen_kv.toFixed(2) + " kV";
+        document.getElementById('dashPloss').innerText = p_loss_mw.toFixed(2) + " MW";
+        document.getElementById('dashRatio').innerText = ratioPct.toFixed(2) + " %";
+
+        document.getElementById('svgPcity').innerText = "P = " + p_mw.toFixed(1) + " MW";
+        document.getElementById('svgVcity').innerText = "V = " + v_kv.toFixed(1) + " kV";
+        document.getElementById('svgR').innerText = "R=" + r_ohm.toFixed(1) + "Ω";
+        document.getElementById('svgVdrop').innerText = "ΔV = " + v_drop_kv.toFixed(2) + " kV";
+        document.getElementById('svgEgen').innerText = "E = " + e_gen_kv.toFixed(1) + " kV";
+
+        // Update Math Values in HTML
+        document.getElementById('mathP').innerText = p_mw.toFixed(1) + " × 10";
+        document.getElementById('mathV').innerText = v_kv.toFixed(1) + " × 10";
+        document.getElementById('mathI').innerText = i_a.toFixed(2);
+        
+        document.getElementById('mathI_sub1').innerText = i_a.toFixed(2);
+        document.getElementById('mathR').innerText = r_ohm.toFixed(2);
+        document.getElementById('mathVdrop').innerText = v_drop_v.toFixed(0);
+        document.getElementById('mathVdropKV').innerText = v_drop_kv.toFixed(2);
+        
+        document.getElementById('mathV_sub1').innerText = v_kv.toFixed(1);
+        document.getElementById('mathVdropKV_sub').innerText = v_drop_kv.toFixed(2);
+        document.getElementById('mathE').innerText = e_gen_kv.toFixed(2);
+        document.getElementById('ansE').innerText = e_gen_kv.toFixed(2);
+
+        document.getElementById('mathI_sub2').innerText = i_a.toFixed(2);
+        document.getElementById('mathR_sub').innerText = r_ohm.toFixed(2);
+        document.getElementById('mathPlossW').innerText = p_loss_w.toFixed(0);
+        document.getElementById('mathPlossMW').innerText = p_loss_mw.toFixed(2);
+
+        document.getElementById('mathP_sub1').innerText = p_mw.toFixed(1);
+        document.getElementById('mathPlossMW_sub').innerText = p_loss_mw.toFixed(2);
+        document.getElementById('mathPtotal').innerText = p_total_mw.toFixed(2);
+
+        // Update Ratio Calculation in Solution Box
+        document.getElementById('mathPlossMW_sub2').innerText = p_loss_mw.toFixed(2);
+        document.getElementById('mathPtotal_sub').innerText = p_total_mw.toFixed(2);
+        document.getElementById('mathRatioPct').innerText = ratioPct.toFixed(2);
+        document.getElementById('ansRatio').innerText = ratioPct.toFixed(2) + " %";
+
+        // Calculate animation speed
+        animSpeed = i_a * 0.005; 
+    }
+
+    function loopAnimation() {
+        dashOffset -= animSpeed;
+        flowLine.setAttribute("stroke-dashoffset", dashOffset);
+        requestAnimationFrame(loopAnimation);
+    }
+
+    // Event Listeners
+    sliderP.addEventListener('input', updatePhysics);
+    sliderV.addEventListener('input', updatePhysics);
+    sliderR.addEventListener('input', updatePhysics);
+
+    // Initial setup
+    updatePhysics();
+    loopAnimation();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់គំរូ ៖ ការបញ្ជូនអានុភាពអគ្គិសនី</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f0fdf4; /* Light green/emerald tint background */
+        }
+        
+        /* Math formatting classes */
+        .math-text {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            font-size: 1.15em;
+        }
+
+        .math-text-bold {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            font-weight: bold;
+            font-size: 1.15em;
+        }
+
+        .math-sub {
+            font-style: normal;
+            font-size: 0.7em;
+            vertical-align: sub;
+        }
+
+        .math-sup {
+            font-style: normal;
+            font-size: 0.7em;
+            vertical-align: super;
+        }
+
+        /* Fraction formatting */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            text-align: center;
+            vertical-align: middle;
+            margin: 0 0.3rem;
+            line-height: 1.2;
+        }
+        .fraction .numerator {
+            border-bottom: 2px solid currentColor;
+            padding: 0 0.2rem;
+        }
+        .fraction .denominator {
+            padding: 0 0.2rem;
+        }
+
+        /* Smooth transition for the answer section */
+        #answer-section {
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transform: translateY(-10px);
+        }
+
+        #answer-section.show {
+            max-height: 2500px;
+            opacity: 1;
+            margin-top: 1.5rem;
+            transform: translateY(0);
+        }
+
+        /* Animation for glowing dots (current flow) */
+        .glow-dot {
+            filter: drop-shadow(0 0 3px #fef08a) drop-shadow(0 0 6px #eab308);
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased p-4 md:p-8 flex items-center justify-center min-h-screen">
+
+    <div class="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        
+        <!-- Header Section -->
+        <div class="bg-gradient-to-r from-teal-700 to-teal-500 px-6 py-6 border-b border-teal-800 shadow-sm relative overflow-hidden">
+            <!-- Decorative background elements -->
+            <svg class="absolute opacity-10 top-0 left-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0,50 Q100,10 200,50 T400,50 T600,50 T800,50" fill="none" stroke="white" stroke-width="4"/>
+                <path d="M0,70 Q100,30 200,70 T400,70 T600,70 T800,70" fill="none" stroke="white" stroke-width="2"/>
+            </svg>
+            <h1 class="text-2xl md:text-3xl text-white font-bold text-center leading-relaxed drop-shadow-md relative z-10">
+                លំហាត់គំរូ ៖ ការបញ្ជូនអានុភាពអគ្គិសនី
+            </h1>
+        </div>
+
+        <div class="p-5 md:p-8 space-y-8">
+            
+            <!-- Problem Statement -->
+            <section class="relative">
+                <div class="absolute -left-4 top-0 w-1 h-full bg-teal-500 rounded-r-md"></div>
+                <h2 class="text-xl font-bold text-slate-800 mb-3 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    ប្រធានលំហាត់
+                </h2>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 text-lg leading-loose text-slate-700 shadow-sm ring-1 ring-slate-100">
+                    <p class="text-justify mb-4">
+                        ស្ថានីយអគ្គិសនីមួយបញ្ជូនអានុភាព <span class="font-bold text-teal-700">100 kW</span> និងតង់ស្យុង <span class="font-bold text-teal-700">20000 V</span> ទៅដល់រោងចក្រមួយដោយប្រើខ្សែកាបអគ្គិសនីដែលមានរេស៊ីស្តង់សរុប <span class="math-text font-bold text-red-600">R = 5.00 Ω</span> ។ គណនា៖
+                    </p>
+                    <ul class="list-none space-y-2 ml-4 md:ml-8">
+                        <li><span class="font-bold text-teal-800 mr-2">ក.</span> ចរន្តដែលឆ្លងកាត់ខ្សែកាបអគ្គិសនី</li>
+                        <li><span class="font-bold text-teal-800 mr-2">ខ.</span> អានុភាពខាតបង់ក្នុងខ្សែកាបអគ្គិសនី</li>
+                        <li><span class="font-bold text-teal-800 mr-2">គ.</span> អានុភាពអគ្គិសនីរោងចក្រទទួលបានពីស្ថានីយអគ្គិសនី។</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Simulator Section -->
+            <section class="bg-slate-50 p-2 md:p-4 rounded-xl border border-slate-200 shadow-inner">
+                <h3 class="text-center font-bold text-slate-600 mb-2">គំនូសបំព្រួញ ៖ ប្រព័ន្ធបញ្ជូនអគ្គិសនី</h3>
+                <div class="w-full overflow-hidden bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <svg viewBox="0 0 800 350" class="w-full h-auto bg-sky-50" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Background Ground -->
+                        <rect x="0" y="280" width="800" height="70" fill="#dcfce7" />
+                        <path d="M 0 280 Q 200 270 400 280 T 800 280" fill="none" stroke="#86efac" stroke-width="4"/>
+
+                        <!-- Transmission Lines -->
+                        <path d="M 180 120 L 620 120" stroke="#64748b" stroke-width="4" />
+                        <path d="M 180 180 L 620 180" stroke="#64748b" stroke-width="4" />
+
+                        <!-- Animated Current (Glowing Dots) -->
+                        <!-- Top Line (Flowing Left to Right) -->
+                        <circle cx="0" cy="120" r="6" fill="#eab308" class="glow-dot">
+                            <animate attributeName="cx" from="180" to="620" dur="2.5s" repeatCount="indefinite" />
+                        </circle>
+                        <circle cx="0" cy="120" r="6" fill="#eab308" class="glow-dot">
+                            <animate attributeName="cx" from="180" to="620" dur="2.5s" begin="1.25s" repeatCount="indefinite" />
+                        </circle>
+
+                        <!-- Bottom Line (Flowing Right to Left - return path) -->
+                        <circle cx="0" cy="180" r="6" fill="#fbbf24" class="glow-dot">
+                            <animate attributeName="cx" from="620" to="180" dur="2.5s" repeatCount="indefinite" />
+                        </circle>
+                        <circle cx="0" cy="180" r="6" fill="#fbbf24" class="glow-dot">
+                            <animate attributeName="cx" from="620" to="180" dur="2.5s" begin="1.25s" repeatCount="indefinite" />
+                        </circle>
+
+                        <!-- Resistance Label in the middle -->
+                        <rect x="340" y="130" width="120" height="40" rx="20" fill="#fee2e2" stroke="#ef4444" stroke-width="2" />
+                        <text x="400" y="156" font-family="Times New Roman" font-size="18" font-style="italic" font-weight="bold" fill="#b91c1c" text-anchor="middle">R = 5.00 Ω</text>
+
+                        <g transform="translate(40, 100)">
+                            <!-- Station Base -->
+                            <rect x="10" y="60" width="120" height="120" fill="#94a3b8" rx="4"/>
+                            <rect x="20" y="40" width="30" height="60" fill="#64748b" />
+                            <!-- Smokestack -->
+                            <rect x="80" y="10" width="20" height="50" fill="#cbd5e1" />
+                            <polygon points="75,10 105,10 90,-10" fill="#f8fafc" opacity="0.8"/>
+                            <polygon points="70,-5 110,-5 90,-25" fill="#f8fafc" opacity="0.6"/>
+                            <!-- Building Details -->
+                            <rect x="30" y="100" width="20" height="30" fill="#f1f5f9" />
+                            <rect x="60" y="100" width="20" height="30" fill="#f1f5f9" />
+                            <rect x="90" y="100" width="20" height="30" fill="#f1f5f9" />
+                            <path d="M 10 180 L 130 180" stroke="#475569" stroke-width="4"/>
+                            
+                            <!-- Label Box -->
+                            <rect x="-20" y="195" width="180" height="60" rx="8" fill="#ccfbf1" stroke="#14b8a6" />
+                            <text x="70" y="215" font-family="Battambang" font-weight="bold" font-size="14" fill="#0f766e" text-anchor="middle">ស្ថានីយអគ្គិសនី</text>
+                            <text x="70" y="235" font-family="Arial" font-size="12" fill="#0f766e" text-anchor="middle">(100 kW, 20000 V)</text>
+                        </g>
+
+                        <!-- Pylon (Left) -->
+                        <g transform="translate(160, 90)">
+                            <path d="M 20 190 L 40 20 L 60 190 M 25 150 L 55 150 M 30 100 L 50 100 M 35 60 L 45 60" stroke="#64748b" stroke-width="4" fill="none"/>
+                            <!-- Crossarms -->
+                            <line x1="0" y1="30" x2="80" y2="30" stroke="#64748b" stroke-width="4"/>
+                            <line x1="0" y1="90" x2="80" y2="90" stroke="#64748b" stroke-width="4"/>
+                            <!-- Insulators -->
+                            <circle cx="20" cy="30" r="5" fill="#ef4444"/>
+                            <circle cx="20" cy="90" r="5" fill="#ef4444"/>
+                        </g>
+
+                        <!-- Pylon (Right) -->
+                        <g transform="translate(560, 90)">
+                            <path d="M 20 190 L 40 20 L 60 190 M 25 150 L 55 150 M 30 100 L 50 100 M 35 60 L 45 60" stroke="#64748b" stroke-width="4" fill="none"/>
+                            <!-- Crossarms -->
+                            <line x1="0" y1="30" x2="80" y2="30" stroke="#64748b" stroke-width="4"/>
+                            <line x1="0" y1="90" x2="80" y2="90" stroke="#64748b" stroke-width="4"/>
+                            <!-- Insulators -->
+                            <circle cx="60" cy="30" r="5" fill="#ef4444"/>
+                            <circle cx="60" cy="90" r="5" fill="#ef4444"/>
+                        </g>
+
+                        <g transform="translate(620, 110)">
+                            <!-- Factory Base -->
+                            <rect x="0" y="50" width="140" height="120" fill="#bae6fd" stroke="#38bdf8" stroke-width="2"/>
+                            <!-- Sawtooth Roof -->
+                            <path d="M -5 50 L 30 10 L 30 50 L 65 10 L 65 50 L 100 10 L 100 50 L 135 10 L 145 50 Z" fill="#7dd3fc" stroke="#38bdf8" stroke-width="2"/>
+                            <!-- Door and Windows -->
+                            <rect x="20" y="110" width="30" height="60" fill="#0284c7" />
+                            <rect x="70" y="80" width="20" height="20" fill="#f0f9ff" />
+                            <rect x="100" y="80" width="20" height="20" fill="#f0f9ff" />
+                            <rect x="70" y="110" width="20" height="20" fill="#f0f9ff" />
+                            <rect x="100" y="110" width="20" height="20" fill="#f0f9ff" />
+                            <path d="M -10 170 L 150 170" stroke="#0284c7" stroke-width="4"/>
+                            
+                            <!-- Label Box -->
+                            <rect x="0" y="185" width="140" height="60" rx="8" fill="#e0f2fe" stroke="#0ea5e9" />
+                            <text x="70" y="210" font-family="Battambang" font-weight="bold" font-size="14" fill="#0369a1" text-anchor="middle">រោងចក្រ</text>
+                            <text x="70" y="230" font-family="Battambang" font-size="12" fill="#0369a1" text-anchor="middle">(ទទួលអានុភាព)</text>
+                        </g>
+                    </svg>
+                </div>
+            </section>
+
+            <div class="text-center pt-2">
+                <button id="toggleBtn" onclick="toggleAnswer()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center mx-auto ring-4 ring-teal-100 hover:ring-teal-200">
+                    <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span id="btnText">បង្ហាញចម្លើយ</span>
+                </button>
+            </div>
+
+            <section id="answer-section">
+                <div class="bg-slate-50 rounded-xl p-5 md:p-8 border border-slate-200 shadow-inner space-y-6">
+                    
+                    <h3 class="text-xl font-bold text-slate-800 border-b-2 border-teal-200 pb-3 mb-6">ដំណើរការដោះស្រាយ៖</h3>
+
+                    <!-- Answer A -->
+                    <div class="bg-white p-5 rounded-lg border-l-4 border-blue-500 shadow-sm">
+                        <h4 class="font-bold text-blue-800 text-lg mb-4">ក. រកចរន្តដែលឆ្លងកាត់ខ្សែកាបអគ្គិសនី (<span class="math-text">I</span>)</h4>
+                        
+                        <div class="space-y-3 text-slate-700 text-lg ml-2 md:ml-4">
+                            <p>តាមរូបមន្ត ៖ <span class="math-text mx-2 text-xl font-bold">P = V &times; I</span> &nbsp; &rArr; &nbsp;
+                                <span class="math-text text-xl font-bold text-blue-900 bg-blue-50 px-2 py-1 rounded">I = <span class="fraction"><span class="numerator">P</span><span class="denominator">V</span></span></span>
+                            </p>
+                            
+                            <p>ដោយមាន ៖</p>
+                            <ul class="list-disc ml-8 space-y-1 text-slate-600">
+                                <li><span class="math-text">P = 100 kW = 100,000 W</span></li>
+                                <li><span class="math-text">V = 20,000 V</span></li>
+                            </ul>
+                            
+                            <p class="pt-2">ជំនួសលេខ ៖</p>
+                            <div class="flex items-center text-xl bg-slate-50 p-3 rounded-lg border border-slate-100 w-max">
+                                <span class="math-text mr-2">I =</span>
+                                <div class="fraction">
+                                    <span class="numerator">100000</span>
+                                    <span class="denominator">20000</span>
+                                </div>
+                                <span class="mx-3">=</span>
+                                <span class="font-bold text-red-600">5 A</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Answer B -->
+                    <div class="bg-white p-5 rounded-lg border-l-4 border-amber-500 shadow-sm">
+                        <h4 class="font-bold text-amber-800 text-lg mb-4">ខ. រកអានុភាពខាតបង់ក្នុងខ្សែកាបអគ្គិសនី (<span class="math-text">P<sub class="math-sub">loss</sub></span>)</h4>
+                        
+                        <div class="space-y-3 text-slate-700 text-lg ml-2 md:ml-4">
+                            <p>តាមរូបមន្ត ៖ <span class="math-text text-xl font-bold text-amber-900 bg-amber-50 px-2 py-1 rounded">P<sub class="math-sub">loss</sub> = R &times; I<sup class="math-sup">2</sup></span></p>
+                            
+                            <p>ដោយមាន ៖</p>
+                            <ul class="list-disc ml-8 space-y-1 text-slate-600">
+                                <li><span class="math-text">R = 5.00 &Omega;</span></li>
+                                <li><span class="math-text">I = 5 A</span> (គណនាឃើញខាងលើ)</li>
+                            </ul>
+                            
+                            <p class="pt-2">ជំនួសលេខ ៖</p>
+                            <div class="flex items-center text-xl bg-slate-50 p-3 rounded-lg border border-slate-100 w-max">
+                                <span class="math-text mr-2">P<sub class="math-sub">loss</sub> =</span>
+                                <span>5.00 &times; 5<sup class="text-sm">2</sup></span>
+                                <span class="mx-3">=</span>
+                                <span>5.00 &times; 25</span>
+                                <span class="mx-3">=</span>
+                                <span class="font-bold text-red-600">125 W</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Answer C -->
+                    <div class="bg-white p-5 rounded-lg border-l-4 border-emerald-500 shadow-sm">
+                        <h4 class="font-bold text-emerald-800 text-lg mb-4">គ. រកអានុភាពអគ្គិសនីរោងចក្រទទួលបាន (<span class="math-text">P<sub class="math-sub">received</sub></span>)</h4>
+                        
+                        <div class="space-y-3 text-slate-700 text-lg ml-2 md:ml-4">
+                            <p class="bg-emerald-50 p-2 rounded-lg inline-block text-emerald-900 border border-emerald-100">
+                                <span class="font-bold">អានុភាពទទួលបាន</span> = <span class="font-bold">អានុភាពបញ្ជូនសរុប</span> - <span class="font-bold">អានុភាពខាតបង់</span>
+                            </p>
+                            
+                            <p class="mt-3">តាមរូបមន្ត ៖ <span class="math-text text-xl font-bold">P<sub class="math-sub">received</sub> = P - P<sub class="math-sub">loss</sub></span></p>
+                            
+                            <p class="pt-2">ជំនួសលេខ ៖</p>
+                            <div class="flex flex-col sm:flex-row sm:items-center text-xl bg-slate-50 p-3 rounded-lg border border-slate-100 w-full sm:w-max gap-2">
+                                <div>
+                                    <span class="math-text mr-2">P<sub class="math-sub">received</sub> =</span>
+                                    <span>100,000 - 125</span>
+                                </div>
+                                <div class="hidden sm:block mx-2">=</div>
+                                <div>
+                                    <span class="font-bold text-red-600">99,875 W</span>
+                                    <span class="mx-2 text-slate-500 text-base">ឬ</span>
+                                    <span class="font-bold text-red-600">99.875 kW</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        function toggleAnswer() {
+            const answerSection = document.getElementById('answer-section');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const button = document.getElementById('toggleBtn');
+            
+            // Toggle visibility class
+            answerSection.classList.toggle('show');
+            
+            if (answerSection.classList.contains('show')) {
+                btnText.textContent = 'លាក់ចម្លើយ';
+                button.classList.remove('bg-teal-600', 'hover:bg-teal-700', 'ring-teal-100', 'hover:ring-teal-200');
+                button.classList.add('bg-slate-700', 'hover:bg-slate-800', 'ring-slate-200', 'hover:ring-slate-300');
+                
+                // Switch icon to 'eye-off'
+                btnIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                `;
+
+                // Smooth scroll to answers
+                setTimeout(() => {
+                    answerSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300);
+
+            } else {
+                btnText.textContent = 'បង្ហាញចម្លើយ';
+                button.classList.remove('bg-slate-700', 'hover:bg-slate-800', 'ring-slate-200', 'hover:ring-slate-300');
+                button.classList.add('bg-teal-600', 'hover:bg-teal-700', 'ring-teal-100', 'hover:ring-teal-200');
+                
+                // Switch icon back to 'eye'
+                btnIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

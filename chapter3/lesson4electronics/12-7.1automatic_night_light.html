@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>សៀគ្វីអំពូលបំភ្លឺស្វ័យប្រវត្តិនៅពេលយប់ (Fixed Layout)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            margin: 0;
+            padding: 1rem;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .app-card {
+            width: 100%;
+            max-width: 1050px;
+            background: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+        .canvas-container {
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 25px 25px;
+            background-color: #fcfcfc;
+            border-bottom: 1px solid #e2e8f0;
+            position: relative;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 950px;
+            margin: 0 auto;
+        }
+        /* Custom Input Ranges */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            border: 2px solid white;
+        }
+        #lightSlider::-webkit-slider-thumb { background: #f59e0b; }
+        #potSlider::-webkit-slider-thumb { background: #3b82f6; }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+        .btn-toggle {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+        .btn-toggle:active { transform: scale(0.96); }
+    </style>
+</head>
+<body>
+
+    <div class="app-card">
+        <!-- Header -->
+        <div class="bg-blue-600 text-white p-5 text-center">
+            <h1 class="text-2xl font-bold tracking-wide">សៀគ្វីអំពូលបំភ្លឺស្វ័យប្រវត្តិនៅពេលយប់</h1>
+            <p class="text-blue-100 text-sm mt-1">ប្រើប្រាស់ LDR ត្រង់ស៊ីស្ទ័រ NPN (2N3904) និងរេស៊ីស្តង់អថេរ</p>
+        </div>
+
+        <!-- Schematic Canvas -->
+        <div class="canvas-container w-full flex justify-center">
+            <canvas id="circuitCanvas" width="900" height="500"></canvas>
+        </div>
+
+        <!-- Controls and Explanations -->
+        <div class="p-6 flex flex-col lg:flex-row gap-8 bg-white items-stretch">
+            
+            <!-- Left: Controls -->
+            <div class="flex flex-col gap-6 w-full lg:w-2/5 justify-center">
+                
+                <!-- Power Switch -->
+                <button id="btnPower" onclick="togglePower()" class="btn-toggle py-4 px-6 rounded-2xl font-bold text-lg text-white bg-slate-400 shadow-md flex justify-center items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span id="txtPower">កុងតាក់មេ (SW) : បើក (OFF)</span>
+                </button>
+
+                <!-- Light Slider -->
+                <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                    <label class="flex justify-between font-bold text-amber-800 mb-3">
+                        <span>កម្រិតពន្លឺ (Light)</span>
+                        <span id="lightValText">ងងឹត</span>
+                    </label>
+                    <input type="range" id="lightSlider" min="0" max="100" value="0">
+                    <div class="flex justify-between text-xs text-amber-600 mt-2 font-bold">
+                        <span>យប់ (ងងឹត)</span>
+                        <span>ថ្ងៃ (ភ្លឺ)</span>
+                    </div>
+                </div>
+
+                <!-- Potentiometer Slider -->
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                    <label class="flex justify-between font-bold text-blue-800 mb-3">
+                        <span>រេស៊ីស្តង់អថេរ (Pot)</span>
+                        <span id="potValText">50 kΩ</span>
+                    </label>
+                    <input type="range" id="potSlider" min="0" max="100" value="50">
+                    <div class="flex justify-between text-xs text-blue-600 mt-2 font-bold">
+                        <span>0 kΩ</span>
+                        <span>100 kΩ</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right: Dynamic Analysis -->
+            <div class="flex-1">
+                <div class="h-full bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col justify-center transition-colors duration-500" id="infoBox">
+                    <h3 class="text-indigo-700 font-bold text-lg mb-3 flex items-center gap-2 border-b border-indigo-100 pb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        ការសង្កេត និងវិភាគ៖
+                    </h3>
+                    <div id="explanationText" class="text-slate-700 text-[1.05rem] leading-relaxed font-bold">
+                        <!-- Text dynamically injected -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- Canvas & DOM ---
+        const canvas = document.getElementById('circuitCanvas');
+        const ctx = canvas.getContext('2d');
+        const btnPower = document.getElementById('btnPower');
+        const txtPower = document.getElementById('txtPower');
+        const lightSlider = document.getElementById('lightSlider');
+        const potSlider = document.getElementById('potSlider');
+        const lightValText = document.getElementById('lightValText');
+        const potValText = document.getElementById('potValText');
+        const explanationText = document.getElementById('explanationText');
+        const infoBox = document.getElementById('infoBox');
+
+        // --- State Variables ---
+        let isPowerOn = false;
+        let isLedOn = false;
+        let lightLevel = 0; 
+        let potValue = 50;  
+        
+        let dashOffset = 0;
+        let lastTime = performance.now();
+
+        // --- Logic Engine ---
+        function updateLogic() {
+            lightLevel = parseInt(lightSlider.value);
+            potValue = parseInt(potSlider.value);
+            
+            lightValText.innerText = lightLevel < 30 ? "ងងឹត" : (lightLevel > 70 ? "ភ្លឺ" : "ស្រទុំ");
+            potValText.innerText = potValue + " kΩ";
+
+            if (!isPowerOn) {
+                isLedOn = false;
+            } else {
+                const rTop = 10 + potValue; 
+                const rLDR = 500 * Math.exp(-0.06 * lightLevel) + 1; 
+                const vBase = 9.0 * (rLDR / (rTop + rLDR));
+                isLedOn = vBase >= 0.7;
+            }
+            updateUI();
+        }
+
+        function togglePower() {
+            isPowerOn = !isPowerOn;
+            updateLogic();
+        }
+
+        lightSlider.addEventListener('input', updateLogic);
+        potSlider.addEventListener('input', updateLogic);
+
+        // --- UI Updates ---
+        function updateUI() {
+            if (isPowerOn) {
+                btnPower.className = "btn-toggle py-4 px-6 rounded-2xl font-bold text-lg text-white bg-blue-600 shadow-md flex justify-center items-center gap-3";
+                txtPower.innerText = "កុងតាក់មេ (SW) : បិទ (ON)";
+            } else {
+                btnPower.className = "btn-toggle py-4 px-6 rounded-2xl font-bold text-lg text-white bg-slate-400 shadow-md flex justify-center items-center gap-3";
+                txtPower.innerText = "កុងតាក់មេ (SW) : បើក (OFF)";
+            }
+
+            if (!isPowerOn) {
+                infoBox.className = "h-full bg-slate-100 border border-slate-200 rounded-2xl p-6 flex flex-col justify-center transition-colors duration-500";
+                explanationText.innerHTML = `<span class="text-slate-500">កុងតាក់មេត្រូវបានផ្តាច់ (OFF)៖</span><br>សៀគ្វីគ្មានចរន្តអគ្គិសនីទេ។ អំពូល LED រលត់។`;
+            } else {
+                if (isLedOn) {
+                    infoBox.className = "h-full bg-blue-50 border border-blue-200 rounded-2xl p-6 flex flex-col justify-center transition-colors duration-500 shadow-[0_0_20px_rgba(59,130,246,0.1)]";
+                    explanationText.innerHTML = `<span class="text-blue-700">ពេលយប់ងងឹត៖</span><br>LDR គ្មានពន្លឺ រេស៊ីស្តង់វាធំ ធ្វើឱ្យចរន្តមិនអាចឆ្លងកាត់វាបានច្រើនទេ។ ចរន្តត្រូវបង្វែរចូលជើង B នៃត្រង់ស៊ីស្ទ័រ Q1 ធ្វើឱ្យវាដំណើរការទាញចរន្តកាត់ជើង C ទៅ E ទើប <span class="text-red-600">អំពូល LED ភ្លឺ</span>។`;
+                } else {
+                    infoBox.className = "h-full bg-amber-50 border border-amber-200 rounded-2xl p-6 flex flex-col justify-center transition-colors duration-500 shadow-[0_0_20px_rgba(245,158,11,0.1)]";
+                    explanationText.innerHTML = `<span class="text-amber-700">ពេលថ្ងៃភ្លឺ៖</span><br>LDR ត្រូវពន្លឺ រេស៊ីស្តង់វាចុះខ្សោយខ្លាំង។ ចរន្តអគ្គិសនីភាគច្រើនហូរឆ្លងកាត់ LDR ចុះម៉ាស់ (GND)។ ជើង B ខ្វះចរន្ត ធ្វើឱ្យ Q1 មិនដំណើរការ ទើប <span class="text-slate-500">អំពូល LED រលត់</span>។`;
+                }
+            }
+        }
+
+        // --- Exact Coordinate Definitions ---
+        const N_BAT_VCC = {x: 100, y: 120};
+        const N_SW_IN   = {x: 125, y: 120};
+        const N_SW_OUT  = {x: 175, y: 120};
+        const N_SPLIT_1 = {x: 300, y: 120};
+        const N_R1_IN   = {x: 365, y: 120};
+        const N_R1_OUT  = {x: 435, y: 120};
+        const N_LED_IN  = {x: 490, y: 120};
+        const N_LED_OUT = {x: 550, y: 120};
+        const N_Q1_C_TOP= {x: 665, y: 120};
+        const N_Q1_C    = {x: 665, y: 240}; // Collector pin end
+
+        const N_SPLIT_2 = {x: 300, y: 280};
+        const N_R2_IN   = {x: 335, y: 280};
+        const N_R2_OUT  = {x: 405, y: 280};
+        const N_POT_IN  = {x: 445, y: 280};
+        const N_POT_OUT = {x: 515, y: 280};
+        const N_SPLIT_3 = {x: 550, y: 280};
+        const N_Q1_B    = {x: 620, y: 280}; // Base pin end
+
+        const N_LDR_TOP = {x: 550, y: 280};
+        const N_LDR_BOT = {x: 550, y: 420};
+
+        const N_Q1_E    = {x: 665, y: 320}; // Emitter pin end
+        const N_Q1_E_BOT= {x: 665, y: 420};
+        const N_BAT_GND = {x: 100, y: 420};
+
+        // --- Drawing Helpers ---
+        const C_WIRE = '#334155';
+        const C_CURRENT = '#f59e0b';
+
+        function drawSolidWire(points) {
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for(let i=1; i<points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+            ctx.strokeStyle = C_WIRE;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'square'; // Ensures tight flush corners
+            ctx.lineJoin = 'miter';
+            ctx.stroke();
+        }
+
+        function drawAnimWire(points) {
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for(let i=1; i<points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+            ctx.strokeStyle = C_CURRENT;
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.setLineDash([8, 14]);
+            ctx.lineDashOffset = dashOffset;
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawDot(x, y) {
+            ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2); ctx.fillStyle = C_WIRE; ctx.fill();
+        }
+
+        function drawBattery(x, y) {
+            ctx.save(); ctx.translate(x, y);
+            ctx.strokeStyle = C_WIRE; ctx.lineWidth = 3;
+            // Draw cells (Centered at Y=270, spanning from 120 to 420 via external lines)
+            ctx.beginPath();
+            ctx.moveTo(0, -150); ctx.lineTo(0, -20);
+            ctx.moveTo(-20, -20); ctx.lineTo(20, -20); // +
+            ctx.lineWidth = 6; ctx.moveTo(-10, 0); ctx.lineTo(10, 0); // -
+            ctx.lineWidth = 3;
+            ctx.moveTo(-20, 20); ctx.lineTo(20, 20); // +
+            ctx.lineWidth = 6; ctx.moveTo(-10, 40); ctx.lineTo(10, 40); // -
+            ctx.lineWidth = 3;
+            ctx.moveTo(0, 40); ctx.lineTo(0, 150);
+            ctx.stroke();
+
+            ctx.font = "bold 14px Arial"; ctx.fillStyle = C_WIRE; ctx.textAlign = "right";
+            ctx.fillText("BAT1", -30, 5); ctx.fillText("9V", -30, 20);
+            ctx.fillText("+", -25, -20); ctx.fillText("-", -25, 45);
+            ctx.restore();
+        }
+
+        function drawSwitch(x, y, isClosed) {
+            ctx.save(); ctx.translate(x, y);
+            ctx.strokeStyle = C_WIRE; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(-25, 0); ctx.lineTo(-15, 0); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(15, 0); ctx.lineTo(25, 0); ctx.stroke();
+            
+            ctx.beginPath(); ctx.arc(-15, 0, 3, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.arc(15, 0, 3, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill(); ctx.stroke();
+            
+            ctx.beginPath(); ctx.moveTo(-15, 0); ctx.lineTo(isClosed ? 15 : 10, isClosed ? 0 : -18); ctx.stroke();
+            ctx.font = "bold 14px Arial"; ctx.fillStyle = C_WIRE; ctx.textAlign = "center"; ctx.fillText("SW", 0, -25);
+            ctx.restore();
+        }
+
+        function drawResistor(x, y, label) {
+            ctx.save(); ctx.translate(x, y);
+            ctx.strokeStyle = C_WIRE; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(-35, 0); ctx.lineTo(-20, 0); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(20, 0); ctx.lineTo(35, 0); ctx.stroke();
+            
+            ctx.beginPath(); ctx.moveTo(-20, 0); ctx.lineTo(-15, -8); ctx.lineTo(-5, 8); 
+            ctx.lineTo(5, -8); ctx.lineTo(15, 8); ctx.lineTo(20, 0); ctx.stroke();
+            
+            ctx.font = "bold 14px Arial"; ctx.fillStyle = C_WIRE; ctx.textAlign = "center"; ctx.fillText(label, 0, -15);
+            ctx.restore();
+        }
+
+        function drawPot(x, y, label, valPct) {
+            ctx.save(); ctx.translate(x, y);
+            ctx.strokeStyle = C_WIRE; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(-35, 0); ctx.lineTo(-20, 0); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(20, 0); ctx.lineTo(35, 0); ctx.stroke();
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath(); ctx.rect(-20, -8, 40, 16); ctx.fill(); ctx.stroke();
+            
+            ctx.beginPath(); ctx.moveTo(0, -25); ctx.lineTo(0, -8); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-4, -12); ctx.lineTo(4, -12); ctx.lineTo(0, -8); ctx.closePath(); 
+            ctx.fillStyle = C_WIRE; ctx.fill();
+            
+            ctx.font = "bold 14px Arial"; ctx.fillStyle = C_WIRE; ctx.textAlign = "center"; 
+            ctx.fillText("100k", 0, 25);
+            ctx.fillStyle = '#3b82f6'; ctx.fillText(valPct + "%", 0, -30);
+            ctx.restore();
+        }
+
+        function drawLED(x, y, isOn) {
+            ctx.save(); ctx.translate(x, y);
+            ctx.strokeStyle = C_WIRE; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(-30, 0); ctx.lineTo(-15, 0); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(15, 0); ctx.lineTo(30, 0); ctx.stroke();
+
+            if (isOn) {
+                ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.25)'; ctx.fill();
+                ctx.shadowColor = '#ef4444'; ctx.shadowBlur = 15;
+            }
+
+            ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2);
+            ctx.fillStyle = isOn ? '#ef4444' : '#ffffff'; ctx.fill(); ctx.stroke(); ctx.shadowBlur = 0;
+            
+            ctx.beginPath(); ctx.moveTo(-8, -8); ctx.lineTo(8, 0); ctx.lineTo(-8, 8); ctx.closePath();
+            ctx.fillStyle = isOn ? '#fff' : C_WIRE; ctx.fill();
+            ctx.beginPath(); ctx.moveTo(8, -8); ctx.lineTo(8, 8); ctx.strokeStyle = isOn ? '#fff' : C_WIRE; ctx.stroke();
+
+            ctx.strokeStyle = C_WIRE; ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(5, -20); ctx.lineTo(12, -27); ctx.moveTo(12, -27); ctx.lineTo(7, -27); ctx.moveTo(12, -27); ctx.lineTo(12, -22);
+            ctx.moveTo(12, -15); ctx.lineTo(19, -22); ctx.moveTo(19, -22); ctx.lineTo(14, -22); ctx.moveTo(19, -22); ctx.lineTo(19, -17);
+            ctx.stroke();
+
+            ctx.font = "bold 14px Arial"; ctx.fillStyle = C_WIRE; ctx.textAlign = "center"; ctx.fillText("LED", 0, -35);
+            ctx.restore();
+        }
+
+        function drawLDR(x, y, lightLvl) {
+            ctx.save(); ctx.translate(x, y);
+            ctx.strokeStyle = C_WIRE; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(0, -70); ctx.lineTo(0, -18); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, 18); ctx.lineTo(0, 70); ctx.stroke();
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, -12); ctx.lineTo(-6, -6); ctx.lineTo(6, 0); ctx.lineTo(-6, 6); ctx.lineTo(0, 12); ctx.stroke();
+
+            ctx.globalAlpha = 0.2 + (lightLvl / 100) * 0.8;
+            ctx.strokeStyle = '#f59e0b'; 
+            ctx.beginPath();
+            ctx.moveTo(-30, -20); ctx.lineTo(-15, -5);
+            ctx.moveTo(-20, -25); ctx.lineTo(-15, -20); ctx.moveTo(-25, -20); ctx.lineTo(-20, -15);
+            ctx.moveTo(-30, 0); ctx.lineTo(-15, 15);
+            ctx.moveTo(-20, -5); ctx.lineTo(-15, 0); ctx.moveTo(-25, 0); ctx.lineTo(-20, 5);
+            ctx.stroke();
+            ctx.globalAlpha = 1.0;
+
+            ctx.strokeStyle = C_WIRE; ctx.beginPath();
+            ctx.moveTo(-15, 70); ctx.lineTo(15, 70);
+            ctx.moveTo(-8, 76); ctx.lineTo(8, 76);
+            ctx.moveTo(-3, 82);  ctx.lineTo(3, 82);
+            ctx.stroke();
+
+            ctx.font = "bold 14px Arial"; ctx.fillStyle = C_WIRE; ctx.textAlign = "left"; ctx.fillText("LDR", 25, 5);
+            ctx.restore();
+        }
+
+        function drawTransistor(x, y) {
+            ctx.save(); ctx.translate(x, y);
+            ctx.strokeStyle = C_WIRE; ctx.lineWidth = 3;
+            
+            ctx.beginPath(); ctx.moveTo(-30, 0); ctx.lineTo(-10, 0); ctx.stroke(); // Base wire
+            ctx.beginPath(); ctx.moveTo(-10, -20); ctx.lineTo(-10, 20); // Vert bar
+            ctx.moveTo(-10, -10); ctx.lineTo(15, -30); ctx.lineTo(15, -40); // Collector
+            ctx.moveTo(-10, 10);  ctx.lineTo(15, 30);  ctx.lineTo(15, 40);  // Emitter
+            ctx.stroke();
+
+            ctx.beginPath(); ctx.arc(0, 0, 25, 0, Math.PI*2); ctx.stroke();
+
+            ctx.translate(5, 22); ctx.rotate(Math.atan2(20, 25));
+            ctx.beginPath(); ctx.moveTo(8, 0); ctx.lineTo(-6, -5); ctx.lineTo(-6, 5); ctx.closePath();
+            ctx.fillStyle = C_WIRE; ctx.fill();
+
+            ctx.restore();
+            
+            ctx.font = "bold 14px Arial"; ctx.fillStyle = C_WIRE; ctx.textAlign = "left";
+            ctx.fillText("Q1", x + 30, y - 5);
+            ctx.font = "12px Arial"; ctx.fillText("2N3904", x + 30, y + 10);
+        }
+
+        // --- Main Render Loop ---
+        function render(time) {
+            let dt = (time - lastTime) / 1000;
+            if (dt > 0.1) dt = 0.1;
+            lastTime = time;
+            dashOffset -= 40 * dt;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw perfectly connected base wires
+            drawSolidWire([N_BAT_VCC, N_SW_IN]);
+            drawSolidWire([N_SW_OUT, N_SPLIT_1, N_R1_IN]);
+            drawSolidWire([N_R1_OUT, N_LED_IN]);
+            drawSolidWire([N_LED_OUT, N_Q1_C_TOP, N_Q1_C]);
+            drawSolidWire([N_SPLIT_1, N_SPLIT_2, N_R2_IN]);
+            drawSolidWire([N_R2_OUT, N_POT_IN]);
+            drawSolidWire([N_POT_OUT, N_SPLIT_3, N_Q1_B]);
+            drawSolidWire([N_Q1_E, N_Q1_E_BOT, N_BAT_GND]);
+
+            drawDot(N_SPLIT_1.x, N_SPLIT_1.y);
+            drawDot(N_SPLIT_2.x, N_SPLIT_2.y);
+            drawDot(N_SPLIT_3.x, N_SPLIT_3.y);
+            drawDot(N_LDR_BOT.x, N_LDR_BOT.y);
+
+            // 2. Draw components perfectly fitted
+            drawBattery(100, 270);
+            drawSwitch(150, 120, isPowerOn);
+            drawResistor(400, 120, "R1 220R");
+            drawLED(520, 120, isLedOn);
+            drawResistor(370, 280, "R2 10k");
+            drawPot(480, 280, "100k", potValue);
+            drawLDR(550, 350, lightLevel);
+            drawTransistor(650, 280);
+
+            // 3. Overlay animated current
+            if (isPowerOn) {
+                drawAnimWire([N_BAT_VCC, N_SW_IN]);
+                drawAnimWire([N_SW_OUT, N_SPLIT_1]);
+                drawAnimWire([N_SPLIT_1, N_SPLIT_2, N_R2_IN]);
+                drawAnimWire([N_R2_OUT, N_POT_IN]);
+                drawAnimWire([N_POT_OUT, N_SPLIT_3]);
+                
+                if (isLedOn) {
+                    drawAnimWire([N_SPLIT_1, N_R1_IN]);
+                    drawAnimWire([N_R1_OUT, N_LED_IN]);
+                    drawAnimWire([N_LED_OUT, N_Q1_C_TOP, N_Q1_C]);
+                    drawAnimWire([N_SPLIT_3, N_Q1_B]);
+                    drawAnimWire([N_Q1_E, N_Q1_E_BOT, N_LDR_BOT, N_BAT_GND]);
+                    drawAnimWire([N_SPLIT_3, {x: 550, y: 332}]); // Small leakage to LDR
+                    drawAnimWire([{x: 550, y: 368}, N_LDR_BOT]);
+                } else {
+                    drawAnimWire([N_SPLIT_3, {x: 550, y: 332}]);
+                    drawAnimWire([{x: 550, y: 368}, N_LDR_BOT, N_BAT_GND]);
+                }
+            }
+
+            requestAnimationFrame(render);
+        }
+
+        // Init
+        updateLogic();
+        requestAnimationFrame(render);
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>មេរៀនទី២វ៉ុលម៉ែត្រទ្រនិច</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #e8f5e9; /* ផ្ទៃពណ៌បៃតងស្រាល */
+            color: #1f2937;
+        }
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #cbd5e1;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #10b981;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+        }
+        .needle {
+            transition: transform 0.3s cubic-bezier(0.4, 2.0, 0.2, 0.9);
+            transform-origin: 150px 180px; /* ចំណុចកណ្តាលនៃការបង្វិល */
+        }
+        .scale-text {
+            font-family: sans-serif;
+            font-size: 10px;
+            fill: #475569;
+            user-select: none;
+        }
+        /* Animation សម្រាប់បង្ហាញដំណោះស្រាយ */
+        .solution-enter {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.5s ease-out;
+        }
+        .solution-enter-active {
+            max-height: 500px;
+            opacity: 1;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <header class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-emerald-700 mb-2">ពិសោធន៍វ៉ុលម៉ែត្រទ្រនិច (Analog Voltmeter)</h1>
+        <p class="text-gray-600 text-lg">ការអានតម្លៃតង់ស្យុងដោយប្រើរូបមន្ត V = Cal × (n / n₀)</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- ========================================== -->
+        <!-- VOLTMETER SIMULATOR SECTION -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 shadow-lg border border-green-200">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-4 pb-2 border-b border-gray-200">វ៉ុលម៉ែត្របង្ហាញតម្លៃជាក់ស្តែង</h2>
+            
+            <!-- ផ្ទាំងគំនូរវ៉ុលម៉ែត្រ (SVG) -->
+            <div class="flex justify-center mb-6 bg-slate-50 rounded-xl p-4 border border-slate-200">
+                <svg width="300" height="200" viewBox="0 0 300 200">
+                    <!-- ផ្ទៃខាងក្រោយវ៉ុលម៉ែត្រ -->
+                    <path d="M 30 180 A 120 120 0 0 1 270 180" fill="none" stroke="#cbd5e1" stroke-width="30"/>
+                    <path d="M 30 180 A 120 120 0 0 1 270 180" fill="none" stroke="#f8fafc" stroke-width="26"/>
+                    
+                    <!-- គំនូសក្រិត (Scale Ticks) បង្កើតដោយ JS -->
+                    <g id="scale-ticks"></g>
+                    <g id="scale-labels"></g>
+
+                    <!-- អក្សរ V នៅកណ្តាល -->
+                    <text x="150" y="140" text-anchor="middle" font-size="24" font-weight="bold" fill="#0f172a" font-family="sans-serif">V</text>
+                    <text x="150" y="155" text-anchor="middle" font-size="10" fill="#64748b" font-family="sans-serif">n₀ = 100</text>
+
+                    <!-- ទ្រនិច (Needle) -->
+                    <g id="needleGroup" class="needle" style="transform: rotate(-60deg);">
+                        <polygon points="146,180 150,40 154,180" fill="#ef4444"/>
+                        <circle cx="150" cy="180" r="8" fill="#1e293b"/>
+                        <circle cx="150" cy="180" r="3" fill="#cbd5e1"/>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- ផ្ទាំងបញ្ជា (Controls) -->
+            <div class="space-y-6">
+                <!-- ជ្រើសរើសកាលីប (Caliber) -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">ជ្រើសរើសកាលីប (Cal)</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="caliber" value="10" checked class="w-5 h-5 text-emerald-600 focus:ring-emerald-500">
+                            <span class="text-lg">10 V</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="caliber" value="5" class="w-5 h-5 text-emerald-600 focus:ring-emerald-500">
+                            <span class="text-lg">5 V</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="caliber" value="3" class="w-5 h-5 text-emerald-600 focus:ring-emerald-500">
+                            <span class="text-lg">3 V</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- អូសទាញទីតាំងទ្រនិច (n) -->
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <label class="text-sm font-bold text-gray-700">ចំនួនប្រឡោះក្រិតទ្រនិចចង្អុល (n)</label>
+                        <span class="text-lg font-bold text-blue-600"><span id="n_disp">0</span> / 100</span>
+                    </div>
+                    <input type="range" id="n_slider" min="0" max="100" value="0" step="1" class="slider mt-2">
+                </div>
+            </div>
+            
+            <!-- លទ្ធផលគណនា -->
+            <div class="mt-6 bg-green-50 rounded-lg p-4 border border-green-200 shadow-inner">
+                <h3 class="text-sm text-gray-500 mb-1">ការគណនាតង់ស្យុងជាក់ស្តែង៖</h3>
+                <div class="text-lg font-mono text-gray-700">
+                    V = Cal × (n / n₀)
+                </div>
+                <div class="text-lg font-mono text-blue-700 my-1" id="calc_step">
+                    V = 10 V × (0 / 100)
+                </div>
+                <div class="text-2xl font-bold text-emerald-700 border-t border-green-200 pt-2 mt-2" id="final_v">
+                    V = 0.00 V
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- EXERCISE SECTION -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 shadow-lg border border-green-200 flex flex-col">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-4 pb-2 border-b border-gray-200">លំហាត់គំរូ</h2>
+            
+            <div class="bg-amber-50 p-5 rounded-lg border-l-4 border-amber-500 mb-6 flex-grow">
+                <h3 class="font-bold text-amber-800 mb-2">ប្រធានលំហាត់៖</h3>
+                <p class="text-gray-700 leading-relaxed text-justify">
+                    វ៉ុលម៉ែត្រមួយមានកាលីប <strong class="text-emerald-600">10 V, 5 V, 3 V</strong>។ វ៉ុលម៉ែត្រនោះមានប្រឡោះក្រិតសរុប <strong class="text-blue-600">n₀ = 100</strong>។ ក្នុងការពិសោធន៍គេឃើញទ្រនិចមានលំអាកប្រឡោះក្រិត <strong class="text-rose-600">25, 80 និង 15</strong> ប្រឡោះក្រិតរៀងគ្នា។ <br><br>
+                    <strong>សំណួរ៖</strong> ចូរគណនាតង់ស្យុងដែលវាស់បានដោយប្រើកាលីបនីមួយៗ។
+                </p>
+            </div>
+
+            <!-- ប៊ូតុងបង្ហាញចម្លើយ -->
+            <button id="toggleSolutionBtn" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors flex justify-center items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                <span id="btnSolutionText">បង្ហាញដំណោះស្រាយ</span>
+            </button>
+
+            <!-- ដំណោះស្រាយ (លាក់ទុកជាស្រេច) -->
+            <div id="solutionBox" class="solution-enter bg-slate-50 border border-slate-200 rounded-lg p-5">
+                <h3 class="font-bold text-emerald-700 border-b border-slate-300 pb-2 mb-3">ដំណោះស្រាយ៖</h3>
+                <p class="mb-2 text-gray-700 font-bold">គណនាតង់ស្យុងដែលវាស់បាន (V) តាមរូបមន្ត V = Cal × (n / n₀)</p>
+                <ul class="space-y-4 text-gray-700">
+                    <li class="bg-white p-3 rounded shadow-sm border border-slate-100">
+                        <span class="font-bold text-slate-800">១. ចំពោះកាលីប 10 V ទ្រនិចចង្អុល 25 ប្រឡោះក្រិត៖</span><br>
+                        គេបាន V₁ = 10 V × (25 / 100) = <strong class="text-emerald-600 text-lg">2.5 V</strong>
+                    </li>
+                    <li class="bg-white p-3 rounded shadow-sm border border-slate-100">
+                        <span class="font-bold text-slate-800">២. ចំពោះកាលីប 5 V ទ្រនិចចង្អុល 80 ប្រឡោះក្រិត៖</span><br>
+                        គេបាន V₂ = 5 V × (80 / 100) = <strong class="text-emerald-600 text-lg">4 V</strong>
+                    </li>
+                    <li class="bg-white p-3 rounded shadow-sm border border-slate-100">
+                        <span class="font-bold text-slate-800">៣. ចំពោះកាលីប 3 V ទ្រនិចចង្អុល 15 ប្រឡោះក្រិត៖</span><br>
+                        គេបាន V₃ = 3 V × (15 / 100) = <strong class="text-emerald-600 text-lg">0.45 V</strong>
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- SVG Scale Generation ---
+        const ticksGroup = document.getElementById('scale-ticks');
+        const labelsGroup = document.getElementById('scale-labels');
+        const cx = 150, cy = 180, r = 120;
+        const totalDivisions = 100;
+        const startAngle = -60; // គិតជាដឺក្រេ ធៀបនឹងអ័ក្សឈរ
+        const endAngle = 60;
+        const angleRange = endAngle - startAngle;
+
+        for (let i = 0; i <= totalDivisions; i++) {
+            // បម្លែង i (0-100) ទៅជាមុំ
+            let theta = startAngle + (i / totalDivisions) * angleRange;
+            // បម្លែងមុំទៅជា radian ដោយដក 90 ដឺក្រេ ដើម្បីឱ្យ 0 ត្រូវនឹងអ័ក្ស Y ខាងលើ
+            let rad = (theta - 90) * Math.PI / 180; 
+            
+            // ប្រវែងគំនូស
+            let tickLength = (i % 10 === 0) ? 15 : (i % 5 === 0 ? 10 : 5);
+            let rInner = r - tickLength;
+            
+            let x1 = cx + r * Math.cos(rad);
+            let y1 = cy + r * Math.sin(rad);
+            let x2 = cx + rInner * Math.cos(rad);
+            let y2 = cy + rInner * Math.sin(rad);
+            
+            // គូរគំនូស
+            let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", x1);
+            line.setAttribute("y1", y1);
+            line.setAttribute("x2", x2);
+            line.setAttribute("y2", y2);
+            line.setAttribute("stroke", (i % 10 === 0) ? "#0f172a" : "#64748b");
+            line.setAttribute("stroke-width", (i % 10 === 0) ? "2" : "1");
+            ticksGroup.appendChild(line);
+
+            // ដាក់លេខរៀងរាល់ 10 ក្រិត
+            if (i % 10 === 0) {
+                let rText = r - 25; // រំកិលលេខចូលក្នុង
+                let xt = cx + rText * Math.cos(rad);
+                let yt = cy + rText * Math.sin(rad) + 4; // បូក 4 សម្រួលចំណុចកណ្តាលអក្សរ
+                
+                let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", xt);
+                text.setAttribute("y", yt);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("class", "scale-text");
+                text.textContent = i;
+                labelsGroup.appendChild(text);
+            }
+        }
+
+        // --- Simulator Logic ---
+        const nSlider = document.getElementById('n_slider');
+        const nDisp = document.getElementById('n_disp');
+        const caliberRadios = document.getElementsByName('caliber');
+        const calcStep = document.getElementById('calc_step');
+        const finalV = document.getElementById('final_v');
+        const needle = document.getElementById('needleGroup');
+        const n0 = 100;
+
+        function updateSimulator() {
+            let n = parseFloat(nSlider.value);
+            nDisp.textContent = n;
+            
+            // យកតម្លៃ Caliber ដែលបានជ្រើសរើស
+            let cal = 10;
+            for(let radio of caliberRadios) {
+                if(radio.checked) {
+                    cal = parseFloat(radio.value);
+                    break;
+                }
+            }
+
+            // គណនា V
+            let v = cal * (n / n0);
+
+            // អាប់ដេតអត្ថបទ
+            calcStep.textContent = `V = ${cal} V × (${n} / ${n0})`;
+            // កំណត់ក្បៀស 2 ខ្ទង់ លើកលែងតែវាកត់លក្ខណៈជាលេខគត់
+            finalV.textContent = `V = ${v % 1 === 0 ? v : v.toFixed(2)} V`;
+
+            // បង្វិលទ្រនិច
+            let angle = startAngle + (n / n0) * angleRange;
+            needle.style.transform = `rotate(${angle}deg)`;
+        }
+
+        // Add Event Listeners
+        nSlider.addEventListener('input', updateSimulator);
+        for(let radio of caliberRadios) {
+            radio.addEventListener('change', updateSimulator);
+        }
+
+        // --- Toggle Solution Logic ---
+        const toggleBtn = document.getElementById('toggleSolutionBtn');
+        const solutionBox = document.getElementById('solutionBox');
+        const btnSolutionText = document.getElementById('btnSolutionText');
+        let isSolutionOpen = false;
+
+        toggleBtn.addEventListener('click', () => {
+            isSolutionOpen = !isSolutionOpen;
+            if (isSolutionOpen) {
+                solutionBox.classList.add('solution-enter-active');
+                btnSolutionText.textContent = "លាក់ដំណោះស្រាយ";
+                toggleBtn.classList.replace('bg-emerald-500', 'bg-slate-500');
+                toggleBtn.classList.replace('hover:bg-emerald-600', 'hover:bg-slate-600');
+            } else {
+                solutionBox.classList.remove('solution-enter-active');
+                btnSolutionText.textContent = "បង្ហាញដំណោះស្រាយ";
+                toggleBtn.classList.replace('bg-slate-500', 'bg-emerald-500');
+                toggleBtn.classList.replace('hover:bg-slate-600', 'hover:bg-emerald-600');
+            }
+        });
+
+        // Initialize Call
+        updateSimulator();
+    </script>
+</body>
+</html>
+```<ElicitationsGroup></ElicitationsGroup>

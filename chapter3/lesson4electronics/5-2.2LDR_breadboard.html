@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDR Breadboard Circuit Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f0f9ff; /* Light blue tint */
+        }
+
+        /* SVG Styles */
+        .wire-red { stroke: #ef4444; stroke-width: 4; fill: none; stroke-linecap: round; }
+        .wire-black { stroke: #1f2937; stroke-width: 4; fill: none; stroke-linecap: round; }
+        .wire-jumper { stroke: #10b981; stroke-width: 3; fill: none; stroke-linecap: round; }
+        
+        .hole { fill: #e2e8f0; stroke: #cbd5e1; stroke-width: 1; }
+        .rail-red { stroke: #ef4444; stroke-width: 2; }
+        .rail-blue { stroke: #3b82f6; stroke-width: 2; }
+
+        /* Component Effects */
+        .led-dome { transition: fill 0.2s; }
+        .led-glow-effect {
+            filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.9)) drop-shadow(0 0 24px rgba(239, 68, 68, 0.7));
+            transition: opacity 0.2s ease-out;
+        }
+
+        /* Flashlight Beam */
+        .light-beam {
+            transition: opacity 0.2s ease-out;
+            pointer-events: none;
+        }
+
+        /* Current Animation */
+        @keyframes flowAnimation {
+            to { stroke-dashoffset: -30; }
+        }
+        .current-flow {
+            stroke: #fbbf24; /* Amber/Yellow for electron flow */
+            stroke-width: 3;
+            stroke-dasharray: 6 9;
+            stroke-linecap: round;
+            fill: none;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .current-flow.active {
+            opacity: 1;
+            animation: flowAnimation 0.6s linear infinite;
+        }
+
+        /* Custom UI Controls */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 26px;
+            width: 26px;
+            border-radius: 50%;
+            background: #f59e0b; /* Amber */
+            cursor: pointer;
+            margin-top: -10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+            border: 2px solid white;
+        }
+        input[type=range]:disabled::-webkit-slider-thumb {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+
+        /* Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3b82f6; /* Blue */
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 md:p-8">
+
+    <div class="bg-white rounded-3xl shadow-2xl max-w-6xl w-full overflow-hidden border border-blue-50 flex flex-col lg:flex-row">
+        
+        <!-- Left Side: Breadboard Simulation -->
+        <div class="p-6 flex-[3] flex flex-col items-center bg-slate-50 border-b lg:border-b-0 lg:border-r border-slate-200 relative">
+            <h2 class="text-2xl font-bold text-slate-800 mb-2 w-full text-center">តម្លើងសៀគ្វី LDR លើបន្ទះ (Breadboard)</h2>
+            <p class="text-sm text-slate-500 mb-6 text-center">សង្កេតមើលចរន្តអគ្គិសនីពេលមានពន្លឺប៉ះ LDR</p>
+
+            <div class="w-full relative bg-white rounded-xl shadow-inner overflow-hidden flex justify-center border border-slate-200" style="min-height: 400px;">
+                <svg viewBox="0 0 800 500" class="w-full h-full drop-shadow-md">
+                    <defs>
+                        <!-- Breadboard Hole Pattern -->
+                        <pattern id="hole-pattern" x="0" y="0" width="15" height="15" patternUnits="userSpaceOnUse">
+                            <rect x="0" y="0" width="15" height="15" fill="none" />
+                            <circle cx="7.5" cy="7.5" r="2.5" class="hole" />
+                        </pattern>
+                        <radialGradient id="table-glow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#ffffff"/>
+                            <stop offset="100%" stop-color="#f8fafc"/>
+                        </radialGradient>
+                        <linearGradient id="beam-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="rgba(253, 224, 71, 0.8)"/> <!-- Yellow-300 -->
+                            <stop offset="100%" stop-color="rgba(253, 224, 71, 0)"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Background -->
+                    <rect width="100%" height="100%" fill="url(#table-glow)"/>
+
+                    <!-- BATTERY 9V -->
+                    <g transform="translate(40, 250)">
+                        <rect x="0" y="0" width="110" height="70" rx="6" fill="#1e293b" stroke="#0f172a" stroke-width="2"/>
+                        <rect x="15" y="-10" width="20" height="10" rx="2" fill="#94a3b8"/>
+                        <rect x="75" y="-10" width="20" height="10" rx="2" fill="#94a3b8"/>
+                        <circle cx="25" cy="-10" r="5" fill="#cbd5e1"/>
+                        <path d="M78,-10 L92,-10 L85,-15 Z" fill="#cbd5e1"/>
+                        <text x="55" y="30" class="text-xl font-bold font-sans" fill="#f8fafc" text-anchor="middle">9V</text>
+                        <text x="55" y="55" class="text-sm font-bold" fill="#f8fafc" text-anchor="middle">ថ្មពិល</text>
+                        <text x="25" y="15" class="text-lg font-bold font-sans" fill="#ef4444" text-anchor="middle">+</text>
+                        <text x="85" y="15" class="text-lg font-bold font-sans" fill="#3b82f6" text-anchor="middle">-</text>
+                    </g>
+
+                    <!-- BREADBOARD -->
+                    <g transform="translate(180, 100)">
+                        <rect x="0" y="0" width="580" height="300" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" filter="drop-shadow(0 10px 15px rgba(0,0,0,0.1))"/>
+                        <!-- Top Power Rails -->
+                        <line x1="20" y1="20" x2="560" y2="20" class="rail-red"/>
+                        <rect x="20" y="27" width="540" height="15" fill="url(#hole-pattern)"/>
+                        <line x1="20" y1="55" x2="560" y2="55" class="rail-blue"/>
+                        <rect x="20" y="62" width="540" height="15" fill="url(#hole-pattern)"/>
+
+                        <!-- Middle Terminal Strips -->
+                        <rect x="20" y="100" width="540" height="75" fill="url(#hole-pattern)"/>
+                        <rect x="0" y="180" width="580" height="15" fill="#e2e8f0"/>
+                        <rect x="20" y="200" width="540" height="75" fill="url(#hole-pattern)"/>
+                    </g>
+
+                    <!-- EXTERNAL WIRES -->
+                    <path d="M 65,240 C 65,150 200,420 285,420" class="wire-red"/> <!-- Bat+ to Switch -->
+                    <path d="M 125,240 C 125,200 180,155 200,165" class="wire-black"/> <!-- Bat- to GND Rail -->
+
+                    <!-- Switch -->
+                    <g transform="translate(260, 400)">
+                        <rect x="0" y="0" width="50" height="30" rx="4" fill="#334155"/>
+                        <rect id="switch-physical" x="25" y="-5" width="10" height="15" rx="2" fill="#94a3b8"/>
+                        <circle cx="15" cy="15" r="4" fill="#cbd5e1"/>
+                        <circle cx="35" cy="15" r="4" fill="#cbd5e1"/>
+                        <line x1="25" y1="0" x2="25" y2="-20" stroke="#94a3b8" stroke-width="3"/>
+                        <line x1="45" y1="0" x2="45" y2="-40" stroke="#94a3b8" stroke-width="3"/>
+                        <text x="25" y="45" class="text-xs font-bold" fill="#334155" text-anchor="middle">កុងតាក់</text>
+                    </g>
+                    <!-- Switch to Breadboard LDR Node -->
+                    <path d="M 305,360 C 305,340 330,350 330,320" class="wire-jumper"/>
+
+                    <!-- LDR COMPONENT -->
+                    <!-- Top down physical representation -->
+                    <g transform="translate(360, 315)">
+                        <!-- Legs -->
+                        <line x1="-30" y1="0" x2="-30" y2="15" stroke="#94a3b8" stroke-width="3"/>
+                        <line x1="30" y1="0" x2="30" y2="15" stroke="#94a3b8" stroke-width="3"/>
+                        
+                        <!-- Body -->
+                        <circle cx="0" cy="0" r="22" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+                        <!-- Cadmium Sulfide Track (Zigzag) -->
+                        <path d="M -15,-5 L -10,-15 L 0,-5 L 10,-15 L 15,-5 L 10,5 L 0,-5 L -10,5 Z" fill="none" stroke="#ef4444" stroke-width="2" stroke-linejoin="round"/>
+                        <path d="M -15,5 L -10,15 L 0,5 L 10,15 L 15,5" fill="none" stroke="#ef4444" stroke-width="2" stroke-linejoin="round"/>
+                        
+                        <text x="0" y="35" class="text-xs font-bold" fill="#334155" text-anchor="middle">LDR</text>
+                    </g>
+
+                    <!-- Jumper LDR to LED -->
+                    <path d="M 390,320 C 390,300 420,330 450,330" class="wire-jumper"/>
+
+                    <!-- LED COMPONENT -->
+                    <g transform="translate(450, 315)">
+                        <!-- Legs -->
+                        <line x1="0" y1="0" x2="0" y2="15" stroke="#94a3b8" stroke-width="3"/> <!-- Anode -->
+                        <line x1="30" y1="-20" x2="30" y2="-150" stroke="#94a3b8" stroke-width="3"/> <!-- Cathode to GND Rail -->
+                        <rect x="28" y="-18" width="5" height="12" fill="#fff" opacity="0.8"/> 
+                        
+                        <!-- Base -->
+                        <path d="M -10,-5 L 25,-5 L 22,0 L -5,0 Z" fill="#64748b"/>
+                        
+                        <!-- Dome -->
+                        <path d="M -10,-5 C -10,-35 25,-35 25,-5 Z" fill="#fee2e2" stroke="#fca5a5" stroke-width="2" class="led-dome"/>
+                        
+                        <!-- Glow Layer -->
+                        <path id="led-glow-layer" d="M -10,-5 C -10,-35 25,-35 25,-5 Z" fill="#ef4444" class="led-glow-effect" opacity="0"/>
+                        
+                        <text x="7" y="30" class="text-xs font-bold" fill="#ef4444" text-anchor="middle">LED</text>
+                    </g>
+
+                    <!-- FLASHLIGHT BEAM SIMULATION -->
+                    <g transform="translate(360, 50)" id="flashlight-group">
+                        <!-- Flashlight Body -->
+                        <rect x="-15" y="0" width="30" height="40" rx="4" fill="#334155"/>
+                        <rect x="-20" y="40" width="40" height="15" rx="2" fill="#1e293b"/>
+                        <!-- Light Beam -->
+                        <polygon id="light-beam" points="-20,55 20,55 80,240 -80,240" fill="url(#beam-grad)" class="light-beam" opacity="0"/>
+                        <text x="0" y="-10" class="text-xs font-bold" fill="#334155" text-anchor="middle">ពន្លឺ (Light)</text>
+                    </g>
+
+                    <!-- CURRENT FLOW ANIMATION PATH -->
+                    <path id="current-animation" d="
+                        M 65,240 
+                        C 65,150 200,420 285,420
+                        L 285,400 L 305,400 
+                        L 305,360 C 305,340 330,350 330,320
+                        L 330,315 L 390,315
+                        M 390,320 C 390,300 420,330 450,330
+                        L 450,315 L 480,315 L 480,165
+                        L 200,165 C 180,155 125,200 125,240
+                    " class="current-flow" />
+
+                    <!-- Fill missing gap for animation consistency -->
+                    <path id="current-animation-gap" d="
+                        M 390,320 C 390,300 420,330 450,330
+                        L 450,315 L 480,315 L 480,165
+                        L 200,165 C 180,155 125,200 125,240
+                    " class="current-flow" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Right Side: Controls and Readouts -->
+        <div class="p-6 md:p-8 flex-[2] flex flex-col justify-center bg-white">
+            
+            <div class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-5 rounded-2xl text-center mb-8 shadow-md">
+                <h1 class="text-2xl font-bold mb-2">សៀគ្វី LDR</h1>
+                <p class="text-blue-100 text-sm">Light Dependent Resistor</p>
+            </div>
+
+            <!-- Power Switch -->
+            <div class="flex items-center justify-between bg-slate-50 border border-slate-200 p-5 rounded-2xl mb-6 shadow-sm transition-colors" id="panel-power">
+                <div>
+                    <div class="font-bold text-slate-800 text-lg mb-1">ប្រភព (Power)</div>
+                    <div class="text-sm font-bold text-slate-500" id="power-status-text">បិទ (OFF)</div>
+                </div>
+                
+                <div class="relative inline-block w-16 mr-2 align-middle select-none">
+                    <input type="checkbox" name="toggle" id="power-toggle" class="toggle-checkbox absolute block w-8 h-8 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-all duration-300" style="top: -4px; border-color: #cbd5e1;"/>
+                    <label for="power-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300"></label>
+                </div>
+            </div>
+
+            <!-- Light Intensity Slider -->
+            <div class="w-full bg-amber-50/50 rounded-2xl p-6 border border-amber-100 shadow-sm mb-6">
+                <label for="light-slider" class="flex justify-between text-slate-800 font-bold mb-4 text-lg">
+                    <span>កម្រិតពន្លឺ (Light)</span>
+                    <span id="light-pct-label" class="text-amber-600">0%</span>
+                </label>
+                
+                <input type="range" id="light-slider" min="0" max="100" step="1" value="0" class="w-full" disabled>
+                
+                <div class="flex justify-between text-xs text-slate-500 mt-3 font-bold px-1">
+                    <span>ងងឹត</span>
+                    <span>ពន្លឺខ្លាំង</span>
+                </div>
+            </div>
+
+            <!-- Data Readouts & Observation -->
+            <div class="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex-grow flex flex-col justify-center">
+                <h4 class="text-blue-800 font-bold mb-3 uppercase tracking-wider text-sm border-b border-blue-200 pb-2">ការសង្កេត (Observation)</h4>
+                <div class="flex items-center gap-3">
+                    <div id="status-icon" class="w-3 h-3 rounded-full bg-slate-400"></div>
+                    <div id="observation-text" class="text-lg text-slate-700 font-bold leading-snug">
+                        សៀគ្វីចំហរ គ្មានដំណើរការ។
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const powerToggle = document.getElementById('power-toggle');
+        const powerStatusText = document.getElementById('power-status-text');
+        const panelPower = document.getElementById('panel-power');
+        const slider = document.getElementById('light-slider');
+        const lightPctLabel = document.getElementById('light-pct-label');
+        
+        const observationText = document.getElementById('observation-text');
+        const statusIcon = document.getElementById('status-icon');
+        
+        // SVG Visual Elements
+        const ledGlowLayer = document.getElementById('led-glow-layer');
+        const lightBeam = document.getElementById('light-beam');
+        const switchPhysical = document.getElementById('switch-physical');
+        const animFlow1 = document.getElementById('current-animation');
+        const animFlow2 = document.getElementById('current-animation-gap');
+
+        let isPowerOn = false;
+
+        function updateSimulation() {
+            let intensity = parseInt(slider.value);
+            lightPctLabel.innerText = intensity + '%';
+
+            // Flashlight UI update
+            lightBeam.style.opacity = intensity / 100;
+
+            if (!isPowerOn) {
+                // OFF State
+                switchPhysical.setAttribute('x', '25'); // Open pos
+                ledGlowLayer.setAttribute('opacity', 0);
+                animFlow1.classList.remove('active');
+                animFlow2.classList.remove('active');
+                
+                observationText.innerText = "សៀគ្វីចំហរ កុងតាក់បិទ។";
+                observationText.className = "text-lg text-slate-500 font-bold leading-snug";
+                statusIcon.className = "w-3 h-3 rounded-full bg-slate-400";
+                return;
+            }
+
+            // ON State Logic
+            switchPhysical.setAttribute('x', '15'); // Closed pos
+            
+            if (intensity === 0) {
+                // Dark
+                ledGlowLayer.setAttribute('opacity', 0);
+                animFlow1.classList.remove('active');
+                animFlow2.classList.remove('active');
+                
+                observationText.innerText = "ងងឹត - LDR មានរេស៊ីស្តង់ធំបំផុត គ្មានចរន្តហូរទេ អំពូលមិនភ្លឺ។";
+                observationText.className = "text-lg text-slate-700 font-bold leading-snug";
+                statusIcon.className = "w-3 h-3 rounded-full bg-slate-700";
+
+            } else if (intensity > 0 && intensity < 50) {
+                // Dim
+                let brightness = 0.2 + (intensity / 50) * 0.4;
+                ledGlowLayer.setAttribute('opacity', brightness);
+                
+                animFlow1.classList.add('active');
+                animFlow2.classList.add('active');
+                // Slower animation
+                let speed = 2.0 - (intensity / 50) * 1.0;
+                animFlow1.style.animationDuration = `${speed}s`;
+                animFlow2.style.animationDuration = `${speed}s`;
+
+                observationText.innerText = "ពន្លឺខ្សោយ - រេស៊ីស្តង់ LDR ថយចុះបន្តិច ចរន្តហូរតិចៗ អំពូលភ្លឺខ្សោយ។";
+                observationText.className = "text-lg text-blue-600 font-bold leading-snug";
+                statusIcon.className = "w-3 h-3 rounded-full bg-blue-500 animate-pulse";
+
+            } else {
+                // Bright
+                let brightness = 0.6 + ((intensity - 50) / 50) * 0.4;
+                ledGlowLayer.setAttribute('opacity', brightness);
+                
+                animFlow1.classList.add('active');
+                animFlow2.classList.add('active');
+                // Faster animation
+                let speed = 1.0 - ((intensity - 50) / 50) * 0.6; // 1.0s down to 0.4s
+                animFlow1.style.animationDuration = `${speed}s`;
+                animFlow2.style.animationDuration = `${speed}s`;
+
+                observationText.innerText = "ពន្លឺខ្លាំង - រេស៊ីស្តង់ LDR កាន់តែតូច ចរន្តហូរខ្លាំង អំពូលភ្លឺខ្លាំង។";
+                observationText.className = "text-lg text-red-600 font-bold leading-snug";
+                statusIcon.className = "w-3 h-3 rounded-full bg-red-500 animate-ping";
+            }
+        }
+
+        // Listeners
+        powerToggle.addEventListener('change', function(e) {
+            isPowerOn = e.target.checked;
+            slider.disabled = !isPowerOn;
+            
+            if (isPowerOn) {
+                powerStatusText.innerText = 'បើក (ON)';
+                powerStatusText.className = 'text-sm font-bold text-blue-600';
+                panelPower.classList.add('bg-blue-50', 'border-blue-200');
+                panelPower.classList.remove('bg-slate-50', 'border-slate-200');
+            } else {
+                powerStatusText.innerText = 'បិទ (OFF)';
+                powerStatusText.className = 'text-sm font-bold text-slate-500';
+                panelPower.classList.remove('bg-blue-50', 'border-blue-200');
+                panelPower.classList.add('bg-slate-50', 'border-slate-200');
+            }
+            updateSimulation();
+        });
+
+        slider.addEventListener('input', updateSimulation);
+
+        // Init
+        updateSimulation();
+    </script>
+</body>
+</html>

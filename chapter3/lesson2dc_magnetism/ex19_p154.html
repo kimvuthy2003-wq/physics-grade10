@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ19ទំព័រ154សៀគ្វីអគ្គិសនី</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ស្ទីលអក្សរខ្មែរទូទៅ */
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            margin: 0;
+            overflow-x: hidden;
+            font-size: 1.15rem; 
+            line-height: 1.8;
+        }
+        
+        .kh { font-family: 'Battambang', sans-serif; }
+
+        /* ស្ទីលសម្រាប់រូបមន្តគណិតវិទ្យា (Times New Roman ស្តង់ដារ) */
+        .math {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.35rem; 
+            letter-spacing: 0.03em;
+        }
+        .math-bold { font-weight: bold; }
+        .math-sub { font-size: 0.65em; vertical-align: -0.25em; }
+        .math-sup { font-size: 0.65em; vertical-align: super; }
+
+        /* ពណ៌សម្រាប់រូបមន្ត និងលទ្ធផល */
+        .text-blue { color: #1d4ed8; }
+        .text-red { color: #dc2626; }
+        .text-emerald { color: #059669; }
+        .text-amber { color: #d97706; }
+        .text-purple { color: #7e22ce; }
+
+        /* ស្ទីលប្រភាគ (Fractions) ធានាមិនឱ្យដាច់គ្នា */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.3em;
+            font-size: 0.95em;
+        }
+        .fraction > span { padding: 0.1em 0.3em; }
+        .fraction .fdn { 
+            border-top: 1.5px solid currentColor; 
+            width: 100%; 
+            text-align: center; 
+        }
+
+        /* ដំណោះស្រាយសម្រាប់ទូរសព្ទដៃ (ការពារការលោតដាច់រូបមន្ត) */
+        .equation-box {
+            display: flex;
+            flex-wrap: wrap; 
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .math-block {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: nowrap; 
+            overflow-x: auto; 
+            max-width: 100%;
+            padding-bottom: 0.2rem;
+            scrollbar-width: none; 
+        }
+        .math-block::-webkit-scrollbar { display: none; }
+
+        /* ស្ទីល Sliders */
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #cbd5e1;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #d97706; 
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(217, 119, 6, 0.5);
+        }
+        
+        /* ផ្ទៃគំនូសសៀគ្វី 2D */
+        #circuit-container {
+            width: 100%;
+            border-radius: 0.75rem;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        /* គំនូរជីវចលចរន្តអគ្គិសនី */
+        .flow-path {
+            fill: none;
+            stroke: #ef4444; 
+            stroke-width: 4;
+            stroke-dasharray: 10, 15;
+            stroke-linecap: round;
+            transition: stroke-opacity 0.3s;
+        }
+        @keyframes flowAnimNormal { to { stroke-dashoffset: -25; } }
+        
+        .solution-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.7s ease-in-out;
+        }
+        .solution-content.open {
+            max-height: 5000px;
+            opacity: 1;
+            margin-top: 1.5rem;
+        }
+
+        .toggle-checkbox:checked { right: 0; border-color: #ef4444; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #ef4444; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- ========================================== -->
+        <!-- 1. ប្រធានលំហាត់ -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <h2 class="text-2xl font-bold text-amber-700 mb-4 border-b border-slate-100 pb-3 flex items-center gap-2">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                លំហាត់ទី១៩
+            </h2>
+            <div class="text-justify font-medium space-y-4 kh">
+                <p>19. គេមានអំពូលពីរគឺ អំពូល <span class="math math-bold">L<span class="math-sub">1</span></span> មានរេស៊ីស្តង់ <span class="math math-bold text-slate-700">R<span class="math-sub">1</span> = <span id="prob_r1">20</span> &Omega;</span> និងអំពូល <span class="math math-bold">L<span class="math-sub">2</span></span> មានរេស៊ីស្តង់ <span class="math math-bold text-slate-700">R<span class="math-sub">2</span> = <span id="prob_r2">10</span> &Omega;</span> ។</p>
+                <ul class="pl-8 space-y-2">
+                    <li>ក. បើគេតវាជាស៊េរី រួចភ្ជាប់វាទៅនឹងប្រភព <span class="math math-bold text-emerald">E = <span id="prob_e1">6.0</span> V</span> តើមួយណាឆេះភ្លឺខ្លាំងជាង?</li>
+                    <li>ខ. បើគេតវាជាខ្នែង រួចភ្ជាប់វាទៅនឹងប្រភព <span class="math math-bold text-emerald">E = <span id="prob_e2">6.0</span> V</span> តើមួយណាឆេះភ្លឺខ្លាំងជាង?</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 2. INTERACTIVE PANEL (2D CANVAS & CONTROLS) -->
+        <!-- ========================================== -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- 2D Circuit Drawing -->
+            <div class="lg:col-span-2 bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-700 flex flex-col">
+                <div class="flex justify-between items-center mb-4 px-2 flex-wrap gap-4">
+                    <h3 class="font-bold text-white text-xl kh">ការប្រៀបធៀបសៀគ្វីអន្តរកម្ម</h3>
+                    
+                    <!-- ប៊ូតុងបើក/បិទចលនាចរន្ត -->
+                    <div class="flex items-center gap-3 bg-slate-700 px-4 py-2 rounded-lg border border-slate-600">
+                        <span class="kh font-bold text-red-400 text-[1rem]">បង្ហាញចរន្ត</span>
+                        <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" id="toggleFlow" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-slate-500 appearance-none cursor-pointer z-10 top-0 left-0 transition-all duration-300"/>
+                            <label for="toggleFlow" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-500 cursor-pointer transition-colors duration-300"></label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="circuit-container" class="flex-grow min-h-[400px] !bg-slate-900 !border-slate-700">
+                    <svg width="100%" height="100%" viewBox="0 0 800 350" preserveAspectRatio="xMidYMid meet">
+                        <defs>
+                            <!-- Radial Gradient សម្រាប់ពន្លឺអំពូល -->
+                            <radialGradient id="glowGrd">
+                                <stop offset="0%" stop-color="#fef08a" stop-opacity="1" />
+                                <stop offset="40%" stop-color="#eab308" stop-opacity="0.6" />
+                                <stop offset="100%" stop-color="#ca8a04" stop-opacity="0" />
+                            </radialGradient>
+                            
+                            <!-- គំរូនិមិត្តសញ្ញាអំពូល -->
+                            <g id="bulbSymbol">
+                                <circle r="18" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>
+                                <!-- ខ្សែរុំក្នុងអំពូល (Filament) -->
+                                <path d="M -10 4 Q -5 -8 0 0 Q 5 -8 10 4" stroke="#94a3b8" stroke-width="2" fill="none"/>
+                            </g>
+                        </defs>
+
+                        <!-- =================សៀគ្វីទី១: ខ្នែង (ខាងឆ្វេង)================= -->
+                        <g transform="translate(0, 0)">
+                            <text x="200" y="30" fill="white" font-size="20" font-weight="bold" font-family="'Battambang', sans-serif" text-anchor="middle">សៀគ្វីខ្នែង (Parallel)</text>
+                            
+                            <!-- ខ្សែភ្លើងគោល -->
+                            <path d="M 100 240 L 100 80 L 300 80 L 300 240" fill="none" stroke="#64748b" stroke-width="3" />
+                            <path d="M 100 160 L 300 160" fill="none" stroke="#64748b" stroke-width="3" />
+                            <path d="M 100 240 L 300 240" fill="none" stroke="#64748b" stroke-width="3" />
+
+                            <!-- ចរន្ត Animation ខ្នែង -->
+                            <g id="animGroupPar">
+                                <path class="flow-path animLine" d="M 180 80 L 100 80 L 100 160" />
+                                <path class="flow-path animLine" d="M 100 160 L 180 160" />
+                                <path class="flow-path animLine" d="M 100 160 L 100 240 L 180 240" />
+                                <path class="flow-path animLine" d="M 220 160 L 300 160 L 300 80 L 220 80" />
+                                <path class="flow-path animLine" d="M 220 240 L 300 240 L 300 160" />
+                            </g>
+
+                            <!-- ប្រភព E ខ្នែង -->
+                            <rect x="180" y="60" width="40" height="40" fill="#0f172a" stroke="none" />
+                            <!-- ប៉ូលវិជ្ជមាន (+) បន្ទាត់វែង -->
+                            <line x1="180" y1="60" x2="180" y2="100" stroke="#f8fafc" stroke-width="2" />
+                            <!-- ប៉ូលអវិជ្ជមាន (-) បន្ទាត់ខ្លី -->
+                            <line x1="190" y1="70" x2="190" y2="90" stroke="#f8fafc" stroke-width="6" />
+                            <line x1="200" y1="80" x2="200" y2="80" stroke="#f8fafc" stroke-width="2" stroke-dasharray="2,2" />
+                            <!-- ប៉ូលវិជ្ជមាន (+) បន្ទាត់វែង -->
+                            <line x1="210" y1="60" x2="210" y2="100" stroke="#f8fafc" stroke-width="2" />
+                            <!-- ប៉ូលអវិជ្ជមាន (-) បន្ទាត់ខ្លី -->
+                            <line x1="220" y1="70" x2="220" y2="90" stroke="#f8fafc" stroke-width="6" />
+                            <text x="165" y="90" fill="#f43f5e" font-size="20" font-weight="bold" font-family="'Times New Roman', serif">+</text>
+                            <text x="235" y="90" fill="#38bdf8" font-size="24" font-weight="bold" font-family="'Times New Roman', serif">-</text>
+                            <text x="200" y="50" fill="#34d399" font-size="18" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">E = <tspan id="svg_e1">6.0 V</tspan></text>
+
+                            <!-- អំពូល L1 ខ្នែង -->
+                            <circle id="glow_p1" cx="200" cy="160" r="40" fill="url(#glowGrd)" opacity="0.8" />
+                            <use href="#bulbSymbol" x="200" y="160" />
+                            <text x="200" y="130" fill="white" font-size="16" font-family="'Times New Roman', serif" text-anchor="middle">L<tspan baseline-shift="sub" font-size="0.75em">1</tspan>, R<tspan baseline-shift="sub" font-size="0.75em">1</tspan>=<tspan id="svg_r1_p">20</tspan>&Omega;</text>
+                            <text x="200" y="195" fill="#c084fc" font-size="14" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">P<tspan baseline-shift="sub" font-size="0.75em">1</tspan>=<tspan id="svg_p1_p">1.8</tspan>W</text>
+
+                            <!-- អំពូល L2 ខ្នែង -->
+                            <circle id="glow_p2" cx="200" cy="240" r="60" fill="url(#glowGrd)" opacity="1" />
+                            <use href="#bulbSymbol" x="200" y="240" />
+                            <text x="200" y="210" fill="white" font-size="16" font-family="'Times New Roman', serif" text-anchor="middle">L<tspan baseline-shift="sub" font-size="0.75em">2</tspan>, R<tspan baseline-shift="sub" font-size="0.75em">2</tspan>=<tspan id="svg_r2_p">10</tspan>&Omega;</text>
+                            <text x="200" y="275" fill="#c084fc" font-size="14" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">P<tspan baseline-shift="sub" font-size="0.75em">2</tspan>=<tspan id="svg_p2_p">3.6</tspan>W</text>
+
+                            <!-- Nodes -->
+                            <circle cx="100" cy="160" r="4" fill="#94a3b8" />
+                            <circle cx="300" cy="160" r="4" fill="#94a3b8" />
+                        </g>
+
+                        <!-- បន្ទាត់ចែកកណ្តាល -->
+                        <line x1="400" y1="30" x2="400" y2="300" stroke="#475569" stroke-width="2" stroke-dasharray="8,8" />
+
+                        <!-- =================សៀគ្វីទី២: ស៊េរី (ខាងស្តាំ)================= -->
+                        <g transform="translate(400, 0)">
+                            <text x="150" y="30" fill="white" font-size="20" font-weight="bold" font-family="'Battambang', sans-serif" text-anchor="middle">សៀគ្វីស៊េរី (Series)</text>
+
+                            <!-- ខ្សែភ្លើងគោល -->
+                            <path d="M 50 200 L 50 80 L 250 80 L 250 200 L 50 200" fill="none" stroke="#64748b" stroke-width="3" />
+
+                            <!-- ចរន្ត Animation ស៊េរី -->
+                            <g id="animGroupSer">
+                                <path class="flow-path animLine" d="M 130 80 L 50 80 L 50 200 L 80 200" />
+                                <path class="flow-path animLine" d="M 120 200 L 180 200" />
+                                <path class="flow-path animLine" d="M 220 200 L 250 200 L 250 80 L 170 80" />
+                            </g>
+
+                            <!-- ប្រភព E ស៊េរី -->
+                            <rect x="130" y="60" width="40" height="40" fill="#0f172a" stroke="none" />
+                            <!-- ប៉ូលវិជ្ជមាន (+) បន្ទាត់វែង -->
+                            <line x1="130" y1="60" x2="130" y2="100" stroke="#f8fafc" stroke-width="2" />
+                            <!-- ប៉ូលអវិជ្ជមាន (-) បន្ទាត់ខ្លី -->
+                            <line x1="140" y1="70" x2="140" y2="90" stroke="#f8fafc" stroke-width="6" />
+                            <line x1="150" y1="80" x2="150" y2="80" stroke="#f8fafc" stroke-width="2" stroke-dasharray="2,2" />
+                            <!-- ប៉ូលវិជ្ជមាន (+) បន្ទាត់វែង -->
+                            <line x1="160" y1="60" x2="160" y2="100" stroke="#f8fafc" stroke-width="2" />
+                            <!-- ប៉ូលអវិជ្ជមាន (-) បន្ទាត់ខ្លី -->
+                            <line x1="170" y1="70" x2="170" y2="90" stroke="#f8fafc" stroke-width="6" />
+                            <text x="115" y="90" fill="#f43f5e" font-size="20" font-weight="bold" font-family="'Times New Roman', serif">+</text>
+                            <text x="185" y="90" fill="#38bdf8" font-size="24" font-weight="bold" font-family="'Times New Roman', serif">-</text>
+                            <text x="150" y="50" fill="#34d399" font-size="18" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">E = <tspan id="svg_e2">6.0 V</tspan></text>
+
+                            <!-- អំពូល L1 ស៊េរី -->
+                            <circle id="glow_s1" cx="100" cy="200" r="30" fill="url(#glowGrd)" opacity="0.4" />
+                            <use href="#bulbSymbol" x="100" y="200" />
+                            <text x="100" y="165" fill="white" font-size="16" font-family="'Times New Roman', serif" text-anchor="middle">L<tspan baseline-shift="sub" font-size="0.75em">1</tspan>, R<tspan baseline-shift="sub" font-size="0.75em">1</tspan>=<tspan id="svg_r1_s">20</tspan>&Omega;</text>
+                            <text x="100" y="235" fill="#c084fc" font-size="14" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">P<tspan baseline-shift="sub" font-size="0.75em">1</tspan>=<tspan id="svg_p1_s">0.8</tspan>W</text>
+
+                            <!-- អំពូល L2 ស៊េរី -->
+                            <circle id="glow_s2" cx="200" cy="200" r="20" fill="url(#glowGrd)" opacity="0.2" />
+                            <use href="#bulbSymbol" x="200" y="200" />
+                            <text x="200" y="165" fill="white" font-size="16" font-family="'Times New Roman', serif" text-anchor="middle">L<tspan baseline-shift="sub" font-size="0.75em">2</tspan>, R<tspan baseline-shift="sub" font-size="0.75em">2</tspan>=<tspan id="svg_r2_s">10</tspan>&Omega;</text>
+                            <text x="200" y="235" fill="#c084fc" font-size="14" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">P<tspan baseline-shift="sub" font-size="0.75em">2</tspan>=<tspan id="svg_p2_s">0.4</tspan>W</text>
+                        </g>
+
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col gap-6">
+                <h3 class="text-xl font-bold text-amber-700 border-b border-slate-100 pb-3 kh">ការកំណត់តម្លៃ</h3>
+                
+                <div class="space-y-6">
+                    <!-- E Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">តង់ស្យុងប្រភព <span class="math">E</span></label>
+                            <span class="math math-bold text-emerald"><span id="eDisp">6.0</span> V</span>
+                        </div>
+                        <input type="range" id="eSlider" min="3" max="24" value="6" step="1" class="slider py-2 bg-emerald-400">
+                    </div>
+
+                    <!-- R1 Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">អំពូល <span class="math">L<span class="math-sub">1</span></span> (<span class="math">R<span class="math-sub">1</span></span>)</label>
+                            <span class="math math-bold text-slate-700"><span id="r1Disp">20.0</span> &Omega;</span>
+                        </div>
+                        <input type="range" id="r1Slider" min="5" max="50" value="20" step="5" class="slider py-2">
+                    </div>
+
+                    <!-- R2 Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">អំពូល <span class="math">L<span class="math-sub">2</span></span> (<span class="math">R<span class="math-sub">2</span></span>)</label>
+                            <span class="math math-bold text-slate-700"><span id="r2Disp">10.0</span> &Omega;</span>
+                        </div>
+                        <input type="range" id="r2Slider" min="5" max="50" value="10" step="5" class="slider py-2">
+                    </div>
+                </div>
+
+                <div class="mt-auto space-y-3">
+                    <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 text-center shadow-sm">
+                        <div class="font-bold text-purple-800 kh text-sm mb-1">ចំណាំ៖</div>
+                        <div class="kh text-purple-700 text-[0.95rem] leading-tight">
+                            កម្រិតពន្លឺនៃអំពូល អាស្រ័យទៅលើទំហំនៃ <strong>អនុភាពអគ្គិសនី (P)</strong> ដែលវាបញ្ចេញ។ <br><span class="math text-purple-600 font-bold">P = V &times; I</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 3. ដំណោះស្រាយ (SOLUTION TOGGLE) -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <button id="toggleBtn" class="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold py-4 px-6 rounded-xl shadow-md transition-colors flex justify-center items-center gap-3">
+                <svg id="toggleIcon" class="w-6 h-6 transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                <span id="btnText" class="text-xl kh">បង្ហាញដំណោះស្រាយលម្អិត</span>
+            </button>
+
+            <div id="solutionBox" class="solution-content bg-slate-50 border border-slate-200 rounded-xl p-6 md:p-10 mt-6">
+                <h3 class="font-bold text-[#d97706] border-b-2 border-slate-200 pb-3 mb-8 text-3xl inline-block border-b-[#f59e0b] kh">ដំណោះស្រាយ</h3>
+                
+                <div class="space-y-10">
+                    
+                    <!-- Part A: Series -->
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-gray-800 text-2xl mb-6 kh">
+                            ក. ករណីតជាស៊េរី តើមួយណាឆេះភ្លឺខ្លាំងជាង?
+                        </h4>
+                        <div>
+                            <p class="kh">ចំពោះសៀគ្វីស៊េរី ចរន្តឆ្លងកាត់អំពូលទាំងពីរមានតម្លៃស្មើគ្នា៖ <span class="math math-formula whitespace-nowrap">I<span class="math-sub">1</span> = I<span class="math-sub">2</span> = I</span></p>
+                            
+                            <div class="equation-box mt-3">
+                                <span class="kh font-medium">គណនាចរន្តរួម៖</span>
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">I = </span>
+                                    <div class="fraction math">
+                                        <span>E</span>
+                                        <span class="fdn">R<span class="math-sub">eq</span></span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = </span>
+                                    <div class="fraction math">
+                                        <span id="solA_e">6.0</span>
+                                        <span class="fdn"><span id="solA_r1">20.0</span> + <span id="solA_r2">10.0</span></span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = <span class="math-bold text-red" id="solA_i">0.20</span> A</span>
+                                </div>
+                            </div>
+
+                            <p class="kh mt-6">អនុភាព (ថាមពលបញ្ចេញពន្លឺ) របស់អំពូលនីមួយៗ គណនាតាមរូបមន្ត <span class="math math-formula">P = I<span class="math-sup">2</span> &times; R</span> ៖</p>
+
+                            <div class="equation-box mt-3">
+                                <span class="kh font-medium">អំពូល L<span class="math-sub text-gray-700">1</span> ៖</span>
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">P<span class="math-sub">1</span> = I<span class="math-sup">2</span> &times; R<span class="math-sub">1</span> = (<span id="solA_i1">0.20</span>)<span class="math-sup">2</span> &times; <span id="solA_r1_2">20.0</span> = <span class="math-bold text-purple" id="solA_p1">0.80</span> W</span>
+                                </div>
+                            </div>
+
+                            <div class="equation-box mt-3">
+                                <span class="kh font-medium">អំពូល L<span class="math-sub text-gray-700">2</span> ៖</span>
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">P<span class="math-sub">2</span> = I<span class="math-sup">2</span> &times; R<span class="math-sub">2</span> = (<span id="solA_i2">0.20</span>)<span class="math-sup">2</span> &times; <span id="solA_r2_2">10.0</span> = <span class="math-bold text-purple" id="solA_p2">0.40</span> W</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-8 flex flex-wrap items-center gap-4 bg-sky-50 p-4 rounded-xl border border-sky-100">
+                                <span class="kh text-xl">ដោយសារអនុភាព <span class="math math-bold text-purple" id="solA_compare">P<span class="math-sub">1</span> &gt; P<span class="math-sub">2</span></span> ដូចនេះ៖</span>
+                                <span class="kh font-bold text-blue-700 border-b-2 border-blue-700 pb-1 text-[1.4rem]" id="solA_conclusion">អំពូល L1 ឆេះភ្លឺខ្លាំងជាង។</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Part B: Parallel -->
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-gray-800 text-2xl mb-6 kh">
+                            ខ. ករណីតជាខ្នែង តើមួយណាឆេះភ្លឺខ្លាំងជាង?
+                        </h4>
+                        <div>
+                            <p class="kh">ចំពោះសៀគ្វីខ្នែង តង់ស្យុងឆ្លងកាត់អំពូលទាំងពីរមានតម្លៃស្មើនឹងប្រភព៖ <span class="math math-formula whitespace-nowrap">V<span class="math-sub">1</span> = V<span class="math-sub">2</span> = E = <span id="solB_e">6.0</span> V</span></p>
+                            
+                            <p class="kh mt-6">អនុភាព (ថាមពលបញ្ចេញពន្លឺ) របស់អំពូលនីមួយៗ គណនាតាមរូបមន្ត <span class="math math-formula">P = V<span class="math-sup">2</span> / R</span> ៖</p>
+
+                            <div class="equation-box mt-3">
+                                <span class="kh font-medium">អំពូល L<span class="math-sub text-gray-700">1</span> ៖</span>
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">P<span class="math-sub">1</span> = </span>
+                                    <div class="fraction math">
+                                        <span>V<span class="math-sup">2</span></span>
+                                        <span class="fdn">R<span class="math-sub">1</span></span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = </span>
+                                    <div class="fraction math">
+                                        <span>(<span id="solB_e1">6.0</span>)<span class="math-sup">2</span></span>
+                                        <span class="fdn" id="solB_r1">20.0</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = <span class="math-bold text-purple" id="solB_p1">1.80</span> W</span>
+                                </div>
+                            </div>
+
+                            <div class="equation-box mt-4">
+                                <span class="kh font-medium">អំពូល L<span class="math-sub text-gray-700">2</span> ៖</span>
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">P<span class="math-sub">2</span> = </span>
+                                    <div class="fraction math">
+                                        <span>V<span class="math-sup">2</span></span>
+                                        <span class="fdn">R<span class="math-sub">2</span></span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = </span>
+                                    <div class="fraction math">
+                                        <span>(<span id="solB_e2">6.0</span>)<span class="math-sup">2</span></span>
+                                        <span class="fdn" id="solB_r2">10.0</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = <span class="math-bold text-purple" id="solB_p2">3.60</span> W</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-8 flex flex-wrap items-center gap-4 bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                                <span class="kh text-xl">ដោយសារអនុភាព <span class="math math-bold text-purple" id="solB_compare">P<span class="math-sub">2</span> &gt; P<span class="math-sub">1</span></span> ដូចនេះ៖</span>
+                                <span class="kh font-bold text-emerald-700 border-b-2 border-emerald-700 pb-1 text-[1.4rem]" id="solB_conclusion">អំពូល L2 ឆេះភ្លឺខ្លាំងជាង។</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const eSlider = document.getElementById('eSlider');
+        const r1Slider = document.getElementById('r1Slider');
+        const r2Slider = document.getElementById('r2Slider');
+        const toggleFlow = document.getElementById('toggleFlow');
+        
+        const animLines = document.querySelectorAll('.animLine');
+        
+        // Glow Elements
+        const glow_p1 = document.getElementById('glow_p1');
+        const glow_p2 = document.getElementById('glow_p2');
+        const glow_s1 = document.getElementById('glow_s1');
+        const glow_s2 = document.getElementById('glow_s2');
+
+        function updateCircuit() {
+            const E = parseFloat(eSlider.value);
+            const R1 = parseFloat(r1Slider.value);
+            const R2 = parseFloat(r2Slider.value);
+
+            // Series Math
+            const Req_s = R1 + R2;
+            const I_s = E / Req_s;
+            const P1_s = I_s * I_s * R1;
+            const P2_s = I_s * I_s * R2;
+
+            // Parallel Math
+            const P1_p = (E * E) / R1;
+            const P2_p = (E * E) / R2;
+
+            // Update Control Displays
+            document.getElementById('eDisp').textContent = E.toFixed(1);
+            document.getElementById('r1Disp').textContent = R1.toFixed(1);
+            document.getElementById('r2Disp').textContent = R2.toFixed(1);
+
+            // Update SVG Texts Parallel
+            document.getElementById('svg_e1').textContent = `${E.toFixed(1)} V`;
+            document.getElementById('svg_r1_p').textContent = R1.toFixed(0);
+            document.getElementById('svg_r2_p').textContent = R2.toFixed(0);
+            document.getElementById('svg_p1_p').textContent = P1_p.toFixed(1);
+            document.getElementById('svg_p2_p').textContent = P2_p.toFixed(1);
+
+            // Update SVG Texts Series
+            document.getElementById('svg_e2').textContent = `${E.toFixed(1)} V`;
+            document.getElementById('svg_r1_s').textContent = R1.toFixed(0);
+            document.getElementById('svg_r2_s').textContent = R2.toFixed(0);
+            document.getElementById('svg_p1_s').textContent = P1_s.toFixed(2);
+            document.getElementById('svg_p2_s').textContent = P2_s.toFixed(2);
+
+            // Update Problem Texts dynamically
+            document.getElementById('prob_e1').textContent = E.toFixed(1);
+            document.getElementById('prob_e2').textContent = E.toFixed(1);
+            document.getElementById('prob_r1').textContent = R1.toFixed(0);
+            document.getElementById('prob_r2').textContent = R2.toFixed(0);
+
+            // --- Solution Part A: Series ---
+            document.getElementById('solA_e').textContent = E.toFixed(1);
+            document.getElementById('solA_r1').textContent = R1.toFixed(1);
+            document.getElementById('solA_r2').textContent = R2.toFixed(1);
+            document.getElementById('solA_i').textContent = I_s.toFixed(2);
+            
+            document.getElementById('solA_i1').textContent = I_s.toFixed(2);
+            document.getElementById('solA_r1_2').textContent = R1.toFixed(1);
+            document.getElementById('solA_p1').textContent = P1_s.toFixed(2);
+
+            document.getElementById('solA_i2').textContent = I_s.toFixed(2);
+            document.getElementById('solA_r2_2').textContent = R2.toFixed(1);
+            document.getElementById('solA_p2').textContent = P2_s.toFixed(2);
+
+            if (P1_s > P2_s) {
+                document.getElementById('solA_compare').innerHTML = `P<span class="math-sub">1</span> &gt; P<span class="math-sub">2</span>`;
+                document.getElementById('solA_conclusion').textContent = "អំពូល L1 ឆេះភ្លឺខ្លាំងជាង។";
+            } else if (P2_s > P1_s) {
+                document.getElementById('solA_compare').innerHTML = `P<span class="math-sub">2</span> &gt; P<span class="math-sub">1</span>`;
+                document.getElementById('solA_conclusion').textContent = "អំពូល L2 ឆេះភ្លឺខ្លាំងជាង។";
+            } else {
+                document.getElementById('solA_compare').innerHTML = `P<span class="math-sub">1</span> = P<span class="math-sub">2</span>`;
+                document.getElementById('solA_conclusion').textContent = "អំពូលទាំងពីរភ្លឺស្មើគ្នា។";
+            }
+
+            // --- Solution Part B: Parallel ---
+            document.getElementById('solB_e').textContent = E.toFixed(1);
+            
+            document.getElementById('solB_e1').textContent = E.toFixed(1);
+            document.getElementById('solB_r1').textContent = R1.toFixed(1);
+            document.getElementById('solB_p1').textContent = P1_p.toFixed(2);
+
+            document.getElementById('solB_e2').textContent = E.toFixed(1);
+            document.getElementById('solB_r2').textContent = R2.toFixed(1);
+            document.getElementById('solB_p2').textContent = P2_p.toFixed(2);
+
+            if (P1_p > P2_p) {
+                document.getElementById('solB_compare').innerHTML = `P<span class="math-sub">1</span> &gt; P<span class="math-sub">2</span>`;
+                document.getElementById('solB_conclusion').textContent = "អំពូល L1 ឆេះភ្លឺខ្លាំងជាង។";
+            } else if (P2_p > P1_p) {
+                document.getElementById('solB_compare').innerHTML = `P<span class="math-sub">2</span> &gt; P<span class="math-sub">1</span>`;
+                document.getElementById('solB_conclusion').textContent = "អំពូល L2 ឆេះភ្លឺខ្លាំងជាង។";
+            } else {
+                document.getElementById('solB_compare').innerHTML = `P<span class="math-sub">1</span> = P<span class="math-sub">2</span>`;
+                document.getElementById('solB_conclusion').textContent = "អំពូលទាំងពីរភ្លឺស្មើគ្នា។";
+            }
+
+            // Update Glow Visuals based on Power
+            const mapGlow = (power) => {
+                const maxP = Math.max((30*30)/5, 0.1); 
+                let ratio = power / 10; 
+                if (ratio > 1) ratio = 1;
+                return {
+                    radius: 20 + ratio * 40,
+                    opacity: 0.2 + ratio * 0.8
+                };
+            };
+
+            const g_p1 = mapGlow(P1_p);
+            glow_p1.setAttribute('r', g_p1.radius);
+            glow_p1.setAttribute('opacity', g_p1.opacity);
+
+            const g_p2 = mapGlow(P2_p);
+            glow_p2.setAttribute('r', g_p2.radius);
+            glow_p2.setAttribute('opacity', g_p2.opacity);
+
+            const g_s1 = mapGlow(P1_s);
+            glow_s1.setAttribute('r', g_s1.radius);
+            glow_s1.setAttribute('opacity', g_s1.opacity);
+
+            const g_s2 = mapGlow(P2_s);
+            glow_s2.setAttribute('r', g_s2.radius);
+            glow_s2.setAttribute('opacity', g_s2.opacity);
+
+            // Animation Logic
+            const I_p_tot = (E/R1) + (E/R2);
+            const animDuration = Math.max(0.5, 3 / Math.max(I_s, I_p_tot)); 
+            animLines.forEach(line => {
+                line.style.animation = `flowAnimNormal ${animDuration}s linear infinite`;
+            });
+        }
+
+        eSlider.addEventListener('input', updateCircuit);
+        r1Slider.addEventListener('input', updateCircuit);
+        r2Slider.addEventListener('input', updateCircuit);
+
+        toggleFlow.addEventListener('change', (e) => {
+            const displayStr = e.target.checked ? 'block' : 'none';
+            animLines.forEach(line => line.style.display = displayStr);
+        });
+
+        const toggleBtn = document.getElementById('toggleBtn');
+        const solutionBox = document.getElementById('solutionBox');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const btnText = document.getElementById('btnText');
+        let solutionOpen = false;
+
+        toggleBtn.addEventListener('click', () => {
+            solutionOpen = !solutionOpen;
+            if (solutionOpen) {
+                solutionBox.classList.add('open');
+                btnText.textContent = "លាក់ដំណោះស្រាយលម្អិត";
+                toggleIcon.style.transform = "rotate(0deg)";
+            } else {
+                solutionBox.classList.remove('open');
+                btnText.textContent = "បង្ហាញដំណោះស្រាយលម្អិត";
+                toggleIcon.style.transform = "rotate(180deg)";
+            }
+        });
+
+        updateCircuit();
+    </script>
+</body>
+</html>

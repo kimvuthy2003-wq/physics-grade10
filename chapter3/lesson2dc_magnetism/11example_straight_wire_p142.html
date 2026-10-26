@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>មេរៀនទី២លំហាត់គំរូដែនម៉ាញេទិចចរន្តត្រង់</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc; 
+            color: #1e293b;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #cbd5e1;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #0ea5e9;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(14, 165, 233, 0.5);
+        }
+        #canvas-container {
+            width: 100%;
+            height: 450px;
+            cursor: grab;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #f0f9ff, #e0f2fe);
+        }
+        #canvas-container:active { cursor: grabbing; }
+        
+        .solution-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.5s ease-in-out;
+        }
+        .solution-content.open {
+            max-height: 1000px;
+            opacity: 1;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- ========================================== -->
+        <!-- 1. ប្រធានលំហាត់ (PROBLEM STATEMENT) -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 shadow-md border border-slate-200">
+            <h2 class="text-xl font-bold text-sky-700 mb-3 border-b border-slate-100 pb-2 flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                ប្រធានលំហាត់គំរូ
+            </h2>
+            <p class="text-gray-700 leading-relaxed text-lg text-justify">
+                ខ្សែចម្លងត្រង់វែងមួយស្ថិតក្នុងខ្យល់ឆ្លងកាត់ដោយចរន្ត <strong>5.0 A</strong> ។ កំណត់ដែនម៉ាញេទិចត្រង់ចំណុច <strong>N</strong> ខាងឆ្វេងខ្សែចម្លងចម្ងាយ <strong>2.0 cm</strong> ពីខ្សែ (គេមិនគិតដែនម៉ាញេទិចផែនដី)។
+            </p>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 2. SIMULATOR អនុវត្ត (3D & CONTROLS) -->
+        <!-- ========================================== -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- 3D Canvas -->
+            <div class="lg:col-span-2 bg-white rounded-2xl p-4 shadow-md border border-slate-200">
+                <div class="flex justify-between items-center mb-3 px-2">
+                    <h3 class="font-bold text-gray-800">អនុវត្ត (3D)</h3>
+                    <span class="text-xs bg-sky-100 text-sky-700 px-2 py-1 rounded">អូសបង្វិល និង Scroll ដើម្បីពង្រីក</span>
+                </div>
+                <div id="canvas-container" class="border border-slate-200 shadow-inner relative">
+                    <div class="absolute top-4 left-4 bg-white/80 backdrop-blur px-3 py-2 rounded shadow text-sm font-bold text-gray-700">
+                        វិធានដៃស្តាំ៖ មេដៃ (I), ម្រាម៤ (B)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls & Dynamic Results -->
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-slate-200 flex flex-col gap-6">
+                <h3 class="text-lg font-bold text-sky-700 border-b border-slate-100 pb-2">ការកំណត់តម្លៃ</h3>
+                
+                <div class="space-y-6">
+                    <!-- ចរន្ត I -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="font-bold text-gray-700">ចរន្ត I (A)</label>
+                            <span id="iDisp" class="font-bold text-rose-600 text-lg">5.0 A</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">ទាញទៅឆ្វេង (អវិជ្ជមាន) ប្តូរទិសដៅចុះក្រោម</div>
+                        <input type="range" id="iSlider" min="-15" max="15" value="5" step="0.5" class="slider">
+                    </div>
+
+                    <!-- កាំ r -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="font-bold text-gray-700">ចម្ងាយ r (cm)</label>
+                            <span id="rDisp" class="font-bold text-indigo-600 text-lg">2.0 cm</span>
+                        </div>
+                        <input type="range" id="rSlider" min="1" max="10" value="2" step="0.5" class="slider mt-1">
+                    </div>
+                </div>
+
+                <!-- លទ្ធផលជាក់ស្តែង -->
+                <div class="mt-auto bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                    <div class="text-sm text-gray-500 mb-1">អាំងតង់ស៊ីតេ B ត្រង់ចំណុច N</div>
+                    <div id="bResultDisplay" class="text-2xl font-bold text-sky-600">5.00 × 10⁻⁵ T</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 3. ដំណោះស្រាយ (SOLUTION TOGGLE) -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 shadow-md border border-slate-200">
+            <button id="toggleBtn" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-xl shadow transition-colors flex justify-center items-center gap-2">
+                <svg id="toggleIcon" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                <span id="btnText">បង្ហាញដំណោះស្រាយលម្អិត</span>
+            </button>
+
+            <div id="solutionBox" class="solution-content bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4">
+                <h3 class="font-bold text-sky-700 border-b border-slate-200 pb-2 mb-4 text-lg">ដំណោះស្រាយ</h3>
+                
+                <p class="font-bold text-gray-800 mb-3">កំណត់ដែនម៉ាញេទិចត្រង់ N</p>
+                <ul class="list-disc list-inside space-y-3 text-gray-700 mb-5 pl-2">
+                    <li><strong>ចំណុចចាប់៖</strong> គឺស្ថិតត្រង់ចំណុច N</li>
+                    <li><strong>ទិស៖</strong> គឺកែងនឹងខ្សែចម្លង និងកែងជាមួយកាំ (ON)</li>
+                    <li>
+                        <strong>ទិសដៅ៖</strong> គឺអនុវត្តតាមវិធានដៃស្តាំ 
+                        <span class="text-sky-600 font-bold ml-1" id="directionText">⇒ B ជានិច្ចមានទិសដៅសំដៅមករកអ្នកសង្កេត</span>
+                    </li>
+                    <li><strong>អាំងតង់ស៊ីតេ៖</strong> ប្រើរូបមន្ត <span class="font-mono text-lg bg-white px-2 py-1 rounded border border-gray-200">B<sub>N</sub> = μ₀ (I / 2πr)</span></li>
+                </ul>
+
+                <div class="bg-white p-4 rounded-lg border border-slate-200 font-mono text-sm sm:text-base space-y-2">
+                    <p>ដោយ <span class="text-rose-600 font-bold" id="sol_i">I = 5.0 A</span>,</p>
+                    <p><span class="text-indigo-600 font-bold" id="sol_r_cm">r = 2.0 cm</span> = <span id="sol_r_m">2.0 × 10⁻²</span> m,</p>
+                    <p>μ₀ = 4π × 10⁻⁷ Tm/A</p>
+                    
+                    <div class="border-t border-dashed border-gray-300 my-3 pt-3 flex flex-wrap items-center gap-2">
+                        <span>B<sub>N</sub> = 4π × 10⁻⁷ Tm/A ×</span>
+                        <div class="flex flex-col items-center">
+                            <span class="border-b border-gray-800 px-2" id="sol_i_top">5.0 A</span>
+                            <span class="px-2" id="sol_r_bottom">2π × 2.0 × 10⁻² m</span>
+                        </div>
+                    </div>
+                    
+                    <div class="text-lg font-bold text-sky-700 mt-4">
+                        ដូចនេះ B<sub>N</sub> = <span id="sol_b_final">5.00 × 10⁻⁵</span> T
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- THREE.JS APPLICATION CODE -->
+    <script>
+        // --- 1. Three.js Initialization ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0f9ff);
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 15, 25); 
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.target.set(0, 0, 0);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 15);
+        scene.add(dirLight);
+
+        // --- 2. Create 3D Objects ---
+        
+        // Grid Plane
+        const gridHelper = new THREE.GridHelper(30, 30, 0xcbd5e1, 0xe2e8f0);
+        scene.add(gridHelper);
+        
+        // Wire (Copper)
+        const wireGeo = new THREE.CylinderGeometry(0.3, 0.3, 30, 32);
+        const wireMat = new THREE.MeshStandardMaterial({ color: 0xb87333, metalness: 0.8, roughness: 0.2 });
+        const wire = new THREE.Mesh(wireGeo, wireMat);
+        scene.add(wire);
+
+        // Animated Current Arrows (Red)
+        const currentArrows = [];
+        const currentArrowMat = new THREE.MeshPhongMaterial({ 
+            color: 0xff0000, 
+            emissive: 0xaa0000, 
+            emissiveIntensity: 0.5 
+        });
+
+        // បង្កើតព្រួញចរន្តពណ៌ក្រហមចំនួន ៤ ដើម
+        for (let i = 0; i < 4; i++) {
+            const group = new THREE.Group();
+            
+            const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 2, 16), currentArrowMat);
+            shaft.position.y = 0;
+            const head = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.5, 16), currentArrowMat);
+            head.position.y = 1.75;
+            
+            group.add(shaft);
+            group.add(head);
+            
+            // ដាក់ព្រួញឱ្យនៅជាប់កៀកនឹងខ្សែចម្លងទង់ដែង
+            group.position.set(0.6, (i * 8) - 12, 0); 
+            scene.add(group);
+            currentArrows.push(group);
+        }
+
+        // B-Field Circle (Dashed)
+        const circleMaterial = new THREE.LineDashedMaterial({ color: 0x0ea5e9, linewidth: 2, scale: 1, dashSize: 0.5, gapSize: 0.5 });
+        const bFieldCircle = new THREE.Line(new THREE.BufferGeometry(), circleMaterial);
+        bFieldCircle.rotation.x = Math.PI / 2;
+        scene.add(bFieldCircle);
+
+        // Point O (Origin)
+        const pointO = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), new THREE.MeshBasicMaterial({ color: 0x1e293b }));
+        scene.add(pointO);
+
+        // Point N (Left side of wire -> -X axis)
+        const pointN = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), new THREE.MeshBasicMaterial({ color: 0x0284c7 }));
+        scene.add(pointN);
+
+        // B Vector at Point N
+        const bVector = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(-5, 0, 0), 4, 0x0284c7, 1.5, 1);
+        scene.add(bVector);
+
+        // --- Create 3D Hand (Stylized) ---
+        const handGroup = new THREE.Group();
+        const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdcb5, roughness: 0.6 });
+
+        // Palm (Box)
+        const palm = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.5, 1.5), skinMat);
+        palm.position.set(-1.2, 0, 0); 
+        handGroup.add(palm);
+
+        // Thumb (Cylinder)
+        const thumb = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.8, 16), skinMat);
+        thumb.position.set(-1.2, 1.8, 0.4); 
+        handGroup.add(thumb);
+
+        // Curled Fingers (Torus Segment)
+        const fingersGeo = new THREE.TorusGeometry(0.8, 0.4, 16, 32, Math.PI * 1.3);
+        const fingers = new THREE.Mesh(fingersGeo, skinMat);
+        fingers.rotation.x = Math.PI / 2;
+        fingers.rotation.z = Math.PI * 0.35; 
+        handGroup.add(fingers);
+
+        scene.add(handGroup);
+
+
+        // --- 3. UI Logic and Updates ---
+        const iSlider = document.getElementById('iSlider');
+        const rSlider = document.getElementById('rSlider');
+        const iDisp = document.getElementById('iDisp');
+        const rDisp = document.getElementById('rDisp');
+        const bResultDisplay = document.getElementById('bResultDisplay');
+        const directionText = document.getElementById('directionText');
+
+        // Solution DOM
+        const sol_i = document.getElementById('sol_i');
+        const sol_r_cm = document.getElementById('sol_r_cm');
+        const sol_r_m = document.getElementById('sol_r_m');
+        const sol_i_top = document.getElementById('sol_i_top');
+        const sol_r_bottom = document.getElementById('sol_r_bottom');
+        const sol_b_final = document.getElementById('sol_b_final');
+
+        const MU_0_OVER_2PI = 2e-7;
+        let currentSpeed = 0; // សម្រាប់ចលនាព្រួញ
+
+        function formatScientificPlain(num) {
+            if (num === 0) return "0.00";
+            let exponent = Math.floor(Math.log10(num));
+            let mantissa = num / Math.pow(10, exponent);
+            let expStr = exponent.toString().replace('-', '⁻').replace('0', '⁰').replace('1', '¹').replace('2', '²').replace('3', '³').replace('4', '⁴').replace('5', '⁵').replace('6', '⁶').replace('7', '⁷').replace('8', '⁸').replace('9', '⁹');
+            return `${mantissa.toFixed(2)} × 10${expStr}`;
+        }
+
+        function updateSimulation() {
+            const I = parseFloat(iSlider.value);
+            const r_cm = parseFloat(rSlider.value);
+            const r_m = r_cm / 100;
+            const absI = Math.abs(I);
+
+            // Update UI
+            iDisp.textContent = `${I.toFixed(1)} A`;
+            rDisp.textContent = `${r_cm.toFixed(1)} cm`;
+
+            // Calculate B
+            let B = 0;
+            if (I !== 0) {
+                B = (MU_0_OVER_2PI * absI) / r_m;
+                bResultDisplay.innerHTML = `${formatScientificPlain(B)} T`;
+            } else {
+                bResultDisplay.textContent = `0.00 T`;
+            }
+
+            // Update Solution Text
+            sol_i.textContent = `I = ${Math.abs(I).toFixed(1)} A`;
+            sol_r_cm.textContent = `r = ${r_cm.toFixed(1)} cm`;
+            sol_r_m.textContent = `${r_cm.toFixed(1)} × 10⁻²`;
+            sol_i_top.textContent = `${Math.abs(I).toFixed(1)} A`;
+            sol_r_bottom.textContent = `2π × ${r_cm.toFixed(1)} × 10⁻² m`;
+            sol_b_final.textContent = formatScientificPlain(B);
+
+            // Update 3D Geometry
+            const radius = r_cm * 2; // Scaled for visual
+            
+            // Circle
+            const points = [];
+            for (let i = 0; i <= 64; i++) {
+                const theta = (i / 64) * Math.PI * 2;
+                points.push(new THREE.Vector3(Math.cos(theta) * radius, Math.sin(theta) * radius, 0));
+            }
+            bFieldCircle.geometry.dispose();
+            bFieldCircle.geometry = new THREE.BufferGeometry().setFromPoints(points);
+            bFieldCircle.computeLineDistances();
+
+            // Point N is on LEFT (-X axis)
+            pointN.position.set(-radius, 0, 0);
+
+            // Hide/Show vectors based on current
+            if (I === 0) {
+                currentArrows.forEach(arrow => arrow.visible = false);
+                bVector.visible = false;
+                handGroup.visible = false;
+                directionText.innerHTML = "⇒ B ស្មើ 0 ដោយសារគ្មានចរន្ត";
+                currentSpeed = 0;
+            } else {
+                currentArrows.forEach(arrow => arrow.visible = true);
+                bVector.visible = true;
+                handGroup.visible = true;
+
+                // ល្បឿនព្រួញ អាស្រ័យលើទំហំចរន្ត I
+                currentSpeed = (I / 15) * 0.2; 
+                
+                // បង្វិលព្រួញចុះក្រោម បើ I < 0
+                currentArrows.forEach(arrow => {
+                    arrow.rotation.z = I > 0 ? 0 : Math.PI;
+                });
+
+                let visualLength = Math.max(2, Math.min(6, (absI/r_cm) * 2));
+                bVector.position.set(-radius, 0, 0); // At point N
+                bVector.setLength(visualLength, 1.2, 0.8);
+
+                if (I > 0) {
+                    // +Z is towards observer
+                    bVector.setDirection(new THREE.Vector3(0, 0, 1));
+                    handGroup.rotation.z = 0;
+                    handGroup.position.set(0, 0, 0);
+                    
+                    directionText.innerHTML = "⇒ B មានទិសដៅសំដៅមករកអ្នកសង្កេត (ចេញក្រៅ)";
+                    directionText.className = "text-sky-600 font-bold ml-1";
+                } else {
+                    // -Z is away from observer
+                    bVector.setDirection(new THREE.Vector3(0, 0, -1));
+                    handGroup.rotation.z = Math.PI; 
+                    
+                    directionText.innerHTML = "⇒ B មានទិសដៅចាក់ចូលទៅក្នុងប្លង់ (ចេញឆ្ងាយពីអ្នកសង្កេត)";
+                    directionText.className = "text-rose-600 font-bold ml-1";
+                }
+            }
+        }
+
+        // --- Toggle Solution ---
+        const toggleBtn = document.getElementById('toggleBtn');
+        const solutionBox = document.getElementById('solutionBox');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const btnText = document.getElementById('btnText');
+        let isOpen = false;
+
+        toggleBtn.addEventListener('click', () => {
+            isOpen = !isOpen;
+            if (isOpen) {
+                solutionBox.classList.add('open');
+                btnText.textContent = "លាក់ដំណោះស្រាយ";
+                toggleIcon.style.transform = "rotate(180deg)";
+            } else {
+                solutionBox.classList.remove('open');
+                btnText.textContent = "បង្ហាញដំណោះស្រាយលម្អិត";
+                toggleIcon.style.transform = "rotate(0deg)";
+            }
+        });
+
+        // Listeners
+        iSlider.addEventListener('input', updateSimulation);
+        rSlider.addEventListener('input', updateSimulation);
+
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // Animation Loop សម្រាប់ចលនាព្រួញ
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            
+            // ធ្វើឱ្យព្រួញក្រហមរត់តាមខ្សែ
+            if (currentSpeed !== 0) {
+                currentArrows.forEach(arrow => {
+                    arrow.position.y += currentSpeed;
+                    if (currentSpeed > 0 && arrow.position.y > 15) {
+                        arrow.position.y = -15;
+                    } else if (currentSpeed < 0 && arrow.position.y < -15) {
+                        arrow.position.y = 15;
+                    }
+                });
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        updateSimulation();
+        animate();
+    </script>
+</body>
+</html>

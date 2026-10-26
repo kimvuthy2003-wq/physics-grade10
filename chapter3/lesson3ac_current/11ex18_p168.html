@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ18ទំព័រ168ត្រង់ស្វូបរិសុទ្ធ </title>
+
+    <!-- បញ្ចូល Google Fonts សម្រាប់ Battambang -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Battambang', 'Khmer OS Battambang', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; line-height: 1.8; margin: 0;
+            font-size: 18px; /* បង្កើនទំហំអក្សរគោល */
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        .lesson-content {
+            background: #ffffff; padding: 25px; border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 20px; text-align: left;
+            border-top: 5px solid #2196f3;
+        }
+        .lesson-content h2 { margin-top: 0; color: #0d47a1; font-size: 28px; border-bottom: 2px solid #bbdefb; padding-bottom: 10px; margin-bottom: 15px;}
+        
+        .sim-layout {
+            display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px;
+        }
+
+        .sim-box {
+            background: #ffffff; border: 2px solid #cfd8dc; border-radius: 12px;
+            padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); text-align: center;
+        }
+        .sim-box h3 { margin-top: 0; color: #37474f; font-size: 24px; margin-bottom: 15px; border-bottom: 2px dashed #eceff1; padding-bottom: 10px;}
+
+        svg {
+            display: block; width: 100%; height: auto; max-height: 450px; margin: 0 auto;
+            background: #f8f9fa; border-radius: 8px; border: 1px solid #cfd8dc;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 900px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        
+        .slider-box {
+            background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;
+            font-weight: bold; text-align: left; font-size: 18px; /* បង្កើនទំហំអក្សរ */
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; margin-bottom: 20px;
+        }
+        .data-panel {
+            padding: 15px; border-radius: 8px; text-align: center; font-size: 18px; font-weight: bold;
+            background: #e3f2fd; border: 2px solid #2196f3; color: #0d47a1;
+        }
+        
+        .val-large { font-size: 32px; font-family: 'Arial', sans-serif; font-weight: 900; display: block; margin: 10px 0; }
+
+        .btn-sol { 
+            background: #0288d1; color: white; width: 100%; margin-top: 20px; font-size: 22px; padding: 15px; 
+            border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: bold; 
+            transition: background 0.3s; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        .btn-sol:hover { background: #01579b; }
+
+        .solution-box {
+            background: #f0f8ff; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 20px; border-left: 6px solid #0288d1;
+            font-size: 20px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* បង្កើនទំហំអក្សរ */
+        }
+        .solution-box h3 { margin-top: 0; color: #01579b; border-bottom: 2px solid #b3e5fc; padding-bottom: 10px; font-size: 24px; }
+        
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+
+        /* រចនាប័ទ្មសម្រាប់អក្សររូបមន្ត HTML សុវត្ថិភាព */
+        .html-math { display: inline-flex; align-items: center; font-size: 20px; }
+        .html-fraction { display: inline-flex; flex-direction: column; align-items: center; margin: 0 8px; vertical-align: middle; }
+        .html-num { border-bottom: 2px solid #111; padding: 0 6px 4px 6px; }
+        .html-den { padding: 4px 6px 0 6px; }
+        .math-var { font-family: 'Times New Roman', Times, serif; font-style: italic; }
+        .math-sub { font-size: 0.75em; font-family: 'Arial', sans-serif; font-style: normal; vertical-align: sub; }
+        .dynamic-val { color: #d32f2f; font-weight: bold; padding: 0 6px; font-size: 24px; font-family: 'Arial', sans-serif;}
+        .highlight { color: #10b981; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ប្រធានលំហាត់ -->
+    <div class="lesson-content">
+        <h2>📝 លំហាត់ទី១៨</h2>
+        <strong>១៨.</strong> ត្រង់ស្វូបរិសុទ្ធនៃរថភ្លើងគំរូភ្ជាប់ទៅនឹងតង់ស្យុងឆ្លាស់ <span style="color:#d32f2f; font-weight:bold; font-family:Arial;">$V_1 =$ <span id="probV1">220</span> V</span> និងទាញចរន្ត <span style="color:#1976d2; font-weight:bold; font-family:Arial;">$I_1 =$ <span id="probI1">0.35</span> A</span> ខណៈផ្តល់ចរន្ត <span style="color:#10b981; font-weight:bold; font-family:Arial;">$I_2 =$ <span id="probI2">6.8</span> A</span> ទៅរថភ្លើង ។<br><br>
+        ក. តើតង់ស្យុងប៉ុន្មានដែលបង្ហាញឆ្លងកាត់ជួររថភ្លើង?<br>
+        ខ. តើត្រង់ស្វូនេះជាស្ទូក ឬស៊ូវ៉ុលទ័រ?
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box" style="border-top: 4px solid #ef4444;">
+            តង់ស្យុងរបុំបឋម $V_1$ (V):<br>
+            <span id="valV1" class="number-display" style="color: #d32f2f; font-size:24px;">220 V</span>
+            <input type="range" id="sliderV1" min="110" max="380" value="220" step="10">
+        </div>
+        <div class="slider-box" style="border-top: 4px solid #1976d2;">
+            ចរន្តរបុំបឋម $I_1$ (A):<br>
+            <span id="valI1" class="number-display" style="color: #1976d2; font-size:24px;">0.35 A</span>
+            <input type="range" id="sliderI1" min="0.10" max="2.00" value="0.35" step="0.05">
+        </div>
+        <div class="slider-box" style="border-top: 4px solid #10b981;">
+            ចរន្តរបុំមធ្យមភាគ $I_2$ (A):<br>
+            <span id="valI2" class="number-display" style="color: #10b981; font-size:24px;">6.8 A</span>
+            <input type="range" id="sliderI2" min="1.0" max="20.0" value="6.8" step="0.1">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងឧបករណ៍ពិសោធន៍ (2D SVG Simulator & Dashboard) -->
+    <div class="sim-box">
+        <h3>⚡ ត្រង់ស្វូ និងរថភ្លើងគំរូ</h3>
+        
+        <div class="dashboard">
+            <div class="data-panel">
+                <div style="font-size: 18px; font-weight: normal; color: #546e7a;">អានុភាពបឋម $P_1$</div>
+                <div class="val-large" id="dashP1" style="color: #ef4444;">77.0 W</div>
+            </div>
+            <div class="data-panel" style="background: #fff8e1; border-color: #ffb300;">
+                <div style="font-size: 18px; font-weight: normal; color: #f57c00;">ប្រភេទត្រង់ស្វូ</div>
+                <div class="val-large" id="dashType" style="color: #ff8f00;">ស៊ូវ៉ុលទ័រ</div>
+            </div>
+            <div class="data-panel" style="background: #e8f5e9; border-color: #4caf50;">
+                <div style="font-size: 18px; font-weight: normal; color: #2e7d32;">អានុភាពមធ្យមភាគ $P_2$</div>
+                <div class="val-large" id="dashP2" style="color: #10b981;">77.0 W</div>
+            </div>
+        </div>
+
+        <svg viewBox="0 0 1000 400" preserveAspectRatio="xMidYMid meet">
+            <!-- ប្រភព AC ខាងឆ្វេង -->
+            <rect x="20" y="150" width="80" height="100" rx="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="4"/>
+            <circle cx="60" cy="200" r="20" fill="none" stroke="#1976d2" stroke-width="3"/>
+            <path d="M 45 200 Q 52.5 185 60 200 T 75 200" fill="none" stroke="#1976d2" stroke-width="3"/>
+            <text x="60" y="135" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold" fill="#1976d2">AC In</text>
+            
+            <!-- ខ្សែប្រភព (Primary Circuit) -->
+            <polyline points="100,170 300,170" fill="none" stroke="#90a4ae" stroke-width="6"/>
+            <polyline points="100,230 300,230" fill="none" stroke="#90a4ae" stroke-width="6"/>
+            
+            <!-- ចលនាចរន្ត Primary -->
+            <polyline id="flowP" points="100,170 300,170 300,230 100,230" fill="none" stroke="#ef4444" stroke-width="4" stroke-dasharray="10,15"/>
+
+            <!-- ត្រង់ស្វូ (Transformer Core) -->
+            <!-- ប្រើ rect កម្រាស់ធំដើម្បីឱ្យឃើញប្រហោងកណ្តាល -->
+            <rect x="300" y="80" width="250" height="240" fill="none" stroke="#cfd8dc" stroke-width="35"/>
+            <rect x="300" y="80" width="250" height="240" fill="none" stroke="#90a4ae" stroke-width="5"/>
+            <rect x="335" y="115" width="180" height="170" fill="none" stroke="#90a4ae" stroke-width="5"/>
+            <text x="425" y="45" text-anchor="middle" font-family="'Battambang', sans-serif" font-size="22" font-weight="bold" fill="#37474f">ស្នូលដែកត្រង់ស្វូ</text>
+            
+            <!-- របុំបឋម (Primary Coil) - ខាងឆ្វេង -->
+            <g id="coilP">
+                <path d="M 280 110 Q 350 120 280 130 Q 350 140 280 150 Q 350 160 280 170 Q 350 180 280 190 Q 350 200 280 210 Q 350 220 280 230 Q 350 240 280 250 Q 350 260 280 270 Q 350 280 280 290" fill="none" stroke="#ef4444" stroke-width="6"/>
+            </g>
+
+            <!-- របុំមធ្យមភាគ (Secondary Coil) - ខាងស្តាំ -->
+            <g id="coilS">
+                <!-- គូរជាខ្សែរុំជុំវិញខាងស្តាំ នឹងកែប្រែចំនួនស្ពែរតាមប្រភេទត្រង់ស្វូក្នុង JS -->
+                <path id="pathCoilS" d="M 570 140 Q 500 160 570 180 Q 500 220 570 260" fill="none" stroke="#10b981" stroke-width="6"/>
+            </g>
+
+            <!-- ខ្សែចេញ (Secondary Circuit) -->
+            <polyline points="550,140 750,140" fill="none" stroke="#90a4ae" stroke-width="6"/>
+            <polyline points="550,260 750,260" fill="none" stroke="#90a4ae" stroke-width="6"/>
+            
+            <!-- ចលនាចរន្ត Secondary -->
+            <polyline id="flowS" points="550,140 750,140 750,260 550,260" fill="none" stroke="#10b981" stroke-width="4" stroke-dasharray="10,15"/>
+
+            <!-- រថភ្លើងគំរូ (Model Train Load) -->
+            <g transform="translate(750, 120)">
+                <!-- តួ -->
+                <rect x="0" y="50" width="140" height="80" fill="#2196f3" rx="10" stroke="#1e293b" stroke-width="3"/>
+                <rect x="80" y="10" width="60" height="40" fill="#1976d2" rx="5" stroke="#1e293b" stroke-width="3"/>
+                <!-- បំពង់ផ្សែង -->
+                <rect x="20" y="20" width="20" height="30" fill="#607d8b"/>
+                <path d="M 15 20 L 45 20 L 35 0 L 25 0 Z" fill="#455a64"/>
+                <!-- កង់ -->
+                <circle cx="30" cy="140" r="15" fill="#37474f" stroke="#b0bec5" stroke-width="3"/>
+                <circle cx="70" cy="140" r="15" fill="#37474f" stroke="#b0bec5" stroke-width="3"/>
+                <circle cx="110" cy="140" r="15" fill="#37474f" stroke="#b0bec5" stroke-width="3"/>
+                <!-- ផ្សែង -->
+                <circle cx="10" cy="-20" r="12" fill="#cfd8dc" opacity="0.8"/>
+                <circle cx="-15" cy="-45" r="18" fill="#cfd8dc" opacity="0.6"/>
+                <circle cx="-40" cy="-70" r="25" fill="#cfd8dc" opacity="0.4"/>
+            </g>
+            <text x="820" y="300" text-anchor="middle" font-family="'Battambang', sans-serif" font-size="22" font-weight="bold" fill="#111">រថភ្លើងគំរូ</text>
+
+            <!-- ផ្លាកសញ្ញា (Labels) -->
+            <!-- Primary Side -->
+            <rect x="130" y="80" width="140" height="85" fill="#ffffff" stroke="#ef4444" stroke-width="3" rx="8"/>
+            <text x="200" y="105" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#37474f">Primary</text>
+            <text id="svgV1" x="200" y="130" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold" fill="#ef4444">V1: 220 V</text>
+            <text id="svgI1" x="200" y="155" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold" fill="#ef4444">I1: 0.35 A</text>
+
+            <!-- Secondary Side -->
+            <rect x="580" y="80" width="140" height="85" fill="#ffffff" stroke="#10b981" stroke-width="3" rx="8"/>
+            <text x="650" y="105" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#37474f">Secondary</text>
+            <text id="svgV2" x="650" y="130" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold" fill="#10b981">V2: 11.3 V</text>
+            <text id="svgI2" x="650" y="155" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold" fill="#10b981">I2: 6.8 A</text>
+
+            <!-- សញ្ញាព្រួញប្រភេទត្រង់ស្វូ -->
+            <g id="arrowType" transform="translate(425, 200)">
+                <path id="arrowShape" d="M -40 0 L 40 0 M 15 -25 L 40 0 L 15 25" fill="none" stroke="#f59e0b" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+        </svg>
+
+        <button id="btnToggleSolution" class="btn-sol">📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត</button>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ (Solution Box) -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <h3>📝 ដំណោះស្រាយលម្អិត</h3>
+        <div id="mathContainer">
+            
+            <p><strong>ក. គណនាតង់ស្យុងឆ្លងកាត់រថភ្លើង ($V_2$) ៖</strong></p>
+            <p>តាមច្បាប់រក្សាអានុភាពនៃត្រង់ស្វូបរិសុទ្ធ ៖</p>
+            <div style="text-align: center; margin: 15px 0;">
+                <div class="html-math">
+                    <span class="math-var">P</span><sub class="math-sub">1</sub> = <span class="math-var">P</span><sub class="math-sub">2</sub> &nbsp;&nbsp;&rArr;&nbsp;&nbsp;
+                    <span class="math-var">V</span><sub class="math-sub">1</sub> &times; <span class="math-var">I</span><sub class="math-sub">1</sub> = <span class="math-var">V</span><sub class="math-sub">2</sub> &times; <span class="math-var">I</span><sub class="math-sub">2</sub>
+                </div>
+            </div>
+            <p>ទាញរក $V_2$ ៖</p>
+            <div style="text-align: center; margin: 15px 0;">
+                <div class="html-math">
+                    <span class="math-var">V</span><sub class="math-sub">2</sub> = 
+                    <div class="html-fraction">
+                        <div class="html-num"><span class="math-var">V</span><sub class="math-sub">1</sub> &times; <span class="math-var">I</span><sub class="math-sub">1</sub></div>
+                        <div class="html-den"><span class="math-var">I</span><sub class="math-sub">2</sub></div>
+                    </div>
+                    =
+                    <div class="html-fraction">
+                        <div class="html-num"><span id="mathV1">220</span> &times; <span id="mathI1">0.35</span></div>
+                        <div class="html-den"><span id="mathI2">6.8</span></div>
+                    </div>
+                    = <span id="mathAnsV2" class="dynamic-val">11.32</span> V
+                </div>
+            </div>
+            <p style="text-align: center;">ដូចនេះ តង់ស្យុងផ្តល់ឱ្យរថភ្លើងគឺ <span class="highlight"><span id="ansTextV2">11.32</span> V</span> ។</p>
+
+            <hr style="border: 0; border-top: 1px dashed #b3e5fc; margin: 25px 0;">
+
+            <p><strong>ខ. កំណត់ប្រភេទត្រង់ស្វូ ៖</strong></p>
+            <p>ដោយសារ $V_2 = $ <span id="cmpV2" style="font-weight: bold;">11.32 V</span> ហើយ $V_1 = $ <span id="cmpV1" style="font-weight: bold;">220 V</span></p>
+            <div style="text-align: center; margin: 15px 0;">
+                <div class="html-math">
+                    យើងឃើញថា <span class="math-var">V</span><sub class="math-sub">2</sub> &nbsp;<span id="cmpSign" style="color:#d32f2f; font-weight:bold; font-size:24px;">&lt;</span>&nbsp; <span class="math-var">V</span><sub class="math-sub">1</sub> ។
+                </div>
+            </div>
+            <div style="text-align: center; font-family: 'Battambang', sans-serif; margin-top: 20px; color: #111; font-weight: bold; background: #e1f5fe; padding: 15px; border-radius: 8px;">
+                ដូចនេះ ត្រង់ស្វូនេះគឺជា <span id="ansType" style="color: #ff8f00; font-size: 24px;">ស៊ូវ៉ុលទ័រ</span> ។
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var sV1 = document.getElementById('sliderV1');
+    var sI1 = document.getElementById('sliderI1');
+    var sI2 = document.getElementById('sliderI2');
+    
+    var flowP = document.getElementById('flowP');
+    var flowS = document.getElementById('flowS');
+    var pathCoilS = document.getElementById('pathCoilS');
+    var arrowShape = document.getElementById('arrowShape');
+    
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+    
+    var offsetP = 0;
+    var offsetS = 0;
+    var speedP = 0;
+    var speedS = 0;
+
+    btnToggleSolution.addEventListener('click', function() {
+        var isHidden = (solutionBox.style.display === 'none');
+        if (isHidden === true) {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    var mathTimeout;
+    function updatePhysics() {
+        var v1 = parseFloat(sV1.value);
+        var i1 = parseFloat(sI1.value);
+        var i2 = parseFloat(sI2.value);
+        
+        var p1 = v1 * i1;
+        var p2 = p1; // បរិសុទ្ធ
+        var v2 = p2 / i2;
+
+        document.getElementById('valV1').innerText = v1 + " V";
+        document.getElementById('valI1').innerText = i1.toFixed(2) + " A";
+        document.getElementById('valI2').innerText = i2.toFixed(1) + " A";
+        
+        document.getElementById('probV1').innerText = v1;
+        document.getElementById('probI1').innerText = i1.toFixed(2);
+        document.getElementById('probI2').innerText = i2.toFixed(1);
+
+        document.getElementById('svgV1').innerText = "V1: " + v1 + " V";
+        document.getElementById('svgI1').innerText = "I1: " + i1.toFixed(2) + " A";
+        document.getElementById('svgV2').innerText = "V2: " + v2.toFixed(1) + " V";
+        document.getElementById('svgI2').innerText = "I2: " + i2.toFixed(1) + " A";
+
+        document.getElementById('dashP1').innerText = p1.toFixed(1) + " W";
+        document.getElementById('dashP2').innerText = p2.toFixed(1) + " W";
+
+        var typeStr = "";
+        var isStepDown = (Math.min(v2, v1) === v2 && v2 !== v1);
+        var isStepUp = (Math.max(v2, v1) === v2 && v2 !== v1);
+        
+        var arrowColor = "#f59e0b";
+        
+        if (isStepDown === true) {
+            typeStr = "ស៊ូវ៉ុលទ័រ";
+            arrowColor = "#2196f3"; // ពណ៌ខៀវសម្រាប់ចុះ
+            arrowShape.setAttribute("d", "M -35 -25 L -35 25 L 35 10 L 35 -10 Z");
+            arrowShape.setAttribute("fill", arrowColor);
+            arrowShape.setAttribute("stroke", "none");
+            document.getElementById('cmpSign').innerText = "<";
+            
+            // គូររបុំខ្សែរងតិចជាងបឋម (៣ កោង)
+            pathCoilS.setAttribute("d", "M 570 140 Q 480 160 570 180 Q 480 220 570 260");
+        } 
+        else if (isStepUp === true) {
+            typeStr = "ស្ទូកវ៉ុលទ័រ";
+            arrowColor = "#ef4444"; // ពណ៌ក្រហមសម្រាប់ឡើង
+            arrowShape.setAttribute("d", "M -35 -10 L -35 10 L 35 25 L 35 -25 Z");
+            arrowShape.setAttribute("fill", arrowColor);
+            arrowShape.setAttribute("stroke", "none");
+            document.getElementById('cmpSign').innerText = ">";
+            
+            // គូររបុំខ្សែរងច្រើនជាងបឋម (ច្រើនកោង)
+            pathCoilS.setAttribute("d", "M 570 110 Q 500 120 570 130 Q 500 140 570 150 Q 500 160 570 170 Q 500 180 570 190 Q 500 200 570 210 Q 500 220 570 230 Q 500 240 570 250 Q 500 260 570 270 Q 500 280 570 290");
+        } 
+        else {
+            typeStr = "រក្សាតង់ស្យុង";
+            arrowColor = "#90a4ae";
+            arrowShape.setAttribute("d", "M -35 -15 L -35 15 L 35 15 L 35 -15 Z");
+            arrowShape.setAttribute("fill", arrowColor);
+            arrowShape.setAttribute("stroke", "none");
+            document.getElementById('cmpSign').innerText = "=";
+            
+            // ស្មើគ្នា
+            pathCoilS.setAttribute("d", "M 570 110 Q 500 120 570 130 Q 500 140 570 150 Q 500 160 570 170 Q 500 180 570 190 Q 500 200 570 210 Q 500 220 570 230 Q 500 240 570 250 Q 500 260 570 270 Q 500 280 570 290");
+        }
+        
+        document.getElementById('dashType').innerText = typeStr;
+        document.getElementById('dashType').style.color = arrowColor;
+        document.getElementById('ansType').innerText = typeStr;
+
+        // ធ្វើបច្ចុប្បន្នភាពរូបមន្ត HTML
+        document.getElementById('mathV1').innerText = v1;
+        document.getElementById('mathI1').innerText = i1.toFixed(2);
+        document.getElementById('mathI2').innerText = i2.toFixed(1);
+        document.getElementById('mathAnsV2').innerText = v2.toFixed(2);
+        document.getElementById('ansTextV2').innerText = v2.toFixed(2);
+        
+        document.getElementById('cmpV2').innerText = v2.toFixed(2) + " V";
+        document.getElementById('cmpV1').innerText = v1 + " V";
+
+        speedP = i1 * 3; 
+        speedS = i2 * 0.5;
+    }
+
+    function loopAnimation() {
+        offsetP -= speedP;
+        offsetS -= speedS;
+        
+        flowP.setAttribute("stroke-dashoffset", offsetP);
+        flowS.setAttribute("stroke-dashoffset", offsetS);
+        
+        requestAnimationFrame(loopAnimation);
+    }
+
+    sV1.addEventListener('input', updatePhysics);
+    sI1.addEventListener('input', updatePhysics);
+    sI2.addEventListener('input', updatePhysics);
+
+    updatePhysics();
+    loopAnimation();
+
+</script>
+
+</body>
+</html>

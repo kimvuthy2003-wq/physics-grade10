@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី៤៖ ផលធៀបត្រង់ស្វូម៉ាទ័រ</title>
+    
+    <!-- បញ្ចូលបណ្ណាល័យ MathJax សម្រាប់បង្ហាញរូបមន្តគណិតវិទ្យា -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Battambang:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #2563eb;
+            color: white;
+            padding: 16px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .problem-statement {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #1f2937;
+            margin-bottom: 24px;
+            padding: 16px;
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #111827; 
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+
+        canvas {
+            background-color: #111827;
+            border-radius: 4px;
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 600px;
+            background-color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .slider-row label {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #1e3a8a;
+            width: 220px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .val-display {
+            width: 80px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #1d4ed8;
+            background-color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .btn-reset { background-color: #64748b; }
+        .btn-reset:hover { background-color: #475569; }
+        
+        .btn-solution { background-color: #3b82f6; }
+        .btn-solution:hover { background-color: #2563eb; }
+
+        .solution-box {
+            display: none;
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 20px;
+            color: #1e3a8a;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>លំហាត់ទី៤៖ ផលធៀបត្រង់ស្វូម៉ាទ័រ</h1>
+    </div>
+    
+    <div class="content">
+        <div class="problem-statement">
+            <strong>៤. ត្រង់ស្វូមួយមានចំនួនស្ពៀ $n_1$ នៅរបុំបឋមនិង $n_2$ នៅរបុំមធ្យមដែលគេឱ្យផលធៀប $\frac{n_2}{n_1} = 4$ ។</strong><br><br>
+            ក. គណនាតង់ស្យុងប្រសិទ្ធនៅរបុំមធ្យម បើគេឱ្យតង់ស្យុងប្រសិទ្ធនៅរបុំបឋម $V_P = 120\text{ V}$ ។<br>
+            ខ. រកចំនួនស្ពៀនៅរបុំមធ្យម បើគេឱ្យចំនួនស្ពៀនៅរបុំបឋម $n_1 = 100$ ។
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="simCanvas" width="800" height="350"></canvas>
+            
+            <div class="controls">
+                <div class="slider-row">
+                    <label>ផលធៀប $\frac{n_2}{n_1}$ :</label>
+                    <input type="range" id="sliderRatio" min="0.5" max="10" value="4" step="0.5" oninput="updateValues()">
+                    <div class="val-display" id="valRatio">4</div>
+                </div>
+                <div class="slider-row">
+                    <label>តង់ស្យុងបឋម $V_P$ :</label>
+                    <input type="range" id="sliderVp" min="10" max="240" value="120" step="10" oninput="updateValues()">
+                    <div class="val-display" id="valVp">120 V</div>
+                </div>
+                <div class="slider-row">
+                    <label>ស្ពៀរបឋម $n_1$ :</label>
+                    <input type="range" id="sliderN1" min="10" max="1000" value="100" step="10" oninput="updateValues()">
+                    <div class="val-display" id="valN1">100</div>
+                </div>
+                
+                <div class="slider-row" style="margin-top: 10px; padding-top: 15px; border-top: 2px dashed #cbd5e1;">
+                    <label style="color: #10b981;">តង់ស្យុងមធ្យម $V_S$ :</label>
+                    <div class="val-display" id="valVs" style="color: #10b981; font-size: 1.3rem; width: 100px; border-color:#10b981;">480 V</div>
+                </div>
+                <div class="slider-row">
+                    <label style="color: #f59e0b;">ស្ពៀរមធ្យម $n_2$ :</label>
+                    <div class="val-display" id="valN2" style="color: #f59e0b; font-size: 1.3rem; width: 100px; border-color:#f59e0b;">400</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-reset" onclick="resetToProblem()">កំណត់ដូចប្រធានដើម</button>
+            <button class="btn-solution" onclick="toggleSolution()">បង្ហាញដំណោះស្រាយ</button>
+        </div>
+
+        <div class="solution-box" id="solutionBox">
+            <h2 style="margin-top:0; border-bottom:2px solid #93c5fd; padding-bottom:8px; color: #1d4ed8;">ដំណោះស្រាយលំហាត់លេខ ៤</h2>
+            <div id="solutionContent">
+                <!-- មាតិកា MathJax នឹងលោតនៅទីនេះ -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let ratio = 4;
+    let vp = 120;
+    let n1 = 100;
+    let vs = 480;
+    let n2 = 400;
+    let time = 0;
+
+    // Dimensions
+    const CORE_X = 250;
+    const CORE_Y = 80;
+    const CORE_W = 300;
+    const CORE_H = 190;
+    const CORE_THICK = 40;
+
+    function toggleSolution() {
+        const box = document.getElementById('solutionBox');
+        box.style.display = box.style.display === 'block' ? 'none' : 'block';
+        if (window.MathJax) {
+            MathJax.typesetPromise([document.getElementById('solutionContent')]);
+        }
+    }
+
+    function updateValues() {
+        ratio = parseFloat(document.getElementById('sliderRatio').value);
+        vp = parseFloat(document.getElementById('sliderVp').value);
+        n1 = parseFloat(document.getElementById('sliderN1').value);
+
+        // គណនា
+        vs = vp * ratio;
+        n2 = Math.round(n1 * ratio);
+
+        // ធ្វើបច្ចុប្បន្នភាព UI
+        document.getElementById('valRatio').innerText = ratio;
+        document.getElementById('valVp').innerText = vp + " V";
+        document.getElementById('valN1').innerText = n1;
+        document.getElementById('valVs').innerText = vs + " V";
+        document.getElementById('valN2').innerText = n2;
+
+        // រៀបចំកូដ LaTeX សម្រាប់ដំណោះស្រាយ
+        let mathHTML = `
+            <p><strong>បម្រាប់៖</strong> $\\frac{n_2}{n_1} = ${ratio}$, $V_P = ${vp}\\text{ V}$, $n_1 = ${n1}$</p>
+            
+            <p><strong>ក. គណនាតង់ស្យុងប្រសិទ្ធនៅរបុំមធ្យម $V_S$ ៖</strong><br>
+            តាមរូបមន្តផលធៀបត្រង់ស្វូ៖
+            $$ \\frac{V_S}{V_P} = \\frac{n_2}{n_1} $$
+            ទាញរកតង់ស្យុងរបុំមធ្យម៖
+            $$ V_S = V_P \\times \\left(\\frac{n_2}{n_1}\\right) $$
+            ជំនួសលេខ៖
+            $$ V_S = ${vp}\\text{ V} \\times ${ratio} $$
+            $$ V_S = \\mathbf{${vs}\\text{ V}} $$</p>
+
+            <p><strong>ខ. រកចំនួនស្ពៀនៅរបុំមធ្យម $n_2$ ៖</strong><br>
+            តាមបម្រាប់ផលធៀប៖
+            $$ \\frac{n_2}{n_1} = ${ratio} $$
+            ទាញរកចំនួនស្ពៀរបុំមធ្យម៖
+            $$ n_2 = ${ratio} \\times n_1 $$
+            ជំនួសលេខ៖
+            $$ n_2 = ${ratio} \\times ${n1} $$
+            $$ n_2 = \\mathbf{${n2}\\text{ស្ពៀ}} $$</p>
+        `;
+
+        const solContainer = document.getElementById('solutionContent');
+        solContainer.innerHTML = mathHTML;
+
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([solContainer]).catch(function (err) {
+                console.error('MathJax error: ', err.message);
+            });
+        }
+    }
+
+    function resetToProblem() {
+        document.getElementById('sliderRatio').value = 4;
+        document.getElementById('sliderVp').value = 120;
+        document.getElementById('sliderN1').value = 100;
+        updateValues();
+    }
+
+    // --- CANVAS DRAWING ---
+    function drawLine(x1, y1, x2, y2, color, width) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+    }
+
+    function drawIronCore() {
+        ctx.fillStyle = '#64748b'; 
+        ctx.fillRect(CORE_X, CORE_Y, CORE_W, CORE_H);
+        
+        ctx.fillStyle = '#111827'; 
+        ctx.fillRect(CORE_X + CORE_THICK, CORE_Y + CORE_THICK, CORE_W - 2*CORE_THICK, CORE_H - 2*CORE_THICK);
+        
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(CORE_X, CORE_Y, CORE_W, CORE_H);
+        ctx.strokeRect(CORE_X + CORE_THICK, CORE_Y + CORE_THICK, CORE_W - 2*CORE_THICK, CORE_H - 2*CORE_THICK);
+
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#475569';
+        for(let i=10; i<CORE_W; i+=10) {
+            drawLine(CORE_X + i, CORE_Y, CORE_X + i, CORE_Y + CORE_THICK, '#475569', 1);
+            drawLine(CORE_X + i, CORE_Y + CORE_H - CORE_THICK, CORE_X + i, CORE_Y + CORE_H, '#475569', 1);
+        }
+        for(let i=10; i<CORE_H; i+=10) {
+            drawLine(CORE_X, CORE_Y + i, CORE_X + CORE_THICK, CORE_Y + i, '#475569', 1);
+            drawLine(CORE_X + CORE_W - CORE_THICK, CORE_Y + i, CORE_X + CORE_W, CORE_Y + i, '#475569', 1);
+        }
+    }
+
+    // គូសខ្សែដែលរត់ពីក្រោយស្នូលដែក
+    function drawCoilBack(arm, startY, endY, loops, color) {
+        let spacing = (endY - startY) / loops;
+        let xIn = arm === 'left' ? CORE_X + CORE_THICK : CORE_X + CORE_W - CORE_THICK;
+        let xOut = arm === 'left' ? CORE_X : CORE_X + CORE_W;
+        
+        ctx.strokeStyle = color === '#ef4444' ? '#991b1b' : '#b45309'; 
+        ctx.lineWidth = 5;
+        
+        for(let i=0; i<=loops; i++) {
+            let y = startY + i*spacing;
+            ctx.beginPath();
+            ctx.moveTo(xIn, y + spacing*0.3);
+            ctx.lineTo(xOut, y);
+            ctx.stroke();
+        }
+    }
+
+    // គូសខ្សែដែលរត់ពីមុខស្នូលដែក
+    function drawCoilFront(arm, startY, endY, loops, color) {
+        let spacing = (endY - startY) / loops;
+        let xIn = arm === 'left' ? CORE_X + CORE_THICK : CORE_X + CORE_W - CORE_THICK;
+        let xOut = arm === 'left' ? CORE_X : CORE_X + CORE_W;
+        
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 5;
+        
+        for(let i=0; i<loops; i++) {
+            let y = startY + i*spacing;
+            ctx.beginPath();
+            ctx.moveTo(xOut, y);
+            if (arm === 'left') {
+                ctx.bezierCurveTo(xOut - 20, y + spacing*0.5, xIn + 5, y + spacing, xIn, y + spacing*1.3);
+            } else {
+                ctx.bezierCurveTo(xOut + 20, y + spacing*0.5, xIn - 5, y + spacing, xIn, y + spacing*1.3);
+            }
+            ctx.stroke();
+        }
+    }
+
+    function drawMagneticFlux() {
+        ctx.save();
+        let p = (time * 1.5) % 1;
+        ctx.setLineDash([15, 15]);
+        ctx.lineDashOffset = -p * 30;
+        ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)'; 
+        ctx.lineWidth = 3;
+        
+        let pathX = CORE_X + CORE_THICK/2;
+        let pathY = CORE_Y + CORE_THICK/2;
+        let pathW = CORE_W - CORE_THICK;
+        let pathH = CORE_H - CORE_THICK;
+
+        ctx.strokeRect(pathX, pathY, pathW, pathH);
+        ctx.restore();
+
+        ctx.fillStyle = '#60a5fa';
+        ctx.font = '14px Khmer OS Battambang';
+        ctx.fillText('ដែនម៉ាញ៉េទិច', CORE_X + CORE_W/2 - 40, CORE_Y + 25);
+    }
+
+    function drawBulb(x, y, brightness) {
+        ctx.save();
+        ctx.translate(x, y);
+        
+        // ពន្លឺ Glow
+        if (brightness > 0) {
+            let grad = ctx.createRadialGradient(0, -20, 0, 0, -20, 60);
+            grad.addColorStop(0, `rgba(253, 224, 71, ${brightness})`);
+            grad.addColorStop(1, 'rgba(253, 224, 71, 0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(0, -20, 60, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // តួអំពូលកញ្ចក់
+        ctx.beginPath();
+        ctx.arc(0, -20, 16, Math.PI*0.8, Math.PI*0.2); 
+        ctx.lineTo(8, 0);
+        ctx.lineTo(-8, 0);
+        ctx.closePath();
+        ctx.fillStyle = brightness > 0 ? `rgba(254, 240, 138, ${0.3 + brightness*0.7})` : 'rgba(255, 255, 255, 0.1)';
+        ctx.fill();
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Filament
+        ctx.beginPath();
+        ctx.moveTo(-4, 0);
+        ctx.lineTo(-4, -15);
+        ctx.lineTo(4, -15);
+        ctx.lineTo(4, 0);
+        ctx.strokeStyle = brightness > 0.3 ? '#ffffff' : '#64748b';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // គូទអំពូល
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(-8, 0, 16, 10);
+        ctx.beginPath();
+        ctx.arc(0, 10, 6, 0, Math.PI);
+        ctx.fill();
+
+        ctx.restore();
+        
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 14px Arial';
+        ctx.fillText('Bulb', x - 15, y + 30);
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        time += 0.05;
+
+        // កំណត់ចំនួនស្ពៀសម្រាប់បង្ហាញលើរូបភាព (Ratio ជាក់ស្តែង)
+        let baseVisualLoops = 5;
+        let pLoops = baseVisualLoops;
+        let sLoops = Math.max(2, Math.min(25, Math.round(baseVisualLoops * ratio))); // កំណត់មិនឱ្យលើស 25 ស្ពៀ ដើម្បីកុំឱ្យចង្អៀត
+
+        let coilStartY = CORE_Y + 30;
+        let coilEndY = CORE_Y + CORE_H - 30;
+
+        // ១. គូសខ្សែរបុំពីក្រោយ
+        drawCoilBack('left', coilStartY, coilEndY, pLoops, '#ef4444');
+        drawCoilBack('right', coilStartY, coilEndY, sLoops, '#f59e0b');
+
+        // ២. គូសស្នូលដែក
+        drawIronCore();
+        drawMagneticFlux();
+
+        // ៣. គូសខ្សែរបុំពីមុខ
+        drawCoilFront('left', coilStartY, coilEndY, pLoops, '#ef4444');
+        drawCoilFront('right', coilStartY, coilEndY, sLoops, '#f59e0b');
+
+        // ៤. ខ្សែបឋមទៅប្រភព AC
+        let pX = 80;
+        let pY = CORE_Y + CORE_H/2;
+        
+        drawLine(pX, pY - 20, pX, coilStartY, '#ef4444', 3);
+        drawLine(pX, coilStartY, CORE_X, coilStartY, '#ef4444', 3);
+        
+        drawLine(pX, pY + 20, pX, coilEndY, '#ef4444', 3);
+        drawLine(pX, coilEndY, CORE_X, coilEndY, '#ef4444', 3);
+
+        ctx.beginPath(); ctx.arc(pX, pY, 20, 0, Math.PI*2); 
+        ctx.fillStyle = '#111827'; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle='#ef4444'; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(pX-10, pY); ctx.bezierCurveTo(pX-5, pY-10, pX+5, pY+10, pX+10, pY); ctx.stroke();
+
+        ctx.fillStyle = '#f87171';
+        ctx.font = 'bold 16px Arial';
+        ctx.fillText('Primary', pX - 25, pY - 40);
+        ctx.font = '16px Khmer OS Battambang';
+        ctx.fillText(`n1 = ${n1}`, pX - 25, pY - 60);
+        ctx.fillText(`VP = ${vp}V`, pX - 25, pY + 45);
+
+        // ៥. ខ្សែមធ្យមទៅអំពូលភ្លើង
+        let sX = CORE_X + CORE_W + 100;
+        let sY = CORE_Y + CORE_H/2;
+        
+        drawLine(CORE_X + CORE_W, coilStartY, sX, coilStartY, '#f59e0b', 3);
+        drawLine(sX, coilStartY, sX, sY - 25, '#f59e0b', 3);
+        
+        drawLine(CORE_X + CORE_W, coilEndY, sX, coilEndY, '#f59e0b', 3);
+        drawLine(sX, coilEndY, sX, sY + 10, '#f59e0b', 3);
+        
+        // កំណត់កម្រិតពន្លឺ (ពន្លឺអតិបរមានៅពេល Vs ដល់ 480V)
+        let brightness = Math.min(1, Math.max(0, vs / 480)); 
+        drawBulb(sX, sY, brightness);
+
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 16px Arial';
+        ctx.fillText('Secondary', sX + 30, pY - 40);
+        ctx.font = '16px Khmer OS Battambang';
+        ctx.fillText(`n2 = ${n2}`, sX + 30, pY - 60);
+        ctx.fillStyle = '#10b981';
+        ctx.fillText(`VS = ${vs}V`, sX + 30, pY + 45);
+
+        requestAnimationFrame(render);
+    }
+
+    updateValues();
+    render();
+</script>
+</body>
+</html>

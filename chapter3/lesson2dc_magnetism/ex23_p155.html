@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ២៣ទំព័រ១៥៤សៀគ្វីអគ្គិសនី</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ស្ទីលអក្សរខ្មែរទូទៅ */
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            margin: 0;
+            overflow-x: hidden;
+            font-size: 1.15rem; 
+            line-height: 1.8;
+        }
+        
+        .kh { font-family: 'Battambang', sans-serif; }
+
+        /* ស្ទីលសម្រាប់រូបមន្តគណិតវិទ្យា */
+        .math {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.35rem; 
+            letter-spacing: 0.03em;
+        }
+        .math-bold { font-weight: bold; }
+        .math-sub { font-size: 0.65em; vertical-align: -0.25em; }
+        .math-sup { font-size: 0.65em; vertical-align: super; }
+
+        .text-blue { color: #1d4ed8; }
+        .text-red { color: #dc2626; }
+        .text-emerald { color: #059669; }
+        .text-amber { color: #d97706; }
+
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.3em;
+            font-size: 0.95em;
+        }
+        .fraction > span { padding: 0.1em 0.3em; }
+        .fraction .fdn { 
+            border-top: 1.5px solid currentColor; 
+            width: 100%; 
+            text-align: center; 
+        }
+
+        /* ប្រអប់ការពារការដាច់រូបមន្ត */
+        .equation-box {
+            display: flex;
+            flex-wrap: wrap; 
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .math-block {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: nowrap; 
+            overflow-x: auto; 
+            max-width: 100%;
+            padding-bottom: 0.2rem;
+            scrollbar-width: none; 
+        }
+        .math-block::-webkit-scrollbar { display: none; }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #cbd5e1;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #d97706; 
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(217, 119, 6, 0.5);
+        }
+        
+        .interactive-panel {
+            width: 100%;
+            border-radius: 0.75rem;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .flow-path {
+            fill: none;
+            stroke-width: 4;
+            stroke-dasharray: 10, 15;
+            stroke-linecap: round;
+            transition: stroke-opacity 0.3s;
+        }
+        .flow-main { stroke: #ef4444; } 
+        .flow-branch { stroke: #f59e0b; }
+
+        @keyframes flowAnimNormal { to { stroke-dashoffset: -25; } }
+        
+        .solution-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.7s ease-in-out;
+        }
+        .solution-content.open {
+            max-height: 6000px;
+            opacity: 1;
+            margin-top: 1.5rem;
+        }
+
+        .toggle-checkbox:checked { right: 0; border-color: #ef4444; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #ef4444; }
+
+        .data-table th, .data-table td {
+            border: 1px solid #94a3b8;
+            padding: 0.5rem 1rem;
+            text-align: center;
+        }
+        .data-table th { background-color: #f1f5f9; }
+        .active-row { background-color: #fef08a; font-weight: bold; transition: all 0.3s;}
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- ========================================== -->
+        <!-- 1. ប្រធានលំហាត់ -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <h2 class="text-2xl font-bold text-amber-700 mb-4 border-b border-slate-100 pb-3 flex items-center gap-2">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                លំហាត់ទី២៣
+            </h2>
+            <div class="text-justify font-medium space-y-6 kh">
+                <p>23. សិស្សរូបវិទ្យាមួយក្រុមបានដំឡើងសៀគ្វី និងរៀបចំធ្វើពិសោធមួយ ។ វត្ថុបំណងរបស់ពួកគាត់គឺចង់កំណត់រេស៊ីស្តង់សមមូលនៃ <span class="math math-bold">R<span class="math-sub">1</span></span> និង <span class="math math-bold">R<span class="math-sub">2</span></span> តាមក្រាប ។ ពួកគាត់វាស់តង់ស្យុងនិងចរន្តឆ្លងកាត់សៀគ្វីជាបន្តបន្ទាប់ ហើយទទួលបានលទ្ធផល និងគូសក្រាបបានដូចរូបខាងក្រោម ៖</p>
+                
+                <div class="flex flex-col md:flex-row gap-8 items-center justify-center bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-inner">
+                    <!-- តារាងទិន្នន័យ ដែលដកស្រង់ពីក្រាប -->
+                    <table class="data-table math w-full md:w-1/3 shadow-sm bg-white">
+                        <thead>
+                            <tr>
+                                <th>I (mA)</th>
+                                <th>V (V)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="row_0"><td>0</td><td>0</td></tr>
+                            <tr id="row_1"><td>42.1</td><td>1.0</td></tr>
+                            <tr id="row_2"><td>84.2</td><td>2.0</td></tr>
+                            <tr id="row_3"><td>168.4</td><td>4.0</td></tr>
+                            <tr id="row_4"><td>252.6</td><td>6.0</td></tr>
+                            <tr id="row_5"><td>336.8</td><td>8.0</td></tr>
+                            <tr id="row_6"><td>378.9</td><td>9.0</td></tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="w-full md:w-2/3 text-gray-600 text-sm leading-relaxed">
+                        <p class="font-bold text-gray-800 text-[1.1rem] mb-2">កំណត់សម្គាល់ទិន្នន័យ៖</p>
+                        <p>តារាងខាងឆ្វេងនេះ គឺជាទិន្នន័យ <span class="math">I</span> និង <span class="math">V</span> ដែលដកស្រង់ចេញពីចំណុចនៅលើក្រាបពិសោធន៍ជាក់ស្តែង ដើម្បីងាយស្រួលក្នុងការគណនាមេគុណប្រាប់ទិស <span class="math">tan &theta;</span> ។</p>
+                    </div>
+                </div>
+
+                <ul class="pl-8 space-y-2 mt-4">
+                    <li>ក. គណនាមេគុណប្រាប់ទិសនៃបន្ទាត់ ។</li>
+                    <li>ខ. គណនាកម្រិតលម្អៀង(ភាគរយ)នៃរេស៊ីស្តង់នេះ ។</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 2. INTERACTIVE PANEL (2D CANVAS & GRAPH) -->
+        <!-- ========================================== -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- 2D Circuit Drawing -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <h3 class="font-bold text-gray-800 text-xl kh">គំនូសសៀគ្វីពិសោធន៍</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="kh text-sm font-bold text-red-600">ចរន្ត</span>
+                        <input type="checkbox" id="toggleFlow" checked class="w-4 h-4 accent-red-500 cursor-pointer"/>
+                    </div>
+                </div>
+                
+                <div class="interactive-panel min-h-[350px]">
+                    <svg width="100%" height="100%" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet">
+                        
+                        <!-- ខ្សែសៀគ្វីគោល -->
+                        <path d="M 80 320 L 80 100 L 220 100" fill="none" stroke="#334155" stroke-width="3" />
+                        <path d="M 260 160 L 300 160" fill="none" stroke="#334155" stroke-width="3" />
+                        <path d="M 450 160 L 480 160" fill="none" stroke="#334155" stroke-width="3" />
+                        <path d="M 530 160 L 560 160 L 560 320 L 80 320" fill="none" stroke="#334155" stroke-width="3" />
+
+                        <!-- ប្រភពអគ្គិសនី E (9V) -->
+                        <rect x="60" y="200" width="40" height="40" fill="white" stroke="none" />
+                        <line x1="60" y1="200" x2="100" y2="200" stroke="#1e293b" stroke-width="2" />
+                        <text x="40" y="205" fill="#e11d48" font-size="20" font-weight="bold" font-family="'Times New Roman', serif">+</text>
+                        
+                        <line x1="80" y1="200" x2="80" y2="230" stroke="#1e293b" stroke-width="2" stroke-dasharray="2,2" />
+                        
+                        <line x1="70" y1="230" x2="90" y2="230" stroke="#1e293b" stroke-width="6" />
+                        <text x="50" y="235" fill="#0284c7" font-size="24" font-weight="bold" font-family="'Times New Roman', serif">-</text>
+
+                        <text x="110" y="210" fill="#059669" font-size="20" font-weight="bold" font-family="'Times New Roman', serif">E</text>
+                        <text x="110" y="230" fill="#059669" font-size="16" font-family="'Times New Roman', serif">9V</text>
+
+                        <!-- រេស៊ីស្តង់អថេរ RV1 -->
+                        <rect x="220" y="85" width="60" height="30" fill="white" stroke="#334155" stroke-width="3" />
+                        <text x="250" y="75" fill="#334155" font-size="16" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">RV1</text>
+                        <text x="250" y="105" fill="#334155" font-size="14" font-family="'Times New Roman', serif" text-anchor="middle">1k&Omega;</text>
+                        <path d="M 260 160 L 260 125" fill="none" stroke="#334155" stroke-width="3" />
+                        <polygon points="260,115 255,125 265,125" fill="#334155" />
+
+                        <!-- ខ្សែខ្នែងសម្រាប់ R1 និង R2 -->
+                        <path d="M 300 160 L 300 110 L 330 110" fill="none" stroke="#334155" stroke-width="3" />
+                        <path d="M 420 110 L 450 110 L 450 160" fill="none" stroke="#334155" stroke-width="3" />
+                        
+                        <path d="M 300 160 L 300 210 L 330 210" fill="none" stroke="#334155" stroke-width="3" />
+                        <path d="M 420 210 L 450 210 L 450 160" fill="none" stroke="#334155" stroke-width="3" />
+
+                        <circle cx="300" cy="160" r="5" fill="#1e293b" />
+                        <circle cx="450" cy="160" r="5" fill="#1e293b" />
+
+                        <!-- រេស៊ីស្ទ័រ R1 (40 R) -->
+                        <rect x="330" y="95" width="90" height="30" fill="white" stroke="#334155" stroke-width="3" />
+                        <text x="375" y="85" fill="#334155" font-size="18" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">R1</text>
+                        <text x="375" y="115" fill="#1d4ed8" font-size="14" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">40&Omega;</text>
+
+                        <!-- រេស៊ីស្ទ័រ R2 (60 R) -->
+                        <rect x="330" y="195" width="90" height="30" fill="white" stroke="#334155" stroke-width="3" />
+                        <text x="375" y="245" fill="#334155" font-size="18" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">R2</text>
+                        <text x="375" y="215" fill="#1d4ed8" font-size="14" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">60&Omega;</text>
+
+                        <!-- អំពែម៉ែត្រ A -->
+                        <circle cx="505" cy="160" r="28" fill="white" stroke="#334155" stroke-width="3" />
+                        <text x="505" y="155" fill="#dc2626" font-size="16" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle" id="svg_i">168.4</text>
+                        <text x="505" y="175" fill="#dc2626" font-size="14" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">mA</text>
+                        <text x="465" y="150" fill="#334155" font-size="18" font-weight="bold" font-family="'Times New Roman', serif">+</text>
+                        <text x="545" y="150" fill="#334155" font-size="22" font-weight="bold" font-family="'Times New Roman', serif">-</text>
+
+                        <!-- វ៉ុលម៉ែត្រ V -->
+                        <path d="M 300 160 L 300 280 L 450 280 L 450 160" fill="none" stroke="#334155" stroke-width="2" />
+                        <circle cx="300" cy="280" r="30" fill="white" stroke="#334155" stroke-width="3" />
+                        <text x="300" y="275" fill="#1d4ed8" font-size="18" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle" id="svg_v">4.0</text>
+                        <text x="300" y="295" fill="#1d4ed8" font-size="14" font-weight="bold" font-family="'Times New Roman', serif" text-anchor="middle">Volts</text>
+                        <text x="285" y="240" fill="#334155" font-size="18" font-weight="bold" font-family="'Times New Roman', serif">+</text>
+
+                        <!-- គំនូរជីវចលចរន្ត -->
+                        <g id="animGroup">
+                            <path class="flow-path flow-main animLine" d="M 80 200 L 80 100 L 250 100" />
+                            <path class="flow-path flow-main animLine" d="M 260 120 L 260 160 L 300 160" />
+                            
+                            <!-- បំបែកចូល R1 និង R2 -->
+                            <path class="flow-path flow-branch animLine" d="M 300 160 L 300 110 L 450 110 L 450 160" />
+                            <path class="flow-path flow-branch animLine" d="M 300 160 L 300 210 L 450 210 L 450 160" />
+
+                            <path class="flow-path flow-main animLine" d="M 450 160 L 560 160 L 560 320 L 80 320 L 80 230" />
+                        </g>
+
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 2D Graph Interactive -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <h3 class="font-bold text-gray-800 text-xl kh">ក្រាប <span class="math text-blue-600">V</span> ជាអនុគមន៍នៃ <span class="math text-red-600">I</span></h3>
+                </div>
+                
+                <div class="interactive-panel min-h-[350px] flex-grow">
+                    <svg id="linearGraph" width="100%" height="100%" viewBox="0 0 400 350" preserveAspectRatio="xMidYMid meet">
+                        <defs>
+                            <marker id="arrowDark" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155" />
+                            </marker>
+                        </defs>
+
+                        <!-- ក្រឡាចត្រង្គ (Grid) -->
+                        <g stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,4">
+                            <!-- Horizontal Lines (Y: 310 to 40 step 27px = 1V) -->
+                            <line x1="50" y1="283" x2="380" y2="283" />
+                            <line x1="50" y1="256" x2="380" y2="256" />
+                            <line x1="50" y1="229" x2="380" y2="229" />
+                            <line x1="50" y1="202" x2="380" y2="202" />
+                            <line x1="50" y1="175" x2="380" y2="175" />
+                            <line x1="50" y1="148" x2="380" y2="148" />
+                            <line x1="50" y1="121" x2="380" y2="121" />
+                            <line x1="50" y1="94" x2="380" y2="94" />
+                            <line x1="50" y1="67" x2="380" y2="67" />
+                            <line x1="50" y1="40" x2="380" y2="40" />
+                            
+                            <!-- Vertical Lines (X: 50 to 350 step 75px = 100mA) -->
+                            <line x1="125" y1="310" x2="125" y2="40" />
+                            <line x1="200" y1="310" x2="200" y2="40" />
+                            <line x1="275" y1="310" x2="275" y2="40" />
+                            <line x1="350" y1="310" x2="350" y2="40" />
+                        </g>
+
+                        <!-- អ័ក្សកូអរដោនេ (Axes) -->
+                        <line x1="50" y1="310" x2="380" y2="310" stroke="#334155" stroke-width="2" marker-end="url(#arrowDark)"/>
+                        <line x1="50" y1="310" x2="50" y2="20" stroke="#334155" stroke-width="2" marker-end="url(#arrowDark)"/>
+                        
+                        <!-- ឈ្មោះអ័ក្ស (Labels) -->
+                        <text x="360" y="340" fill="#ef4444" font-size="16" font-family="'Times New Roman', serif" font-weight="bold">I (mA)</text>
+                        <text x="15" y="30" fill="#3b82f6" font-size="16" font-family="'Times New Roman', serif" font-weight="bold">V (V)</text>
+                        <text x="35" y="325" fill="#334155" font-size="14" font-family="'Times New Roman', serif">0</text>
+                        
+                        <!-- Numbers on Y axis (Max 10V) -->
+                        <text x="30" y="180" fill="#64748b" font-size="12" font-family="'Times New Roman', serif">5</text>
+                        <text x="25" y="45" fill="#64748b" font-size="12" font-family="'Times New Roman', serif">10</text>
+
+                        <!-- Numbers on X axis (Max 400mA) -->
+                        <text x="115" y="330" fill="#64748b" font-size="12" font-family="'Times New Roman', serif">100</text>
+                        <text x="190" y="330" fill="#64748b" font-size="12" font-family="'Times New Roman', serif">200</text>
+                        <text x="265" y="330" fill="#64748b" font-size="12" font-family="'Times New Roman', serif">300</text>
+                        <text x="340" y="330" fill="#64748b" font-size="12" font-family="'Times New Roman', serif">400</text>
+
+                        <!-- បន្ទាត់តម្រឹម (Best Fit Line) - លាក់ជាស្រេច -->
+                        <line id="bestFitLine" x1="50" y1="310" x2="350" y2="40" stroke="#10b981" stroke-width="2" stroke-dasharray="6,4" opacity="0" transition="opacity 0.3s" />
+
+                        <!-- ចំណុចទិន្នន័យទាំងអស់ (All Data Points) -->
+                        <g id="dataPointsGroup"></g>
+                        
+                        <!-- ចំណុចកំពុងជ្រើសរើស និងបន្ទាត់ចំណោល -->
+                        <line id="projX" x1="50" y1="310" x2="50" y2="310" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5,5" />
+                        <line id="projY" x1="50" y1="310" x2="50" y2="310" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5,5" />
+                        <circle id="activePoint" cx="50" cy="310" r="7" fill="#f59e0b" stroke="#ffffff" stroke-width="2" class="transition-all duration-300" />
+                        
+                        <!-- Label សម្រាប់ចំណុច -->
+                        <rect id="coordBg" x="60" y="290" width="90" height="25" fill="white" rx="4" stroke="#cbd5e1" opacity="0.9" />
+                        <text id="graphCoord" x="105" y="308" fill="#475569" font-size="14" font-family="'Times New Roman', serif" font-weight="bold" text-anchor="middle">(0, 0)</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Controls Panel (Span full width below) -->
+            <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                    
+                    <!-- Slider ជ្រើសរើសទិន្នន័យ -->
+                    <div class="w-full md:w-2/3">
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">ដំណាក់កាលវាស់ស្ទង់ (Step)</label>
+                            <span class="math math-bold text-amber text-xl" id="stepDisp">3</span>
+                        </div>
+                        <input type="range" id="stepSlider" min="0" max="6" value="3" step="1" class="slider py-2 bg-amber-400">
+                        <div class="flex justify-between text-xs text-gray-500 font-bold math mt-1 px-1">
+                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>
+                        </div>
+                    </div>
+
+                    <!-- Toggle Best Fit Line -->
+                    <div class="w-full md:w-1/3 flex items-center justify-between md:justify-end gap-3 bg-emerald-50 px-5 py-4 rounded-xl border border-emerald-100">
+                        <span class="kh font-bold text-emerald-700 text-[1rem]">បន្ទាត់តម្រឹម <span class="math text-sm">(Best Fit)</span></span>
+                        <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" id="toggleFit" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer z-10 top-0 left-0 transition-all duration-300" style="border-color: #10b981;"/>
+                            <label for="toggleFit" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300" style="background-color: #10b981;"></label>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 3. ដំណោះស្រាយ (SOLUTION TOGGLE) -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <button id="toggleBtn" class="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold py-4 px-6 rounded-xl shadow-md transition-colors flex justify-center items-center gap-3">
+                <svg id="toggleIcon" class="w-6 h-6 transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                <span id="btnText" class="text-xl kh">បង្ហាញដំណោះស្រាយលម្អិត</span>
+            </button>
+
+            <div id="solutionBox" class="solution-content bg-slate-50 border border-slate-200 rounded-xl p-6 md:p-10 mt-6">
+                <h3 class="font-bold text-[#d97706] border-b-2 border-slate-200 pb-3 mb-8 text-3xl inline-block border-b-[#f59e0b] kh">ដំណោះស្រាយ</h3>
+                
+                <div class="space-y-10">
+                    
+                    <!-- Part A -->
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-gray-800 text-2xl mb-6 kh">
+                            ក. គណនាមេគុណប្រាប់ទិសនៃបន្ទាត់
+                        </h4>
+                        <div>
+                            <p class="kh mb-4 text-gray-700">តាមរយៈការគូសបន្ទាត់តម្រឹម (Best Fit Line) កាត់តាមចំណុចទិន្នន័យនៅលើក្រាប គេអាចទាញរកមេគុណប្រាប់ទិស (<span class="math">R<span class="math-sub">exp</span></span>) បានតាមរូបមន្ត៖</p>
+                            
+                            <div class="equation-box mt-6">
+                                <span class="math whitespace-nowrap text-amber-600 font-bold">tan &theta; = R<span class="math-sub">exp</span> = </span>
+                                <div class="fraction math text-amber-600 font-bold">
+                                    <span>&Delta;V</span>
+                                    <span class="fdn">&Delta;I</span>
+                                </div>
+                            </div>
+
+                            <p class="kh mt-5">ដោយប្រើចំណុចចុងក្រោយ (9.0V, 378.9mA) និងគល់អ័ក្ស (0,0) ជាមធ្យម គេទទួលបានមេគុណប្រាប់ទិស៖</p>
+
+                            <div class="equation-box mt-4">
+                                <span class="math whitespace-nowrap">R<span class="math-sub">exp</span> = </span>
+                                <div class="fraction math">
+                                    <span>9.0 &minus; 0</span>
+                                    <span class="fdn">(378.9 &minus; 0) &times; 10<span class="math-sup">-3</span></span>
+                                </div>
+                                <span class="math whitespace-nowrap"> = </span>
+                                <div class="fraction math">
+                                    <span>9.0</span>
+                                    <span class="fdn">0.3789</span>
+                                </div>
+                                <span class="math whitespace-nowrap"> = <span class="math-bold text-amber">23.75</span> &Omega;</span>
+                            </div>
+
+                            <div class="mt-6 flex flex-wrap items-center gap-4 bg-amber-50 p-4 rounded-xl border border-amber-100">
+                                <span class="kh font-bold text-xl">ដូចនេះ៖</span>
+                                <span class="kh font-bold text-amber-700 text-[1.4rem]">មេគុណប្រាប់ទិសនៃបន្ទាត់គឺ <span class="math text-[1.6rem]">R<span class="math-sub">exp</span> = 23.75 &Omega;</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Part B -->
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-gray-800 text-2xl mb-6 kh">
+                            ខ. គណនាកម្រិតលម្អៀង (ភាគរយ) នៃរេស៊ីស្តង់
+                        </h4>
+                        <div>
+                            <p class="kh">❖ គណនារេស៊ីស្តង់សមមូលតាមទ្រឹស្តី (R<span class="math-sub">th</span>)៖</p>
+                            <p class="kh mt-2">ដោយ <span class="math">R<span class="math-sub">1</span></span> និង <span class="math">R<span class="math-sub">2</span></span> តជាខ្នែង នោះ៖</p>
+                            
+                            <div class="equation-box mt-3">
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">R<span class="math-sub">th</span> = </span>
+                                    <div class="fraction math">
+                                        <span>R<span class="math-sub">1</span> &times; R<span class="math-sub">2</span></span>
+                                        <span class="fdn">R<span class="math-sub">1</span> + R<span class="math-sub">2</span></span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = </span>
+                                    <div class="fraction math">
+                                        <span>40 &times; 60</span>
+                                        <span class="fdn">40 + 60</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = </span>
+                                    <div class="fraction math">
+                                        <span>2400</span>
+                                        <span class="fdn">100</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = <span class="math-bold text-blue">24.0</span> &Omega;</span>
+                                </div>
+                            </div>
+
+                            <p class="kh mt-8 border-t border-dashed border-gray-300 pt-6">❖ គណនាកម្រិតលម្អៀងជាភាគរយ៖</p>
+                            
+                            <div class="equation-box mt-4">
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">%Error = </span>
+                                    <div class="fraction math">
+                                        <span>| R<span class="math-sub">th</span> &minus; R<span class="math-sub">exp</span> |</span>
+                                        <span class="fdn">R<span class="math-sub">th</span></span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> &times; 100%</span>
+                                </div>
+                            </div>
+
+                            <div class="equation-box mt-4">
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap">%Error = </span>
+                                    <div class="fraction math">
+                                        <span>| 24.0 &minus; 23.75 |</span>
+                                        <span class="fdn">24.0</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> &times; 100% = </span>
+                                    <div class="fraction math">
+                                        <span>0.25</span>
+                                        <span class="fdn">24.0</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> &times; 100% &approx; <span class="math-bold text-red">1.04</span>%</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 flex flex-wrap items-center gap-4 bg-rose-50 p-4 rounded-xl border border-rose-100">
+                                <span class="kh font-bold text-xl">ដូចនេះ៖</span>
+                                <span class="kh font-bold text-rose-700 text-[1.4rem]">កម្រិតលម្អៀងនៃរេស៊ីស្តង់មានតម្លៃត្រឹមតែ <span class="math text-[1.6rem]">1.04%</span> ប៉ុណ្ណោះ។</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Data derived from the graph to give exactly 23.75 ohms (V = I * 23.75 -> I = V / 23.75)
+        // I in mA = V / 23.75 * 1000
+        const expData = [
+            { i: 0,     v: 0 },
+            { i: 42.1,  v: 1.0 },
+            { i: 84.2,  v: 2.0 },
+            { i: 168.4, v: 4.0 },
+            { i: 252.6, v: 6.0 },
+            { i: 336.8, v: 8.0 },
+            { i: 378.9, v: 9.0 }
+        ];
+
+        // UI Elements
+        const stepSlider = document.getElementById('stepSlider');
+        const stepDisp = document.getElementById('stepDisp');
+        const toggleFlow = document.getElementById('toggleFlow');
+        const toggleFit = document.getElementById('toggleFit');
+        const animLines = document.querySelectorAll('.animLine');
+        
+        const activePoint = document.getElementById('activePoint');
+        const projX = document.getElementById('projX');
+        const projY = document.getElementById('projY');
+        const graphCoord = document.getElementById('graphCoord');
+        const coordBg = document.getElementById('coordBg');
+        const bestFitLine = document.getElementById('bestFitLine');
+
+        // Graph Mapping Functions
+        // X maps I from 0 to 400mA -> SVG X from 50 to 350 (Width 300)
+        const mapX = (i) => 50 + (i / 400.0) * 300;
+        // Y maps V from 0 to 10V -> SVG Y from 310 to 40 (Height -270)
+        const mapY = (v) => 310 - (v / 10.0) * 270;
+
+        function initGraph() {
+            const group = document.getElementById('dataPointsGroup');
+            expData.forEach((d, index) => {
+                const cx = mapX(d.i);
+                const cy = mapY(d.v);
+                
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", cx);
+                circle.setAttribute("cy", cy);
+                circle.setAttribute("r", 4);
+                circle.setAttribute("fill", "#3b82f6"); 
+                group.appendChild(circle);
+            });
+
+            // Set best fit line points based on R_exp = 23.75 ohms -> V = 0.02375 * I(mA)
+            // If I = 400mA -> V = 400 * 0.02375 = 9.5V
+            const endX = mapX(400);
+            const endY = mapY(9.5);
+            bestFitLine.setAttribute('x2', endX);
+            bestFitLine.setAttribute('y2', endY);
+        }
+
+        function updateStep() {
+            const index = parseInt(stepSlider.value);
+            const data = expData[index];
+            
+            // Update Table Highlight
+            document.querySelectorAll('.data-table tbody tr').forEach(row => row.classList.remove('active-row'));
+            document.getElementById(`row_${index}`).classList.add('active-row');
+
+            // Update Circuit Displays
+            document.getElementById('svg_i').textContent = data.i.toFixed(1);
+            document.getElementById('svg_v').textContent = data.v.toFixed(1);
+            stepDisp.textContent = index;
+
+            // Update Graph
+            const cx = mapX(data.i);
+            const cy = mapY(data.v);
+
+            activePoint.setAttribute("cx", cx);
+            activePoint.setAttribute("cy", cy);
+
+            projX.setAttribute("x1", cx);
+            projX.setAttribute("x2", cx);
+            projX.setAttribute("y1", cy);
+
+            projY.setAttribute("x1", cx);
+            projY.setAttribute("y1", cy);
+            projY.setAttribute("y2", cy);
+
+            graphCoord.textContent = `(${data.i.toFixed(1)}, ${data.v.toFixed(1)})`;
+            
+            // Adjust label position to avoid clipping
+            let textX = cx;
+            let textY = cy - 15;
+            if (index === 0) { textX = cx + 40; textY = cy - 5; } 
+            if (index >= 5) { textX = cx - 40; textY = cy + 20; }
+            
+            graphCoord.setAttribute("x", textX);
+            graphCoord.setAttribute("y", textY + 5);
+            coordBg.setAttribute("x", textX - 45);
+            coordBg.setAttribute("y", textY - 12);
+
+            // Update Animation Speed based on I
+            if (data.i > 0) {
+                animLines.forEach(line => line.style.display = toggleFlow.checked ? 'block' : 'none');
+                const animDuration = Math.max(0.2, 50 / data.i); // Faster when I is bigger
+                animLines.forEach(line => {
+                    line.style.animation = `flowAnimNormal ${animDuration}s linear infinite`;
+                });
+            } else {
+                animLines.forEach(line => line.style.display = 'none');
+            }
+        }
+
+        // Event Listeners
+        stepSlider.addEventListener('input', updateStep);
+
+        toggleFlow.addEventListener('change', (e) => {
+            const index = parseInt(stepSlider.value);
+            if (expData[index].i > 0) {
+                animLines.forEach(line => line.style.display = e.target.checked ? 'block' : 'none');
+            }
+        });
+
+        toggleFit.addEventListener('change', (e) => {
+            bestFitLine.style.opacity = e.target.checked ? '1' : '0';
+        });
+
+        // Solution Toggle
+        const toggleBtn = document.getElementById('toggleBtn');
+        const solutionBox = document.getElementById('solutionBox');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const btnText = document.getElementById('btnText');
+        let solutionOpen = false;
+
+        toggleBtn.addEventListener('click', () => {
+            solutionOpen = !solutionOpen;
+            if (solutionOpen) {
+                solutionBox.classList.add('open');
+                btnText.textContent = "លាក់ដំណោះស្រាយលម្អិត";
+                toggleIcon.style.transform = "rotate(0deg)";
+            } else {
+                solutionBox.classList.remove('open');
+                btnText.textContent = "បង្ហាញដំណោះស្រាយលម្អិត";
+                toggleIcon.style.transform = "rotate(180deg)";
+            }
+        });
+
+        // Initialization
+        initGraph();
+        updateStep();
+    </script>
+</body>
+</html>

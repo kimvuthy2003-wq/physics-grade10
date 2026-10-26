@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ពិសោធន៍បាតុភូតរន្ទះ និងផ្គរលាន់</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Kantumruy Pro', sans-serif; background-color: #0f172a; margin: 0; overflow: hidden; color: #e2e8f0; }
+        .font-lora { font-family: 'Lora', serif; }
+        
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-action {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        #canvas-container {
+            position: relative;
+            background: linear-gradient(to bottom, #020617 0%, #1e293b 70%, #0f172a 100%);
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen">
+
+    <!-- Left UI Panel -->
+    <div class="glass-panel w-full md:w-1/3 lg:w-1/4 h-auto md:h-full flex flex-col p-6 shadow-2xl z-10 overflow-y-auto">
+        <h1 class="text-2xl font-bold text-amber-400 mb-2 leading-tight">បាតុភូតរន្ទះ និងផ្គរលាន់</h1>
+        <p class="text-sm text-slate-400 mb-6 font-lora">Lightning and Thunder</p>
+
+        <!-- Theory Section -->
+        <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 mb-6 shadow-sm">
+            <h2 class="text-sm font-bold text-amber-500 mb-3 flex items-center gap-2">
+                <span>⚡</span> ការពន្យល់បាតុភូត
+            </h2>
+            <p class="text-sm text-slate-300 leading-relaxed mb-3">
+                នៅពេលមានព្យុះភ្លៀង ពពកខ្មៅនឹងកកិតគ្នាបង្កើតបានជាបន្ទុកអគ្គិសនី។ បន្ទុក <span class="font-bold text-sky-400">(-)</span> កកកុញនៅបាតពពក ចំណែកដីនិងដើមឈើមានបន្ទុក <span class="font-bold text-rose-400">(+)</span>។
+            </p>
+            <p class="text-sm text-slate-300 leading-relaxed">
+                រន្ទះគឺជាការលោតផ្កាភ្លើងអគ្គិសនីដ៏ធំ។ ដោយសារ <span class="font-bold text-yellow-300">ពន្លឺមានល្បឿនលឿន</span> (៣ សែន គ.ម/វិនាទី) យើងឃើញរន្ទះភ្លាមៗ។ រីឯ <span class="font-bold text-emerald-400">សំឡេងមានល្បឿនយឺត</span> (៣៤០ ម/វិនាទី) ទើបយើងឮសូរផ្គរលាន់តាមក្រោយ។
+            </p>
+        </div>
+
+        <h3 class="text-md font-bold text-slate-200 mb-3">បញ្ជាការពិសោធន៍៖</h3>
+        <div class="flex flex-col space-y-3">
+            <button id="startBtn" onclick="startStorm()" class="btn-action bg-amber-500 hover:bg-amber-400 text-slate-900 flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold text-base shadow-lg shadow-amber-900/40 border border-amber-300">
+                ☁️ បង្កើតព្យុះរន្ទះ (Start Storm)
+            </button>
+            
+            <button onclick="resetSim()" class="btn-action bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm border border-slate-500">
+                🔄 ត្រឡប់ដើម (Reset)
+            </button>
+        </div>
+        
+        <div class="mt-auto pt-6 text-xs text-slate-500 text-center">
+            កំណត់សម្គាល់៖ សូមបើកសំឡេង (Volume) ដើម្បីស្តាប់សូរផ្គរលាន់
+        </div>
+    </div>
+
+    <!-- Right 3D/2D Canvas -->
+    <div id="canvas-container" class="flex-1 w-full h-full relative">
+        <canvas id="simCanvas" class="block w-full h-full absolute inset-0 z-0"></canvas>
+    </div>
+
+    <script>
+        // --- Web Audio API for Synthesis ---
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function createWhiteNoiseBuffer(duration) {
+            const bufferSize = audioCtx.sampleRate * duration;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            return buffer;
+        }
+
+        function playZapSound() {
+            if (!audioCtx) return;
+            const duration = 0.3;
+            const noiseBuffer = createWhiteNoiseBuffer(duration);
+            const noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = noiseBuffer;
+
+            // Bandpass filter for electrical crackle
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 1500;
+            filter.Q.value = 0.5;
+
+            // Sharp envelope
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(1.5, audioCtx.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+
+            noiseSource.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            noiseSource.start();
+        }
+
+        function playThunderSound() {
+            if (!audioCtx) return;
+            const duration = 4.0;
+            const noiseBuffer = createWhiteNoiseBuffer(duration);
+            const noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = noiseBuffer;
+
+            // Heavy low-pass filter for deep rumble
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 200; // Deep sound
+            filter.Q.value = 1.0;
+
+            // Secondary filter for some mid-range crackle
+            const filter2 = audioCtx.createBiquadFilter();
+            filter2.type = 'peaking';
+            filter2.frequency.value = 400;
+            filter2.Q.value = 2.0;
+            filter2.gain.value = 10;
+
+            // Complex envelope for rumbling effect
+            const gainNode = audioCtx.createGain();
+            const now = audioCtx.currentTime;
+            
+            gainNode.gain.setValueAtTime(0, now);
+            // Attack (hits person)
+            gainNode.gain.linearRampToValueAtTime(2.0, now + 0.1);
+            // Rumble variations
+            gainNode.gain.linearRampToValueAtTime(1.2, now + 0.4);
+            gainNode.gain.linearRampToValueAtTime(1.8, now + 0.8);
+            gainNode.gain.linearRampToValueAtTime(0.8, now + 1.5);
+            // Long decay
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+            noiseSource.connect(filter);
+            filter.connect(filter2);
+            filter2.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            noiseSource.start();
+        }
+
+        // --- Canvas Setup & State Machine ---
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        let cw, ch;
+        let groundY;
+        
+        // Simulation States
+        const STATE_IDLE = 0;
+        const STATE_DESCENDING = 1;
+        const STATE_STRIKE = 2;
+        const STATE_WAVE = 3;
+        
+        let state = STATE_IDLE;
+        
+        // Entities
+        let cloud = { x: 0, y: 0, targetY: 0, width: 250, height: 100 };
+        let treeX = 0;
+        let personX = 0;
+        
+        let lightningPath = [];
+        let flashAlpha = 0;
+        
+        let waveRadius = 0;
+        let waveActive = false;
+        
+        let personThought = "";
+        let thoughtAlpha = 0;
+
+        function resize() {
+            cw = container.clientWidth;
+            ch = container.clientHeight;
+            canvas.width = cw;
+            canvas.height = ch;
+            
+            groundY = ch * 0.85;
+            treeX = cw * 0.8; // Tree on the right
+            personX = cw * 0.2; // Person on the left
+            
+            if(state === STATE_IDLE) {
+                cloud.x = treeX;
+                cloud.y = -150; // Hidden above
+                cloud.targetY = ch * 0.25; // Where it stops
+            }
+        }
+        window.addEventListener('resize', resize);
+
+        // --- Drawing Functions ---
+        
+        function drawScenery() {
+            // Ground
+            ctx.fillStyle = '#064e3b'; // dark green
+            ctx.fillRect(0, groundY, cw, ch - groundY);
+            // Ground highlight
+            ctx.fillStyle = '#065f46';
+            ctx.fillRect(0, groundY, cw, 15);
+
+            // Draw charges on ground/tree if state > IDLE
+            if (state >= STATE_DESCENDING && state < STATE_WAVE) {
+                ctx.fillStyle = '#f43f5e'; // Rose-400 for (+)
+                ctx.font = 'bold 20px "Lora"';
+                ctx.fillText('+', treeX - 30, groundY + 25);
+                ctx.fillText('+', treeX + 30, groundY + 25);
+                ctx.fillText('+', treeX, groundY - 140); // Top of tree
+            }
+
+            // Tree
+            ctx.fillStyle = '#78350f'; // Trunk
+            ctx.fillRect(treeX - 10, groundY - 100, 20, 100);
+            
+            ctx.fillStyle = '#047857'; // Leaves
+            ctx.beginPath();
+            ctx.moveTo(treeX - 60, groundY - 70);
+            ctx.lineTo(treeX + 60, groundY - 70);
+            ctx.lineTo(treeX, groundY - 180);
+            ctx.fill();
+            
+            ctx.fillStyle = '#059669'; // Leaves highlight
+            ctx.beginPath();
+            ctx.moveTo(treeX - 45, groundY - 70);
+            ctx.lineTo(treeX + 45, groundY - 70);
+            ctx.lineTo(treeX, groundY - 160);
+            ctx.fill();
+
+            // Person (Stick figure)
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            // Body
+            ctx.beginPath(); ctx.moveTo(personX, groundY - 50); ctx.lineTo(personX, groundY - 20); ctx.stroke();
+            // Legs
+            ctx.beginPath(); ctx.moveTo(personX, groundY - 20); ctx.lineTo(personX - 15, groundY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(personX, groundY - 20); ctx.lineTo(personX + 15, groundY); ctx.stroke();
+            // Arms
+            ctx.beginPath(); ctx.moveTo(personX - 15, groundY - 35); ctx.lineTo(personX + 15, groundY - 35); ctx.stroke();
+            // Head
+            ctx.fillStyle = '#e2e8f0';
+            ctx.beginPath(); ctx.arc(personX, groundY - 60, 10, 0, Math.PI*2); ctx.fill();
+
+            // Thought Bubble
+            if (thoughtAlpha > 0) {
+                ctx.save();
+                ctx.globalAlpha = thoughtAlpha;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.lineWidth = 2;
+                
+                // Bubble background
+                const bw = 140; const bh = 50;
+                const bx = personX - bw/2; const by = groundY - 140;
+                ctx.beginPath();
+                ctx.roundRect(bx, by, bw, bh, 15);
+                ctx.fill(); ctx.stroke();
+                
+                // Bubble tail
+                ctx.beginPath();
+                ctx.moveTo(personX + 10, groundY - 90);
+                ctx.lineTo(personX + 5, groundY - 75);
+                ctx.lineTo(personX - 10, groundY - 90);
+                ctx.fill(); ctx.stroke();
+
+                // Text
+                ctx.fillStyle = '#0f172a';
+                ctx.font = 'bold 16px "Kantumruy Pro"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                // Colorize based on text
+                if (personThought.includes("រន្ទះ")) ctx.fillStyle = '#d97706'; // Amber for lightning
+                if (personThought.includes("ផ្គរលាន់")) ctx.fillStyle = '#0369a1'; // Sky for thunder
+                
+                ctx.fillText(personThought, bx + bw/2, by + bh/2);
+                ctx.restore();
+            }
+        }
+
+        function drawCloud() {
+            ctx.save();
+            ctx.fillStyle = '#334155'; // Dark slate
+            
+            const cx = cloud.x;
+            const cy = cloud.y;
+            
+            // Draw overlapping circles for cloud shape
+            ctx.beginPath();
+            ctx.arc(cx - 70, cy, 40, 0, Math.PI*2);
+            ctx.arc(cx - 30, cy - 20, 50, 0, Math.PI*2);
+            ctx.arc(cx + 30, cy - 30, 60, 0, Math.PI*2);
+            ctx.arc(cx + 70, cy - 10, 45, 0, Math.PI*2);
+            ctx.arc(cx + 40, cy + 20, 40, 0, Math.PI*2);
+            ctx.arc(cx - 40, cy + 20, 35, 0, Math.PI*2);
+            ctx.fill();
+
+            // Cloud Charges (-)
+            if (state >= STATE_DESCENDING && state < STATE_WAVE) {
+                ctx.fillStyle = '#38bdf8'; // Sky-400 for (-)
+                ctx.font = 'bold 24px "Lora"';
+                ctx.fillText('-', cx - 50, cy + 40);
+                ctx.fillText('-', cx, cy + 50);
+                ctx.fillText('-', cx + 50, cy + 40);
+            }
+            ctx.restore();
+        }
+
+        function generateLightning() {
+            lightningPath = [];
+            let currentX = cloud.x;
+            let currentY = cloud.y + 40;
+            const targetX = treeX;
+            const targetY = groundY - 180; // Top of tree
+            
+            const segments = 12;
+            lightningPath.push({x: currentX, y: currentY});
+            
+            for(let i=1; i<=segments; i++) {
+                let progress = i / segments;
+                let nextY = currentY + (targetY - currentY) * progress;
+                // Add horizontal zig-zag
+                let nextX = currentX + (targetX - currentX) * progress + (Math.random() - 0.5) * 80;
+                
+                if(i === segments) {
+                    nextX = targetX;
+                    nextY = targetY;
+                }
+                
+                lightningPath.push({x: nextX, y: nextY});
+            }
+        }
+
+        function drawLightning() {
+            if (lightningPath.length === 0) return;
+
+            // Flash screen
+            ctx.fillStyle = `rgba(255, 255, 255, ${flashAlpha})`;
+            ctx.fillRect(0, 0, cw, ch);
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(lightningPath[0].x, lightningPath[0].y);
+            for(let i=1; i<lightningPath.length; i++) {
+                ctx.lineTo(lightningPath[i].x, lightningPath[i].y);
+            }
+            
+            // Outer glow
+            ctx.strokeStyle = 'rgba(253, 224, 71, 0.8)'; // Yellow
+            ctx.lineWidth = 8;
+            ctx.lineJoin = 'miter';
+            ctx.stroke();
+
+            // Inner core
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawSoundWave() {
+            if (!waveActive) return;
+            
+            ctx.save();
+            // Concentric arcs traveling leftwards
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 4;
+            
+            const numArcs = 3;
+            for(let i=0; i<numArcs; i++) {
+                let r = waveRadius - (i * 40);
+                if (r > 0) {
+                    ctx.globalAlpha = Math.max(0, 1 - (r / (treeX - personX))); // Fade out as it travels
+                    ctx.beginPath();
+                    // Draw arc facing left
+                    ctx.arc(treeX, groundY - 180, r, Math.PI * 0.7, Math.PI * 1.3);
+                    ctx.stroke();
+                }
+            }
+            ctx.restore();
+        }
+
+        // --- Logic & Animation Loop ---
+        
+        function startStorm() {
+            initAudio();
+            if (state !== STATE_IDLE) return;
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+            
+            state = STATE_DESCENDING;
+            personThought = "";
+            thoughtAlpha = 0;
+            waveActive = false;
+        }
+
+        function resetSim() {
+            state = STATE_IDLE;
+            cloud.y = -150;
+            flashAlpha = 0;
+            waveActive = false;
+            thoughtAlpha = 0;
+            personThought = "";
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('startBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function animate() {
+            if (!cw || !ch) resize();
+            ctx.clearRect(0, 0, cw, ch);
+
+            drawScenery();
+            
+            // State Machine Logic
+            if (state === STATE_DESCENDING) {
+                // Cloud lowers
+                cloud.y += (cloud.targetY - cloud.y) * 0.02;
+                
+                if (Math.abs(cloud.targetY - cloud.y) < 2) {
+                    // Ready to strike
+                    state = STATE_STRIKE;
+                    generateLightning();
+                    playZapSound();
+                    flashAlpha = 1.0;
+                    personThought = "ឃើញពន្លឺរន្ទះ!";
+                    thoughtAlpha = 1.0;
+                }
+            } 
+            else if (state === STATE_STRIKE) {
+                flashAlpha -= 0.05; // Fade flash quickly
+                if (flashAlpha <= 0) {
+                    flashAlpha = 0;
+                    state = STATE_WAVE;
+                    waveRadius = 0;
+                    waveActive = true;
+                    thoughtAlpha = 0; // Hide thought temporarily
+                }
+                drawLightning();
+            }
+            else if (state === STATE_WAVE) {
+                const speedOfSoundScale = 5; // Pixels per frame
+                waveRadius += speedOfSoundScale;
+                
+                // Check if wave hit person (distance from tree to person)
+                const distToPerson = treeX - personX;
+                if (waveRadius >= distToPerson && thoughtAlpha === 0) {
+                    playThunderSound();
+                    personThought = "ឮសូរផ្គរលាន់ហើយ!";
+                    thoughtAlpha = 1.0;
+                    waveActive = false; // Stop drawing wave
+                    
+                    // Reset automatically after showing thought for a while
+                    setTimeout(resetSim, 4000);
+                }
+            }
+
+            drawSoundWave();
+            drawCloud();
+
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize
+        resize();
+        requestAnimationFrame(animate);
+
+    </script>
+</body>
+</html>

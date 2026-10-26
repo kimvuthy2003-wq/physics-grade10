@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>មេរៀនទី២ដែនម៉ាញេទិចក្នុងសូលេណូអ៊ីត</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #cbd5e1;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #0ea5e9;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(14, 165, 233, 0.5);
+        }
+        #canvas-container {
+            width: 100%;
+            height: 550px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #e0f2fe, #f8fafc);
+            position: relative;
+            touch-action: none; /* ការពារការ Scroll អេក្រង់ពេលអូសលើ Canvas */
+        }
+        canvas { display: block; outline: none; }
+        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <header class="text-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h1 class="text-3xl font-bold text-sky-700 mb-2">ដែនម៉ាញេទិចនៃសូលេណូអ៊ីត</h1>
+            <p class="text-gray-600">សង្កេតមើលទិសដៅខ្សែដែន (ចេញពីប៉ូលជើង N ចូលប៉ូលត្បូង S) និងប្រើត្រីវិស័យស្ទង់ទីតាំង</p>
+        </header>
+
+        <section class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- 3D Canvas (Left: 3 Columns) -->
+            <div class="lg:col-span-3 bg-white rounded-2xl p-4 shadow-md border border-slate-200 flex flex-col">
+                <div class="flex justify-between items-center mb-3 px-2 flex-wrap gap-3">
+                    <h2 class="font-bold text-gray-800">ផ្ទាំងពិសោធន៍ 3D</h2>
+                    <div class="flex items-center gap-3 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 shadow-sm">
+                        <span class="text-sm font-bold text-emerald-800">បើកប្រើត្រីវិស័យ៖</span>
+                        <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="compassToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer z-10 top-0 left-0 transition-all duration-300"/>
+                            <label for="compassToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300"></label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="canvas-container" class="border border-slate-200 shadow-inner flex-grow cursor-grab">
+                    <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-2 rounded shadow text-sm text-gray-700 pointer-events-none z-10 border border-slate-200">
+                        <ul class="space-y-1">
+                            <li><span class="inline-block w-3 h-3 rounded-full bg-orange-500 mr-1"></span> <strong>ខ្សែស្ពៀរ (សូលេណូអ៊ីត)</strong></li>
+                            <li><span class="inline-block w-3 h-3 rounded-full bg-red-600 mr-1"></span> <strong class="text-red-700">ចរន្ត I</strong> (គ្រាប់ក្រហមរត់)</li>
+                            <li><span class="inline-block w-3 h-3 rounded-full bg-sky-500 mr-1"></span> <strong class="text-sky-700">ខ្សែដែនម៉ាញេទិច</strong></li>
+                            <li id="compassTip" class="hidden text-emerald-700 font-bold mt-2 pt-2 border-t border-slate-200">
+                                📱 ប្រើម្រាមដៃអូសលើផ្ទៃដើម្បីរំកិលត្រីវិស័យ
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls (Right: 1 Column) -->
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-slate-200 flex flex-col gap-6">
+                <h3 class="text-lg font-bold text-sky-700 border-b border-slate-100 pb-2">ការកំណត់</h3>
+                
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="font-bold text-gray-700">ចរន្តអគ្គិសនី I</label>
+                            <span id="iDisp" class="font-bold text-red-600 text-lg">5.0 A</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">ទាញទៅឆ្វេង (អវិជ្ជមាន) ប្តូរទិសដៅចរន្ត</div>
+                        <input type="range" id="iSlider" min="-10" max="10" value="5" step="0.5" class="slider py-2">
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4 mt-4 flex-grow">
+                    <h4 class="font-bold text-gray-800 border-b border-slate-200 pb-1">លក្ខណៈប៉ូល</h4>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold text-gray-600">មុខខាងឆ្វេង៖</span>
+                        <span id="poleLeft" class="font-bold text-xl">-</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold text-gray-600">មុខខាងស្តាំ៖</span>
+                        <span id="poleRight" class="font-bold text-xl">-</span>
+                    </div>
+                    
+                    <div class="bg-blue-50 p-3 rounded-lg border border-blue-100 mt-4 text-xs text-blue-800 leading-relaxed text-justify">
+                        <strong>កំណត់ចំណាំ៖</strong> ខ្សែដែនម៉ាញេទិចមានទិសដៅចេញពី <strong>ប៉ូលជើង (N)</strong> ហើយចូលទៅក្នុង <strong>ប៉ូលត្បូង (S)</strong> នៅផ្នែកខាងក្រៅសូលេណូអ៊ីត។
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- THREE.JS APPLICATION CODE -->
+    <script>
+        // --- 1. Basic Setup ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 20, 45);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        dirLight.position.set(20, 30, 20);
+        scene.add(dirLight);
+
+        // --- 2. Solenoid Geometry ---
+        const solRadius = 3.5;
+        const solLength = 22;
+        const solTurns = 16;
+
+        class HelixCurve extends THREE.Curve {
+            constructor(radius, length, turns) {
+                super();
+                this.r = radius;
+                this.l = length;
+                this.t = turns;
+            }
+            getPoint(t, optionalTarget = new THREE.Vector3()) {
+                const x = (t - 0.5) * this.l;
+                const y = this.r * Math.cos(t * Math.PI * 2 * this.t);
+                const z = this.r * Math.sin(t * Math.PI * 2 * this.t);
+                return optionalTarget.set(x, y, z);
+            }
+        }
+
+        const path = new HelixCurve(solRadius, solLength, solTurns);
+        const tubeGeo = new THREE.TubeGeometry(path, 600, 0.25, 8, false);
+        const tubeMat = new THREE.MeshStandardMaterial({ 
+            color: 0xe67e22, metalness: 0.7, roughness: 0.3
+        });
+        const solenoidMesh = new THREE.Mesh(tubeGeo, tubeMat);
+        scene.add(solenoidMesh);
+
+        // --- 3. Current Animation (Red Particles) ---
+        const currentParticles = new THREE.Group();
+        const particleGeo = new THREE.SphereGeometry(0.4, 8, 8);
+        const particleMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const numParticles = 45;
+        
+        for(let i=0; i<numParticles; i++) {
+            const mesh = new THREE.Mesh(particleGeo, particleMat);
+            currentParticles.add(mesh);
+        }
+        scene.add(currentParticles);
+
+        // --- 4. Magnetic Field Lines (Dashed for animation) ---
+        const fieldLinesGroup = new THREE.Group();
+        // ប្រើ LineDashedMaterial ដើម្បីធ្វើចលនាខ្សែដែន (Flow Animation)
+        const lineMat = new THREE.LineDashedMaterial({ 
+            color: 0x0ea5e9, transparent: true, opacity: 0.7, 
+            dashSize: 1.5, gapSize: 1.5, linewidth: 2
+        });
+        
+        function createFieldLine(radiusY, radiusZ) {
+            const points = [];
+            // គូសពីមុខខាងឆ្វេង (x = -L/2) ទៅមុខខាងស្តាំ (x = +L/2) នៅខាងក្នុង
+            for(let x = -solLength/2; x <= solLength/2; x += 1) {
+                points.push(new THREE.Vector3(x, radiusY * 0.2, radiusZ * 0.2));
+            }
+            // គូសពីមុខខាងស្តាំ (x = +L/2) ត្រលប់ទៅខាងឆ្វេង (x = -L/2) នៅខាងក្រៅ
+            const rx = solLength * 0.85;
+            const ry = Math.abs(radiusY) > 0 ? Math.abs(radiusY) * 2 + solRadius + 1 : 0;
+            const rz = Math.abs(radiusZ) > 0 ? Math.abs(radiusZ) * 2 + solRadius + 1 : 0;
+            
+            for(let i = 0; i <= 30; i++) {
+                const t = i / 30;
+                const angle = Math.PI/2 - t * Math.PI; 
+                const x = rx * Math.sin(angle);
+                const y = Math.sign(radiusY) * ry * Math.cos(angle);
+                const z = Math.sign(radiusZ) * rz * Math.cos(angle);
+                if (i>0) points.push(new THREE.Vector3(x, y, z));
+            }
+            const geo = new THREE.BufferGeometry().setFromPoints(points);
+            const line = new THREE.LineLoop(geo, lineMat);
+            line.computeLineDistances();
+            return line;
+        }
+
+        fieldLinesGroup.add(createFieldLine(0, 0)); 
+        fieldLinesGroup.add(createFieldLine(solRadius, 0)); 
+        fieldLinesGroup.add(createFieldLine(-solRadius, 0)); 
+        fieldLinesGroup.add(createFieldLine(0, solRadius)); 
+        fieldLinesGroup.add(createFieldLine(0, -solRadius)); 
+        scene.add(fieldLinesGroup);
+
+        // Pole Labels (Sprites)
+        function makeTextSprite(message, color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = color;
+            ctx.font = 'bold 90px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(message, 64, 64);
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({ map: texture, depthTest: false });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.scale.set(7, 7, 1);
+            return sprite;
+        }
+        
+        const spriteN = makeTextSprite('N', '#e11d48'); 
+        const spriteS = makeTextSprite('S', '#0284c7'); 
+        scene.add(spriteN);
+        scene.add(spriteS);
+
+        // --- 5. Interactive Compass ---
+        const compassGroup = new THREE.Group();
+        
+        const needleNGeo = new THREE.ConeGeometry(0.8, 3, 16);
+        needleNGeo.translate(0, 1.5, 0);
+        const needleNMat = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+        const needleN = new THREE.Mesh(needleNGeo, needleNMat);
+        
+        const needleSGeo = new THREE.ConeGeometry(0.8, 3, 16);
+        needleSGeo.rotateX(Math.PI); 
+        needleSGeo.translate(0, -1.5, 0);
+        const needleSMat = new THREE.MeshPhongMaterial({ color: 0x0284c7 });
+        const needleS = new THREE.Mesh(needleSGeo, needleSMat);
+        
+        const caseGeo = new THREE.CylinderGeometry(3.5, 3.5, 0.5, 32);
+        const caseMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4, wireframe:true });
+        const compassCase = new THREE.Mesh(caseGeo, caseMat);
+        compassCase.rotation.x = Math.PI/2;
+
+        compassGroup.add(needleN);
+        compassGroup.add(needleS);
+        compassGroup.add(compassCase);
+        compassGroup.visible = false; 
+        scene.add(compassGroup);
+
+        // Plane for mouse raycasting
+        const dragPlaneGeo = new THREE.PlaneGeometry(200, 200);
+        const dragPlaneMat = new THREE.MeshBasicMaterial({ visible: false });
+        const dragPlane = new THREE.Mesh(dragPlaneGeo, dragPlaneMat);
+        dragPlane.rotation.x = -Math.PI / 2;
+        scene.add(dragPlane);
+
+        // --- 6. Physics Model ---
+        function calculateBField(pos, I) {
+            if (I === 0) return new THREE.Vector3(1, 0, 0); // លំនាំដើម
+            
+            const p1 = new THREE.Vector3(solLength/2, 0, 0);
+            const p2 = new THREE.Vector3(-solLength/2, 0, 0);
+            
+            // Inside Solenoid -> Uniform field
+            if (Math.abs(pos.x) < solLength/2 && (pos.y*pos.y + pos.z*pos.z) < (solRadius*1.3)**2) {
+                // ប្រសិនបើ I>0 ដែនរត់ទៅ +X 
+                return new THREE.Vector3(Math.sign(I), 0, 0).normalize();
+            }
+
+            // Outside -> Dipole approximation
+            const r1 = new THREE.Vector3().subVectors(pos, p1);
+            const r2 = new THREE.Vector3().subVectors(pos, p2);
+            
+            const d1 = Math.pow(r1.length(), 3);
+            const d2 = Math.pow(r2.length(), 3);
+            
+            const b = new THREE.Vector3();
+            // ប្រសិនបើ I>0, មុខខាងស្តាំ (p1) ជាប្រភពចេញ (Source) -> N, មុខខាងឆ្វេង (p2) ស្រូបចូល (Sink) -> S
+            b.addScaledVector(r1, 1/d1);
+            b.addScaledVector(r2, -1/d2);
+            
+            if (I < 0) b.negate();
+            
+            return b.normalize();
+        }
+
+        // --- 7. User Interaction & Touch Support ---
+        const iSlider = document.getElementById('iSlider');
+        const iDisp = document.getElementById('iDisp');
+        const poleLeft = document.getElementById('poleLeft');
+        const poleRight = document.getElementById('poleRight');
+        const compassToggle = document.getElementById('compassToggle');
+        const compassTip = document.getElementById('compassTip');
+        
+        let compassEnabled = false;
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        compassToggle.addEventListener('change', (e) => {
+            compassEnabled = e.target.checked;
+            compassGroup.visible = compassEnabled;
+            compassTip.style.display = compassEnabled ? 'block' : 'none';
+            controls.enabled = !compassEnabled; // បិទ OrbitControl ពេលប្រើត្រីវិស័យដើម្បីអូសបានងាយ
+
+            if (compassEnabled) {
+                compassGroup.position.set(0, 0, solRadius + 8);
+                updateCompassRotation();
+                container.style.cursor = "crosshair";
+            } else {
+                container.style.cursor = "grab";
+            }
+        });
+
+        // គាំទ្រទាំង Mouse និង Touch លើទូរសព្ទ
+        function onPointerMove(e) {
+            if (!compassEnabled) return;
+            
+            let clientX, clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else if (e.clientX !== undefined) {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            } else {
+                return;
+            }
+
+            const rect = container.getBoundingClientRect();
+            mouse.x = ((clientX - rect.left) / container.clientWidth) * 2 - 1;
+            mouse.y = -((clientY - rect.top) / container.clientHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObject(dragPlane);
+            if (intersects.length > 0) {
+                compassGroup.position.copy(intersects[0].point);
+                updateCompassRotation();
+            }
+        }
+
+        container.addEventListener('mousemove', onPointerMove);
+        container.addEventListener('touchmove', (e) => {
+            if (compassEnabled) {
+                e.preventDefault(); // ការពារកុំឱ្យ Scroll ពេលកំពុងអូសត្រីវិស័យ
+                onPointerMove(e);
+            }
+        }, { passive: false });
+        container.addEventListener('touchstart', (e) => {
+            if (compassEnabled) {
+                e.preventDefault();
+                onPointerMove(e);
+            }
+        }, { passive: false });
+
+        function updateCompassRotation() {
+            const I = parseFloat(iSlider.value);
+            if (I === 0) return;
+            const bDir = calculateBField(compassGroup.position, I);
+            const targetQuaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), bDir);
+            compassGroup.quaternion.copy(targetQuaternion);
+        }
+
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            if(controls.enabled) controls.update();
+
+            const I = parseFloat(iSlider.value);
+            
+            // Update UI & Pole Mapping
+            iDisp.textContent = `${I.toFixed(1)} A`;
+            if (I > 0) {
+                // I>0: B រត់ទៅ +X. ដូច្នេះ មុខចេញ (ស្តាំ) = N, មុខចូល (ឆ្វេង) = S
+                poleLeft.textContent = "មុខត្បូង (S)"; poleLeft.className = "font-bold text-xl text-blue-600";
+                poleRight.textContent = "មុខជើង (N)"; poleRight.className = "font-bold text-xl text-rose-600";
+                
+                spriteS.position.x = -solLength/2 - 6;
+                spriteN.position.x = solLength/2 + 6;
+                spriteN.visible = true; spriteS.visible = true;
+                
+                lineMat.dashOffset -= 0.05; // ចលនាខ្សែដែន
+            } else if (I < 0) {
+                // I<0: B រត់ទៅ -X. ដូច្នេះ មុខចេញ (ឆ្វេង) = N, មុខចូល (ស្តាំ) = S
+                poleLeft.textContent = "មុខជើង (N)"; poleLeft.className = "font-bold text-xl text-rose-600";
+                poleRight.textContent = "មុខត្បូង (S)"; poleRight.className = "font-bold text-xl text-blue-600";
+                
+                spriteN.position.x = -solLength/2 - 6;
+                spriteS.position.x = solLength/2 + 6;
+                spriteN.visible = true; spriteS.visible = true;
+                
+                lineMat.dashOffset += 0.05; // ចលនាខ្សែដែន
+            } else {
+                poleLeft.textContent = "-"; poleLeft.className = "font-bold text-xl text-gray-400";
+                poleRight.textContent = "-"; poleRight.className = "font-bold text-xl text-gray-400";
+                spriteN.visible = false; spriteS.visible = false;
+            }
+
+            // Animate Current Particles
+            if (I !== 0) {
+                currentParticles.visible = true;
+                fieldLinesGroup.visible = true;
+                
+                const speed = (I / 10) * 0.01; 
+                time += speed;
+                
+                for(let i=0; i<numParticles; i++) {
+                    let t = (i / numParticles + time) % 1.0;
+                    if (t < 0) t += 1.0;
+                    path.getPoint(t, currentParticles.children[i].position);
+                }
+                
+                if(compassEnabled) updateCompassRotation();
+            } else {
+                currentParticles.visible = false;
+                fieldLinesGroup.visible = false;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
+```<ElicitationsGroup></ElicitationsGroup>

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>លំហាត់ទី៣០ ដែនម៉ាញេទិចនៃសូលេណូអ៊ីត</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Load Three.js សម្រាប់ 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        /* ស្ទីលអក្សរខ្មែរទូទៅ */
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            margin: 0;
+            overflow-x: hidden;
+            font-size: 1.15rem; 
+            line-height: 1.8;
+        }
+        
+        .kh { font-family: 'Battambang', sans-serif; }
+
+        /* ស្ទីលសម្រាប់រូបមន្តគណិតវិទ្យា */
+        .math {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.35rem; 
+            letter-spacing: 0.03em;
+        }
+        .math-bold { font-weight: bold; }
+        .math-sub { font-size: 0.65em; vertical-align: -0.25em; }
+        .math-sup { font-size: 0.65em; vertical-align: super; }
+
+        /* ពណ៌សម្គាល់អថេរ */
+        .text-blue { color: #1d4ed8; }
+        .text-red { color: #dc2626; }
+        .text-emerald { color: #059669; }
+        .text-amber { color: #d97706; }
+        .text-purple { color: #7e22ce; }
+
+        /* ទម្រង់ប្រភាគដ៏រឹងមាំ */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.3em;
+            font-size: 0.95em;
+        }
+        .fraction > span { 
+            padding: 0.1em 0.3em; 
+            line-height: 1.2;
+            white-space: nowrap; /* ការពារការបែកជួរលេខ និងស្វ័យគុណ */
+        }
+        .fraction .fdn { 
+            border-top: 1.5px solid currentColor; 
+            width: 100%; 
+            text-align: center; 
+        }
+
+        /* ប្រអប់ការពារការដាច់រូបមន្តបញ្ឈរ */
+        .equation-box {
+            display: flex;
+            flex-wrap: wrap; 
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            width: 100%;
+        }
+        .math-block {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: nowrap; 
+            overflow-x: auto; 
+            max-width: 100%;
+            padding-bottom: 0.5rem;
+            -webkit-overflow-scrolling: touch; 
+            white-space: nowrap;
+        }
+        .math-block::-webkit-scrollbar { display: none; }
+
+        /* ស្ទីល Sliders */
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #cbd5e1;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #d97706; 
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(217, 119, 6, 0.5);
+        }
+        
+        /* ផ្ទៃ 3D (Hardcoded CSS ការពារទូរសព្ទគាំង) */
+        .canvas-wrapper {
+            width: 100%;
+            height: 450px; 
+            border-radius: 0.75rem;
+            background: linear-gradient(to bottom, #0f172a, #1e293b);
+            overflow: hidden;
+            position: relative;
+            cursor: grab;
+            border: 2px solid #cbd5e1;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+            display: block;
+        }
+        .canvas-wrapper:active { cursor: grabbing; }
+        
+        .canvas-wrapper canvas { 
+            display: block; 
+            outline: none; 
+            width: 100% !important;
+            height: 100% !important;
+            touch-action: none; 
+        }
+
+        /* បិទបើកចម្លើយ */
+        .solution-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.7s ease-in-out;
+        }
+        .solution-content.open {
+            max-height: 4000px;
+            opacity: 1;
+            margin-top: 1.5rem;
+        }
+
+        .toggle-checkbox:checked { right: 0; border-color: #3b82f6; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #3b82f6; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- ========================================== -->
+        <!-- 1. ប្រធានលំហាត់ -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <h2 class="text-2xl font-bold text-amber-700 mb-4 border-b border-slate-100 pb-3 flex items-center gap-2">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                លំហាត់ទី៣០
+            </h2>
+            <div class="text-justify font-medium space-y-4 kh">
+                <p>30. សូលេណូអ៊ីតស្នូលខ្យល់តូចមួយប្រវែង <span class="math math-bold text-blue">L = <span id="prob_l">12</span> cm</span> និងមានចំនួនស្ពៀសរុប <span class="math math-bold text-purple">N = <span id="prob_n">460</span> ស្ពៀ</span> ជាស្ពៀជាប់ៗគ្នា ហើយឆ្លងកាត់ដោយចរន្ត <span class="math math-bold text-red">I = <span id="prob_i">1.0</span> A</span> ។ </p>
+                <p>គណនាដែនម៉ាញេទិច <span class="math math-bold text-emerald">B</span> ត្រង់ផ្ចិតនៃសូលេណូអ៊ីតនេះ ។</p>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 2. INTERACTIVE PANEL (3D CANVAS & CONTROLS) -->
+        <!-- ========================================== -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- 3D Canvas -->
+            <div class="lg:col-span-2 bg-white rounded-2xl p-4 md:p-5 shadow-sm border border-slate-200 flex flex-col">
+                <div class="flex justify-between items-center mb-4 px-1 md:px-2 flex-wrap gap-4">
+                    <h3 class="font-bold text-gray-800 text-lg md:text-xl kh">ផ្ទាំងបង្ហាញលក្ខណៈរូបអន្តរកម្ម 3D</h3>
+                    <div class="flex items-center gap-3">
+                        <span class="kh text-xs md:text-sm font-bold bg-slate-100 text-slate-600 px-3 py-1 rounded-full shadow-sm">បង្វិលស្វ័យប្រវត្តិ</span>
+                        <div class="relative inline-block w-10 align-middle select-none">
+                            <input type="checkbox" id="toggleAutoRotate" checked class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer z-10 top-0 left-0 transition-all duration-300"/>
+                            <label for="toggleAutoRotate" class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300"></label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="canvas-container" class="canvas-wrapper">
+                    <!-- Overlay Legend -->
+                    <div class="absolute top-2 left-2 md:top-4 md:left-4 bg-white/90 backdrop-blur px-3 py-2 md:px-4 md:py-3 rounded-lg md:rounded-xl shadow-lg text-gray-800 pointer-events-none z-10 border border-white/50 max-w-[85%] md:max-w-none">
+                        <ul class="space-y-1.5 md:space-y-3 font-medium text-[0.7rem] md:text-[0.95rem] kh">
+                            <li class="flex items-center gap-2 md:gap-3"><span class="w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-slate-500"></span> សូលេណូអ៊ីត <span class="math text-purple-600 font-bold ml-1">N</span> ស្ពៀ</li>
+                            <li class="flex items-center gap-2 md:gap-3"><span class="w-3 h-3 md:w-4 md:h-4 rounded-full bg-red-500 shadow-[0_0_6px_#ef4444]"></span> ចរន្តអគ្គិសនី <span class="math text-red-600 font-bold">I</span></li>
+                            <li class="flex items-center gap-2 md:gap-3"><span class="w-3 h-1 md:w-4 md:h-1 bg-emerald-500"></span> វ៉ិចទ័រដែនម៉ាញេទិច <span class="math text-emerald-600 font-bold">B</span></li>
+                            <li class="flex items-center gap-2 md:gap-3"><span class="w-3 h-0 md:w-4 border-t-2 border-dashed border-blue-400"></span> ប្រវែង <span class="math text-blue-600 font-bold">L</span></li>
+                        </ul>
+                    </div>
+                    <!-- Guide Note -->
+                    <div class="absolute bottom-3 right-3 md:bottom-4 md:right-4 bg-black/40 text-white/90 px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[0.7rem] md:text-sm backdrop-blur pointer-events-none kh border border-white/10">
+                        ប្រើដៃអូសបង្វិល 🔄
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col gap-6">
+                <h3 class="text-xl font-bold text-amber-700 border-b border-slate-100 pb-3 kh">ការកំណត់តម្លៃ</h3>
+                
+                <div class="space-y-8">
+                    <!-- N Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">ចំនួនស្ពៀ <span class="math text-purple-600">N</span></label>
+                            <span class="math math-bold text-purple"><span id="nDisp">460</span> ស្ពៀ</span>
+                        </div>
+                        <input type="range" id="nSlider" min="100" max="1000" value="460" step="10" class="slider py-2 bg-purple-400">
+                    </div>
+
+                    <!-- L Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">ប្រវែងសូលេណូអ៊ីត <span class="math text-blue-600">L</span></label>
+                            <span class="math math-bold text-blue"><span id="lDisp">12.0</span> cm</span>
+                        </div>
+                        <input type="range" id="lSlider" min="5.0" max="30.0" value="12.0" step="0.5" class="slider py-2 bg-blue-400">
+                    </div>
+
+                    <!-- I Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-gray-700 kh">ចរន្តអគ្គិសនី <span class="math text-red-600">I</span></label>
+                            <span class="math math-bold text-red"><span id="iDisp">1.0</span> A</span>
+                        </div>
+                        <input type="range" id="iSlider" min="0.5" max="10.0" value="1.0" step="0.5" class="slider py-2 bg-red-400">
+                    </div>
+                </div>
+
+                <!-- Live Results -->
+                <div class="mt-auto space-y-4">
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 flex flex-col justify-center items-center shadow-sm h-32">
+                        <div class="font-bold text-emerald-800 kh text-[1rem]">ដែនម៉ាញេទិច <span class="math">B</span></div>
+                        <div class="math math-bold text-emerald text-[1.8rem] mt-2" id="bDisp">4.81 &times; 10<span class="math-sup">-3</span> T</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 3. ដំណោះស្រាយ (SOLUTION TOGGLE) -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <button id="toggleBtn" class="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold py-4 px-6 rounded-xl shadow-md transition-colors flex justify-center items-center gap-3">
+                <svg id="toggleIcon" class="w-6 h-6 transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                <span id="btnText" class="text-xl kh">បង្ហាញដំណោះស្រាយលម្អិត</span>
+            </button>
+
+            <div id="solutionBox" class="solution-content bg-slate-50 border border-slate-200 rounded-xl p-6 md:p-10 mt-6">
+                <h3 class="font-bold text-[#d97706] border-b-2 border-slate-200 pb-3 mb-8 text-3xl inline-block border-b-[#f59e0b] kh">ដំណោះស្រាយ</h3>
+                
+                <div class="space-y-12">
+                    
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-gray-800 text-2xl mb-6 kh">
+                            គណនាដែនម៉ាញេទិច <span class="math math-bold text-emerald-700">B</span> ត្រង់ផ្ចិតនៃសូលេណូអ៊ីត
+                        </h4>
+                        <div>
+                            <p class="kh text-gray-700 mb-4">រូបមន្តដែនម៉ាញេទិចត្រង់ផ្ចិតសូលេណូអ៊ីត៖</p>
+                            
+                            <!-- ប្រអប់រូបមន្តរឹងមាំ (Robust Math Block) -->
+                            <div class="equation-box">
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap text-emerald-700 font-bold">B = &mu;<span class="math-sub">0</span> &times; </span>
+                                    <div class="fraction math text-emerald-700 font-bold">
+                                        <span>N</span>
+                                        <span class="fdn">L</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap text-emerald-700 font-bold"> &times; I</span>
+                                    
+                                    <span class="math whitespace-nowrap text-emerald-700 font-bold ml-4"> = 4&pi; &times; 10<span class="math-sup">-7</span> &times; </span>
+                                    <div class="fraction math text-emerald-700 font-bold">
+                                        <span>N &times; I</span>
+                                        <span class="fdn">L</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="kh mt-8 border-t border-dashed border-gray-300 pt-5">ដោយមានបម្រាប់៖</p>
+                            <ul class="pl-8 space-y-3 math text-[1.3rem]">
+                                <li>L = <span class="font-bold text-blue" id="sol_l">12</span> cm = <span class="font-bold text-blue" id="sol_l_m">0.12</span> m</li>
+                                <li>N = <span class="font-bold text-purple" id="sol_n">460</span> ស្ពៀ</li>
+                                <li>I = <span class="font-bold text-red" id="sol_i">1.0</span> A</li>
+                                <li>&mu;<span class="math-sub">0</span> &approx; 4 &times; 3.14 &times; 10<span class="math-sup">-7</span> = <span class="font-bold">12.56</span> &times; 10<span class="math-sup">-7</span> T&middot;m/A</li>
+                            </ul>
+
+                            <div class="equation-box mt-6">
+                                <span class="kh mr-2 font-medium">ជំនួសលេខ៖</span>
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap text-emerald-700 font-bold">B = (12.56 &times; 10<span class="math-sup">-7</span>) &times; </span>
+                                    <div class="fraction math">
+                                        <span><span id="sol_n_sub">460</span> &times; <span id="sol_i_sub">1.0</span></span>
+                                        <span class="fdn" id="sol_l_sub">0.12</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="equation-box mt-4">
+                                <div class="math-block">
+                                    <span class="math whitespace-nowrap text-emerald-700 font-bold">B = </span>
+                                    <div class="fraction math">
+                                        <span><span id="sol_top_calc1">5777.6</span> &times; 10<span class="math-sup">-7</span></span>
+                                        <span class="fdn" id="sol_bot_calc1">0.12</span>
+                                    </div>
+                                    <span class="math whitespace-nowrap"> = <span id="sol_b_calc1">48146.67</span> &times; 10<span class="math-sup">-7</span> T</span>
+                                </div>
+                            </div>
+
+                            <p class="kh mt-5">បំប្លែងទៅជាទម្រង់ស្ដង់ដារ (Scientific Notation)៖</p>
+
+                            <div class="mt-4 flex flex-wrap items-center gap-4 bg-emerald-50 p-5 rounded-xl border border-emerald-100">
+                                <span class="kh font-bold text-xl">ដូចនេះ៖</span>
+                                <span class="math math-bold text-emerald-700 border-b-[3px] border-emerald-600 pb-1 text-[1.8rem]">B &approx; <span id="sol_b_final">4.81</span> &times; 10<span class="math-sup">-3</span> T</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- 3D Three.js Logic (Safe Init) -->
+    <script>
+        // អនុគមន៍ជំនួយកែអត្ថបទប្រកបដោយសុវត្ថិភាព
+        const setText = (id, val) => {
+            const el = document.getElementById(id);
+            if(el) el.textContent = val;
+        };
+
+        // រង់ចាំឱ្យ HTML Render ទំហំប្រអប់រួចរាល់សិន ទើបចាប់ផ្តើមគូរ 3D
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(init3DPhysics, 150);
+        });
+
+        function init3DPhysics() {
+            const container = document.getElementById('canvas-container');
+            const nSlider = document.getElementById('nSlider');
+            const lSlider = document.getElementById('lSlider');
+            const iSlider = document.getElementById('iSlider');
+            const toggleAutoRotate = document.getElementById('toggleAutoRotate');
+
+            // --- 1. Scene Setup ---
+            const scene = new THREE.Scene();
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            
+            let w = container.clientWidth || window.innerWidth - 32;
+            let h = container.clientHeight || 450;
+            
+            renderer.setSize(w, h);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+            camera.position.set(20, 15, 30); // មើលបញ្ឆិតពីខាងលើ
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 1.5;
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(10, 30, 20);
+            scene.add(dirLight);
+
+            // --- 2. 3D Objects Construction ---
+            
+            const solenoidGroup = new THREE.Group();
+            scene.add(solenoidGroup);
+
+            // គ្រាប់ចរន្តអគ្គិសនី I 
+            const particlesGroup = new THREE.Group();
+            scene.add(particlesGroup);
+            const numParticles = 40; // ចំនួនគ្រាប់ភ្លើងរត់តាមខ្សែ
+
+            const particleGeo = new THREE.SphereGeometry(0.2, 16, 16);
+            const particleMat = new THREE.MeshPhongMaterial({ 
+                color: 0xef4444, 
+                emissive: 0xdc2626,
+                shininess: 100
+            });
+
+            for(let i=0; i<numParticles; i++) {
+                const p = new THREE.Mesh(particleGeo, particleMat);
+                // តម្រៀបគ្រាប់ភ្លើងតាមភាគរយនៃប្រវែងខ្សែ (0 ទៅ 1)
+                p.userData.t = i / numParticles; 
+                particlesGroup.add(p);
+            }
+
+            let solenoidMesh;
+            let vectorB_arrow;
+            let lengthLine;
+            let solenoidCurve;
+
+            // Custom Curve សម្រាប់បង្កើតរាង Solenoid (Helix) តាមបណ្តោយអ័ក្ស X
+            class HelixCurve extends THREE.Curve {
+                constructor(radius, length, turns) {
+                    super();
+                    this.radius = radius;
+                    this.length = length;
+                    this.turns = turns;
+                }
+                getPoint(t, optionalTarget = new THREE.Vector3()) {
+                    // t ពី 0 ទៅ 1
+                    const x = (t - 0.5) * this.length;
+                    // មុំវិលសរុប = turns * 2pi
+                    const angle = t * Math.PI * 2 * this.turns;
+                    const y = Math.cos(angle) * this.radius;
+                    const z = Math.sin(angle) * this.radius;
+                    return optionalTarget.set(x, y, z);
+                }
+            }
+
+            function buildSolenoid(length_cm, turns) {
+                // Visual constraints
+                const r_visual = 3; // កាំថេរដើម្បីងាយស្រួលមើល
+                const l_visual = (length_cm / 30) * 20; // មាត្រដ្ឋានប្រវែង
+                // បង្រួមចំនួនជុំខ្សែដែលត្រូវបង្ហាញ (កុំឱ្យចង្អៀតពេក ធានាថាមិន Lag)
+                const visualTurns = Math.max(10, Math.min(turns / 20, 50)); 
+
+                if(solenoidMesh) {
+                    solenoidMesh.geometry.dispose();
+                    solenoidMesh.material.dispose();
+                    solenoidGroup.remove(solenoidMesh);
+                }
+                if(lengthLine) {
+                    lengthLine.geometry.dispose();
+                    lengthLine.material.dispose();
+                    scene.remove(lengthLine);
+                }
+                if(vectorB_arrow) {
+                    scene.remove(vectorB_arrow);
+                }
+
+                // បង្កើតខ្សែ Solenoid
+                solenoidCurve = new HelixCurve(r_visual, l_visual, visualTurns);
+                const tubeGeo = new THREE.TubeGeometry(solenoidCurve, visualTurns * 20, 0.15, 8, false);
+                const tubeMat = new THREE.MeshStandardMaterial({ 
+                    color: 0x94a3b8, // ពណ៌ទង់ដែង/ដែក
+                    metalness: 0.6,
+                    roughness: 0.4
+                });
+                solenoidMesh = new THREE.Mesh(tubeGeo, tubeMat);
+                solenoidGroup.add(solenoidMesh);
+
+                // ខ្សែបន្ទាត់ប្រវែង L (ពណ៌ខៀវ) នៅខាងក្រោម
+                const lLineGeo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(-l_visual/2, -r_visual - 1.5, 0),
+                    new THREE.Vector3(l_visual/2, -r_visual - 1.5, 0)
+                ]);
+                const lLineMat = new THREE.LineDashedMaterial({ 
+                    color: 0x60a5fa, 
+                    linewidth: 2, 
+                    dashSize: 0.5, 
+                    gapSize: 0.5 
+                });
+                lengthLine = new THREE.Line(lLineGeo, lLineMat);
+                lengthLine.computeLineDistances(); 
+                scene.add(lengthLine);
+
+                // វ៉ិចទ័រដែនម៉ាញេទិច (B) ដោតកាត់កណ្តាល (អ័ក្ស X)
+                const dir = new THREE.Vector3(1, 0, 0).normalize(); 
+                const origin = new THREE.Vector3(-l_visual/2 - 2, 0, 0); 
+                const arrowLength = l_visual + 4; // លូតហួសខ្សែបន្តិច
+
+                vectorB_arrow = new THREE.ArrowHelper(
+                    dir, 
+                    origin, 
+                    arrowLength, 
+                    0x10b981, // Emerald
+                    arrowLength * 0.1, 
+                    arrowLength * 0.05  
+                );
+                vectorB_arrow.line.material.linewidth = 4;
+                scene.add(vectorB_arrow);
+            }
+
+            // --- 3. Logic & UI Update ---
+            function updateSimulation() {
+                const N = parseInt(nSlider.value); 
+                const L_cm = parseFloat(lSlider.value);
+                const L_m = L_cm / 100;
+                const I = parseFloat(iSlider.value);
+
+                // ការគណនា៖ B = mu0 * (N/L) * I
+                const PI = 3.14; 
+                const mu0 = 4 * PI * 1e-7; // 12.56e-7
+                
+                const B = mu0 * (N / L_m) * I;
+                // បំប្លែងជាទម្រង់ x 10^-3 T (mT) សម្រាប់បង្ហាញ
+                const B_display = B * 1e3; 
+
+                // បច្ចុប្បន្នភាព UI
+                setText('nDisp', N);
+                setText('lDisp', L_cm.toFixed(1));
+                setText('iDisp', I.toFixed(1));
+                
+                const el_bDisp = document.getElementById('bDisp');
+                if(el_bDisp) el_bDisp.innerHTML = B_display.toFixed(2) + ` &times; 10<span class="math-sup">-3</span> T`;
+
+                setText('prob_n', N);
+                setText('prob_l', L_cm.toFixed(0));
+                setText('prob_i', I.toFixed(1));
+
+                setText('sol_n', N);
+                setText('sol_l', L_cm.toFixed(0));
+                setText('sol_l_m', L_m.toFixed(2));
+                setText('sol_i', I.toFixed(1));
+                
+                setText('sol_n_sub', N);
+                setText('sol_l_sub', L_m.toFixed(2));
+                setText('sol_i_sub', I.toFixed(1));
+                
+                // ការគណនាផ្នែកៗសម្រាប់ដំណោះស្រាយ
+                const top_calc1 = 12.56 * N * I; 
+                setText('sol_top_calc1', top_calc1.toFixed(1));
+                setText('sol_bot_calc1', L_m.toFixed(2));
+                
+                const b_raw_e7 = top_calc1 / L_m; // គុណនឹង 10^-7
+                setText('sol_b_calc1', b_raw_e7.toFixed(2));
+                
+                setText('sol_b_final', B_display.toFixed(2));
+
+                // បច្ចុប្បន្នភាព 3D
+                buildSolenoid(L_cm, N);
+                
+                // ល្បឿនចរន្ត
+                particlesGroup.userData.speed = 0.001 + (I / 10.0) * 0.005;
+            }
+
+            // --- 4. Event Listeners ---
+            nSlider.addEventListener('input', updateSimulation);
+            lSlider.addEventListener('input', updateSimulation);
+            iSlider.addEventListener('input', updateSimulation);
+
+            toggleAutoRotate.addEventListener('change', (e) => {
+                controls.autoRotate = e.target.checked;
+            });
+
+            window.addEventListener('resize', () => {
+                if(container.clientWidth > 0 && container.clientHeight > 0){
+                    camera.aspect = container.clientWidth / container.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(container.clientWidth, container.clientHeight);
+                }
+            });
+
+            // --- 5. Animation Loop ---
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+
+                // ធ្វើអោយគ្រាប់ចរន្តរត់តាមខ្សែសូលេណូអ៊ីត
+                if(solenoidCurve) {
+                    const speed = particlesGroup.userData.speed || 0.002;
+                    particlesGroup.children.forEach(p => {
+                        p.userData.t += speed;
+                        if(p.userData.t > 1.0) p.userData.t -= 1.0;
+                        
+                        // ទាញយកកូអរដោនេតាមចំណុច t នៃខ្សែ
+                        const pt = solenoidCurve.getPoint(p.userData.t);
+                        p.position.copy(pt);
+                    });
+                }
+
+                renderer.render(scene, camera);
+            }
+
+            // ដំណើរការ
+            updateSimulation();
+            animate();
+        }
+
+        // មុខងារប៊ូតុងបង្ហាញចម្លើយ 
+        const toggleBtn = document.getElementById('toggleBtn');
+        const solutionBox = document.getElementById('solutionBox');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const btnText = document.getElementById('btnText');
+        let solutionOpen = false;
+
+        toggleBtn.addEventListener('click', () => {
+            solutionOpen = !solutionOpen;
+            if (solutionOpen) {
+                solutionBox.classList.add('open');
+                btnText.textContent = "លាក់ដំណោះស្រាយលម្អិត";
+                toggleIcon.style.transform = "rotate(0deg)";
+            } else {
+                solutionBox.classList.remove('open');
+                btnText.textContent = "បង្ហាញដំណោះស្រាយលម្អិត";
+                toggleIcon.style.transform = "rotate(180deg)";
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>លំហាត់ទី៦៖ រូបភាពនៃអ្នកសង្កេតក្នុងកញ្ចក់ប្លង់</title>
+    
+    <!-- បញ្ចូលបណ្ណាល័យ MathJax សម្រាប់បង្ហាញរូបមន្តគណិតវិទ្យា -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Battambang:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 920px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #2563eb;
+            color: white;
+            padding: 16px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 22px;
+        }
+
+        .problem-statement {
+            font-size: 1.15rem;
+            line-height: 2.0;
+            color: #1f2937;
+            margin-bottom: 18px;
+            padding: 16px 20px;
+            background-color: #f8fafc;
+            border-left: 5px solid #2563eb;
+            border-radius: 6px;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        .touch-hint {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            border: 1px dashed #60a5fa;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.05rem;
+            margin-bottom: 16px;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 14px;
+            position: relative;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            border: 1.5px solid #94a3b8;
+            border-radius: 8px;
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            touch-action: none; /* អនុញ្ញាតឱ្យចាប់ទាញលើអេក្រង់ទូរសព្ទដោយមិនរំកិលទំព័រ */
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+            max-width: 700px;
+            background-color: #e2e8f0;
+            padding: 18px 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .slider-row label {
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: #1e3a8a;
+            width: 260px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .val-display {
+            width: 130px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.15rem;
+            color: #1d4ed8;
+            background-color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button.action-btn {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.02rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .btn-rays { background-color: #059669; }
+        .btn-rays:hover { background-color: #047857; }
+
+        .btn-reset { background-color: #64748b; }
+        .btn-reset:hover { background-color: #475569; }
+        
+        .btn-solution { background-color: #2563eb; }
+        .btn-solution:hover { background-color: #1d4ed8; }
+
+        .solution-box {
+            display: none;
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 20px;
+            color: #1e3a8a;
+            line-height: 1.9;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 600px) {
+            .slider-row { flex-wrap: wrap; gap: 8px; }
+            .slider-row label { width: 100%; }
+            .val-display { width: 105px; font-size: 1.05rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>លំហាត់ទី៦៖ រូបភាពនៃអ្នកសង្កេតក្នុងកញ្ចក់ប្លង់</h1>
+    </div>
+    
+    <div class="content">
+        <!-- ប្រធានលំហាត់នៅផ្នែកខាងលើ -->
+        <div class="problem-statement">
+            <strong>៦.</strong> អ្នកសង្កេតម្នាក់សម្លឹងមើលពីចំណុច $O$ ទៅកញ្ចក់ប្លង់មួយដែលស្ថិតនៅចម្ងាយ $1\text{ m}$ ។ តើភ្នែកនេះស្ថិតនៅចម្ងាយប៉ុន្មានពីរូបភាពដែលមើលឃើញនៅក្នុងកញ្ចក់?
+        </div>
+
+        <div class="touch-hint">
+            👆 លោកគ្រូ និងសិស្សានុសិស្សអាចយកដៃចាប់ទាញរូបមនុស្ស (ត្រង់ចំណុច O) ទៅជិត ឬឆ្ងាយពីកញ្ចក់លើអេក្រង់ផ្ទាល់បាន!
+        </div>
+
+        <!-- ផ្នែកពិសោធន៍ (Simulator) -->
+        <div class="canvas-container">
+            <canvas id="simCanvas" width="840" height="440"></canvas>
+            
+            <div class="controls">
+                <div class="slider-row">
+                    <label>ចម្ងាយពីមនុស្សទៅកញ្ចក់ ($OH$) :</label>
+                    <input type="range" id="sliderDist" min="0.30" max="2.20" value="1.00" step="0.05" oninput="onSliderChange()">
+                    <div class="val-display" id="valOH">1.00 m</div>
+                </div>
+                
+                <div class="slider-row" style="margin-top: 6px; padding-top: 12px; border-top: 2px dashed #cbd5e1;">
+                    <label style="color: #0284c7;">ចម្ងាយពីកញ្ចក់ទៅរូបភាព ($HO'$) :</label>
+                    <div style="flex-grow: 1;"></div>
+                    <div class="val-display" id="valHOPrime" style="color: #0284c7; border-color: #0284c7;">1.00 m</div>
+                </div>
+
+                <div class="slider-row">
+                    <label style="color: #dc2626; font-size: 1.12rem;">ចម្ងាយពីភ្នែកទៅរូបភាព ($OO'$) :</label>
+                    <div style="flex-grow: 1;"></div>
+                    <div class="val-display" id="valOOPrime" style="color: #dc2626; border-color: #dc2626; font-size: 1.25rem;">2.00 m</div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="action-btn btn-rays" onclick="toggleRays()">🔦 បង្ហាញ/លាក់កាំពន្លឺឆ្លុះ</button>
+                <button class="action-btn btn-reset" onclick="resetToProblem()">🔄 កំណត់ដូចប្រធានដើម (1.00 m)</button>
+                <button class="action-btn btn-solution" id="btnToggleSol" onclick="toggleSolution()">📖 បង្ហាញដំណោះស្រាយ</button>
+            </div>
+        </div>
+
+        <!-- ប្រអប់ដំណោះស្រាយ -->
+        <div class="solution-box" id="solutionBox">
+            <h2 style="margin-top:0; border-bottom:2px solid #93c5fd; padding-bottom:8px; color: #1d4ed8;">ដំណោះស្រាយលំហាត់ទី៦</h2>
+            <div id="solutionContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const MIRROR_X = 420; // ទីតាំងកញ្ចក់ប្លង់ H នៅចំកណ្តាលអេក្រង់
+    const FLOOR_Y = 345;  // កម្រិតបន្ទាត់ដី OH O'
+    const PX_PER_METER = 160; // 1 m = 160 pixels
+
+    let distOH = 1.00; // គិតជាម៉ែត្រ (m)
+    let isDragging = false;
+    let showRays = true;
+
+    function toggleRays() {
+        showRays = !showRays;
+    }
+
+    function resetToProblem() {
+        distOH = 1.00;
+        document.getElementById('sliderDist').value = 1.00;
+        updateSimulation();
+    }
+
+    function toggleSolution() {
+        const box = document.getElementById('solutionBox');
+        const btn = document.getElementById('btnToggleSol');
+        if (box.style.display === 'block') {
+            box.style.display = 'none';
+            btn.innerText = "📖 បង្ហាញដំណោះស្រាយ";
+        } else {
+            box.style.display = 'block';
+            btn.innerText = "🙈 លាក់ដំណោះស្រាយ";
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([document.getElementById('solutionContent')]);
+            }
+        }
+    }
+
+    function onSliderChange() {
+        distOH = parseFloat(document.getElementById('sliderDist').value);
+        updateSimulation();
+    }
+
+    function updateSimulation() {
+        let distHOPrime = distOH;
+        let distOOPrime = distOH + distHOPrime;
+
+        document.getElementById('valOH').innerText = distOH.toFixed(2) + " m";
+        document.getElementById('valHOPrime').innerText = distHOPrime.toFixed(2) + " m";
+        document.getElementById('valOOPrime').innerText = distOOPrime.toFixed(2) + " m";
+
+        let mathHTML = `
+            <p><strong>បម្រាប់៖</strong></p>
+            <ul>
+                <li>ចម្ងាយពីភ្នែកអ្នកសង្កេតត្រង់ $O$ ទៅកញ្ចក់ប្លង់ត្រង់ $H$ គឺ៖ $OH = ${distOH.toFixed(2)}\\text{ m}$</li>
+                <li>រូបភាពនៃអ្នកសង្កេតនៅក្នុងកញ្ចក់ប្លង់ស្ថិតនៅត្រង់ចំណុច $O'$</li>
+            </ul>
+            <p><strong>រកចម្ងាយពីភ្នែកអ្នកសង្កេតទៅរូបភាពនៅក្នុងកញ្ចក់ ($OO'$) ៖</strong><br>
+            តាមលក្ខណៈនៃកញ្ចក់ប្លង់ រូបភាពពិតនិម្មិត $O'$ ស្ថិតនៅឆ្លុះគ្នាជាមួយវត្ថុ $O$ ធៀបនឹងផ្ទៃកញ្ចក់ប្លង់ $H$ ពោលគឺចម្ងាយពីកញ្ចក់ទៅរូបភាពស្មើនឹងចម្ងាយពីវត្ថុទៅកញ្ចក់៖
+            $$ HO' = OH = ${distOH.toFixed(2)}\\text{ m} $$
+            ដូចនេះ ចម្ងាយសរុបពីភ្នែកអ្នកសង្កេត ($O$) ទៅរូបភាពនៅក្នុងកញ្ចក់ ($O'$) គឺ៖
+            $$ OO' = OH + HO' = 2 \\times OH $$
+            ជំនួសលេខ៖
+            $$ OO' = ${distOH.toFixed(2)}\\text{ m} + ${distHOPrime.toFixed(2)}\\text{ m} = \\mathbf{${distOOPrime.toFixed(2)}\\text{ m}} $$
+            </p>
+        `;
+
+        const solContainer = document.getElementById('solutionContent');
+        solContainer.innerHTML = mathHTML;
+
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([solContainer]);
+        }
+    }
+
+    // --- មុខងារចាប់ទាញមនុស្សលើអេក្រង់ផ្ទាល់ (Mouse & Touch Dragging) ---
+    function getCanvasPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        }
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    function handleStart(e) {
+        const pos = getCanvasPos(e);
+        const personX = MIRROR_X - distOH * PX_PER_METER;
+        // ពិនិត្យថាតើអ្នកប្រើចុចចំតួមនុស្ស ឬចំណុច O ដែរឬទេ
+        if (Math.abs(pos.x - personX) < 55 && pos.y > FLOOR_Y - 190 && pos.y < FLOOR_Y + 45) {
+            isDragging = true;
+            e.preventDefault();
+        }
+    }
+
+    function handleMove(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const pos = getCanvasPos(e);
+        let newDist = (MIRROR_X - pos.x) / PX_PER_METER;
+        newDist = Math.max(0.30, Math.min(2.20, newDist));
+        distOH = Math.round(newDist * 20) / 20; // បង្គត់ជាជំហាន 0.05m
+        document.getElementById('sliderDist').value = distOH;
+        updateSimulation();
+    }
+
+    function handleEnd() {
+        isDragging = false;
+    }
+
+    canvas.addEventListener('mousedown', handleStart);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleEnd);
+
+    canvas.addEventListener('touchstart', handleStart, { passive: false });
+    window.addEventListener('touchmove', handleMove, { passive: false });
+    window.addEventListener('touchend', handleEnd);
+
+    // --- មុខងារគូសរូបមនុស្ស និងរូបភាពក្នុងកញ្ចក់ ---
+    function drawClearText(text, x, y, font, fillColor, align = 'center', strokeColor = 'rgba(255,255,255,0.92)') {
+        ctx.save();
+        ctx.font = font;
+        ctx.textAlign = align;
+        ctx.textBaseline = 'middle';
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = strokeColor;
+        ctx.lineJoin = 'round';
+        ctx.strokeText(text, x, y);
+        ctx.fillStyle = fillColor;
+        ctx.fillText(text, x, y);
+        ctx.restore();
+    }
+
+    function drawArrowOnLine(x1, y1, x2, y2, frac, color) {
+        let ax = x1 + (x2 - x1) * frac;
+        let ay = y1 + (y2 - y1) * frac;
+        let angle = Math.atan2(y2 - y1, x2 - x1);
+
+        ctx.save();
+        ctx.translate(ax, ay);
+        ctx.rotate(angle);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(9, 0);
+        ctx.lineTo(-7, -6);
+        ctx.lineTo(-7, 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function drawPerson(x, floorY, facingRight, isVirtual) {
+        ctx.save();
+        if (isVirtual) {
+            ctx.globalAlpha = 0.55;
+        }
+        const dir = facingRight ? 1 : -1;
+
+        // ស្រមោលក្រោមជើង
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.12)';
+        ctx.beginPath();
+        ctx.ellipse(x, floorY, 24, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // ស្បែកជើង
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.roundRect(x - 12, floorY - 8, 26 * (facingRight ? 1 : 0.8), 8, 4);
+        ctx.fill();
+
+        // ជើង (ខោពណ៌ទឹកប៊ិចចាស់)
+        ctx.strokeStyle = '#1e3a8a';
+        ctx.lineWidth = 12;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x - 4 * dir, floorY - 8);
+        ctx.lineTo(x - 2 * dir, floorY - 62);
+        ctx.moveTo(x + 5 * dir, floorY - 8);
+        ctx.lineTo(x + 3 * dir, floorY - 62);
+        ctx.stroke();
+
+        // ដងខ្លួន (អាវពណ៌ខៀវ ឬបៃតងសម្រាប់រូបភាព)
+        ctx.fillStyle = isVirtual ? '#0284c7' : '#2563eb';
+        ctx.strokeStyle = '#1d4ed8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(x - 16, floorY - 118, 32, 58, 10);
+        ctx.fill();
+        ctx.stroke();
+
+        // ដៃ
+        ctx.strokeStyle = isVirtual ? '#0369a1' : '#1d4ed8';
+        ctx.lineWidth = 9;
+        ctx.beginPath();
+        ctx.moveTo(x, floorY - 108);
+        ctx.lineTo(x + 14 * dir, floorY - 75);
+        ctx.stroke();
+
+        // ក និងក្បាល
+        ctx.fillStyle = '#fde68a';
+        ctx.strokeStyle = '#b45309';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x, floorY - 140, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // សក់
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.arc(x - 2 * dir, floorY - 144, 18, Math.PI * 0.85, Math.PI * 2.15);
+        ctx.fill();
+
+        // ភ្នែក (បែរទៅរកកញ្ចក់)
+        const eyeX = x + 12 * dir;
+        const eyeY = floorY - 140;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(eyeX, eyeY, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(eyeX + 1.5 * dir, eyeY, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+        return { eyeX: x + 12 * dir, eyeY: floorY - 140, headTopY: floorY - 158 };
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // ១. គូសផ្ទៃខាងមុខកញ្ចក់ (ឆ្វេង) និងខាងក្រោយកញ្ចក់ (ស្តាំ)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, MIRROR_X, canvas.height);
+
+        ctx.fillStyle = '#f1f5f9';
+        ctx.fillRect(MIRROR_X, 0, canvas.width - MIRROR_X, canvas.height);
+
+        // ស្លាកតំបន់ខាងមុខ និងខាងក្រោយកញ្ចក់
+        drawClearText('ខាងមុខកញ្ចក់ (វត្ថុពិត)', 210, 28, 'bold 20px "Khmer OS Battambang"', '#1e3a8a');
+        drawClearText('ខាងក្នុងកញ្ចក់ (រូបភាពនិម្មិត)', 630, 28, 'bold 20px "Khmer OS Battambang"', '#0369a1');
+
+        const personX = MIRROR_X - distOH * PX_PER_METER;
+        const imageX = MIRROR_X + distOH * PX_PER_METER;
+
+        // ២. គូសមនុស្សពិត (ត្រង់ O) និងរូបភាពក្នុងកញ្ចក់ (ត្រង់ O')
+        const realPts = drawPerson(personX, FLOOR_Y, true, false);
+        const virtPts = drawPerson(imageX, FLOOR_Y, false, true);
+
+        // ៣. គូសកាំពន្លឺចាំងផ្លាត និងបន្ទាត់បន្លាយដាច់ៗក្នុងកញ្ចក់
+        if (showRays) {
+            // កាំពន្លឺទី១៖ ចេញពីភ្នែកទៅប៉ះកញ្ចក់កែង រួចផ្លាតត្រឡប់មកវិញ
+            ctx.strokeStyle = '#dc2626';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(realPts.eyeX, realPts.eyeY);
+            ctx.lineTo(MIRROR_X, realPts.eyeY);
+            ctx.stroke();
+            drawArrowOnLine(realPts.eyeX, realPts.eyeY, MIRROR_X, realPts.eyeY, 0.45, '#dc2626');
+
+            // បន្លាយដាច់ៗទៅរកភ្នែករូបភាពនិម្មិត
+            ctx.setLineDash([6, 5]);
+            ctx.strokeStyle = '#0284c7';
+            ctx.beginPath();
+            ctx.moveTo(MIRROR_X, realPts.eyeY);
+            ctx.lineTo(virtPts.eyeX, virtPts.eyeY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // កាំពន្លឺទី២៖ ចេញពីចុងជើង (O) ទៅប៉ះកញ្ចក់ រួចផ្លាតចូលភ្នែកអ្នកសង្កេត
+            let midMirrorY = (FLOOR_Y + realPts.eyeY) / 2;
+            ctx.strokeStyle = '#059669';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(personX, FLOOR_Y);
+            ctx.lineTo(MIRROR_X, midMirrorY);
+            ctx.lineTo(realPts.eyeX, realPts.eyeY);
+            ctx.stroke();
+            drawArrowOnLine(personX, FLOOR_Y, MIRROR_X, midMirrorY, 0.55, '#059669');
+            drawArrowOnLine(MIRROR_X, midMirrorY, realPts.eyeX, realPts.eyeY, 0.55, '#059669');
+
+            // បន្លាយដាច់ៗពីកញ្ចក់ទៅចុងជើងរូបភាព O'
+            ctx.setLineDash([6, 5]);
+            ctx.strokeStyle = 'rgba(5, 150, 105, 0.6)';
+            ctx.beginPath();
+            ctx.moveTo(MIRROR_X, midMirrorY);
+            ctx.lineTo(imageX, FLOOR_Y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // ៤. គូសកញ្ចក់ប្លង់ (Plane Mirror) ត្រង់ H (កម្ពស់ 1 m ដូចក្នុងរូបប្រធានលំហាត់)
+        const mirrorTopY = FLOOR_Y - 195;
+        ctx.fillStyle = '#bae6fd';
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 3;
+        ctx.fillRect(MIRROR_X - 5, mirrorTopY, 10, FLOOR_Y - mirrorTopY);
+        ctx.strokeRect(MIRROR_X - 5, mirrorTopY, 10, FLOOR_Y - mirrorTopY);
+
+        // ស្នាមឆ្នូតក្រោយកញ្ចក់ប្លង់
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 2;
+        for (let y = mirrorTopY + 8; y < FLOOR_Y; y += 14) {
+            ctx.beginPath();
+            ctx.moveTo(MIRROR_X + 5, y);
+            ctx.lineTo(MIRROR_X + 15, y + 8);
+            ctx.stroke();
+        }
+        drawClearText('កញ្ចក់ប្លង់', MIRROR_X, mirrorTopY - 22, 'bold 21px "Khmer OS Battambang"', '#0f172a');
+        drawClearText('1 m', MIRROR_X + 36, (mirrorTopY + FLOOR_Y) / 2, 'bold 20px Arial', '#334155');
+
+        // ៥. គូសបន្ទាត់គោល O - H - O' (ដូចដ្យាក្រាមក្នុងសៀវភៅពុម្ព)
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(personX, FLOOR_Y);
+        ctx.lineTo(imageX, FLOOR_Y);
+        ctx.stroke();
+
+        // ចំណុច O, H, O'
+        [
+            { x: personX, label: 'O', color: '#dc2626', sub: 'អ្នកសង្កេត' },
+            { x: MIRROR_X, label: 'H', color: '#0f172a', sub: '' },
+            { x: imageX, label: "O'", color: '#0284c7', sub: 'រូបភាពក្នុងកញ្ចក់' }
+        ].forEach(pt => {
+            ctx.beginPath();
+            ctx.arc(pt.x, FLOOR_Y, 6.5, 0, Math.PI * 2);
+            ctx.fillStyle = pt.color;
+            ctx.fill();
+            drawClearText(pt.label, pt.x, FLOOR_Y + 26, 'bold 24px Arial', pt.color);
+            if (pt.sub) {
+                drawClearText(pt.sub, pt.x, FLOOR_Y - 178, 'bold 18px "Khmer OS Battambang"', pt.color);
+            }
+        });
+
+        // ៦. គូសរង្វាស់ចម្ងាយ OH, HO' និងចម្ងាយសរុប OO'
+        const dimY1 = FLOOR_Y + 56;
+        const dimY2 = FLOOR_Y + 86;
+
+        // រង្វាស់ OH និង HO'
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(personX, dimY1);
+        ctx.lineTo(imageX, dimY1);
+        ctx.moveTo(personX, dimY1 - 6); ctx.lineTo(personX, dimY1 + 6);
+        ctx.moveTo(MIRROR_X, dimY1 - 6); ctx.lineTo(MIRROR_X, dimY1 + 6);
+        ctx.moveTo(imageX, dimY1 - 6); ctx.lineTo(imageX, dimY1 + 6);
+        ctx.stroke();
+
+        drawClearText(`OH = ${distOH.toFixed(2)} m`, (personX + MIRROR_X) / 2, dimY1, 'bold 18px Arial', '#1e3a8a');
+        drawClearText(`HO' = ${distOH.toFixed(2)} m`, (MIRROR_X + imageX) / 2, dimY1, 'bold 18px Arial', '#0284c7');
+
+        // រង្វាស់សរុប OO'
+        ctx.strokeStyle = '#dc2626';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(personX, dimY2);
+        ctx.lineTo(imageX, dimY2);
+        ctx.moveTo(personX, dimY2 - 7); ctx.lineTo(personX, dimY2 + 7);
+        ctx.moveTo(imageX, dimY2 - 7); ctx.lineTo(imageX, dimY2 + 7);
+        ctx.stroke();
+
+        drawClearText(`ចម្ងាយសរុប OO' = ${(distOH * 2).toFixed(2)} m`, MIRROR_X, dimY2, 'bold 20px "Khmer OS Battambang"', '#dc2626');
+
+        requestAnimationFrame(render);
+    }
+
+    updateSimulation();
+    render();
+</script>
+</body>
+</html>

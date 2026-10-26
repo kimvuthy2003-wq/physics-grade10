@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ពិសោធន៍និម្មិត៖ ត្រង់ស្វូ (Transformer Simulator)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body { font-family: 'Battambang', sans-serif; background-color: #f8fafc; color: #334155; margin: 0; overflow-x: hidden; }
+        .kh { font-family: 'Battambang', sans-serif; }
+        .math { font-family: 'Times New Roman', Times, serif; }
+
+        .slider {
+            -webkit-appearance: none; width: 100%; height: 8px; border-radius: 5px; outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+        }
+        .slider-red::-webkit-slider-thumb { background: #ef4444; box-shadow: 0 0 5px rgba(239, 68, 68, 0.5); }
+        .slider-blue::-webkit-slider-thumb { background: #3b82f6; box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+        .slider-purple::-webkit-slider-thumb { background: #8b5cf6; box-shadow: 0 0 5px rgba(139, 92, 246, 0.5); }
+
+        .canvas-wrapper {
+            width: 100%; height: 500px; border-radius: 0.75rem; background: linear-gradient(to bottom, #1e293b, #020617);
+            overflow: hidden; position: relative; cursor: grab; border: 2px solid #cbd5e1; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .canvas-wrapper:active { cursor: grabbing; }
+        .canvas-wrapper canvas { display: block; width: 100% !important; height: 100% !important; touch-action: none; }
+
+        .fraction { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 0.3em; font-size: 0.95em; }
+        .fraction > span { padding: 0.1em 0.3em; line-height: 1.2; white-space: nowrap; }
+        .fraction .fdn { border-top: 1.5px solid currentColor; width: 100%; text-align: center; }
+        .equation-box { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-top: 0.75rem; width: 100%; }
+        .math-block { display: inline-flex; align-items: center; flex-wrap: nowrap; overflow-x: auto; max-width: 100%; padding-bottom: 0.5rem; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+        .math-block::-webkit-scrollbar { display: none; }
+
+        .solution-content { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.7s ease-in-out; }
+        .solution-content.open { max-height: 5000px; opacity: 1; margin-top: 1.5rem; }
+        
+        .pulse-text { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <h2 class="text-2xl font-bold text-blue-700 mb-4 border-b border-slate-100 pb-3 flex items-center gap-2">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                ត្រង់ស្វូ (Transformer)
+            </h2>
+            <div class="text-justify font-medium space-y-3 kh text-gray-700 leading-relaxed">
+                <p>ត្រង់ស្វូផ្សំឡើងពីរបុំខ្សែចម្លងទង់ដែងរុំលើ <strong>ស៊ីមដែក</strong>។ ថាមពលអគ្គិសនីផ្ទេរពីរបុំទី១ ទៅរបុំទី២ តាមរយៈ <strong>ភ្លុចម៉ាញេទិច</strong> ដែលរត់កាត់តាមស្នូលដែកដោយសុវត្ថិភាព។</p>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+            
+            <!-- 3D Canvas -->
+            <div class="xl:col-span-7 bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col relative">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <h3 class="font-bold text-gray-800 text-lg kh">ម៉ូដែល 3D៖ របុំខ្សែទង់ដែង និងចរន្ត</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="kh text-xs font-bold text-slate-500">បង្វិលកាមេរ៉ា</span>
+                        <input type="checkbox" id="toggleAutoRotate" checked class="w-4 h-4 cursor-pointer accent-blue-600">
+                    </div>
+                </div>
+                
+                <div id="canvas-container" class="canvas-wrapper">
+                    <!-- Overlay Labels -->
+                    <div class="absolute top-4 left-4 bg-black/60 backdrop-blur px-3 py-2 rounded-lg text-white pointer-events-none z-10 border border-white/20">
+                        <div class="text-xs kh font-bold text-red-400 mb-1">បឋម (Primary)</div>
+                        <div class="text-lg font-bold math">V<span class="text-xs">p</span> = <span id="vp3d">220</span> V</div>
+                        <div class="text-sm math text-gray-300">I<span class="text-xs">p</span> = <span id="ip3d">5.0</span> A</div>
+                    </div>
+                    
+                    <div class="absolute top-4 right-4 bg-black/60 backdrop-blur px-3 py-2 rounded-lg text-white pointer-events-none z-10 border border-white/20 text-right">
+                        <div class="text-xs kh font-bold text-blue-400 mb-1">មធ្យម (Secondary)</div>
+                        <div class="text-lg font-bold math">V<span class="text-xs">s</span> = <span id="vs3d">110</span> V</div>
+                        <div class="text-sm math text-gray-300">I<span class="text-xs">s</span> = <span id="is3d">10.0</span> A</div>
+                    </div>
+                    
+                    <!-- Legend -->
+                    <div class="absolute bottom-4 right-4 bg-black/60 backdrop-blur px-3 py-2 rounded-lg text-white pointer-events-none z-10 border border-white/20">
+                        <ul class="text-[0.7rem] kh space-y-1.5">
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-400"></span> ចរន្តចូល (Primary)</li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-400"></span> ចរន្តចេញ (Secondary)</li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> ភ្លុចម៉ាញេទិច (Flux)</li>
+                        </ul>
+                    </div>
+
+                    <div class="absolute bottom-4 left-4 bg-slate-800/80 backdrop-blur px-4 py-2 rounded-full text-white pointer-events-none z-10 border border-slate-600">
+                        <span id="statusBadge" class="kh font-bold text-sm">កំពុងគណនា...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="xl:col-span-5 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col gap-6">
+                <h3 class="text-xl font-bold text-slate-800 border-b border-slate-100 pb-3 kh">គ្រប់គ្រងអថេរ (Inputs)</h3>
+                
+                <div class="space-y-6">
+                    <!-- Vp Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-red-700 kh text-sm">តង់ស្យុងចូល <span class="math">V<span class="math-sub">p</span></span></label>
+                            <span class="math font-bold text-red-600"><span id="vpDisp">220</span> V</span>
+                        </div>
+                        <input type="range" id="vpSlider" min="12" max="240" value="220" step="1" class="slider slider-red bg-red-200">
+                    </div>
+
+                    <!-- Ip Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-red-700 kh text-sm">ចរន្តចូល <span class="math">I<span class="math-sub">p</span></span></label>
+                            <span class="math font-bold text-red-600"><span id="ipDisp">5.0</span> A</span>
+                        </div>
+                        <input type="range" id="ipSlider" min="1.0" max="20.0" value="5.0" step="0.5" class="slider slider-red bg-red-200">
+                    </div>
+
+                    <div class="border-t border-slate-100 my-2"></div>
+
+                    <!-- Np Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-purple-700 kh text-sm">ចំនួនស្ពៀរវង់បឋម <span class="math">N<span class="math-sub">p</span></span></label>
+                            <span class="math font-bold text-purple-600"><span id="npDisp">1000</span></span>
+                        </div>
+                        <input type="range" id="npSlider" min="100" max="2000" value="1000" step="50" class="slider slider-purple bg-purple-200">
+                    </div>
+
+                    <!-- Ns Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-bold text-purple-700 kh text-sm">ចំនួនស្ពៀរវង់មធ្យម <span class="math">N<span class="math-sub">s</span></span></label>
+                            <span class="math font-bold text-purple-600"><span id="nsDisp">500</span></span>
+                        </div>
+                        <input type="range" id="nsSlider" min="100" max="2000" value="500" step="50" class="slider slider-purple bg-purple-200">
+                    </div>
+                </div>
+
+                <!-- Live Results -->
+                <h3 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 mt-4 kh">លទ្ធផលបញ្ចេញ (Outputs)</h3>
+                <div class="mt-auto space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-blue-50 p-3 rounded-xl border border-blue-200 flex flex-col justify-center items-center shadow-sm">
+                            <div class="font-bold text-blue-800 kh text-xs">តង់ស្យុងចេញ <span class="math">V<span class="math-sub">s</span></span></div>
+                            <div class="math font-bold text-blue-600 text-[1.5rem] mt-1"><span id="vsDisp">110</span> V</div>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-xl border border-blue-200 flex flex-col justify-center items-center shadow-sm">
+                            <div class="font-bold text-blue-800 kh text-xs">ចរន្តចេញ <span class="math">I<span class="math-sub">s</span></span></div>
+                            <div class="math font-bold text-blue-600 text-[1.5rem] mt-1"><span id="isDisp">10.0</span> A</div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-100 p-3 rounded-xl border border-slate-200 flex justify-between items-center px-6">
+                        <div class="text-xs kh font-bold text-slate-600">អានុភាព <span class="math">P<span class="math-sub">in</span> = P<span class="math-sub">out</span></span></div>
+                        <div class="math font-bold text-slate-800 text-lg"><span id="pDisp">1100</span> W</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 3. Summary Content -->
+        <!-- ========================================== -->
+        <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <button id="toggleBtn" class="w-full bg-[#1e293b] hover:bg-[#334155] text-white font-bold py-4 px-6 rounded-xl shadow-md transition-colors flex justify-center items-center gap-3">
+                <svg id="toggleIcon" class="w-6 h-6 transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                <span id="btnText" class="text-xl kh">បង្ហាញទ្រឹស្តី និងរូបមន្តត្រង់ស្វូ</span>
+            </button>
+
+            <div id="solutionBox" class="solution-content bg-slate-50 border border-slate-200 rounded-xl p-6 md:p-8 mt-6">
+                <div class="space-y-6">
+                    <p class="kh text-gray-700 leading-relaxed">
+                        ផលធៀបត្រង់ស្វូ (Transformation Ratio) កំណត់ដោយ <span class="math font-bold text-purple-700">k = N<span class="math-sub">s</span> / N<span class="math-sub">p</span></span>។
+                    </p>
+                    
+                    <div class="equation-box bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="math-block">
+                            <span class="math whitespace-nowrap text-slate-800 font-bold">k = </span>
+                            <div class="fraction math text-purple-700 font-bold">
+                                <span>N<span class="math-sub">s</span></span>
+                                <span class="fdn">N<span class="math-sub">p</span></span>
+                            </div>
+                            <span class="math whitespace-nowrap font-bold mx-3"> = </span>
+                            <div class="fraction math text-blue-700 font-bold">
+                                <span>V<span class="math-sub">s</span></span>
+                                <span class="fdn text-red-600">V<span class="math-sub">p</span></span>
+                            </div>
+                            <span class="math whitespace-nowrap font-bold mx-3"> = </span>
+                            <div class="fraction math text-red-600 font-bold">
+                                <span>I<span class="math-sub">p</span></span>
+                                <span class="fdn text-blue-700">I<span class="math-sub">s</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="list-none space-y-4 kh">
+                        <li class="flex items-start gap-3 bg-red-50 p-4 rounded-lg border border-red-100">
+                            <div class="w-8 h-8 rounded-full bg-red-200 flex items-center justify-center font-bold text-red-700 math mt-0.5">&uarr;</div>
+                            <div>
+                                <span class="font-bold text-red-800">ត្រង់ស្វូតម្លើងតង់ស្យុង (Step-Up):</span> 
+                                បើ <span class="math">N<span class="math-sub">s</span> > N<span class="math-sub">p</span></span> នោះ <span class="math">V<span class="math-sub">s</span> > V<span class="math-sub">p</span></span>។ ប៉ុន្តែដើម្បីរក្សាថាមពល ចរន្តត្រូវតែធ្លាក់ចុះ <span class="math">I<span class="math-sub">s</span> < I<span class="math-sub">p</span></span>។
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3 bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                            <div class="w-8 h-8 rounded-full bg-emerald-200 flex items-center justify-center font-bold text-emerald-700 math mt-0.5">&darr;</div>
+                            <div>
+                                <span class="font-bold text-emerald-800">ត្រង់ស្វូតំហយតង់ស្យុង (Step-Down):</span> 
+                                បើ <span class="math">N<span class="math-sub">s</span> < N<span class="math-sub">p</span></span> នោះ <span class="math">V<span class="math-sub">s</span> < V<span class="math-sub">p</span></span>។ ទន្ទឹមនឹងនោះ ចរន្តត្រូវតែកើនឡើង <span class="math">I<span class="math-sub">s</span> > I<span class="math-sub">p</span></span>។
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Logic Script -->
+    <script>
+        const setText = (id, val) => {
+            const el = document.getElementById(id);
+            if(el) el.textContent = val;
+        };
+
+        (function waitForDependencies() {
+            const container = document.getElementById('canvas-container');
+            if (typeof THREE === 'undefined' || typeof THREE.OrbitControls === 'undefined' || !container) {
+                requestAnimationFrame(waitForDependencies);
+                return;
+            }
+            if (!container.hasAttribute('data-initialized')) {
+                container.setAttribute('data-initialized', 'true');
+                setTimeout(initTransformerLab, 100); 
+            }
+        })();
+
+        function initTransformerLab() {
+            const container3d = document.getElementById('canvas-container');
+            const vpSlider = document.getElementById('vpSlider');
+            const ipSlider = document.getElementById('ipSlider');
+            const npSlider = document.getElementById('npSlider');
+            const nsSlider = document.getElementById('nsSlider');
+            const toggleAutoRotate = document.getElementById('toggleAutoRotate');
+            const statusBadge = document.getElementById('statusBadge');
+
+            const scene = new THREE.Scene();
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            
+            let w3d = container3d.clientWidth;
+            let h3d = container3d.clientHeight;
+            
+            renderer.setSize(w3d, h3d);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container3d.appendChild(renderer.domElement);
+
+            const camera = new THREE.PerspectiveCamera(45, w3d / h3d, 0.1, 1000);
+            camera.position.set(0, 15, 35); 
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 1.0;
+            controls.maxPolarAngle = Math.PI / 1.5; 
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+            dirLight.position.set(10, 30, 20);
+            scene.add(dirLight);
+
+            // Transformer Group
+            const transformerGroup = new THREE.Group();
+            scene.add(transformerGroup);
+
+            // Iron Core (Dark Grey)
+            const coreMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7, roughness: 0.4 });
+            const coreThickness = 2.5;
+            const coreWidth = 14;
+            const coreHeight = 12;
+            
+            const topBar = new THREE.Mesh(new THREE.BoxGeometry(coreWidth, coreThickness, coreThickness), coreMat);
+            topBar.position.y = coreHeight/2 - coreThickness/2;
+            transformerGroup.add(topBar);
+
+            const bottomBar = new THREE.Mesh(new THREE.BoxGeometry(coreWidth, coreThickness, coreThickness), coreMat);
+            bottomBar.position.y = -coreHeight/2 + coreThickness/2;
+            transformerGroup.add(bottomBar);
+
+            const leftBar = new THREE.Mesh(new THREE.BoxGeometry(coreThickness, coreHeight - coreThickness*2, coreThickness), coreMat);
+            leftBar.position.x = -coreWidth/2 + coreThickness/2;
+            transformerGroup.add(leftBar);
+
+            const rightBar = new THREE.Mesh(new THREE.BoxGeometry(coreThickness, coreHeight - coreThickness*2, coreThickness), coreMat);
+            rightBar.position.x = coreWidth/2 - coreThickness/2;
+            transformerGroup.add(rightBar);
+
+            // Copper Coils Group
+            const coilGroup = new THREE.Group();
+            transformerGroup.add(coilGroup);
+
+            let primaryMesh, secondaryMesh;
+            let primaryCurve, secondaryCurve;
+            
+            const copperMat = new THREE.MeshStandardMaterial({ 
+                color: 0xd97706, // Copper Yellow-Orange
+                metalness: 0.8,
+                roughness: 0.2
+            });
+
+            class HelixCurve extends THREE.Curve {
+                constructor(radius, height, turns) {
+                    super();
+                    this.radius = radius;
+                    this.height = height;
+                    this.turns = turns;
+                }
+                getPoint(t, optionalTarget = new THREE.Vector3()) {
+                    const y = (t - 0.5) * this.height; 
+                    const angle = t * Math.PI * 2 * this.turns;
+                    const x = Math.cos(angle) * this.radius;
+                    const z = Math.sin(angle) * this.radius;
+                    return optionalTarget.set(x, y, z);
+                }
+            }
+
+            function rebuildCoils(Np, Ns) {
+                if(primaryMesh) { coilGroup.remove(primaryMesh); primaryMesh.geometry.dispose(); }
+                if(secondaryMesh) { coilGroup.remove(secondaryMesh); secondaryMesh.geometry.dispose(); }
+
+                const vp_turns = Math.floor((Np / 2000) * 25 + 8);
+                const vs_turns = Math.floor((Ns / 2000) * 25 + 8);
+
+                const coilLength = coreHeight - coreThickness*2 - 0.5;
+                const coilRadius = coreThickness/2 + 0.6;
+                const wireThickness = 0.22;
+
+                primaryCurve = new HelixCurve(coilRadius, coilLength, vp_turns);
+                const pGeo = new THREE.TubeGeometry(primaryCurve, vp_turns * 12, wireThickness, 6, false);
+                primaryMesh = new THREE.Mesh(pGeo, copperMat);
+                primaryMesh.position.x = -coreWidth/2 + coreThickness/2;
+                coilGroup.add(primaryMesh);
+
+                secondaryCurve = new HelixCurve(coilRadius, coilLength, vs_turns);
+                const sGeo = new THREE.TubeGeometry(secondaryCurve, vs_turns * 12, wireThickness, 6, false);
+                secondaryMesh = new THREE.Mesh(sGeo, copperMat);
+                secondaryMesh.position.x = coreWidth/2 - coreThickness/2;
+                coilGroup.add(secondaryMesh);
+            }
+
+            // Particles for Current & Flux (Moving strictly along the wire and core)
+            const pCurrentGroup = new THREE.Group();
+            const sCurrentGroup = new THREE.Group();
+            const fluxGroup = new THREE.Group();
+            transformerGroup.add(pCurrentGroup);
+            transformerGroup.add(sCurrentGroup);
+            transformerGroup.add(fluxGroup);
+
+            const pMat = new THREE.MeshBasicMaterial({ color: 0xfca5a5 }); // Red Current Primary
+            const sMat = new THREE.MeshBasicMaterial({ color: 0x93c5fd }); // Blue Current Secondary
+            const fMat = new THREE.MeshBasicMaterial({ color: 0x34d399 }); // Emerald Flux
+
+            const particleGeo = new THREE.SphereGeometry(0.25, 8, 8);
+            
+            const numParticles = 12;
+            for(let i=0; i<numParticles; i++) {
+                const pp = new THREE.Mesh(particleGeo, pMat);
+                pp.userData.t = i / numParticles;
+                pCurrentGroup.add(pp);
+
+                const sp = new THREE.Mesh(particleGeo, sMat);
+                sp.userData.t = i / numParticles;
+                sCurrentGroup.add(sp);
+            }
+
+            const numFlux = 16;
+            for(let i=0; i<numFlux; i++) {
+                const fp = new THREE.Mesh(particleGeo, fMat);
+                fp.userData.t = i / numFlux;
+                fluxGroup.add(fp);
+            }
+
+            function getFluxPoint(t) {
+                const w = coreWidth - coreThickness;
+                const h = coreHeight - coreThickness;
+                const totalLen = 2*w + 2*h;
+                let dist = t * totalLen;
+                const p = new THREE.Vector3();
+                
+                if (dist <= w) {
+                    p.set(-w/2 + dist, -h/2, 0);
+                } else if (dist <= w + h) {
+                    dist -= w;
+                    p.set(w/2, -h/2 + dist, 0);
+                } else if (dist <= 2*w + h) {
+                    dist -= (w + h);
+                    p.set(w/2 - dist, h/2, 0);
+                } else {
+                    dist -= (2*w + h);
+                    p.set(-w/2, h/2 - dist, 0);
+                }
+                return p;
+            }
+
+            function updateSimulation() {
+                const Vp = parseFloat(vpSlider.value);
+                const Ip = parseFloat(ipSlider.value);
+                const Np = parseFloat(npSlider.value);
+                const Ns = parseFloat(nsSlider.value);
+
+                const k = Ns / Np;
+                const Vs = Vp * k;
+                const Is = Ip / k;
+                const Power = Vp * Ip;
+
+                setText('vpDisp', Math.round(Vp));
+                setText('vp3d', Math.round(Vp));
+                setText('ipDisp', Ip.toFixed(1));
+                setText('ip3d', Ip.toFixed(1));
+                setText('npDisp', Np);
+                setText('nsDisp', Ns);
+                setText('vsDisp', Math.round(Vs));
+                setText('vs3d', Math.round(Vs));
+                setText('isDisp', Is.toFixed(1));
+                setText('is3d', Is.toFixed(1));
+                setText('pDisp', Math.round(Power));
+
+                if (k > 1) {
+                    statusBadge.textContent = "តម្លើងតង់ស្យុង (Step-Up)";
+                    statusBadge.className = "kh font-bold text-sm text-red-400 pulse-text";
+                } else if (k < 1) {
+                    statusBadge.textContent = "តំហយតង់ស្យុង (Step-Down)";
+                    statusBadge.className = "kh font-bold text-sm text-emerald-400 pulse-text";
+                } else {
+                    statusBadge.textContent = "ឯកោ (Isolation)";
+                    statusBadge.className = "kh font-bold text-sm text-slate-300";
+                }
+
+                rebuildCoils(Np, Ns);
+
+                // Very slow, smooth speeds to observe clearly
+                pCurrentGroup.userData.speed = 0.001 + (Ip / 50) * 0.002;
+                sCurrentGroup.userData.speed = 0.001 + (Is / 50) * 0.002;
+                fluxGroup.userData.speed = 0.002 + (Vp / 400) * 0.003;
+            }
+
+            vpSlider.addEventListener('input', updateSimulation);
+            ipSlider.addEventListener('input', updateSimulation);
+            npSlider.addEventListener('input', updateSimulation);
+            nsSlider.addEventListener('input', updateSimulation);
+            toggleAutoRotate.addEventListener('change', (e) => { controls.autoRotate = e.target.checked; });
+
+            window.addEventListener('resize', () => {
+                if(container3d.clientWidth > 0){
+                    w3d = container3d.clientWidth;
+                    h3d = container3d.clientHeight;
+                    camera.aspect = w3d / h3d;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(w3d, h3d);
+                }
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+
+                // Animate Primary Current precisely along the copper wire helix
+                if (primaryCurve) {
+                    const speedP = pCurrentGroup.userData.speed || 0.001;
+                    pCurrentGroup.children.forEach(p => {
+                        p.userData.t += speedP;
+                        if(p.userData.t > 1) p.userData.t -= 1;
+                        const pt = primaryCurve.getPoint(p.userData.t);
+                        p.position.copy(pt);
+                        p.position.x += (-coreWidth/2 + coreThickness/2);
+                    });
+                }
+
+                // Animate Secondary Current precisely along the copper wire helix
+                if (secondaryCurve) {
+                    const speedS = sCurrentGroup.userData.speed || 0.001;
+                    sCurrentGroup.children.forEach(p => {
+                        p.userData.t += speedS;
+                        if(p.userData.t > 1) p.userData.t -= 1;
+                        const pt = secondaryCurve.getPoint(p.userData.t);
+                        p.position.copy(pt);
+                        p.position.x += (coreWidth/2 - coreThickness/2);
+                    });
+                }
+
+                // Animate Magnetic Flux inside the iron core
+                const speedF = fluxGroup.userData.speed || 0.002;
+                fluxGroup.children.forEach(p => {
+                    p.userData.t += speedF;
+                    if(p.userData.t > 1) p.userData.t -= 1;
+                    const pt = getFluxPoint(p.userData.t);
+                    p.position.copy(pt);
+                });
+
+                renderer.render(scene, camera);
+            }
+
+            updateSimulation();
+            animate();
+        }
+
+        const toggleBtn = document.getElementById('toggleBtn');
+        const solutionBox = document.getElementById('solutionBox');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const btnText = document.getElementById('btnText');
+        let solutionOpen = false;
+
+        toggleBtn.addEventListener('click', () => {
+            solutionOpen = !solutionOpen;
+            if (solutionOpen) {
+                solutionBox.classList.add('open');
+                btnText.textContent = "លាក់ទ្រឹស្តី និងរូបមន្តត្រង់ស្វូ";
+                toggleIcon.style.transform = "rotate(0deg)";
+            } else {
+                solutionBox.classList.remove('open');
+                btnText.textContent = "បង្ហាញទ្រឹស្តី និងរូបមន្តត្រង់ស្វូ";
+                toggleIcon.style.transform = "rotate(180deg)";
+            }
+        });
+    </script>
+</body>
+</html>

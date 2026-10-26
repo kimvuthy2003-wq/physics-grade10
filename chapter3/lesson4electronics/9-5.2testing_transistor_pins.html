@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>កម្មវិធីក្លែងធ្វើ ការវាស់ត្រង់ស៊ីស្ទ័រ (Transistor Multimeter Simulator)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f0f9ff;
+            color: #0f172a;
+        }
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #e0f2fe;
+            touch-action: none; /* Prevent scrolling when dragging on mobile */
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            cursor: default;
+        }
+        /* Radio Button Styling */
+        .custom-radio:checked + label {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+        }
+        /* Digital LCD Font */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    </style>
+</head>
+<body class="min-h-screen p-4 lg:p-8 flex flex-col items-center">
+
+    <div class="max-w-6xl w-full flex flex-col lg:flex-row gap-6">
+        
+        <!-- Main Simulation Area -->
+        <div class="flex-grow flex flex-col gap-4">
+            
+            <!-- Header & Controls -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800">ការវាស់ត្រង់ស៊ីស្ទ័រ (Transistor Testing)</h1>
+                    <p class="text-sm text-slate-500">ប្រើម៉ាល់ទីម៉ែត្រ (Diode Mode) ដើម្បីរកជើង E, B, C</p>
+                </div>
+
+                <div class="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
+                    <input type="radio" id="npn" name="transistorType" value="NPN" class="custom-radio hidden" checked>
+                    <label for="npn" class="flex-1 sm:flex-none text-center py-2 px-6 rounded-lg cursor-pointer font-bold text-slate-600 transition-all border border-transparent">
+                        NPN (2N3904)
+                    </label>
+                    
+                    <input type="radio" id="pnp" name="transistorType" value="PNP" class="custom-radio hidden">
+                    <label for="pnp" class="flex-1 sm:flex-none text-center py-2 px-6 rounded-lg cursor-pointer font-bold text-slate-600 transition-all border border-transparent">
+                        PNP (2N3906)
+                    </label>
+                </div>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="canvas-container" id="canvasWrapper">
+                <canvas id="simCanvas" width="800" height="550"></canvas>
+            </div>
+        </div>
+
+        <!-- Instructions Panel -->
+        <div class="w-full lg:w-96 flex flex-col gap-4">
+            
+            <div class="bg-blue-600 text-white p-6 rounded-2xl shadow-md">
+                <h2 class="text-xl font-bold mb-2 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    របៀបវាស់ (Instructions)
+                </h2>
+                <p class="text-blue-100 text-sm mb-4">
+                    ទាញខ្សែប៉ូលពណ៌ក្រហម (+) និងខ្មៅ (-) ទៅប៉ះជើងត្រង់ស៊ីស្ទ័រ E, B, C ដើម្បីវាស់កម្រិតតង់ស្យុងឆ្លងកាត់ឌីយ៉ូតខាងក្នុង។
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex-grow" id="instructionPanel">
+                <!-- Content injected via JS based on selected type -->
+            </div>
+
+            <div class="bg-amber-50 p-5 rounded-2xl border border-amber-200">
+                <h3 class="font-bold text-amber-800 text-sm mb-2">គន្លឹះសំខាន់៖</h3>
+                <ul class="text-sm text-slate-700 list-disc pl-4 space-y-1">
+                    <li>តង់ស្យុង <b>B ទៅ E</b> តែងតែធំជាង <b>B ទៅ C</b> បន្តិចជានិច្ច (ដោយសារ Emitter មានកម្រិតដូប៉ាម៉ង់ខ្ពស់ជាង)។</li>
+                    <li><span class="font-mono text-xs bg-amber-100 px-1 rounded">0.709 V</span> > <span class="font-mono text-xs bg-amber-100 px-1 rounded">0.702 V</span></li>
+                    <li><b>OL</b> មានន័យថា "Over Limit" ឬសៀគ្វីចំហរ គ្មានចរន្តហូរឆ្លងកាត់ទេ។</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const wrapper = document.getElementById('canvasWrapper');
+        
+        // UI Elements
+        const radioNPN = document.getElementById('npn');
+        const radioPNP = document.getElementById('pnp');
+        const instructionPanel = document.getElementById('instructionPanel');
+
+        // State Variables
+        let transistorType = 'NPN';
+        let displayValue = 'OL';
+
+        // Layout Constants
+        const CX = 400; // Center X
+        const MULTI_X = 400;
+        const MULTI_Y = 100;
+        
+        // Transistor Pins Coordinates
+        const PINS = {
+            E: { id: 'E', x: 340, y: 450, label: 'E' },
+            B: { id: 'B', x: 400, y: 450, label: 'B' },
+            C: { id: 'C', x: 460, y: 450, label: 'C' }
+        };
+
+        const SNAP_RADIUS = 25;
+
+        // Probes State
+        const PROBE_RED = { x: 200, y: 350, id: 'RED', color: '#ef4444', target: null, isDragging: false };
+        const PROBE_BLK = { x: 600, y: 350, id: 'BLK', color: '#1e293b', target: null, isDragging: false };
+
+        let activeProbe = null;
+
+        // --- Interaction Logic ---
+
+        function getMousePos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            // Scale mouse coordinates to match canvas coordinate system
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX = evt.clientX;
+            let clientY = evt.clientY;
+            
+            if(evt.touches && evt.touches.length > 0) {
+                clientX = evt.touches[0].clientX;
+                clientY = evt.touches[0].clientY;
+            }
+
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function handlePointerDown(e) {
+            const pos = getMousePos(e);
+            
+            // Check Red Probe (Check handle tip area)
+            if (Math.hypot(pos.x - PROBE_RED.x, pos.y - PROBE_RED.y) < 40) {
+                activeProbe = PROBE_RED;
+                PROBE_RED.isDragging = true;
+                PROBE_RED.target = null;
+            } 
+            // Check Black Probe
+            else if (Math.hypot(pos.x - PROBE_BLK.x, pos.y - PROBE_BLK.y) < 40) {
+                activeProbe = PROBE_BLK;
+                PROBE_BLK.isDragging = true;
+                PROBE_BLK.target = null;
+            }
+            
+            if (activeProbe && e.cancelable) e.preventDefault();
+            calculateMultimeter();
+        }
+
+        function handlePointerMove(e) {
+            if (!activeProbe) return;
+            const pos = getMousePos(e);
+            activeProbe.x = pos.x;
+            activeProbe.y = pos.y;
+            calculateMultimeter();
+            if (e.cancelable) e.preventDefault();
+        }
+
+        function handlePointerUp(e) {
+            if (!activeProbe) return;
+            
+            // Snap Logic
+            for (let key in PINS) {
+                let pin = PINS[key];
+                // Check if another probe is already on this pin
+                let isOccupied = (PROBE_RED.target === pin.id && activeProbe !== PROBE_RED) || 
+                                 (PROBE_BLK.target === pin.id && activeProbe !== PROBE_BLK);
+                                 
+                if (!isOccupied && Math.hypot(activeProbe.x - pin.x, activeProbe.y - pin.y) < SNAP_RADIUS * 2) {
+                    activeProbe.x = pin.x;
+                    activeProbe.y = pin.y;
+                    activeProbe.target = pin.id;
+                    break;
+                }
+            }
+            
+            activeProbe.isDragging = false;
+            activeProbe = null;
+            calculateMultimeter();
+        }
+
+        // Attach listeners (Mouse & Touch)
+        canvas.addEventListener('mousedown', handlePointerDown);
+        canvas.addEventListener('mousemove', handlePointerMove);
+        window.addEventListener('mouseup', handlePointerUp);
+
+        canvas.addEventListener('touchstart', handlePointerDown, {passive: false});
+        canvas.addEventListener('touchmove', handlePointerMove, {passive: false});
+        window.addEventListener('touchend', handlePointerUp);
+
+        // --- Core Simulation Logic ---
+
+        function calculateMultimeter() {
+            displayValue = 'OL';
+            
+            if (PROBE_RED.target && PROBE_BLK.target) {
+                const redPin = PROBE_RED.target;
+                const blkPin = PROBE_BLK.target;
+
+                if (transistorType === 'NPN') {
+                    if (redPin === 'B' && blkPin === 'C') displayValue = '0.702 V';
+                    if (redPin === 'B' && blkPin === 'E') displayValue = '0.709 V';
+                } else if (transistorType === 'PNP') {
+                    if (blkPin === 'B' && redPin === 'C') displayValue = '0.702 V';
+                    if (blkPin === 'B' && redPin === 'E') displayValue = '0.709 V';
+                }
+            }
+        }
+
+        function updateInstructions() {
+            if (transistorType === 'NPN') {
+                instructionPanel.innerHTML = `
+                    <h3 class="font-bold text-slate-800 text-lg border-b pb-2 mb-4">ត្រង់ស៊ីស្ទ័រ NPN</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3">
+                            <span class="mt-1 flex-shrink-0 w-3 h-3 rounded-full bg-blue-500"></span>
+                            <p class="text-sm text-slate-700">ខ្សែក្រហម(+) លើជើង B និង ខ្សែខ្មៅ(-) លើជើង C <br><span class="font-bold text-emerald-600">→ បង្ហាញ ~0.702 V</span></p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="mt-1 flex-shrink-0 w-3 h-3 rounded-full bg-blue-500"></span>
+                            <p class="text-sm text-slate-700">ខ្សែក្រហម(+) លើជើង B និង ខ្សែខ្មៅ(-) លើជើង E <br><span class="font-bold text-emerald-600">→ បង្ហាញ ~0.709 V</span></p>
+                        </div>
+                        <div class="flex items-start gap-3 opacity-70">
+                            <span class="mt-1 flex-shrink-0 w-3 h-3 rounded-full bg-slate-300"></span>
+                            <p class="text-sm text-slate-600">ការតភ្ជាប់ផ្សេងទៀត <br><span class="font-bold text-slate-500">→ បង្ហាញ OL</span></p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                instructionPanel.innerHTML = `
+                    <h3 class="font-bold text-slate-800 text-lg border-b pb-2 mb-4">ត្រង់ស៊ីស្ទ័រ PNP</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3">
+                            <span class="mt-1 flex-shrink-0 w-3 h-3 rounded-full bg-blue-500"></span>
+                            <p class="text-sm text-slate-700">ខ្សែខ្មៅ(-) លើជើង B និង ខ្សែក្រហម(+) លើជើង C <br><span class="font-bold text-emerald-600">→ បង្ហាញ ~0.702 V</span></p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="mt-1 flex-shrink-0 w-3 h-3 rounded-full bg-blue-500"></span>
+                            <p class="text-sm text-slate-700">ខ្សែខ្មៅ(-) លើជើង B និង ខ្សែក្រហម(+) លើជើង E <br><span class="font-bold text-emerald-600">→ បង្ហាញ ~0.709 V</span></p>
+                        </div>
+                        <div class="flex items-start gap-3 opacity-70">
+                            <span class="mt-1 flex-shrink-0 w-3 h-3 rounded-full bg-slate-300"></span>
+                            <p class="text-sm text-slate-600">ការតភ្ជាប់ផ្សេងទៀត <br><span class="font-bold text-slate-500">→ បង្ហាញ OL</span></p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        radioNPN.addEventListener('change', () => { transistorType = 'NPN'; calculateMultimeter(); updateInstructions(); });
+        radioPNP.addEventListener('change', () => { transistorType = 'PNP'; calculateMultimeter(); updateInstructions(); });
+
+
+        // --- Drawing Helpers ---
+
+        function drawLine(x1, y1, x2, y2, color, width) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+        }
+
+        function drawDiode(x, y, angle) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#334155';
+            ctx.fillStyle = '#334155';
+            
+            // Wire
+            ctx.beginPath();
+            ctx.moveTo(-20, 0); ctx.lineTo(20, 0);
+            ctx.stroke();
+
+            // Triangle
+            ctx.beginPath();
+            ctx.moveTo(-10, -10); ctx.lineTo(10, 0); ctx.lineTo(-10, 10); ctx.closePath();
+            ctx.fill();
+
+            // Bar
+            ctx.beginPath();
+            ctx.moveTo(10, -10); ctx.lineTo(10, 10);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawMultimeter() {
+            const x = MULTI_X;
+            const y = MULTI_Y;
+            const w = 240;
+            const h = 140;
+
+            // Box
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.roundRect(x - w/2, y - h/2, w, h, 12);
+            ctx.fill();
+            
+            // Inner rim
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Screen Area
+            ctx.fillStyle = '#bbf7d0'; // Light green LCD look
+            ctx.beginPath();
+            ctx.roundRect(x - 90, y - 50, 180, 60, 6);
+            ctx.fill();
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Screen Text
+            ctx.fillStyle = '#064e3b';
+            ctx.font = '32px "Share Tech Mono"';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(displayValue, x + 80, y - 20);
+
+            // Mode indicator
+            ctx.fillStyle = '#1e293b';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('DIODE MODE', x - 85, y - 35);
+            ctx.fillText('►|', x - 85, y - 15); // Diode symbol
+
+            // Ports Area
+            ctx.fillStyle = '#334155';
+            ctx.beginPath(); ctx.roundRect(x - 60, y + 25, 40, 30, 4); ctx.fill(); // V/Ohm/Diode
+            ctx.beginPath(); ctx.roundRect(x + 20, y + 25, 40, 30, 4); ctx.fill(); // COM
+
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('V/Ω/►|', x - 40, y + 20);
+            ctx.fillText('COM', x + 40, y + 20);
+            
+            // Port Holes
+            ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(x - 40, y + 40, 8, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.arc(x + 40, y + 40, 8, 0, Math.PI*2); ctx.fill();
+        }
+
+        function drawTransistorSetup() {
+            const tx = CX;
+            const ty = 380;
+            
+            // Pins/Legs
+            drawLine(PINS.E.x, PINS.E.y, PINS.E.x, ty, '#94a3b8', 6);
+            drawLine(PINS.B.x, PINS.B.y, PINS.B.x, ty, '#94a3b8', 6);
+            drawLine(PINS.C.x, PINS.C.y, PINS.C.x, ty, '#94a3b8', 6);
+            
+            // Snap targets indication
+            for(let key in PINS) {
+                let p = PINS[key];
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, SNAP_RADIUS, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(148, 163, 184, 0.2)';
+                ctx.fill();
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Labels E, B, C
+                ctx.fillStyle = '#334155';
+                ctx.font = 'bold 18px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(p.label, p.x, p.y + 35);
+            }
+
+            // Body TO-92
+            ctx.fillStyle = '#111827';
+            ctx.beginPath();
+            ctx.moveTo(tx - 75, ty);
+            ctx.lineTo(tx + 75, ty);
+            ctx.bezierCurveTo(tx + 75, ty - 60, tx - 75, ty - 60, tx - 75, ty);
+            ctx.fill();
+            
+            // Body Label
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(transistorType === 'NPN' ? '2N3904' : '2N3906', tx, ty - 25);
+            ctx.font = '12px Arial';
+            ctx.fillText(transistorType, tx, ty - 10);
+        }
+
+        function drawEquivalentCircuit() {
+            const cx = CX;
+            const cy = 250;
+
+            // Box
+            ctx.fillStyle = '#f8fafc';
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.roundRect(cx - 100, cy - 40, 200, 80, 8);
+            ctx.fill();
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Wires
+            drawLine(cx, cy, cx, cy + 40, '#334155', 2); // To B
+            drawLine(cx - 60, cy, cx + 60, cy, '#334155', 2);
+            drawLine(cx - 60, cy, cx - 60, cy + 40, '#334155', 2); // To E
+            drawLine(cx + 60, cy, cx + 60, cy + 40, '#334155', 2); // To C
+            
+            // Diodes
+            if (transistorType === 'NPN') {
+                // NPN: B -> E and B -> C
+                drawDiode(cx - 30, cy, Math.PI);   // Pointing left (towards E)
+                drawDiode(cx + 30, cy, 0);         // Pointing right (towards C)
+            } else {
+                // PNP: E -> B and C -> B
+                drawDiode(cx - 30, cy, 0);         // Pointing right (towards B)
+                drawDiode(cx + 30, cy, Math.PI);   // Pointing left (towards B)
+            }
+
+            // Labels
+            ctx.fillStyle = '#475569';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('B', cx, cy - 10);
+            ctx.fillText('E', cx - 60, cy - 10);
+            ctx.fillText('C', cx + 60, cy - 10);
+            
+            // Connection lines to physical part
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1;
+            drawLine(cx, cy + 40, PINS.B.x, 340, '#cbd5e1', 1);
+            drawLine(cx - 60, cy + 40, PINS.E.x, 340, '#cbd5e1', 1);
+            drawLine(cx + 60, cy + 40, PINS.C.x, 340, '#cbd5e1', 1);
+        }
+
+        function drawWireCurve(startX, startY, endX, endY, color) {
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            // Add some gravity sag to the wires
+            const cp1x = startX;
+            const cp1y = startY + 200;
+            const cp2x = endX;
+            const cp2y = endY + 200;
+            ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+        }
+
+        function drawProbe(probe) {
+            const isRed = probe.id === 'RED';
+            
+            // Wire from Multimeter
+            const startX = isRed ? MULTI_X - 40 : MULTI_X + 40;
+            const startY = MULTI_Y + 40;
+            drawWireCurve(startX, startY, probe.x, probe.y - 60, probe.color);
+
+            ctx.save();
+            ctx.translate(probe.x, probe.y);
+            
+            // Highlight if dragging or snapped
+            if (probe.isDragging || probe.target) {
+                ctx.beginPath();
+                ctx.arc(0, 0, 15, 0, Math.PI*2);
+                ctx.fillStyle = isRed ? 'rgba(239, 68, 68, 0.3)' : 'rgba(30, 41, 59, 0.3)';
+                ctx.fill();
+            }
+
+            // Metal Tip
+            ctx.fillStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.moveTo(-2, -30); ctx.lineTo(2, -30);
+            ctx.lineTo(1, 0); ctx.lineTo(-1, 0);
+            ctx.fill();
+            
+            // Plastic Handle
+            ctx.fillStyle = probe.color;
+            ctx.beginPath();
+            ctx.roundRect(-5, -70, 10, 40, 5);
+            ctx.fill();
+            
+            // Grip rings
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillRect(-5, -60, 10, 2);
+            ctx.fillRect(-5, -50, 10, 2);
+            ctx.fillRect(-5, -40, 10, 2);
+
+            // Label (+ / -)
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(isRed ? '+' : '-', 0, -80);
+
+            ctx.restore();
+        }
+
+        // --- Render Loop ---
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawEquivalentCircuit();
+            drawTransistorSetup();
+            drawMultimeter();
+            
+            // Draw Probes (Inactive first, active on top)
+            if (activeProbe === PROBE_RED) {
+                drawProbe(PROBE_BLK);
+                drawProbe(PROBE_RED);
+            } else {
+                drawProbe(PROBE_RED);
+                drawProbe(PROBE_BLK);
+            }
+
+            requestAnimationFrame(render);
+        }
+
+        // Initialize
+        updateInstructions();
+        requestAnimationFrame(render);
+
+    </script>
+</body>
+</html>

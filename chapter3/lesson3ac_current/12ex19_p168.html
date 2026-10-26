@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ19ទំព័រ168ត្រង់ស្វូបរិសុទ្ធ </title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts សម្រាប់ Battambang -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Battambang', 'Khmer OS Battambang', sans-serif;
+            margin: 0;
+            background-color: #f4f6f9; 
+            color: #111;
+            font-size: 18px; /* ទំហំអក្សរធំ */
+        }
+
+        .container-custom {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ប៊ូតុង និង Input */
+        .action-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border-width: 1px;
+            border-color: #cbd5e1;
+            background-color: #ffffff;
+            color: #334155;
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .action-btn:hover {
+            background-color: #f8fafc;
+            border-color: #94a3b8;
+        }
+        .action-btn:active {
+            transform: translateY(2px);
+        }
+        
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 28px;
+            width: 28px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -10px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* SVG Simulator */
+        svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 480px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #cfd8dc;
+            margin: 0 auto;
+        }
+
+        /* រចនាប័ទ្មសម្រាប់អក្សររូបមន្ត (HTML Math សុវត្ថិភាព) */
+        .html-math { display: inline-flex; align-items: center; font-size: 20px; }
+        .html-fraction { display: inline-flex; flex-direction: column; align-items: center; margin: 0 8px; vertical-align: middle; }
+        .html-num { border-bottom: 2px solid #111; padding: 0 6px 4px 6px; }
+        .html-den { padding: 4px 6px 0 6px; }
+        .math-var { font-family: 'Times New Roman', Times, serif; font-style: italic; }
+        .math-sub { font-size: 0.75em; font-family: 'Arial', sans-serif; font-style: normal; vertical-align: sub; }
+        .dynamic-val { color: #d32f2f; font-weight: bold; border-bottom: 2px dashed #d32f2f; padding: 0 6px; font-size: 22px; font-family: 'Arial', sans-serif;}
+        .highlight { color: #10b981; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container-custom">
+    
+    <div class="mb-5 text-center">
+        <h1 class="text-3xl font-bold text-slate-800 mb-2 leading-tight">ត្រង់ស្វូបរិសុទ្ធ</h1>
+        <p class="text-lg text-slate-500">អានុភាពថេរ និង ផលធៀបតង់ស្យុង</p>
+    </div>
+
+    <!--  លំហាត់លេខ19  -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6 shadow-sm text-slate-800">
+        <h3 class="text-xl font-bold text-orange-600 mb-4 border-b border-slate-200 pb-2">📝 ប្រធានលំហាត់ទី១៩</h3>
+        <p class="mb-2 leading-relaxed text-lg">
+            ១៩. តង់ស្យុងចេញនៃត្រង់ស្វូបរិសុទ្ធ <span class="font-bold text-yellow-600" id="probP">95.0 W</span> គឺ <span class="font-bold text-emerald-600" id="probV2">12.0 V</span> និងចរន្តចូលគឺ <span class="font-bold text-red-600" id="probI1">25.0 A</span> ។<br>
+            ក. តើត្រង់ស្វូនេះ ជាស្ទូក ឬស៊ូវ៉ុលទ័រ?<br>
+            ខ. គណនាផលធៀបរវាងតង់ស្យុងចេញនិងចូលនៃត្រង់ស្វូនេះ ។
+        </p>
+    </div>
+
+    <!-- ២. ផ្ទាំង Simulator (នៅក្រោមប្រធានលំហាត់) -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+            <h2 class="text-2xl font-bold text-slate-800">⚡ ដ្យាក្រាមត្រង់ស្វូ 2D</h2>
+            
+            <!-- Dashboard ខ្នាតតូច បង្ហាញលទ្ធផលភ្លាមៗ -->
+            <div class="flex gap-4 md:gap-6 bg-slate-50 px-4 py-2 rounded-lg border border-slate-200 shadow-sm w-full md:w-auto justify-center">
+                <div class="text-center">
+                    <div class="text-sm text-slate-500">តង់ស្យុងចូល V1</div>
+                    <div class="text-xl font-bold text-blue-600" id="dashV1">3.8 V</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm text-slate-500">ចរន្តចេញ I2</div>
+                    <div class="text-xl font-bold text-fuchsia-600" id="dashI2">7.9 A</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm text-slate-500">ផលធៀប (Ratio)</div>
+                    <div class="text-xl font-bold text-amber-600" id="dashRatio">3.16</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="relative w-full flex items-center justify-center bg-slate-50 border border-slate-200 rounded-xl shadow-sm p-4">
+            <!-- ប្រើ SVG ដើម្បីគូរ -->
+            <svg id="circuitSvg" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
+                <!-- ប្រភព AC ខាងឆ្វេង -->
+                <rect x="50" y="200" width="80" height="100" rx="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="4"/>
+                <circle cx="90" cy="250" r="20" fill="none" stroke="#1976d2" stroke-width="3"/>
+                <path d="M 75 250 Q 82.5 235 90 250 T 105 250" fill="none" stroke="#1976d2" stroke-width="3"/>
+                <text x="90" y="180" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold" fill="#1976d2">AC In</text>
+                
+                <!-- ខ្សែប្រភព (Primary Circuit) -->
+                <polyline points="130,220 300,220" fill="none" stroke="#90a4ae" stroke-width="6"/>
+                <polyline points="130,280 300,280" fill="none" stroke="#90a4ae" stroke-width="6"/>
+                
+                <!-- ចលនាចរន្ត Primary -->
+                <polyline id="flowP" points="130,220 300,220 300,280 130,280" fill="none" stroke="#ef4444" stroke-width="5" stroke-dasharray="10,15"/>
+
+                <!-- ត្រង់ស្វូ (Transformer Core) -->
+                <rect x="300" y="100" width="250" height="300" fill="none" stroke="#cfd8dc" stroke-width="35"/>
+                <rect x="325" y="125" width="200" height="250" fill="none" stroke="#90a4ae" stroke-width="5"/>
+                <text x="425" y="70" text-anchor="middle" font-family="'Battambang', sans-serif" font-size="24" font-weight="bold" fill="#37474f">ស្នូលដែកត្រង់ស្វូ</text>
+                
+                <!-- របុំបឋម (Primary Coil) -->
+                <g id="coilP">
+                    <path id="pathCoilP" d="M 280 150 Q 350 160 280 170 Q 350 180 280 190 Q 350 200 280 210 Q 350 220 280 230 Q 350 240 280 250 Q 350 260 280 270 Q 350 280 280 290 Q 350 300 280 310 Q 350 320 280 330 Q 350 340 280 350" fill="none" stroke="#ef4444" stroke-width="8"/>
+                </g>
+
+                <!-- របុំមធ្យមភាគ (Secondary Coil) -->
+                <g id="coilS">
+                    <path id="pathCoilS" d="M 570 180 Q 500 200 570 220 Q 500 240 570 260 Q 500 280 570 300 Q 500 320 570 340" fill="none" stroke="#10b981" stroke-width="8"/>
+                </g>
+
+                <!-- ខ្សែចេញ (Secondary Circuit) -->
+                <polyline points="550,180 750,180" fill="none" stroke="#90a4ae" stroke-width="6"/>
+                <polyline points="550,340 750,340" fill="none" stroke="#90a4ae" stroke-width="6"/>
+                
+                <!-- ចលនាចរន្ត Secondary -->
+                <polyline id="flowS" points="550,180 750,180 750,340 550,340" fill="none" stroke="#10b981" stroke-width="5" stroke-dasharray="10,15"/>
+
+                <!-- ឧបករណ៍ប្រើប្រាស់ (Load) -->
+                <rect x="750" y="160" width="100" height="200" rx="10" fill="#fff8e1" stroke="#ffb300" stroke-width="4"/>
+                <circle cx="800" cy="230" r="30" fill="#ffffff" stroke="#ff8f00" stroke-width="4"/>
+                <path d="M 780 210 L 820 250 M 780 250 L 820 210" fill="none" stroke="#ff8f00" stroke-width="4"/>
+                <text x="800" y="330" text-anchor="middle" font-family="'Battambang', sans-serif" font-size="24" font-weight="bold" fill="#111">បន្ទុក</text>
+
+                <!-- ផ្លាកសញ្ញា (Labels) -->
+                <!-- Primary Side -->
+                <rect x="140" y="90" width="130" height="100" fill="#ffffff" stroke="#3b82f6" stroke-width="3" rx="8"/>
+                <text x="205" y="120" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#475569">Primary</text>
+                <text id="svgV1" x="205" y="150" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold" fill="#3b82f6">V1: 3.8 V</text>
+                <text id="svgI1" x="205" y="180" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold" fill="#ef4444">I1: 25.0 A</text>
+
+                <!-- Secondary Side -->
+                <rect x="580" y="90" width="130" height="100" fill="#ffffff" stroke="#10b981" stroke-width="3" rx="8"/>
+                <text x="645" y="120" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#475569">Secondary</text>
+                <text id="svgV2" x="645" y="150" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold" fill="#10b981">V2: 12.0 V</text>
+                <text id="svgI2" x="645" y="180" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold" fill="#10b981">I2: 7.9 A</text>
+
+                <!-- សញ្ញាព្រួញប្រភេទត្រង់ស្វូ -->
+                <g id="arrowType" transform="translate(425, 250)">
+                    <path id="arrowShape" d="M -35 -10 L -35 10 L 35 25 L 35 -25 Z" fill="#ef4444" stroke="none"/>
+                </g>
+                <text id="svgTypeLabel" x="425" y="330" text-anchor="middle" font-family="'Battambang', sans-serif" font-size="22" font-weight="bold" fill="#ef4444">ស្ទូកវ៉ុលទ័រ</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- ៣. ផ្ទាំងបញ្ជាទិន្នន័យ (Sliders) -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6 shadow-sm">
+        <h3 class="text-xl font-bold text-slate-800 mb-4">⚙️ ផ្ទាំងគ្រប់គ្រងទិន្នន័យ (Sliders)</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block text-lg font-bold text-slate-700 mb-3">អានុភាព (<span class="math-var">P</span>): <span id="lblP" class="text-yellow-600 text-2xl ml-2">95.0 W</span></label>
+                <input type="range" id="sliderP" min="10" max="200" value="95" step="1">
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block text-lg font-bold text-slate-700 mb-3">តង់ស្យុងចេញ (<span class="math-var">V</span><sub class="math-sub">2</sub>): <span id="lblV2" class="text-emerald-600 text-2xl ml-2">12.0 V</span></label>
+                <input type="range" id="sliderV2" min="1.0" max="50.0" value="12.0" step="0.5">
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block text-lg font-bold text-slate-700 mb-3">ចរន្តចូល (<span class="math-var">I</span><sub class="math-sub">1</sub>): <span id="lblI1" class="text-red-600 text-2xl ml-2">25.0 A</span></label>
+                <input type="range" id="sliderI1" min="1.0" max="50.0" value="25.0" step="0.5">
+            </div>
+        </div>
+        
+        <button id="btnToggleSol" class="action-btn w-full mt-6 py-4 rounded-xl font-bold border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 text-xl">
+            📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត
+        </button>
+    </div>
+
+    <!-- ៤. ដំណោះស្រាយ -->
+    <div id="solutionBox" class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-lg text-slate-800 leading-relaxed hidden mb-6 shadow-sm">
+        <h3 class="text-2xl font-bold text-blue-700 mb-4 border-b border-blue-200 pb-3">📝 ដំណោះស្រាយលម្អិត</h3>
+        
+        <p class="font-bold text-slate-800 mt-4 text-xl">ក. កំណត់ប្រភេទត្រង់ស្វូ ៖</p>
+        <p>ដោយសារត្រង់ស្វូនេះបរិសុទ្ធ វាមិនមានការបាត់បង់អានុភាពទេ៖</p>
+        <div class="html-math my-3 w-full justify-center">
+            <span class="math-var">P</span><sub class="math-sub">1</sub> = <span class="math-var">P</span><sub class="math-sub">2</sub> = <span class="math-var">P</span> = <span id="mathP">95.0</span> W
+        </div>
+        <p>រកតង់ស្យុងចូល (<span class="math-var">V</span><sub class="math-sub">1</sub>) ៖</p>
+        <div class="html-math my-4 w-full justify-center">
+            <span class="math-var">P</span><sub class="math-sub">1</sub> = <span class="math-var">V</span><sub class="math-sub">1</sub> &times; <span class="math-var">I</span><sub class="math-sub">1</sub> &nbsp;&nbsp;&rArr;&nbsp;&nbsp;
+            <span class="math-var">V</span><sub class="math-sub">1</sub> = 
+            <div class="html-fraction">
+                <div class="html-num"><span class="math-var">P</span><sub class="math-sub">1</sub></div>
+                <div class="html-den"><span class="math-var">I</span><sub class="math-sub">1</sub></div>
+            </div>
+            =
+            <div class="html-fraction">
+                <div class="html-num"><span id="mathP_sub">95.0</span></div>
+                <div class="html-den"><span id="mathI1_sub">25.0</span></div>
+            </div>
+            = <span id="mathV1" class="dynamic-val">3.8</span> V
+        </div>
+        <p>ប្រៀបធៀប <span class="math-var">V</span><sub class="math-sub">2</sub> និង <span class="math-var">V</span><sub class="math-sub">1</sub> ៖</p>
+        <p>ដោយ <span class="math-var">V</span><sub class="math-sub">2</sub> = <span id="cmpV2">12.0</span> V និង <span class="math-var">V</span><sub class="math-sub">1</sub> = <span id="cmpV1">3.8</span> V យើងឃើញថា <span class="math-var">V</span><sub class="math-sub">2</sub> <span id="cmpSign" class="font-bold text-3xl text-orange-600 align-middle">&gt;</span> <span class="math-var">V</span><sub class="math-sub">1</sub> ។</p>
+        <p class="mt-4">ដូចនេះ ត្រង់ស្វូនេះគឺជា <span id="ansType" class="highlight text-2xl bg-green-100 px-4 py-2 rounded">ស្ទូកវ៉ុលទ័រ</span> ។</p>
+
+        <hr class="border-blue-200 my-6">
+
+        <p class="font-bold text-slate-800 text-xl">ខ. គណនាផលធៀបតង់ស្យុង ៖</p>
+        <div class="html-math my-4 w-full justify-center">
+            <span class="math-var">K</span> = 
+            <div class="html-fraction">
+                <div class="html-num"><span class="math-var">V</span><sub class="math-sub">2</sub></div>
+                <div class="html-den"><span class="math-var">V</span><sub class="math-sub">1</sub></div>
+            </div>
+            =
+            <div class="html-fraction">
+                <div class="html-num"><span id="mathRatioV2">12.0</span></div>
+                <div class="html-den"><span id="mathRatioV1">3.8</span></div>
+            </div>
+            = <span id="mathRatio" class="dynamic-val">3.16</span>
+        </div>
+        <p class="mt-4">ដូចនេះ ផលធៀបតង់ស្យុងគឺ <span class="highlight text-2xl bg-white px-4 py-2 rounded border border-blue-200"><span id="ansRatio">3.16</span></span> ។</p>
+    </div>
+
+</div>
+
+<script>
+    // អថេរ UI
+    var sliderP = document.getElementById('sliderP');
+    var sliderV2 = document.getElementById('sliderV2');
+    var sliderI1 = document.getElementById('sliderI1');
+    
+    var btnToggleSol = document.getElementById('btnToggleSol');
+    var solutionBox = document.getElementById('solutionBox');
+    
+    // អថេរ SVG
+    var flowP = document.getElementById('flowP');
+    var flowS = document.getElementById('flowS');
+    var pathCoilP = document.getElementById('pathCoilP');
+    var pathCoilS = document.getElementById('pathCoilS');
+    var arrowShape = document.getElementById('arrowShape');
+    var svgTypeLabel = document.getElementById('svgTypeLabel');
+    
+    // Animation offsets
+    var offsetP = 0;
+    var offsetS = 0;
+    var speedP = 0;
+    var speedS = 0;
+
+    btnToggleSol.addEventListener('click', function() {
+        if (solutionBox.classList.contains('hidden')) {
+            solutionBox.classList.remove('hidden');
+        } else {
+            solutionBox.classList.add('hidden');
+        }
+    });
+
+    function updatePhysics() {
+        var p = parseFloat(sliderP.value);
+        var v2 = parseFloat(sliderV2.value);
+        var i1 = parseFloat(sliderI1.value);
+        
+        // គណនា V1 និង I2
+        var v1 = p / i1;
+        var i2 = p / v2;
+        var ratio = v2 / v1;
+
+        // ធ្វើបច្ចុប្បន្នភាពអក្សរលើ UI
+        document.getElementById('lblP').innerText = p.toFixed(1) + " W";
+        document.getElementById('lblV2').innerText = v2.toFixed(1) + " V";
+        document.getElementById('lblI1').innerText = i1.toFixed(1) + " A";
+        
+        document.getElementById('probP').innerText = p.toFixed(1) + " W";
+        document.getElementById('probV2').innerText = v2.toFixed(1) + " V";
+        document.getElementById('probI1').innerText = i1.toFixed(1) + " A";
+
+        document.getElementById('dashV1').innerText = v1.toFixed(2) + " V";
+        document.getElementById('dashI2').innerText = i2.toFixed(2) + " A";
+        document.getElementById('dashRatio').innerText = ratio.toFixed(2);
+
+        document.getElementById('svgV1').innerText = "V1: " + v1.toFixed(1) + " V";
+        document.getElementById('svgI1').innerText = "I1: " + i1.toFixed(1) + " A";
+        document.getElementById('svgV2').innerText = "V2: " + v2.toFixed(1) + " V";
+        document.getElementById('svgI2').innerText = "I2: " + i2.toFixed(1) + " A";
+
+        // កំណត់ប្រភេទត្រង់ស្វូ ដោយមិនប្រើសញ្ញា < ឬ > ក្នុងតក្កវិជ្ជា
+        var typeStr = "";
+        var isStepUp = (Math.max(v2, v1) === v2 && v2 !== v1);
+        var isStepDown = (Math.min(v2, v1) === v2 && v2 !== v1);
+        
+        var arrowColor = "#d97706"; // Default amber
+        var typeSign = "=";
+        
+        if (isStepUp === true) {
+            typeStr = "ស្ទូកវ៉ុលទ័រ";
+            arrowColor = "#ef4444"; // Red for up
+            typeSign = ">";
+            arrowShape.setAttribute("d", "M -35 -10 L -35 10 L 35 25 L 35 -25 Z");
+            
+            // Primary តិចស្ពែរ Secondary ច្រើនស្ពែរ
+            pathCoilP.setAttribute("d", "M 280 180 Q 350 200 280 220 Q 350 240 280 260 Q 350 280 280 300 Q 350 320 280 340");
+            pathCoilS.setAttribute("d", "M 570 110 Q 500 120 570 130 Q 500 140 570 150 Q 500 160 570 170 Q 500 180 570 190 Q 500 200 570 210 Q 500 220 570 230 Q 500 240 570 250 Q 500 260 570 270 Q 500 280 570 290 Q 500 300 570 310 Q 500 320 570 330 Q 500 340 570 350");
+        } 
+        else if (isStepDown === true) {
+            typeStr = "ស៊ូវ៉ុលទ័រ";
+            arrowColor = "#3b82f6"; // Blue for down
+            typeSign = "<";
+            arrowShape.setAttribute("d", "M -35 -25 L -35 25 L 35 10 L 35 -10 Z");
+            
+            // Primary ច្រើនស្ពែរ Secondary តិចស្ពែរ
+            pathCoilP.setAttribute("d", "M 280 110 Q 350 120 280 130 Q 350 140 280 150 Q 350 160 280 170 Q 350 180 280 190 Q 350 200 280 210 Q 350 220 280 230 Q 350 240 280 250 Q 350 260 280 270 Q 350 280 280 290 Q 350 300 280 310 Q 350 320 280 330 Q 350 340 280 350");
+            pathCoilS.setAttribute("d", "M 570 180 Q 500 200 570 220 Q 500 240 570 260 Q 500 280 570 300 Q 500 320 570 340");
+        } 
+        else {
+            typeStr = "រក្សាតង់ស្យុង";
+            arrowColor = "#94a3b8"; // Slate for equal
+            typeSign = "=";
+            arrowShape.setAttribute("d", "M -35 -15 L -35 15 L 35 15 L 35 -15 Z");
+            
+            // ស្មើគ្នា
+            pathCoilP.setAttribute("d", "M 280 110 Q 350 130 280 150 Q 350 170 280 190 Q 350 210 280 230 Q 350 250 280 270 Q 350 290 280 310 Q 350 330 280 350");
+            pathCoilS.setAttribute("d", "M 570 110 Q 500 130 570 150 Q 500 170 570 190 Q 500 210 570 230 Q 500 250 570 270 Q 500 290 570 310 Q 500 330 570 350");
+        }
+        
+        arrowShape.setAttribute("fill", arrowColor);
+        svgTypeLabel.textContent = typeStr;
+        svgTypeLabel.setAttribute("fill", arrowColor);
+        document.getElementById('ansType').innerText = typeStr;
+        document.getElementById('cmpSign').innerText = typeSign;
+
+        // Update Math Values in HTML
+        document.getElementById('mathP').innerText = p.toFixed(1);
+        document.getElementById('mathP_sub').innerText = p.toFixed(1);
+        document.getElementById('mathI1_sub').innerText = i1.toFixed(1);
+        document.getElementById('mathV1').innerText = v1.toFixed(2);
+        
+        document.getElementById('cmpV2').innerText = v2.toFixed(1);
+        document.getElementById('cmpV1').innerText = v1.toFixed(2);
+        
+        document.getElementById('mathRatioV2').innerText = v2.toFixed(1);
+        document.getElementById('mathRatioV1').innerText = v1.toFixed(2);
+        document.getElementById('mathRatio').innerText = ratio.toFixed(2);
+        document.getElementById('ansRatio').innerText = ratio.toFixed(2);
+
+        // Calculate animation speed
+        speedP = i1 * 0.15; 
+        speedS = i2 * 0.15;
+    }
+
+    function loopAnimation() {
+        offsetP -= speedP;
+        offsetS -= speedS;
+        
+        flowP.setAttribute("stroke-dashoffset", offsetP);
+        flowS.setAttribute("stroke-dashoffset", offsetS);
+        
+        requestAnimationFrame(loopAnimation);
+    }
+
+    // Event Listeners
+    sliderP.addEventListener('input', updatePhysics);
+    sliderV2.addEventListener('input', updatePhysics);
+    sliderI1.addEventListener('input', updatePhysics);
+
+    // Initial setup
+    updatePhysics();
+    loopAnimation();
+
+</script>
+
+</body>
+</html>

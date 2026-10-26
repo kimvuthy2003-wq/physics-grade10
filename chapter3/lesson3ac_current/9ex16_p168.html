@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ប្រដាប់សាកថ្មទូរស័ព្ទ (2D Simulator)</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- MathJax Configuration and Script -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .math-scroll-container {
+            width: 100%;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 1rem 0;
+            -webkit-overflow-scrolling: touch;
+            -ms-overflow-style: none;  
+            scrollbar-width: none;  
+        }
+        .math-scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .answer-grid-wrapper {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.5s ease-in-out;
+        }
+        .answer-grid-wrapper.show {
+            grid-template-rows: 1fr;
+        }
+        .answer-inner {
+            overflow: hidden;
+        }
+
+        /* 2D Animation Styles */
+        .flow-line-ac {
+            stroke-dasharray: 8;
+            animation: dash-ac 1s linear infinite;
+        }
+        .flow-line-dc {
+            stroke-dasharray: 8;
+            animation: dash-dc 1.5s linear infinite;
+        }
+        @keyframes dash-ac {
+            0% { stroke-dashoffset: 16; }
+            50% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -16; }
+        }
+        @keyframes dash-dc {
+            to { stroke-dashoffset: -16; }
+        }
+        .battery-charge {
+            animation: charge-up 2s infinite;
+        }
+        @keyframes charge-up {
+            0% { width: 0%; fill: #ef4444; }
+            50% { fill: #eab308; }
+            100% { width: 85%; fill: #22c55e; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased p-3 md:p-6 flex items-center justify-center min-h-screen">
+
+    <div class="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 my-4">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-700 to-cyan-600 px-5 py-5 shadow-sm">
+            <h1 class="text-xl md:text-2xl text-white font-bold text-center drop-shadow-sm">
+                លំហាត់ទី១៦៖ ប្រដាប់សាកថ្មទូរស័ព្ទ
+            </h1>
+        </div>
+
+        <div class="p-4 md:p-6 space-y-6">
+            
+            <!-- Problem Statement -->
+            <section class="bg-blue-50/50 p-5 md:p-6 rounded-xl border border-blue-100 shadow-sm relative">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500 rounded-l-xl"></div>
+                <div class="text-base md:text-lg leading-relaxed text-slate-700 space-y-3">
+                    <p class="font-bold text-slate-800 text-justify">
+                        ប្រដាប់សាកថ្មទូរស័ព្ទមានត្រង់ស្វូមួយដែលបញ្ចុះតង់ស្យុងឆ្លាស់ពី 240 V មក 5.0 V ដើម្បីសាកថ្មទូរស័ព្ទ 3.7 V ជាចរន្តជាប់ ។ ដើម្បីសាកថ្មទូរស័ព្ទបានគេត្រូវបំប្លែងវាពីចរន្តឆ្លាស់ទៅចរន្តជាប់ដោយប្រើស្ពានឌីយ៉ូត(មេរៀនទី 4 ក្រោយ)គឺបំប្លែងពី AC = 5.0 V ទៅជា DC = 5.0 V ។ សន្មតថា របុំមធ្យមមាន 30 ស្ពៀ និងប្រដាប់សាកថ្មផ្តល់ចរន្ត 2.00 A ។
+                    </p>
+                    <p class="font-bold">គណនា ៖</p>
+                    <ul class="pl-6 space-y-2 list-none">
+                        <li>ក. ចំនួនស្ពៀនៅរបុំបឋម</li>
+                        <li>ខ. ចរន្តអគ្គិសនីនៅរបុំបឋម</li>
+                        <li>គ. អានុភាពបញ្ជូន ។</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 2D Diagram / Simulator Section -->
+            <section class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner">
+                <h3 class="text-center font-bold text-slate-700 mb-4 text-sm md:text-base">គំនូសបំព្រួញ 2D: ដំណើរការប្រដាប់សាកថ្ម (Adapter)</h3>
+                
+                <div class="w-full bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden flex justify-center p-2">
+                    <!-- 2D SVG Diagram -->
+                    <svg viewBox="0 0 900 350" class="w-full h-auto max-w-full" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <!-- Corrected Diode Symbol -->
+                            <g id="diode-symbol">
+                                <polygon points="-6,-6 6,0 -6,6" fill="#1e293b"/>
+                                <line x1="6" y1="-7" x2="6" y2="7" stroke="#1e293b" stroke-width="2.5"/>
+                            </g>
+                        </defs>
+
+                        <!-- AC Power Source (Left) -->
+                        <circle cx="80" cy="175" r="20" fill="none" stroke="#1e293b" stroke-width="2"/>
+                        <path d="M 65 175 Q 72.5 160 80 175 T 95 175" fill="none" stroke="#1e293b" stroke-width="2"/>
+                        <text x="80" y="215" font-family="Arial" font-size="14" fill="#b91c1c" font-weight="bold" text-anchor="middle">AC 240V</text>
+
+                        <!-- Primary Circuit Lines -->
+                        <path d="M 100 175 L 150 175 L 150 100 L 250 100" fill="none" stroke="#94a3b8" stroke-width="4"/>
+                        <path d="M 100 175 L 150 175 L 150 250 L 250 250" fill="none" stroke="#94a3b8" stroke-width="4"/>
+                        
+                        <!-- AC Animated Flow (Primary) -->
+                        <path d="M 100 175 L 150 175 L 150 100 L 230 100" fill="none" stroke="#ef4444" stroke-width="2" class="flow-line-ac"/>
+                        <path d="M 100 175 L 150 175 L 150 250 L 230 250" fill="none" stroke="#ef4444" stroke-width="2" class="flow-line-ac"/>
+
+                        <!-- Primary Coil (Many turns) -->
+                        <path d="M 250 100 A 15 15 0 0 1 250 130 A 15 15 0 0 1 250 160 A 15 15 0 0 1 250 190 A 15 15 0 0 1 250 220 A 15 15 0 0 1 250 250" fill="none" stroke="#b45309" stroke-width="3" stroke-linecap="round"/>
+                        <text x="210" y="180" font-family="Battambang" font-size="14" fill="#92400e" font-weight="bold" text-anchor="end">របុំបឋម</text>
+                        <text x="210" y="200" font-family="Arial" font-size="14" fill="#92400e" text-anchor="end">N₁ = ?</text>
+                        <text x="210" y="220" font-family="Arial" font-size="14" fill="#92400e" text-anchor="end">I₁ = ?</text>
+
+                        <!-- Transformer Core -->
+                        <line x1="270" y1="80" x2="270" y2="270" stroke="#475569" stroke-width="4"/>
+                        <line x1="285" y1="80" x2="285" y2="270" stroke="#475569" stroke-width="4"/>
+                        <text x="277" y="300" font-family="Battambang" font-size="14" fill="#334155" text-anchor="middle">ត្រង់ស្វូ (បញ្ចុះតង់ស្យុង)</text>
+
+                        <!-- Secondary Coil (Few turns) -->
+                        <path d="M 305 125 A 25 25 0 0 0 305 175 A 25 25 0 0 0 305 225" fill="none" stroke="#b45309" stroke-width="4" stroke-linecap="round"/>
+                        <text x="345" y="180" font-family="Battambang" font-size="14" fill="#92400e" font-weight="bold" text-anchor="start">របុំមធ្យម</text>
+                        <text x="345" y="200" font-family="Arial" font-size="14" fill="#92400e" text-anchor="start">N₂ = 30</text>
+                        <text x="345" y="220" font-family="Arial" font-size="14" fill="#b91c1c" font-weight="bold" text-anchor="start">AC 5.0V</text>
+
+                        <!-- Secondary AC Lines into Bridge -->
+                        <path d="M 305 125 L 500 125" fill="none" stroke="#94a3b8" stroke-width="3"/>
+                        <path d="M 305 225 L 500 225" fill="none" stroke="#94a3b8" stroke-width="3"/>
+                        
+                        <!-- AC Animated Flow (Secondary) -->
+                        <path d="M 320 125 L 490 125" fill="none" stroke="#ef4444" stroke-width="2" class="flow-line-ac"/>
+                        <path d="M 320 225 L 490 225" fill="none" stroke="#ef4444" stroke-width="2" class="flow-line-ac"/>
+
+                        <!-- Bridge Rectifier Container -->
+                        <rect x="420" y="90" width="160" height="170" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4"/>
+                        <text x="500" y="285" font-family="Battambang" font-size="14" fill="#334155" text-anchor="middle">ស្ពានឌីយ៉ូត (Bridge Rectifier)</text>
+                        
+                        <!-- The Diamond Circuit -->
+                        <path d="M 450 175 L 500 125 L 550 175 L 500 225 Z" fill="none" stroke="#64748b" stroke-width="3"/>
+                        
+                        <!-- Diodes in correct orientation -->
+                        <!-- Top-Left Diode (Points towards Top: 500,125) -->
+                        <use href="#diode-symbol" x="475" y="150" transform="rotate(-45 475 150)"/>
+                        <!-- Bottom-Left Diode (Points towards Bottom: 500,225) -->
+                        <use href="#diode-symbol" x="475" y="200" transform="rotate(45 475 200)"/>
+                        <!-- Top-Right Diode (Points towards Right: 550,175) -->
+                        <use href="#diode-symbol" x="525" y="150" transform="rotate(45 525 150)"/>
+                        <!-- Bottom-Right Diode (Points towards Right: 550,175) -->
+                        <use href="#diode-symbol" x="525" y="200" transform="rotate(-45 525 200)"/>
+
+                        <!-- Connection Dots -->
+                        <circle cx="500" cy="125" r="4" fill="#1e293b"/> <!-- Top AC -->
+                        <circle cx="500" cy="225" r="4" fill="#1e293b"/> <!-- Bottom AC -->
+                        <circle cx="450" cy="175" r="4" fill="#1e293b"/> <!-- Left DC- -->
+                        <circle cx="550" cy="175" r="4" fill="#1e293b"/> <!-- Right DC+ -->
+
+                        <!-- DC Output Lines -->
+                        <!-- DC+ from Right node (550, 175) -->
+                        <path d="M 550 175 L 600 175 L 600 60 L 720 60" fill="none" stroke="#3b82f6" stroke-width="3"/> 
+                        <!-- DC- from Left node (450, 175) with jump over AC line -->
+                        <path d="M 450 175 L 450 215 A 10 10 0 0 1 450 235 L 450 290 L 720 290" fill="none" stroke="#1e293b" stroke-width="3"/>
+                        
+                        <!-- DC Animated Flow -->
+                        <path d="M 560 175 L 600 175 L 600 60 L 700 60" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="6" class="flow-line-dc"/>
+                        <path d="M 700 290 L 450 290 L 450 235" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="6" class="flow-line-dc"/>
+                        <path d="M 450 215 L 450 185" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="6" class="flow-line-dc"/>
+
+                        <text x="630" y="50" font-family="Arial" font-size="14" fill="#2563eb" font-weight="bold" text-anchor="middle">+ DC 5.0V</text>
+                        <text x="630" y="80" font-family="Arial" font-size="12" fill="#2563eb" text-anchor="middle">I₂ = 2.00 A</text>
+                        <text x="630" y="310" font-family="Arial" font-size="16" fill="#1e293b" font-weight="bold" text-anchor="middle">-</text>
+
+                        <!-- Smartphone / Battery -->
+                        <rect x="720" y="100" width="90" height="160" rx="10" fill="#334155" stroke="#0f172a" stroke-width="3"/>
+                        <rect x="725" y="110" width="80" height="140" rx="4" fill="#000"/>
+                        
+                        <!-- Battery Icon on Screen -->
+                        <rect x="740" y="160" width="40" height="20" rx="2" fill="none" stroke="#fff" stroke-width="2"/>
+                        <rect x="780" y="166" width="3" height="8" fill="#fff"/>
+                        <rect x="742" y="162" width="0" height="16" rx="1" fill="#22c55e" class="battery-charge"/>
+                        
+                        <!-- Phone Brand -->
+                        <text x="765" y="240" font-family="Arial" font-size="10" fill="#cbd5e1" font-weight="bold" text-anchor="middle" letter-spacing="1">realme</text>
+                        <text x="765" y="270" font-family="Arial" font-size="12" fill="#fff" text-anchor="middle">3.7 V</text>
+
+                        <!-- Connecting cables to phone -->
+                        <path d="M 720 60 L 765 60 L 765 100" fill="none" stroke="#3b82f6" stroke-width="3"/>
+                        <path d="M 720 290 L 765 290 L 765 260" fill="none" stroke="#1e293b" stroke-width="3"/>
+                    </svg>
+                </div>
+            </section>
+
+            <!-- Toggle Answer Button -->
+            <div class="flex justify-center pt-2">
+                <button id="toggleBtn" onclick="toggleAnswer()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform active:scale-95 flex items-center">
+                    <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span id="btnText">បង្ហាញដំណោះស្រាយ</span>
+                </button>
+            </div>
+
+            <!-- Answer Section -->
+            <div id="answer-section" class="answer-grid-wrapper mt-4">
+                <div class="answer-inner">
+                    <div class="bg-white rounded-xl p-5 md:p-6 border border-slate-200 shadow-inner space-y-8">
+                        
+                        <!-- Part A -->
+                        <div class="border-l-4 border-indigo-500 pl-4 space-y-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded text-sm">ក</span>
+                                <h4 class="font-bold text-indigo-900 text-base md:text-lg">គណនាចំនួនស្ពៀនៅរបុំបឋម ($N_1$)</h4>
+                            </div>
+                            <div class="math-scroll-container bg-indigo-50/40 p-4 rounded-lg border border-indigo-100">
+                                <p class="text-slate-700 mb-2">តាមរូបមន្តផលធៀបបំប្លែងនៃត្រង់ស្វូ ៖</p>
+                                $$\frac{V_1}{V_2} = \frac{N_1}{N_2}$$
+                                
+                                <p class="text-slate-700 mt-4 mb-2">ទាញរក $N_1$ ៖</p>
+                                $$N_1 = \frac{V_1 \cdot N_2}{V_2}$$
+                                
+                                <p class="text-slate-700 mt-4 mb-2">ដោយ ៖</p>
+                                <ul class="list-disc list-inside text-slate-700 mb-2 ml-4 space-y-1">
+                                    <li>$V_1 = 240 \text{ V}$ (តង់ស្យុងចូល)</li>
+                                    <li>$V_2 = 5.0 \text{ V}$ (តង់ស្យុងចេញពីត្រង់ស្វូ)</li>
+                                    <li>$N_2 = 30$ ស្ពៀ</li>
+                                </ul>
+                                
+                                <p class="text-slate-700 mb-2 mt-4">ជំនួសលេខ ៖</p>
+                                $$N_1 = \frac{240 \times 30}{5.0} = \frac{7200}{5} = 1440$$
+                            </div>
+                            <p class="font-bold text-base md:text-lg text-indigo-700 mt-4 bg-white shadow-sm border border-slate-100 inline-block px-4 py-2 rounded-lg">
+                                ដូចនេះ ចំនួនស្ពៀនៅរបុំបឋមគឺ $N_1 = 1440$ ស្ពៀ ។
+                            </p>
+                        </div>
+
+                        <hr class="border-slate-100">
+
+                        <!-- Part B -->
+                        <div class="border-l-4 border-emerald-500 pl-4 space-y-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded text-sm">ខ</span>
+                                <h4 class="font-bold text-emerald-800 text-base md:text-lg">គណនាចរន្តអគ្គិសនីនៅរបុំបឋម ($I_1$)</h4>
+                            </div>
+                            <div class="math-scroll-container bg-emerald-50/40 p-4 rounded-lg border border-emerald-100">
+                                <p class="text-slate-700 mb-2">សន្មតថាជាត្រង់ស្វូបរិសុទ្ធ (គ្មានការខាតបង់ថាមពល) ៖</p>
+                                $$\frac{V_1}{V_2} = \frac{I_2}{I_1} \quad \text{ឬ} \quad V_1 \cdot I_1 = V_2 \cdot I_2$$
+                                
+                                <p class="text-slate-700 mt-4 mb-2">ទាញរក $I_1$ ៖</p>
+                                $$I_1 = \frac{V_2 \cdot I_2}{V_1}$$
+                                
+                                <p class="text-slate-700 mt-4 mb-2">ដោយ $V_1 = 240 \text{ V}, \ V_2 = 5.0 \text{ V}, \ I_2 = 2.00 \text{ A}$</p>
+                                
+                                <p class="text-slate-700 mb-2 mt-4">ជំនួសលេខ ៖</p>
+                                $$I_1 = \frac{5.0 \times 2.00}{240} = \frac{10}{240} = \frac{1}{24} \approx 0.042 \text{ A}$$
+                            </div>
+                            <p class="font-bold text-base md:text-lg text-emerald-700 mt-4 bg-white shadow-sm border border-slate-100 inline-block px-4 py-2 rounded-lg">
+                                ដូចនេះ ចរន្តអគ្គិសនីនៅរបុំបឋមគឺ $I_1 \approx 0.042 \text{ A}$ (ឬ $41.67 \text{ mA}$) ។
+                            </p>
+                        </div>
+
+                        <hr class="border-slate-100">
+
+                        <!-- Part C -->
+                        <div class="border-l-4 border-amber-500 pl-4 space-y-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded text-sm">គ</span>
+                                <h4 class="font-bold text-amber-900 text-base md:text-lg">គណនាអានុភាពបញ្ជូន ($P$)</h4>
+                            </div>
+                            <div class="math-scroll-container bg-amber-50/40 p-4 rounded-lg border border-amber-100">
+                                <p class="text-slate-700 mb-2">អានុភាពបញ្ជូន (អានុភាពផ្តល់ដោយត្រង់ស្វូ) ៖</p>
+                                $$P = P_1 = P_2 = V_2 \cdot I_2$$
+                                
+                                <p class="text-slate-700 mb-2 mt-4">ជំនួសលេខ ៖</p>
+                                $$P = 5.0 \times 2.00 = 10 \text{ W}$$
+                            </div>
+                            <p class="font-bold text-base md:text-lg text-amber-700 mt-4 bg-white shadow-sm border border-slate-100 inline-block px-4 py-2 rounded-lg">
+                                ដូចនេះ អានុភាពបញ្ជូនគឺ $P = 10 \text{ W}$ ។
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- UI Interaction Script -->
+    <script>
+        function toggleAnswer() {
+            const answerSection = document.getElementById('answer-section');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const button = document.getElementById('toggleBtn');
+            
+            answerSection.classList.toggle('show');
+            
+            if (answerSection.classList.contains('show')) {
+                btnText.textContent = 'លាក់ដំណោះស្រាយ';
+                button.classList.replace('bg-blue-600', 'bg-slate-600');
+                button.classList.replace('hover:bg-blue-700', 'hover:bg-slate-700');
+                
+                btnIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                `;
+                if (window.MathJax) {
+                    MathJax.typesetPromise();
+                }
+                setTimeout(() => { answerSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 300);
+            } else {
+                btnText.textContent = 'បង្ហាញដំណោះស្រាយ';
+                button.classList.replace('bg-slate-600', 'bg-blue-600');
+                button.classList.replace('hover:bg-slate-700', 'hover:bg-blue-700');
+                
+                btnIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
