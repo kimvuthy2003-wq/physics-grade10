@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ការកំណត់ម៉ាសមាឌទឹក</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Khmer OS Siemreap', 'Kantumruy Pro', sans-serif;
+            background-color: #f0f4f8;
+            color: #2c3e50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 14px;
+        }
+        .simulator-box {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            padding: 28px 22px;
+            width: 100%;
+            max-width: 580px;
+            text-align: center;
+        }
+        h2 {
+            color: #1a252f;
+            margin-top: 0;
+            margin-bottom: 18px;
+            font-size: 1.75rem;
+            line-height: 1.4;
+        }
+        .instruction {
+            background-color: #eaf2f8;
+            padding: 18px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 17px;
+            margin-bottom: 24px;
+            line-height: 1.85;
+            border-left: 5px solid #3498db;
+        }
+        .beaker-container {
+            margin: 20px auto 0 auto;
+            position: relative;
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        /* មាត់កែវផ្នែកខាងលើ */
+        .beaker-lip {
+            width: 160px;
+            height: 7px;
+            border: 4px solid #7f8c8d;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-bottom: -2px;
+            z-index: 3;
+        }
+        .beaker {
+            width: 150px;
+            height: 220px;
+            border: 4px solid #7f8c8d;
+            border-top: none;
+            border-radius: 0 0 14px 14px;
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.9);
+            overflow: hidden;
+            z-index: 2;
+            box-shadow: inset -8px 0 12px rgba(0,0,0,0.04);
+        }
+        .water {
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to bottom, rgba(52, 152, 219, 0.65), rgba(41, 128, 185, 0.85));
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            transition: height 0.8s ease-in-out;
+            border-top: 2.5px solid rgba(41, 128, 185, 0.95);
+            z-index: 1;
+        }
+        /* គំនូសក្រិតលើកែវ (Graduation Marks) */
+        .graduations {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 3;
+        }
+        .tick {
+            position: absolute;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: 100%;
+            transform: translateY(50%);
+        }
+        .tick-line {
+            height: 2px;
+            background-color: #2c3e50;
+        }
+        .tick.major .tick-line {
+            width: 26px;
+            height: 2.5px;
+            background-color: #1a252f;
+        }
+        .tick.minor .tick-line {
+            width: 14px;
+            height: 2px;
+            background-color: #5d6d7e;
+        }
+        .tick-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #1a252f;
+            margin-right: 6px;
+            font-family: Arial, sans-serif;
+            text-shadow: 0 0 4px rgba(255,255,255,0.95);
+        }
+        .unit-label {
+            position: absolute;
+            top: 6px;
+            left: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #34495e;
+            z-index: 3;
+        }
+        .scale-plate {
+            width: 185px;
+            height: 12px;
+            background-color: #95a5a6;
+            border-radius: 6px;
+            margin-top: -1px;
+        }
+        .scale-display {
+            background-color: #2ecc71;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 28px;
+            font-weight: bold;
+            padding: 12px;
+            width: 170px;
+            margin: -2px auto 24px auto;
+            border-radius: 0 0 10px 10px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .controls {
+            margin-top: 15px;
+        }
+        .volume-label {
+            font-size: 19px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        #volume-text {
+            font-size: 22px;
+            color: #2980b9;
+        }
+        input[type="range"] {
+            width: 92%;
+            max-width: 400px;
+            height: 10px;
+            margin: 18px 0;
+            cursor: pointer;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        button:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+        button:hover:not(:disabled) {
+            background-color: #2980b9;
+        }
+        .btn-reset {
+            background-color: #e74c3c;
+        }
+        .btn-reset:hover:not(:disabled) {
+            background-color: #c0392b;
+        }
+        .btn-solution {
+            background-color: #9b59b6;
+        }
+        .btn-solution:hover:not(:disabled) {
+            background-color: #8e44ad;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .solution-box {
+            display: none;
+            margin-top: 25px;
+            background-color: #fdfefe;
+            border: 2px dashed #9b59b6;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 17px;
+            line-height: 1.8;
+            animation: fadeIn 0.4s;
+        }
+        .solution-box h4 {
+            color: #8e44ad;
+            margin-top: 0;
+            font-size: 21px;
+            text-align: center;
+            border-bottom: 1px solid #d2b4de;
+            padding-bottom: 12px;
+        }
+        .solution-box ul {
+            padding-left: 22px;
+            margin-bottom: 16px;
+        }
+        .solution-box li {
+            margin-bottom: 6px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 480px) {
+            .simulator-box {
+                padding: 20px 15px;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            .instruction {
+                font-size: 16.5px;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+                font-size: 18px;
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="simulator-box">
+        <h2>🔬 ពិសោធន៍កំណត់ម៉ាសមាឌទឹក</h2>
+        
+        <div class="instruction">
+            <strong>របៀបអនុវត្តសម្រាប់សិស្ស៖</strong><br>
+            ១. អូសរបារដើម្បីជ្រើសរើសមាឌទឹក (V) ដែលចង់វាស់។<br>
+            ២. ចុចប៊ូតុង "ចាក់ទឹកចូល" រួចកត់ត្រាម៉ាសសរុប។<br>
+            ៣. ចុចប៊ូតុង "បង្ហាញដំណោះស្រាយ" ដើម្បីផ្ទៀងផ្ទាត់ការគណនារបស់អ្នក។
+        </div>
+
+        <div class="beaker-container">
+            <div class="beaker-lip"></div>
+            <div class="beaker">
+                <span class="unit-label">mL</span>
+                <div class="water" id="water-level"></div>
+                <div class="graduations" id="beaker-ticks"></div>
+            </div>
+            <div class="scale-plate"></div>
+        </div>
+        
+        <div class="scale-display" id="scale-value">50.0 g</div>
+
+        <div class="controls">
+            <label for="volume-slider" class="volume-label">ជ្រើសរើសមាឌទឹក (V): <b id="volume-text">0</b> mL</label><br>
+            <input type="range" id="volume-slider" min="0" max="100" step="10" value="0" oninput="updateVolumeText()">
+            
+            <div class="btn-group">
+                <button onclick="performExperiment()">💧 ចាក់ទឹកចូល</button>
+                <button id="btn-sol" class="btn-solution" onclick="toggleSolution()" disabled>📝 បង្ហាញដំណោះស្រាយ</button>
+                <button class="btn-reset" onclick="resetExperiment()">🔄 កំណត់ឡើងវិញ</button>
+            </div>
+        </div>
+
+        <!-- Solution Container -->
+        <div id="solution-box" class="solution-box"></div>
+    </div>
+
+    <script>
+        const emptyBeakerMass = 50.0; 
+        const waterDensity = 1.0;     
+        const maxVolume = 100;
+        const maxFillHeightPercent = 85; 
+
+        // បង្កើតគំនូសក្រិតលើកែវដោយស្វ័យប្រវត្តិ (ពី 10 mL ដល់ 100 mL)
+        function createGraduations() {
+            const container = document.getElementById("beaker-ticks");
+            container.innerHTML = "";
+            for (let v = 10; v <= maxVolume; v += 10) {
+                const isMajor = (v % 20 === 0);
+                const bottomPercent = (v / maxVolume) * maxFillHeightPercent;
+                
+                const tick = document.createElement("div");
+                tick.className = "tick " + (isMajor ? "major" : "minor");
+                tick.style.bottom = bottomPercent + "%";
+                
+                if (isMajor) {
+                    const label = document.createElement("span");
+                    label.className = "tick-label";
+                    label.innerText = v;
+                    tick.appendChild(label);
+                }
+                
+                const line = document.createElement("div");
+                line.className = "tick-line";
+                tick.appendChild(line);
+                
+                container.appendChild(tick);
+            }
+        }
+
+        function updateVolumeText() {
+            let vol = document.getElementById("volume-slider").value;
+            document.getElementById("volume-text").innerText = vol;
+            
+            document.getElementById("solution-box").style.display = "none";
+            document.getElementById("btn-sol").disabled = true;
+        }
+
+        function performExperiment() {
+            let volume = parseFloat(document.getElementById("volume-slider").value);
+            let waterMass = volume * waterDensity;
+            let totalMass = emptyBeakerMass + waterMass;
+
+            document.getElementById("scale-value").innerText = totalMass.toFixed(1) + " g";
+            
+            let waterHeightPercentage = (volume / maxVolume) * maxFillHeightPercent;
+            document.getElementById("water-level").style.height = waterHeightPercentage + "%";
+
+            document.getElementById("btn-sol").disabled = false;
+            
+            if (document.getElementById("solution-box").style.display === "block") {
+                generateSolutionHTML(volume, totalMass, waterMass);
+            }
+        }
+
+        function toggleSolution() {
+            let box = document.getElementById("solution-box");
+            if (box.style.display === "none" || box.style.display === "") {
+                let volume = parseFloat(document.getElementById("volume-slider").value);
+                let waterMass = volume * waterDensity;
+                let totalMass = emptyBeakerMass + waterMass;
+                
+                generateSolutionHTML(volume, totalMass, waterMass);
+                box.style.display = "block";
+            } else {
+                box.style.display = "none";
+            }
+        }
+
+        function generateSolutionHTML(volume, totalMass, waterMass) {
+            let box = document.getElementById("solution-box");
+            
+            if (volume === 0) {
+                box.innerHTML = `<h4 style="color: #e74c3c;">មិនមានទឹកក្នុងកែវទេ!</h4>
+                                 <p style="text-align:center;">សូមជ្រើសរើសមាឌទឹកធំជាង ០ ដើម្បីធ្វើការគណនា។</p>`;
+                return;
+            }
+
+            let densityCalc = (waterMass / volume).toFixed(1);
+
+            box.innerHTML = `
+                <h4>📝 ដំណោះស្រាយ</h4>
+                <ul>
+                    <li>ម៉ាសកែវវាស់ទទេ <b>(m₁) = ${emptyBeakerMass.toFixed(1)} g</b></li>
+                    <li>ម៉ាសកែវ + ទឹក <b>(m₂) = ${totalMass.toFixed(1)} g</b> <i>(អានពីជញ្ជីង)</i></li>
+                    <li>មាឌទឹក <b>(V) = ${volume} mL = ${volume} cm³</b></li>
+                </ul>
+                <p><b>១. គណនាម៉ាសទឹកសុទ្ធ (m)៖</b></p>
+                <p style="padding: 10px 14px; background:#f4f6f7; border-left:4px solid #3498db; border-radius:4px;">
+                    រូបមន្ត៖ m = m₂ - m₁<br>
+                    m = ${totalMass.toFixed(1)} - ${emptyBeakerMass.toFixed(1)} = <b>${waterMass.toFixed(1)} g</b>
+                </p>
+                <p><b>២. គណនាម៉ាសមាឌទឹក (ρ)៖</b></p>
+                <p style="padding: 10px 14px; background:#f4f6f7; border-left:4px solid #2ecc71; border-radius:4px;">
+                    រូបមន្ត៖ ρ = m / V<br>
+                    ρ = ${waterMass.toFixed(1)} / ${volume} = <b>${densityCalc} g/cm³</b>
+                </p>
+                <p style="text-align:center; color:#27ae60; font-size:18px; margin-top:16px;">
+                    <b>ដូចនេះ ម៉ាសមាឌទឹកគឺ ${densityCalc} g/cm³ ឬ ${densityCalc * 1000} kg/m³។</b>
+                </p>
+            `;
+        }
+
+        function resetExperiment() {
+            document.getElementById("volume-slider").value = 0;
+            document.getElementById("volume-text").innerText = "0";
+            document.getElementById("water-level").style.height = "0%";
+            document.getElementById("scale-value").innerText = emptyBeakerMass.toFixed(1) + " g";
+            document.getElementById("solution-box").style.display = "none";
+            document.getElementById("btn-sol").disabled = true;
+        }
+
+        createGraduations();
+    </script>
+</body>
+</html>
