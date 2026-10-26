@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>សំណួរ និងចម្លើយ - ឡង់ទី</title>
+    <style>
+        body {
+            font-family: 'Khmer OS Siemreap', 'Suwannaphum', Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.8;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .qa-container {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+        .question {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .answer {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #27ae60;
+            border-radius: 4px;
+            color: #444;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.95em;
+            font-family: 'Khmer OS Siemreap', sans-serif;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-hide {
+            background-color: #e74c3c;
+        }
+        .btn-hide:hover {
+            background-color: #c0392b;
+        }
+        .svg-container {
+            background-color: #ffffff;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+            margin-top: 15px;
+            padding: 10px;
+            text-align: center;
+            overflow-x: auto;
+        }
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>សំណួរ និងចម្លើយរូបវិទ្យា (មេរៀន ឡង់ទី)</h1>
+
+    <!-- Q1 to Q5 remains the same as before -->
+    <div class="qa-container">
+        <div class="question">១. ដូចម្តេចហៅថា ឡង់ទី? តើឡង់ទីមានប៉ុន្មានប្រភេទ? ចូរគូររូបតាងប្រភេទឡង់ទីនីមួយៗ។</div>
+        <button id="btn-1" onclick="toggleAnswer(1)">បង្ហាញចម្លើយ</button>
+        <div id="answer-1" class="answer">
+            <b>ចម្លើយ៖</b><br>
+            - <b>ឡង់ទី៖</b> គឺជាមជ្ឈដ្ឋានថ្លាមានរាងជាសូលីត កំណត់ដោយផ្ទៃស្វ៊ែរពីរ ឬផ្ទៃស្វ៊ែរមួយនិងផ្ទៃប្លង់មួយ។<br>
+            - <b>ឡង់ទីមាន ២ ប្រភេទគឺ៖</b><br>
+            &nbsp;&nbsp;១. ឡង់ទីបង្រួម (Convex lens)៖ មានគែមស្តើងជាងផ្ចិតកណ្តាល។<br>
+            &nbsp;&nbsp;២. ឡង់ទីពង្រីក (Concave lens)៖ មានគែមក្រាស់ជាងផ្ចិតកណ្តាល។<br>
+            <div class="svg-container">
+                <svg width="300" height="150" viewBox="0 0 300 150">
+                    <path d="M 80 20 Q 120 75 80 130 Q 40 75 80 20 Z" fill="#e0f7fa" stroke="#00838f" stroke-width="2"/>
+                    <line x1="80" y1="10" x2="80" y2="140" stroke="#34495e" stroke-width="1" stroke-dasharray="4"/>
+                    <text x="80" y="145" text-anchor="middle" font-size="12">ឡង់ទីបង្រួម</text>
+                    
+                    <path d="M 220 20 Q 240 75 220 130 L 260 130 Q 240 75 260 20 Z" fill="#e0f7fa" stroke="#00838f" stroke-width="2"/>
+                    <line x1="240" y1="10" x2="240" y2="140" stroke="#34495e" stroke-width="1" stroke-dasharray="4"/>
+                    <text x="240" y="145" text-anchor="middle" font-size="12">ឡង់ទីពង្រីក</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="qa-container">
+        <div class="question">២. ដូចម្តេចហៅថា ចំណុចកំណុំរបស់ឡង់ទី?</div>
+        <button id="btn-2" onclick="toggleAnswer(2)">បង្ហាញចម្លើយ</button>
+        <div id="answer-2" class="answer">
+            <b>ចម្លើយ៖</b> <b>ចំណុចកំណុំរបស់ឡង់ទី (F)</b> គឺជាចំណុចប្រជុំនៃកាំចំណាំងបែរ (ចំពោះឡង់ទីបង្រួម) ឬចំណុចប្រជុំនៃបន្លាយកាំចំណាំងបែរ (ចំពោះឡង់ទីពង្រីក) នៅពេលដែលកាំចូលស្របទៅនឹងអ័ក្សមេនៃឡង់ទី។ ឡង់ទីមួយមានកំណុំពីរគឺ កំណុំវត្ថុ និងកំណុំរូប ដែលស្ថិតនៅចម្ងាយស្មើគ្នាពីផ្ចិតអុបទិក។
+        </div>
+    </div>
+
+    <div class="qa-container">
+        <div class="question">៣. ហេតុអ្វីបានជាវត្ថុភ្លឺស្ថិតនៅឆ្ងាយពីឡង់ទីបង្រួម មានទីតាំងរូបភាពស្ថិតនៅលើកំណុំនៃឡង់ទី?</div>
+        <button id="btn-3" onclick="toggleAnswer(3)">បង្ហាញចម្លើយ</button>
+        <div id="answer-3" class="answer">
+            <b>ចម្លើយ៖</b> ពីព្រោះកាលណាវត្ថុភ្លឺស្ថិតនៅឆ្ងាយអានន្ត នោះបាច់កាំពន្លឺដែលជះមកពីវត្ថុនោះ នឹងចូលមកប៉ះឡង់ទីក្នុងទម្រង់ជាបាច់កាំស្រប (ស្របគ្នានឹងអ័ក្សមេ)។ តាមលក្ខណៈរបស់ឡង់ទីបង្រួម រាល់កាំចូលស្របនឹងអ័ក្សមេ វានឹងផ្តល់កាំចំណាំងបែរកាត់តាមចំណុចកំណុំរូប (F')។ ដូច្នេះរូបភាពដែលកើតឡើង នឹងប្រមូលផ្តុំគ្នានៅត្រង់ចំណុចកំណុំនោះតែម្តង។
+        </div>
+    </div>
+
+    <div class="qa-container">
+        <div class="question">៤. តើកែវភ្នែកជាប្រភេទឡង់ទីអ្វី? តើវាមានតួនាទីជាអ្វី?</div>
+        <button id="btn-4" onclick="toggleAnswer(4)">បង្ហាញចម្លើយ</button>
+        <div id="answer-4" class="answer">
+            <b>ចម្លើយ៖</b><br>
+            - កែវភ្នែករបស់មនុស្ស គឺជាប្រភេទ <b>ឡង់ទីបង្រួម (Convex lens)</b>។<br>
+            - <b>តួនាទី៖</b> វាមានតួនាទីបង្រួមកាំពន្លឺដែលចូលមកក្នុងភ្នែក ឱ្យទៅផ្តុំគ្នាបង្កើតជារូបភាពនៅត្រង់រេទីន (Retina) ដើម្បីឱ្យយើងអាចមើលឃើញវត្ថុផ្សេងៗបានច្បាស់។ វាអាចផ្លាស់ប្តូរភាពកោង (ចម្ងាយកំណុំ) របស់វាបាន ដើម្បីតម្រូវតាមចម្ងាយជិតឬឆ្ងាយនៃវត្ថុ។
+        </div>
+    </div>
+
+    <div class="qa-container">
+        <div class="question">៥. តើកែវពង្រីកធ្វើពីឡង់ទីប្រភេទណា? ហេតុអ្វីបានជាឡង់ទីដែលយកមកធ្វើកែវពង្រីកត្រូវមានចម្ងាយកំណុំខ្លី?</div>
+        <button id="btn-5" onclick="toggleAnswer(5)">បង្ហាញចម្លើយ</button>
+        <div id="answer-5" class="answer">
+            <b>ចម្លើយ៖</b><br>
+            - កែវពង្រីក ធ្វើឡើងពី <b>ឡង់ទីបង្រួម (Convex lens)</b>។<br>
+            - <b>មូលហេតុដែលត្រូវមានចម្ងាយកំណុំខ្លី៖</b> ពីព្រោះអានុភាពពង្រីក (Magnification) នៃឡង់ទី សមាមាត្រច្រាសនឹងចម្ងាយកំណុំរបស់វា។ កាលណាឡង់ទីមានចម្ងាយកំណុំ (f) កាន់តែខ្លី នោះវានឹងមានអានុភាពពង្រីកកាន់តែធំ ដែលអនុញ្ញាតឱ្យយើងអាចមើលឃើញវត្ថុតូចៗបានកាន់តែធំច្បាស់ល្អ។
+        </div>
+    </div>
+
+    <!-- Q6 with drawn SVG -->
+    <div class="qa-container">
+        <div class="question">៦. ឡង់ទីផ្សំឡើងដោយកំណាត់ព្រីសដូចរូបខាងស្តាំ។ តើកំណាត់ព្រីស (ក) និង (ខ) មួយណាបំបែកកាំពន្លឺខ្លាំងជាង? ចូរគូរកាំពន្លឺដាលឆ្លងកាត់កំណាត់ព្រីសទាំងពីរ។</div>
+        <button id="btn-6" onclick="toggleAnswer(6)">បង្ហាញចម្លើយ</button>
+        <div id="answer-6" class="answer">
+            <b>ចម្លើយ៖</b><br>
+            - កំណាត់ព្រីស <b>(ក)</b> ដែលស្ថិតនៅគែមឡង់ទី (មានមុំកំពូលធំជាង ឬរាងស្រួចជាង) <b>បំបែក (បត់) កាំពន្លឺបានខ្លាំងជាង</b> កំណាត់ព្រីស (ខ) ដែលស្ថិតនៅជិតអ័ក្សមេ។<br>
+            - <b>គូរកាំពន្លឺឆ្លងកាត់ព្រីស៖</b> (កាំពន្លឺកាត់ព្រីស ក បត់ខ្លាំងជាងព្រីស ខ តែវាទៅប្រសព្វគ្នានៅកំណុំ F' តែមួយ)
+            <div class="svg-container">
+                <svg width="400" height="220" viewBox="0 0 400 220">
+                    <!-- Axis -->
+                    <line x1="20" y1="110" x2="380" y2="110" stroke="#7f8c8d" stroke-dasharray="4"/>
+                    
+                    <!-- Lens segments -->
+                    <path d="M 120 20 L 135 55 L 120 55 Z" fill="#bdc3c7" stroke="#2c3e50"/>
+                    <path d="M 120 55 L 135 55 L 140 85 L 120 85 Z" fill="#ecf0f1" stroke="#2c3e50"/>
+                    <path d="M 120 85 L 140 85 L 140 135 L 120 135 Z" fill="#bdc3c7" stroke="#2c3e50"/>
+                    <path d="M 120 135 L 140 135 L 135 165 L 120 165 Z" fill="#ecf0f1" stroke="#2c3e50"/>
+                    <path d="M 120 165 L 135 165 L 120 200 Z" fill="#bdc3c7" stroke="#2c3e50"/>
+                    
+                    <text x="145" y="45" font-weight="bold">ក</text>
+                    <text x="150" y="75" font-weight="bold">ខ</text>
+                    
+                    <!-- Ray for ក -->
+                    <line x1="20" y1="40" x2="125" y2="40" stroke="#e74c3c" stroke-width="2"/>
+                    <polygon points="70,35 80,40 70,45" fill="#e74c3c"/>
+                    <line x1="125" y1="40" x2="280" y2="110" stroke="#e74c3c" stroke-width="2"/>
+                    <polygon points="200,70 210,78 200,82" fill="#e74c3c"/>
+                    
+                    <!-- Ray for ខ -->
+                    <line x1="20" y1="70" x2="130" y2="70" stroke="#2980b9" stroke-width="2"/>
+                    <polygon points="70,65 80,70 70,75" fill="#2980b9"/>
+                    <line x1="130" y1="70" x2="280" y2="110" stroke="#2980b9" stroke-width="2"/>
+                    <polygon points="205,86 215,93 205,98" fill="#2980b9"/>
+                    
+                    <!-- Focal Point -->
+                    <circle cx="280" cy="110" r="4" fill="black"/>
+                    <text x="275" y="130" font-weight="bold">F'</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Q7 with drawn SVGs -->
+    <div class="qa-container">
+        <div class="question">៧. ចូរគូរកាំពន្លឺពិសេសបំពេញរូបខាងក្រោម ដើម្បីរកទីតាំងរូបភាព។</div>
+        <button id="btn-7" onclick="toggleAnswer(7)">បង្ហាញចម្លើយ</button>
+        <div id="answer-7" class="answer">
+            <b>ចម្លើយ៖</b><br>
+            ការរកទីតាំងរូបភាព ត្រូវគូសកាំពិសេសយ៉ាងតិច ២ ក្នុងចំណោមកាំទាំង៣៖<br>
+            ១. កាំចេញពីចុងវត្ថុ ស្របនឹងអ័ក្សមេ -> កាំចំណាំងបែរឆ្លងកាត់កំណុំរូប (F')។<br>
+            ២. កាំចេញពីចុងវត្ថុ កាត់តាមផ្ចិតអុបទិក (O) -> កាំចំណាំងបែរចេញទៅត្រង់ មិនងាក។<br>
+            <i>(ចំណុចប្រសព្វនៃកាំចំណាំងបែរ ឬបន្លាយកាំចំណាំងបែរ គឺជាទីតាំងនៃរូបភាព)</i>
+            
+            <div class="svg-container">
+                <h4 style="margin-bottom: 5px; color: #2c3e50;">រូបទី១៖ ឡង់ទីបង្រួម (វត្ថុនៅក្រៅកំណុំ F) -> រូបពិត ផ្កាប់</h4>
+                <svg width="450" height="220" viewBox="0 0 450 220">
+                    <line x1="20" y1="110" x2="430" y2="110" stroke="black" stroke-width="1.5"/>
+                    <path d="M 200 30 Q 220 110 200 190 Q 180 110 200 30 Z" fill="#e0f7fa" stroke="#00838f" stroke-width="2"/>
+                    <line x1="200" y1="30" x2="200" y2="190" stroke="#00838f" stroke-dasharray="4"/>
+                    
+                    <!-- F, 2F points -->
+                    <circle cx="140" cy="110" r="3" fill="black"/><text x="135" y="130">F</text>
+                    <circle cx="80" cy="110" r="3" fill="black"/><text x="75" y="130">2F</text>
+                    <circle cx="260" cy="110" r="3" fill="black"/><text x="255" y="130">F'</text>
+                    <circle cx="320" cy="110" r="3" fill="black"/><text x="310" y="130">2F'</text>
+                    
+                    <!-- Object -->
+                    <line x1="110" y1="110" x2="110" y2="70" stroke="black" stroke-width="3"/>
+                    <polygon points="105,75 110,65 115,75" fill="black"/>
+                    
+                    <!-- Image -->
+                    <line x1="380" y1="110" x2="380" y2="185" stroke="#c62828" stroke-width="3"/>
+                    <polygon points="375,180 380,190 385,180" fill="#c62828"/>
+                    
+                    <!-- Rays -->
+                    <line x1="110" y1="70" x2="200" y2="70" stroke="#e74c3c" stroke-width="1.5"/>
+                    <polygon points="150,66 160,70 150,74" fill="#e74c3c"/>
+                    <line x1="200" y1="70" x2="380" y2="190" stroke="#e74c3c" stroke-width="1.5"/>
+                    <polygon points="280,120 288,128 276,128" fill="#e74c3c"/> 
+                    
+                    <line x1="110" y1="70" x2="380" y2="190" stroke="#2980b9" stroke-width="1.5"/>
+                    <polygon points="240,124 250,132 242,136" fill="#2980b9"/> 
+                </svg>
+
+                <h4 style="margin-bottom: 5px; color: #2c3e50;">រូបទី២៖ ឡង់ទីបង្រួម (វត្ថុនៅចន្លោះ O និង F) -> រូបនិម្មិត ឈរ</h4>
+                <svg width="450" height="220" viewBox="0 0 450 220">
+                    <line x1="20" y1="150" x2="430" y2="150" stroke="black" stroke-width="1.5"/>
+                    <path d="M 280 50 Q 300 150 280 210 Q 260 150 280 50 Z" fill="#e0f7fa" stroke="#00838f" stroke-width="2"/>
+                    <line x1="280" y1="50" x2="280" y2="210" stroke="#00838f" stroke-dasharray="4"/>
+                    
+                    <!-- Points -->
+                    <circle cx="220" cy="150" r="3" fill="black"/><text x="215" y="170">F</text>
+                    <circle cx="340" cy="150" r="3" fill="black"/><text x="335" y="170">F'</text>
+                    
+                    <!-- Object -->
+                    <line x1="250" y1="150" x2="250" y2="110" stroke="black" stroke-width="3"/>
+                    <polygon points="245,115 250,105 255,115" fill="black"/>
+                    
+                    <!-- Virtual Image -->
+                    <line x1="190" y1="150" x2="190" y2="35" stroke="#c62828" stroke-width="3" stroke-dasharray="4"/>
+                    <polygon points="185,40 190,30 195,40" fill="#c62828"/>
+                    
+                    <!-- Rays -->
+                    <line x1="250" y1="110" x2="280" y2="110" stroke="#e74c3c" stroke-width="1.5"/>
+                    <line x1="280" y1="110" x2="385" y2="180" stroke="#e74c3c" stroke-width="1.5"/>
+                    <polygon points="325,136 335,146 323,148" fill="#e74c3c"/>
+                    
+                    <line x1="280" y1="110" x2="190" y2="30" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="4"/>
+                    
+                    <line x1="250" y1="110" x2="340" y2="230" stroke="#2980b9" stroke-width="1.5"/>
+                    <polygon points="285,152 295,165 282,165" fill="#2980b9"/>
+                    <line x1="250" y1="110" x2="190" y2="30" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="4"/>
+                </svg>
+
+                <h4 style="margin-bottom: 5px; color: #2c3e50;">រូបទី៣៖ ឡង់ទីពង្រីក (រូបនិម្មិតជានិច្ច ឈរ តូចជាងវត្ថុ)</h4>
+                <svg width="450" height="220" viewBox="0 0 450 220">
+                    <line x1="20" y1="140" x2="430" y2="140" stroke="black" stroke-width="1.5"/>
+                    <path d="M 270 40 L 290 40 Q 280 140 290 220 L 270 220 Q 280 140 270 40 Z" fill="#e0f7fa" stroke="#00838f" stroke-width="2"/>
+                    <line x1="280" y1="40" x2="280" y2="220" stroke="#00838f" stroke-dasharray="4"/>
+                    
+                    <!-- Points -->
+                    <circle cx="210" cy="140" r="3" fill="black"/><text x="205" y="160">F'</text>
+                    <circle cx="350" cy="140" r="3" fill="black"/><text x="345" y="160">F</text>
+                    
+                    <!-- Object -->
+                    <line x1="140" y1="140" x2="140" y2="80" stroke="black" stroke-width="3"/>
+                    <polygon points="135,85 140,75 145,85" fill="black"/>
+                    
+                    <!-- Virtual Image -->
+                    <line x1="233" y1="140" x2="233" y2="120" stroke="#c62828" stroke-width="3" stroke-dasharray="4"/>
+                    <polygon points="228,125 233,115 238,125" fill="#c62828"/>
+                    
+                    <!-- Rays -->
+                    <line x1="140" y1="80" x2="280" y2="80" stroke="#e74c3c" stroke-width="1.5"/>
+                    <polygon points="200,76 210,80 200,84" fill="#e74c3c"/>
+                    
+                    <line x1="280" y1="80" x2="350" y2="20" stroke="#e74c3c" stroke-width="1.5"/>
+                    <polygon points="310,40 320,50 310,55" fill="#e74c3c"/>
+                    
+                    <line x1="280" y1="80" x2="210" y2="140" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="4"/>
+                    
+                    <line x1="140" y1="80" x2="280" y2="140" stroke="#2980b9" stroke-width="1.5"/>
+                    <polygon points="190,98 200,108 190,112" fill="#2980b9"/>
+                    <line x1="280" y1="140" x2="350" y2="170" stroke="#2980b9" stroke-width="1.5"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleAnswer(id) {
+            var answerDiv = document.getElementById('answer-' + id);
+            var btn = document.getElementById('btn-' + id);
+            
+            if (answerDiv.style.display === 'none' || answerDiv.style.display === '') {
+                answerDiv.style.display = 'block';
+                btn.innerText = 'លាក់ចម្លើយ';
+                btn.classList.add('btn-hide');
+            } else {
+                answerDiv.style.display = 'none';
+                btn.innerText = 'បង្ហាញចម្លើយ';
+                btn.classList.remove('btn-hide');
+            }
+        }
+    </script>
+</body>
+</html>

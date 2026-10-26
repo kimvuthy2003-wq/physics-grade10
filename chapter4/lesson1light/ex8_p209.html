@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ការពិសោធន៍៖ ចំណាំងបែរនៃពន្លឺ (Snell's Law)</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts សម្រាប់ Battambang -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- MathJax សម្រាប់រូបមន្តស្តង់ដារ -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Battambang', 'Khmer OS Battambang', sans-serif;
+            margin: 0;
+            background-color: #f4f6f9; 
+            color: #111;
+            font-size: 18px; /* ទំហំអក្សរធំ */
+        }
+
+        .container-custom {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ប៊ូតុង និង Input */
+        .action-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border-width: 1px;
+            border-color: #cbd5e1;
+            background-color: #ffffff;
+            color: #334155;
+            font-size: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-weight: bold;
+        }
+        .action-btn:hover {
+            background-color: #f8fafc;
+            border-color: #94a3b8;
+        }
+        .action-btn:active {
+            transform: translateY(2px);
+        }
+        
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 28px;
+            width: 28px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -10px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* SVG Simulator */
+        svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 500px;
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #cfd8dc;
+            margin: 0 auto;
+        }
+
+        /* រចនាប័ទ្មសម្រាប់អក្សររូបមន្ត HTML សុវត្ថិភាព */
+        .html-math { display: inline-flex; align-items: center; font-size: 22px; }
+        .html-fraction { display: inline-flex; flex-direction: column; align-items: center; margin: 0 8px; vertical-align: middle; }
+        .html-num { border-bottom: 2px solid #111; padding: 0 6px 4px 6px; }
+        .html-den { padding: 4px 6px 0 6px; }
+        .math-var { font-family: 'Times New Roman', Times, serif; font-style: italic; }
+        .math-sub { font-size: 0.75em; font-family: 'Arial', sans-serif; font-style: normal; vertical-align: sub; }
+        .dynamic-val { color: #d32f2f; font-weight: bold; padding: 0 6px; font-size: 24px; font-family: 'Arial', sans-serif;}
+        .highlight { color: #10b981; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container-custom">
+    
+    <div class="mb-5 text-center">
+        <h1 class="text-3xl font-bold text-slate-800 mb-2 leading-tight">ការពិសោធន៍៖ ចំណាំងបែរនៃពន្លឺ</h1>
+        <p class="text-lg text-slate-500">ច្បាប់ស្នេល-ដេកាត (Snell's Law)</p>
+    </div>
+
+    <!-- ១. ប្រធានលំហាត់ -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6 shadow-sm text-slate-800">
+        <h3 class="text-xl font-bold text-orange-600 mb-4 border-b border-slate-200 pb-2">📝 ប្រធានលំហាត់ទី៨</h3>
+        <p class="mb-2 leading-relaxed text-lg text-justify">
+            ៨. កញ្ចក់មួយមានរាងប្រលេពីប៉ែត និងមានសន្ទស្សន៍ <span class="font-bold text-emerald-600" id="probN2">1.59</span> ។ គេដាក់កញ្ចក់នេះទៅក្នុងទឹកដែលមានសន្ទស្សន៍ <span class="font-bold text-blue-600" id="probN1">1.33</span> ។ កាំពន្លឺមួយដាលនៅក្នុងទឹកហើយប៉ះផ្ទៃកញ្ចក់ក្រោមមុំមួយដែលមានតម្លៃ <span class="font-bold text-orange-500" id="probTh1">70&deg;</span> ។ គណនាមុំចំណាំងបែរនៅក្នុងកញ្ចក់ ។
+        </p>
+    </div>
+
+    <!-- ២. ផ្ទាំង Simulator -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+            <h2 class="text-2xl font-bold text-slate-800">⚡ ដ្យាក្រាមពន្លឺឆ្លងកាត់មជ្ឈដ្ឋាន 2D</h2>
+            
+            <!-- Dashboard ខ្នាតតូច -->
+            <div class="flex flex-wrap gap-4 md:gap-6 bg-slate-50 px-4 py-3 rounded-lg border border-slate-200 shadow-sm w-full md:w-auto justify-center">
+                <div class="text-center">
+                    <div class="text-sm text-slate-500">មុំចំណាំងប៉ះ ($\theta_1$)</div>
+                    <div class="text-2xl font-bold text-orange-500" id="dashTh1">70.0&deg;</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm text-slate-500">មុំចំណាំងផ្លាត ($\theta'_1$)</div>
+                    <div class="text-2xl font-bold text-yellow-500" id="dashTh1Prime">70.0&deg;</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm text-slate-500">មុំចំណាំងបែរ ($\theta_2$)</div>
+                    <div class="text-2xl font-bold text-emerald-600" id="dashTh2">51.8&deg;</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tirWarning" class="hidden mb-4 p-4 bg-red-50 border border-red-300 rounded-lg text-red-600 font-bold text-center text-xl shadow-sm">
+            ⚠️ បាតុភូតចំណាំងផ្លាតសរុប (Total Internal Reflection) បានកើតឡើង! គ្មានកាំចំណាំងបែរទេ។
+        </div>
+        
+        <div class="relative w-full flex items-center justify-center bg-slate-50 border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <svg id="opticSvg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <!-- ក្បាលព្រួញ -->
+                    <marker id="arrowInc" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#f97316" />
+                    </marker>
+                    <marker id="arrowRef" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#eab308" />
+                    </marker>
+                    <marker id="arrowRefr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981" />
+                    </marker>
+                </defs>
+
+                <!-- ផ្ទៃមជ្ឈដ្ឋាន -->
+                <!-- មជ្ឈដ្ឋានទី១ (ឧ. ទឹក) ផ្នែកខាងលើ -->
+                <rect x="0" y="0" width="1000" height="300" fill="#e0f2fe"/>
+                <text x="20" y="40" font-family="'Battambang', sans-serif" font-size="24" font-weight="bold" fill="#0284c7" id="svgMedium1">មជ្ឈដ្ឋានទី១ (ទឹក) n1 = 1.33</text>
+
+                <!-- មជ្ឈដ្ឋានទី២ (ឧ. កញ្ចក់) ផ្នែកខាងក្រោម -->
+                <rect x="0" y="300" width="1000" height="300" fill="#e2e8f0"/>
+                <text x="20" y="340" font-family="'Battambang', sans-serif" font-size="24" font-weight="bold" fill="#475569" id="svgMedium2">មជ្ឈដ្ឋានទី២ (កញ្ចក់) n2 = 1.59</text>
+
+                <!-- ខ្សែបន្ទាត់ព្រំដែន (Boundary) -->
+                <line x1="0" y1="300" x2="1000" y2="300" stroke="#94a3b8" stroke-width="4"/>
+
+                <!-- ខ្សែតែកង (Normal Line) -->
+                <line x1="500" y1="50" x2="500" y2="550" stroke="#64748b" stroke-width="3" stroke-dasharray="10,10"/>
+                <text x="510" y="70" font-family="'Battambang', sans-serif" font-size="18" fill="#64748b">ខ្សែតែកង</text>
+
+                <!-- ធ្នូមុំ (Arcs) -->
+                <!-- មុំចំណាំងប៉ះ (Incident Angle Arc) -->
+                <path id="arcInc" d="" fill="none" stroke="#f97316" stroke-width="2"/>
+                <text id="lblSvgTh1" x="460" y="150" font-family="Arial" font-size="20" font-weight="bold" fill="#f97316">θ1</text>
+
+                <!-- មុំចំណាំងបែរ (Refracted Angle Arc) -->
+                <path id="arcRefr" d="" fill="none" stroke="#10b981" stroke-width="2"/>
+                <text id="lblSvgTh2" x="530" y="450" font-family="Arial" font-size="20" font-weight="bold" fill="#10b981">θ2</text>
+
+                <!-- កាំពន្លឺ (Light Rays) -->
+                <!-- កាំចំណាំងប៉ះ (Incident Ray) -->
+                <line id="rayInc" x1="200" y1="50" x2="500" y2="300" stroke="#f97316" stroke-width="5" marker-end="url(#arrowInc)"/>
+                
+                <!-- កាំចំណាំងផ្លាត (Reflected Ray) -->
+                <line id="rayRef" x1="500" y1="300" x2="800" y2="50" stroke="#eab308" stroke-width="3" marker-end="url(#arrowRef)"/>
+
+                <!-- កាំចំណាំងបែរ (Refracted Ray) -->
+                <line id="rayRefr" x1="500" y1="300" x2="650" y2="550" stroke="#10b981" stroke-width="5" marker-end="url(#arrowRefr)"/>
+
+            </svg>
+        </div>
+        
+        <!-- កំណត់សម្គាល់ពណ៌ -->
+        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center border-t border-slate-200 pt-4">
+            <div class="text-orange-500 font-bold text-lg"><span class="inline-block w-4 h-4 bg-orange-500 rounded-full mr-2"></span>កាំចំណាំងប៉ះ</div>
+            <div class="text-yellow-500 font-bold text-lg"><span class="inline-block w-4 h-4 bg-yellow-500 rounded-full mr-2"></span>កាំចំណាំងផ្លាត</div>
+            <div class="text-emerald-500 font-bold text-lg"><span class="inline-block w-4 h-4 bg-emerald-500 rounded-full mr-2"></span>កាំចំណាំងបែរ</div>
+            <div class="text-slate-500 font-bold text-lg"><span class="inline-block w-4 h-1 bg-slate-500 border-t border-dashed mr-2"></span>ខ្សែតែកង</div>
+        </div>
+    </div>
+
+    <!-- ៣. ផ្ទាំងបញ្ជាទិន្នន័យ (Sliders) -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6 shadow-sm">
+        <h3 class="text-xl font-bold text-slate-800 mb-4">⚙️ ផ្ទាំងគ្រប់គ្រងទិន្នន័យ</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block text-lg font-bold text-slate-700 mb-3">សន្ទស្សន៍មជ្ឈដ្ឋានទី១ (<span class="math-var">n</span><sub class="math-sub">1</sub>): <span id="lblN1" class="text-blue-600 text-2xl ml-2">1.33</span></label>
+                <input type="range" id="sliderN1" min="1.0" max="2.5" value="1.33" step="0.01">
+                <div class="text-sm text-slate-500 mt-2">(ទឹក = 1.33, ខ្យល់ = 1.00)</div>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block text-lg font-bold text-slate-700 mb-3">សន្ទស្សន៍មជ្ឈដ្ឋានទី២ (<span class="math-var">n</span><sub class="math-sub">2</sub>): <span id="lblN2" class="text-emerald-600 text-2xl ml-2">1.59</span></label>
+                <input type="range" id="sliderN2" min="1.0" max="2.5" value="1.59" step="0.01">
+                <div class="text-sm text-slate-500 mt-2">(កញ្ចក់ប្រលេពីប៉ែត = 1.59)</div>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block text-lg font-bold text-slate-700 mb-3">មុំចំណាំងប៉ះ (<span class="math-var">&theta;</span><sub class="math-sub">1</sub>): <span id="lblTh1" class="text-orange-500 text-2xl ml-2">70&deg;</span></label>
+                <input type="range" id="sliderTh1" min="0" max="89" value="70" step="1">
+                <div class="text-sm text-slate-500 mt-2">(មុំរវាងកាំប៉ះ និងខ្សែតែកង)</div>
+            </div>
+        </div>
+        
+        <button id="btnToggleSol" class="action-btn w-full mt-6 py-4 rounded-xl text-blue-700 bg-blue-50 border-blue-300 hover:bg-blue-100">
+            📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត
+        </button>
+    </div>
+
+    <!-- ៤. ដំណោះស្រាយ -->
+    <div id="solutionBox" class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-lg text-slate-800 leading-relaxed hidden mb-6 shadow-sm overflow-x-auto">
+        <h3 class="text-2xl font-bold text-blue-700 mb-4 border-b border-blue-200 pb-3">📝 ដំណោះស្រាយលម្អិត</h3>
+        
+        <p class="font-bold text-slate-800 mt-4 text-xl">១. ទិន្នន័យប្រធាន ៖</p>
+        <ul class="list-disc ml-8 mb-4">
+            <li>សន្ទស្សន៍មជ្ឈដ្ឋានទី១ (ទឹក)៖ <span id="mathDataN1"></span></li>
+            <li>សន្ទស្សន៍មជ្ឈដ្ឋានទី២ (កញ្ចក់)៖ <span id="mathDataN2"></span></li>
+            <li>មុំចំណាំងប៉ះ៖ <span id="mathDataTh1"></span></li>
+        </ul>
+
+        <p class="font-bold text-slate-800 text-xl">២. រូបមន្តច្បាប់ស្នេល-ដេកាត (Snell's Law) ៖</p>
+        <div class="my-4 w-full text-center text-2xl">
+            $$n_1 \sin\theta_1 = n_2 \sin\theta_2$$
+        </div>
+
+        <p class="font-bold text-slate-800 text-xl">៣. គណនាមុំចំណាំងបែរ ($\theta_2$) ៖</p>
+        <p>ទាញរក $\sin\theta_2$ ៖</p>
+        <div id="mathCalcSinTh2" class="my-4 w-full text-center text-xl overflow-x-auto overflow-y-hidden">
+            <!-- Rendered by JS -->
+        </div>
+
+        <div id="mathCalcTh2" class="my-4 w-full text-center text-xl overflow-x-auto overflow-y-hidden">
+             <!-- Rendered by JS (Result or TIR warning) -->
+        </div>
+        
+        <p class="mt-4 text-center" id="finalConcl">
+            ដូចនេះ មុំចំណាំងបែរនៅក្នុងកញ្ចក់គឺ <span class="highlight text-2xl bg-white px-4 py-2 rounded border border-blue-200"><span id="ansFinal">...</span>&deg;</span> ។
+        </p>
+
+    </div>
+
+</div>
+
+<script>
+    // អថេរ UI
+    var sliderN1 = document.getElementById('sliderN1');
+    var sliderN2 = document.getElementById('sliderN2');
+    var sliderTh1 = document.getElementById('sliderTh1');
+    
+    var btnToggleSol = document.getElementById('btnToggleSol');
+    var solutionBox = document.getElementById('solutionBox');
+    
+    // អថេរ SVG Rays
+    var rayInc = document.getElementById('rayInc');
+    var rayRef = document.getElementById('rayRef');
+    var rayRefr = document.getElementById('rayRefr');
+    var arcInc = document.getElementById('arcInc');
+    var arcRefr = document.getElementById('arcRefr');
+    var lblSvgTh1 = document.getElementById('lblSvgTh1');
+    var lblSvgTh2 = document.getElementById('lblSvgTh2');
+
+    btnToggleSol.addEventListener('click', function() {
+        if (solutionBox.classList.contains('hidden')) {
+            solutionBox.classList.remove('hidden');
+        } else {
+            solutionBox.classList.add('hidden');
+        }
+    });
+
+    var mathTimeout;
+
+    // អនុគមន៍គូសធ្នូ (Arc) ក្នុង SVG
+    function describeArc(x, y, radius, startAngle, endAngle){
+        var start = polarToCartesian(x, y, radius, endAngle);
+        var end = polarToCartesian(x, y, radius, startAngle);
+        var largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+        var d = [
+            "M", start.x, start.y, 
+            "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
+        ].join(" ");
+        return d;       
+    }
+
+    function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+        var angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+        return {
+            x: centerX + (radius * Math.cos(angleInRadians)),
+            y: centerY + (radius * Math.sin(angleInRadians))
+        };
+    }
+
+    function updatePhysics() {
+        var n1 = parseFloat(sliderN1.value);
+        var n2 = parseFloat(sliderN2.value);
+        var th1_deg = parseFloat(sliderTh1.value);
+        
+        var th1_rad = th1_deg * Math.PI / 180;
+        var sin_th1 = Math.sin(th1_rad);
+        
+        // Snell's Law
+        var sin_th2 = (n1 / n2) * sin_th1;
+
+        // ត្រួតពិនិត្យចំណាំងផ្លាតសរុប (TIR) ដោយមិនប្រើ < ឬ >
+        var isTIR = false;
+        var diff = Math.max(sin_th2, 1.0) - 1.0;
+        var isGreaterThanOne = (diff !== 0);
+        if (isGreaterThanOne === true) {
+            isTIR = true;
+        }
+
+        var th2_rad = 0;
+        var th2_deg = 0;
+
+        // ធ្វើបច្ចុប្បន្នភាពអក្សរលើ UI
+        document.getElementById('lblN1').innerText = n1.toFixed(2);
+        document.getElementById('lblN2').innerText = n2.toFixed(2);
+        document.getElementById('lblTh1').innerHTML = th1_deg + "&deg;";
+        
+        document.getElementById('probN1').innerText = n1.toFixed(2);
+        document.getElementById('probN2').innerText = n2.toFixed(2);
+        document.getElementById('probTh1').innerHTML = th1_deg + "&deg;";
+
+        document.getElementById('dashTh1').innerHTML = th1_deg.toFixed(1) + "&deg;";
+        document.getElementById('dashTh1Prime').innerHTML = th1_deg.toFixed(1) + "&deg;";
+
+        document.getElementById('svgMedium1').innerText = "មជ្ឈដ្ឋានទី១: n1 = " + n1.toFixed(2);
+        document.getElementById('svgMedium2').innerText = "មជ្ឈដ្ឋានទី២: n2 = " + n2.toFixed(2);
+
+        // --- គូសបន្ទាត់ក្នុង SVG ---
+        var cx = 500; // Center X
+        var cy = 300; // Center Y (Boundary)
+        var rayLen = 300;
+
+        // កាំចំណាំងប៉ះ (Incident Ray) - មកពីឆ្វេងលើ (មុំវាស់ពីអ័ក្ស Y)
+        var incX = cx - rayLen * Math.sin(th1_rad);
+        var incY = cy - rayLen * Math.cos(th1_rad);
+        
+        // Line x1, y1 គឺជាចុងកន្ទុយ, x2, y2 គឺជាចំណុចកណ្តាល
+        rayInc.setAttribute("x1", incX);
+        rayInc.setAttribute("y1", incY);
+        rayInc.setAttribute("x2", cx);
+        rayInc.setAttribute("y2", cy);
+
+        // គូសធ្នូសម្រាប់មុំ $\theta_1$
+        var arcR = 80;
+        if (th1_deg > 0) {
+            arcInc.setAttribute("d", describeArc(cx, cy, arcR, 360 - th1_deg, 360));
+            var midTh1 = (360 - th1_deg/2) * Math.PI/180;
+            lblSvgTh1.setAttribute("x", cx + (arcR+20)*Math.sin(midTh1) - 10);
+            lblSvgTh1.setAttribute("y", cy - (arcR+20)*Math.cos(midTh1) + 10);
+            lblSvgTh1.textContent = "θ1=" + th1_deg + "°";
+        } else {
+            arcInc.setAttribute("d", "");
+            lblSvgTh1.textContent = "";
+        }
+
+        // កាំចំណាំងផ្លាត (Reflected Ray) - ទៅស្តាំលើ
+        var refX = cx + rayLen * Math.sin(th1_rad);
+        var refY = cy - rayLen * Math.cos(th1_rad);
+        rayRef.setAttribute("x1", cx);
+        rayRef.setAttribute("y1", cy);
+        rayRef.setAttribute("x2", refX);
+        rayRef.setAttribute("y2", refY);
+
+        if (isTIR === true) {
+            // បាតុភូតចំណាំងផ្លាតសរុប
+            document.getElementById('dashTh2').innerHTML = "-";
+            document.getElementById('tirWarning').classList.remove('hidden');
+            rayRefr.setAttribute("opacity", "0");
+            arcRefr.setAttribute("opacity", "0");
+            lblSvgTh2.textContent = "";
+            
+            // កាំផ្លាតភ្លឺច្បាស់ 100%
+            rayRef.setAttribute("stroke-width", "5");
+            rayRef.setAttribute("stroke", "#facc15");
+
+            document.getElementById('ansFinal').innerText = "គ្មាន (ចំណាំងផ្លាតសរុប)";
+            document.getElementById('finalConcl').innerHTML = `<span class="text-red-600 font-bold">⚠️ កាំពន្លឺមិនបានឆ្លងកាត់ចូលមជ្ឈដ្ឋានទី២ទេ ព្រោះកើតមានបាតុភូតចំណាំងផ្លាតសរុប។</span>`;
+
+        } else {
+            // ចំណាំងបែរធម្មតា
+            th2_rad = Math.asin(sin_th2);
+            th2_deg = th2_rad * 180 / Math.PI;
+
+            document.getElementById('dashTh2').innerHTML = th2_deg.toFixed(1) + "&deg;";
+            document.getElementById('tirWarning').classList.add('hidden');
+            
+            rayRefr.setAttribute("opacity", "1");
+            arcRefr.setAttribute("opacity", "1");
+            
+            // កាំផ្លាតរាងស្តើង (ដោយសារថាមពលភាគច្រើនទៅកាំបែរ)
+            rayRef.setAttribute("stroke-width", "2");
+            rayRef.setAttribute("stroke", "#eab308");
+
+            // កាំចំណាំងបែរ (Refracted Ray) - ទៅស្តាំក្រោម
+            var refrX = cx + rayLen * Math.sin(th2_rad);
+            var refrY = cy + rayLen * Math.cos(th2_rad);
+            rayRefr.setAttribute("x1", cx);
+            rayRefr.setAttribute("y1", cy);
+            rayRefr.setAttribute("x2", refrX);
+            rayRefr.setAttribute("y2", refrY);
+
+            // គូសធ្នូសម្រាប់មុំ $\theta_2$
+            if (th2_deg > 0) {
+                arcRefr.setAttribute("d", describeArc(cx, cy, arcR, 180, 180 + th2_deg));
+                var midTh2 = (180 + th2_deg/2) * Math.PI/180;
+                lblSvgTh2.setAttribute("x", cx + (arcR+30)*Math.sin(midTh2) - 15);
+                lblSvgTh2.setAttribute("y", cy - (arcR+30)*Math.cos(midTh2) + 5);
+                lblSvgTh2.textContent = "θ2=" + th2_deg.toFixed(1) + "°";
+            } else {
+                arcRefr.setAttribute("d", "");
+                lblSvgTh2.textContent = "";
+            }
+
+            document.getElementById('ansFinal').innerText = th2_deg.toFixed(1);
+            document.getElementById('finalConcl').innerHTML = `ដូចនេះ មុំចំណាំងបែរនៅក្នុងកញ្ចក់គឺ <span class="highlight text-2xl bg-white px-4 py-2 rounded border border-blue-200"><span id="ansFinal">${th2_deg.toFixed(1)}</span>&deg;</span> ។`;
+        }
+
+        // ធ្វើបច្ចុប្បន្នភាព MathJax Formula
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            
+            document.getElementById('mathDataN1').innerHTML = "\\( n_1 = " + n1.toFixed(2) + " \\)";
+            document.getElementById('mathDataN2').innerHTML = "\\( n_2 = " + n2.toFixed(2) + " \\)";
+            document.getElementById('mathDataTh1').innerHTML = "\\( \\theta_1 = " + th1_deg + "^\\circ \\)";
+
+            document.getElementById('mathCalcSinTh2').innerHTML = "$$ \\sin\\theta_2 = \\frac{n_1}{n_2} \\sin\\theta_1 = \\frac{" + n1.toFixed(2) + "}{" + n2.toFixed(2) + "} \\sin(" + th1_deg + "^\\circ) $$ <br> $$ \\sin\\theta_2 = \\frac{" + n1.toFixed(2) + "}{" + n2.toFixed(2) + "} \\times " + sin_th1.toFixed(4) + " = " + sin_th2.toFixed(4) + " $$";
+
+            if (isTIR === true) {
+                document.getElementById('mathCalcTh2').innerHTML = "$$ \\text{ដោយ } \\sin\\theta_2 = " + sin_th2.toFixed(4) + " \\text{ ធំជាង } 1 $$ <br> <span class='text-red-600 font-bold'>នាំឱ្យគ្មានមុំចំណាំងបែរទេ (បាតុភូតចំណាំងផ្លាតសរុប)។</span>";
+            } else {
+                document.getElementById('mathCalcTh2').innerHTML = "$$ \\theta_2 = \\arcsin(" + sin_th2.toFixed(4) + ") = " + th2_deg.toFixed(1) + "^\\circ $$";
+            }
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 200);
+    }
+
+    // Event Listeners
+    sliderN1.addEventListener('input', updatePhysics);
+    sliderN2.addEventListener('input', updatePhysics);
+    sliderTh1.addEventListener('input', updatePhysics);
+
+    // Initial setup
+    updatePhysics();
+
+</script>
+
+</body>
+</html>

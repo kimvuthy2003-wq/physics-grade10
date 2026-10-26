@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី៩៖ ទីតាំងវត្ថុសម្រាប់រូបភាពពិត និងនិម្មិត</title>
+
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f0f4f8; padding: 20px; color: #1a202c; text-align: center; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fffaf0; color: #7b341e; padding: 20px 25px;
+            border-radius: 10px; border-left: 6px solid #dd6b20;
+            text-align: left; margin-bottom: 25px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #cbd5e0;
+            border-radius: 10px; overflow: hidden;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08); margin: 0 auto 20px;
+            display: block; padding-top: 15px; padding-bottom: 15px;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 480px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: flex; gap: 15px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;
+        }
+        
+        button {
+            color: white; padding: 14px 24px; font-size: 16px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            font-family: inherit; transition: all 0.2s ease;
+        }
+        button:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        button:active { transform: scale(0.98); }
+        
+        .btn-case { background: #4a5568; opacity: 0.6; }
+        .btn-case.active { background: #805ad5; opacity: 1; outline: 3px solid #b794f4; }
+        .btn-action { background: #3182ce; }
+        .btn-reset { background: #718096; }
+        .btn-sol { background: #38a169; width: 100%; margin-bottom: 20px; padding: 16px; font-size: 17px;}
+
+        .solution-box {
+            background: #edf2f7; padding: 30px; border-radius: 10px;
+            text-align: left; margin-top: 10px; border-left: 6px solid #2b6cb0;
+            font-size: 17px; line-height: 1.9; box-shadow: 0 5px 10px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 { margin-top: 0; color: #2c5282; border-bottom: 2px solid #a0aec0; padding-bottom: 10px; font-size: 20px; }
+        
+        .note-box { 
+            background: #e6fffa; border-left: 6px solid #319795; 
+            padding: 15px 20px; margin-bottom: 25px; border-radius: 6px; color: #234e52; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>លំហាត់ទី ៩ ៖</strong> តើគេត្រូវដាក់បន្ទាត់ភ្លឺមួយនៅត្រង់កន្លែងណា ដើម្បីឱ្យឡង់ទីបង្រួមមួយមានចម្ងាយកំណុំ $f = 20\text{ cm}$ បានរូបភាពមួយធំជាងបន្ទាត់ភ្លឺបួនដង ដោយរកក្នុងករណីរូបភាពពិត និងមិនពិត (និម្មិត)?
+    </div>
+
+    <div class="controls-grid">
+        <button class="btn-case active" id="btnCase1">📐 ករណីទី១៖ រូបភាពពិត</button>
+        <button class="btn-case" id="btnCase2">🔍 ករណីទី២៖ រូបភាពនិម្មិត</button>
+    </div>
+    <div class="controls-grid">
+        <button class="btn-action" id="btnShoot">🚀 បាញ់កាំពន្លឺ</button>
+        <button class="btn-reset" id="btnReset">🔄 ត្រឡប់ដើម</button>
+    </div>
+
+    <div class="sim-area">
+        <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <!-- ក្បាលព្រួញសម្រាប់តែកាំពន្លឺប៉ុណ្ណោះ -->
+                <marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#e53e3e" />
+                </marker>
+                <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#38a169" />
+                </marker>
+                <marker id="arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#3182ce" />
+                </marker>
+            </defs>
+
+            <!-- អ័ក្សអុបទិច -->
+            <line x1="50" y1="225" x2="750" y2="225" stroke="#4a5568" stroke-width="2" />
+            
+            <!-- ឡង់ទីប៉ោង (f = 20cm => ខ្នាត 60px) -->
+            <path d="M 400 40 Q 420 225 400 410 Q 380 225 400 40 Z" fill="#ebf8ff" stroke="#2b6cb0" stroke-width="2"/>
+            <line x1="400" y1="30" x2="400" y2="420" stroke="#2b6cb0" stroke-width="1" stroke-dasharray="5,5" />
+            <text x="408" y="245" font-family="Arial" font-weight="bold" font-size="16" fill="#2b6cb0">O</text>
+
+            <!-- កំណុំ F និង F' (60px ពីឡង់ទី) -->
+            <circle cx="340" cy="225" r="4" fill="#805ad5" />
+            <text x="332" y="250" font-family="Arial" font-style="italic" font-weight="bold" font-size="16" fill="#805ad5">F</text>
+            <circle cx="460" cy="225" r="4" fill="#805ad5" />
+            <text x="454" y="250" font-family="Arial" font-style="italic" font-weight="bold" font-size="16" fill="#805ad5">F'</text>
+
+            <!-- កាំពន្លឺ (Ray Paths) -->
+            <path id="ray1" fill="none" stroke="#e53e3e" stroke-width="2" marker-end="url(#arrowRed)"/>
+            <path id="ray2" fill="none" stroke="#38a169" stroke-width="2" marker-end="url(#arrowGreen)"/>
+            <path id="ray3" fill="none" stroke="#3182ce" stroke-width="2" marker-end="url(#arrowBlue)"/>
+            
+            <!-- កាំពន្លឺនិម្មិត -->
+            <path id="vRay1" fill="none" stroke="#e53e3e" stroke-width="2" stroke-dasharray="6,4" opacity="0"/>
+            <path id="vRay2" fill="none" stroke="#38a169" stroke-width="2" stroke-dasharray="6,4" opacity="0"/>
+            <path id="vRay3" fill="none" stroke="#3182ce" stroke-width="2" stroke-dasharray="6,4" opacity="0"/>
+
+            <!-- វត្ថុ AB (កែសម្រួលគូរព្រួញដោយផ្ទាល់ ឱ្យស្អាត) -->
+            <g id="objectGroup">
+                <line id="objLine" x1="325" y1="225" x2="325" y2="205" stroke="#1a202c" stroke-width="3"/>
+                <!-- ក្បាលព្រួញរបស់វត្ថុ -->
+                <polygon id="objArrow" points="325,195 319,207 331,207" fill="#1a202c"/>
+                
+                <text id="lblB" x="310" y="195" font-family="Arial" font-weight="bold" font-size="16" fill="#1a202c">B</text>
+                <text id="lblA" x="310" y="240" font-family="Arial" font-weight="bold" font-size="16" fill="#1a202c">A</text>
+                
+                <!-- គំនូសប្រវែងចម្ងាយវត្ថុ -->
+                <line id="pLine1" x1="325" y1="250" x2="325" y2="260" stroke="#718096" stroke-width="1.5"/>
+                <line id="pLine2" x1="400" y1="250" x2="400" y2="260" stroke="#718096" stroke-width="1.5"/>
+                <line id="pLineMid" x1="325" y1="255" x2="400" y2="255" stroke="#718096" stroke-width="1.5"/>
+                <text id="lblP" x="362.5" y="275" text-anchor="middle" font-family="Arial" font-size="14" fill="#4a5568">25 cm</text>
+            </g>
+
+            <!-- រូបភាព A'B' (កែសម្រួលគូរព្រួញដោយផ្ទាល់ ឱ្យស្អាត) -->
+            <g id="imageGroup" style="opacity: 0; transition: opacity 0.5s ease;">
+                <line id="imgLine" x1="700" y1="225" x2="700" y2="335" stroke="#dd6b20" stroke-width="3"/>
+                <!-- ក្បាលព្រួញរបស់រូបភាព -->
+                <polygon id="imgArrow" points="700,345 694,333 706,333" fill="#dd6b20"/>
+                
+                <text id="lblBp" x="715" y="340" font-family="Arial" font-weight="bold" font-size="16" fill="#dd6b20">B'</text>
+                <text id="lblAp" x="715" y="220" font-family="Arial" font-weight="bold" font-size="16" fill="#dd6b20">A'</text>
+                
+                <!-- គំនូសប្រវែងចម្ងាយរូបភាព -->
+                <line id="ppLine1" x1="700" y1="250" x2="700" y2="260" stroke="#718096" stroke-width="1.5"/>
+                <line id="ppLineMid" x1="400" y1="255" x2="700" y2="255" stroke="#718096" stroke-width="1.5"/>
+                <text id="lblPp" x="550" y="275" text-anchor="middle" font-family="Arial" font-size="14" fill="#4a5568">100 cm</text>
+            </g>
+        </svg>
+    </div>
+
+    <button id="btnToggleSolution" class="btn-sol">📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត</button>
+
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box">
+            💡 <strong>ចំណាំ៖</strong> ដោយសាររូបភាពមានទំហំធំជាងវត្ថុ ៤ ដង នោះកម្រិតពង្រីក $\vert{}m\vert{} = \frac{\vert{}p'\vert{}}{p} = 4$ ។ រូបមន្តឡង់ទីស្តើងគឺ $\frac{1}{f} = \frac{1}{p} + \frac{1}{p'}$ ។
+        </div>
+
+        <h3>ដំណោះស្រាយលម្អិត</h3>
+        <p>បម្រាប់ដែលយើងមាន៖ ឡង់ទីបង្រួម (ប៉ោង) មានចម្ងាយកំណុំ $f = 20 \text{ cm}$ និងទំហំរូបភាពធំជាងវត្ថុ $4$ ដង។</p>
+
+        <p><strong>ករណីទី១៖ រូបភាពពិត (A'B' ជាទិសដៅផ្ទុយពី AB)</strong></p>
+        <p>រូបភាពពិតកើតឡើងនៅម្ខាងទៀតនៃឡង់ទី $p' > 0$ ។</p>
+        <p>យើងមាន $\frac{p'}{p} = 4 \Rightarrow p' = 4p$</p>
+        <p>តាមរូបមន្ត៖ $$\frac{1}{f} = \frac{1}{p} + \frac{1}{p'}$$</p>
+        <p>ជំនួសលេខ៖ $$\frac{1}{20} = \frac{1}{p} + \frac{1}{4p} = \frac{4+1}{4p} = \frac{5}{4p}$$</p>
+        <p>ទាញរក $p$ ៖ $$4p = 20 \times 5 = 100 \Rightarrow p = 25 \text{ cm}$$</p>
+        <p style="color: #2f855a; font-weight: bold;">ដូចនេះ សម្រាប់រូបភាពពិត គេត្រូវដាក់វត្ថុនៅចម្ងាយ $25\text{ cm}$ ពីឡង់ទី។ (រូបភាពកើតមាននៅចម្ងាយ $p' = 100\text{ cm}$)</p>
+
+        <hr style="border: 1px solid #cbd5e0; margin: 25px 0;">
+
+        <p><strong>ករណីទី២៖ រូបភាពនិម្មិត ឬមិនពិត (A'B' ជាទិសដៅដូច AB)</strong></p>
+        <p>រូបភាពនិម្មិតកើតឡើងនៅម្ខាងវត្ថុ $p' < 0$ ។</p>
+        <p>យើងមាន $\frac{\vert{}p'\vert{}}{p} = 4 \Rightarrow -p' = 4p \Rightarrow p' = -4p$</p>
+        <p>តាមរូបមន្ត៖ $$\frac{1}{f} = \frac{1}{p} + \frac{1}{p'}$$</p>
+        <p>ជំនួសលេខ៖ $$\frac{1}{20} = \frac{1}{p} + \frac{1}{-4p} = \frac{4-1}{4p} = \frac{3}{4p}$$</p>
+        <p>ទាញរក $p$ ៖ $$4p = 20 \times 3 = 60 \Rightarrow p = 15 \text{ cm}$$</p>
+        <p style="color: #2f855a; font-weight: bold;">ដូចនេះ សម្រាប់រូបភាពនិម្មិត គេត្រូវដាក់វត្ថុនៅចម្ងាយ $15\text{ cm}$ ពីឡង់ទី។ (រូបភាពកើតមាននៅចម្ងាយ $p' = -60\text{ cm}$)</p>
+    </div>
+</div>
+
+<script>
+    const btnCase1 = document.getElementById('btnCase1');
+    const btnCase2 = document.getElementById('btnCase2');
+    const btnShoot = document.getElementById('btnShoot');
+    const btnReset = document.getElementById('btnReset');
+    const btnToggleSolution = document.getElementById('btnToggleSolution');
+    const solutionBox = document.getElementById('solutionBox');
+    
+    const ray1 = document.getElementById('ray1'), ray2 = document.getElementById('ray2'), ray3 = document.getElementById('ray3');
+    const vRay1 = document.getElementById('vRay1'), vRay2 = document.getElementById('vRay2'), vRay3 = document.getElementById('vRay3');
+    const imageGroup = document.getElementById('imageGroup');
+    
+    const objLine = document.getElementById('objLine'), objArrow = document.getElementById('objArrow'), lblB = document.getElementById('lblB'), lblA = document.getElementById('lblA');
+    const pLine1 = document.getElementById('pLine1'), pLineMid = document.getElementById('pLineMid'), lblP = document.getElementById('lblP');
+    const imgLine = document.getElementById('imgLine'), imgArrow = document.getElementById('imgArrow'), lblBp = document.getElementById('lblBp'), lblAp = document.getElementById('lblAp');
+    const ppLine1 = document.getElementById('ppLine1'), ppLineMid = document.getElementById('ppLineMid'), lblPp = document.getElementById('lblPp');
+
+    let currentCase = 1; 
+    let animationId;
+    let progress = 0; 
+    let isAnimating = false;
+
+    btnToggleSolution.addEventListener('click', () => {
+        solutionBox.style.display = (solutionBox.style.display === 'none' || solutionBox.style.display === '') ? 'block' : 'none';
+    });
+
+    btnCase1.addEventListener('click', () => { setCase(1); });
+    btnCase2.addEventListener('click', () => { setCase(2); });
+
+    function setCase(c) {
+        if(isAnimating) return; 
+        currentCase = c;
+        btnCase1.className = currentCase === 1 ? 'btn-case active' : 'btn-case';
+        btnCase2.className = currentCase === 2 ? 'btn-case active' : 'btn-case';
+        resetSim();
+
+        // ផ្ទៃកណ្តាល Y = 225. វត្ថុមានកម្ពស់ 30px -> ចុងព្រួញ Y = 195
+        if (currentCase === 1) { 
+            // រូបពិត: p=25cm -> 75px -> x=325
+            objLine.setAttribute('x1', '325'); objLine.setAttribute('x2', '325');
+            objArrow.setAttribute('points', '325,195 319,207 331,207');
+            lblB.setAttribute('x', '310'); lblA.setAttribute('x', '310');
+            
+            pLine1.setAttribute('x1', '325'); pLine1.setAttribute('x2', '325');
+            pLineMid.setAttribute('x1', '325'); lblP.setAttribute('x', '362.5'); lblP.textContent = "25 cm";
+            
+            // រូបភាព: p'=100cm -> 300px -> x=700. កម្ពស់ x4 = 120px ផ្កាប់ចុះ (Y=345)
+            imgLine.setAttribute('x1', '700'); imgLine.setAttribute('y1', '225'); imgLine.setAttribute('x2', '700'); imgLine.setAttribute('y2', '335');
+            imgArrow.setAttribute('points', '700,345 694,333 706,333');
+            
+            lblBp.setAttribute('x', '715'); lblBp.setAttribute('y', '340'); 
+            lblAp.setAttribute('x', '715'); lblAp.setAttribute('y', '220');
+            
+            ppLine1.setAttribute('x1', '700'); ppLine1.setAttribute('x2', '700');
+            ppLineMid.setAttribute('x1', '400'); ppLineMid.setAttribute('x2', '700'); 
+            lblPp.setAttribute('x', '550'); lblPp.textContent = "100 cm";
+        } else { 
+            // រូបនិម្មិត: p=15cm -> 45px -> x=355
+            objLine.setAttribute('x1', '355'); objLine.setAttribute('x2', '355');
+            objArrow.setAttribute('points', '355,195 349,207 361,207');
+            lblB.setAttribute('x', '340'); lblA.setAttribute('x', '340');
+            
+            pLine1.setAttribute('x1', '355'); pLine1.setAttribute('x2', '355');
+            pLineMid.setAttribute('x1', '355'); lblP.setAttribute('x', '377.5'); lblP.textContent = "15 cm";
+
+            // រូបភាពនិម្មិត: p'=-60cm -> -180px -> x=220. កម្ពស់ x4 = 120px ឈរត្រង់ (Y=105)
+            imgLine.setAttribute('x1', '220'); imgLine.setAttribute('y1', '225'); imgLine.setAttribute('x2', '220'); imgLine.setAttribute('y2', '115');
+            imgArrow.setAttribute('points', '220,105 214,117 226,117');
+            
+            lblBp.setAttribute('x', '200'); lblBp.setAttribute('y', '110'); 
+            lblAp.setAttribute('x', '200'); lblAp.setAttribute('y', '220');
+            
+            ppLine1.setAttribute('x1', '220'); ppLine1.setAttribute('x2', '220');
+            ppLineMid.setAttribute('x1', '220'); ppLineMid.setAttribute('x2', '400'); 
+            lblPp.setAttribute('x', '310'); lblPp.textContent = "60 cm (និម្មិត)";
+        }
+    }
+
+    function resetSim() {
+        cancelAnimationFrame(animationId);
+        isAnimating = false; progress = 0;
+        ray1.setAttribute("d", ""); ray2.setAttribute("d", ""); ray3.setAttribute("d", "");
+        vRay1.setAttribute("opacity", "0"); vRay2.setAttribute("opacity", "0"); vRay3.setAttribute("opacity", "0");
+        imageGroup.style.opacity = 0;
+        btnShoot.innerText = "🚀 បាញ់កាំពន្លឺ"; btnShoot.style.background = "#3182ce";
+    }
+
+    btnReset.addEventListener('click', resetSim);
+
+    function updateRays(p) {
+        // ចំណុចកំពូលវត្ថុគឺ y = 195
+        if (currentCase === 1) {
+            let x = 325 + (p * 425); 
+            // កាំទី១ ក្រហម: ស្របទៅឡង់ទី រួចកាត់ F'(460, 225) ទៅកាន់ (700, 345)
+            let path1 = x <= 400 ? `M 325 195 L ${x} 195` : `M 325 195 L 400 195 L ${x} ${195 + (150/300)*(x-400)}`;
+            ray1.setAttribute("d", path1);
+            
+            // កាំទី២ បៃតង: កាត់ផ្ចិត O(400, 225) ទៅកាន់ (700, 345)
+            ray2.setAttribute("d", `M 325 195 L ${x} ${195 + (150/375)*(x-325)}`);
+            
+            // កាំទី៣ ខៀវ: កាត់ F(340, 225) ទៅដល់ឡង់ទី (400, 345) រួចស្របទៅ (700, 345)
+            let path3 = x <= 400 ? `M 325 195 L ${x} ${195 + (150/75)*(x-325)}` : `M 325 195 L 400 345 L ${x} 345`;
+            ray3.setAttribute("d", path3);
+
+        } else {
+            let x = 355 + (p * 395); 
+            
+            // កាំទី១ ក្រហម: ស្រប រួចកាត់ F'(460, 225) [ហាក់ចេញពី 220, 105]
+            let path1 = x <= 400 ? `M 355 195 L ${x} 195` : `M 355 195 L 400 195 L ${x} ${195 + (30/60)*(x-400)}`;
+            ray1.setAttribute("d", path1);
+            
+            // កាំទី២ បៃតង: កាត់ O(400, 225)
+            ray2.setAttribute("d", `M 355 195 L ${x} ${195 + (30/45)*(x-355)}`);
+            
+            // កាំទី៣ ខៀវ: ហាក់ចេញពី F(340, 225) ទៅកាត់ឡង់ទីនៅ (400, 105) រួចស្របអ័ក្ស
+            let path3 = x <= 400 ? `M 340 225 L ${x} ${225 - (30/15)*(x-340)}` : `M 340 225 L 400 105 L ${x} 105`;
+            ray3.setAttribute("d", path3);
+
+            // កាំនិម្មិត (ខ្សែដាច់ៗវាយថយក្រោយពេលបាញ់ចប់)
+            if (p > 0.8) {
+                vRay1.setAttribute("d", `M 400 195 L 220 105`); vRay1.setAttribute("opacity", "1");
+                vRay2.setAttribute("d", `M 355 195 L 220 105`); vRay2.setAttribute("opacity", "1");
+                vRay3.setAttribute("d", `M 400 105 L 220 105`); vRay3.setAttribute("opacity", "1");
+            }
+        }
+    }
+
+    function animateLoop() {
+        if (progress < 1) {
+            progress += 0.012; 
+            if (progress > 1) progress = 1;
+            updateRays(progress);
+            
+            if (progress >= 0.8) imageGroup.style.opacity = 1;
+            
+            animationId = requestAnimationFrame(animateLoop);
+        } else {
+            isAnimating = false;
+            btnShoot.innerText = "✅ បានបញ្ចាំងរួចរាល់";
+            btnShoot.style.background = "#38a169";
+        }
+    }
+
+    btnShoot.addEventListener('click', () => {
+        if (!isAnimating && progress === 0) {
+            isAnimating = true;
+            btnShoot.innerText = "⏳ កំពុងបាញ់កាំពន្លឺ...";
+            btnShoot.style.background = "#dd6b20";
+            animateLoop();
+        }
+    });
+
+    setCase(1);
+</script>
+
+</body>
+</html>

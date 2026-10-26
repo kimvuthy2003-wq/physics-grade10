@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ចំណាំងបែរនៃពន្លឺ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f3f4f6;
+        }
+        
+        /* Custom scrollbar for table container */
+        .table-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Input styling */
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        canvas {
+            touch-action: none; /* Prevent scrolling when touching canvas */
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-gray-800">
+
+    <div class="max-w-7xl mx-auto">
+        <h2 class="text-2xl md:text-3xl font-bold text-center text-blue-700 mb-6 md:mb-8 shadow-sm bg-white py-4 rounded-lg">
+          ការពិសោធន៍ចំណាំងបែរនៃពន្លឺ
+        </h2>
+        
+        <div class="flex flex-col lg:flex-row gap-6">
+            
+            <div class="w-full lg:w-1/2 flex flex-col items-center">
+                <div class="bg-white p-4 rounded-xl shadow-md w-full max-w-[550px]">
+                    <div class="relative w-full aspect-square bg-gray-50 rounded-lg overflow-hidden border border-gray-200 flex justify-center items-center">
+                        <canvas id="simCanvas" width="500" height="500" class="w-full h-auto max-w-[500px]"></canvas>
+                    </div>
+                    
+                    <div class="mt-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                            <label class="font-bold text-gray-700 flex-shrink-0">
+                                មុំពន្លឺចូល (i) = <span id="angleVal" class="text-blue-600 text-lg">45°</span>
+                            </label>
+                            <input type="range" id="angleSlider" min="0" max="80" step="1" value="45" 
+                                class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+                        <div class="text-gray-600 text-sm md:text-base">
+                            សន្ទស្សន៍ចំណាំងបែរកញ្ចក់ (n₂) = <span class="font-bold text-gray-800">1.50</span> <br>
+                            សន្ទស្សន៍ចំណាំងបែរខ្យល់ (n₁) = <span class="font-bold text-gray-800">1.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="w-full lg:w-1/2">
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-md h-full flex flex-col">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">លទ្ធផលពិសោធន៍</h3>
+                    
+                    <div class="flex justify-between items-center bg-gray-100 p-3 rounded-lg mb-4 text-sm md:text-base font-bold text-gray-700 shadow-inner">
+                        <div>KH = <span id="currentKH" class="text-green-600">0.00</span> cm</div>
+                        <div>K'H' = <span id="currentKpHp" class="text-orange-600">0.00</span> cm</div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <button onclick="recordData()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200 shadow-sm text-sm md:text-base">
+                            កត់ត្រា (លើកទី <span id="trialCounter">1</span>)
+                        </button>
+                        <button onclick="resetData()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-200 shadow-sm text-sm md:text-base">
+                            ចាប់ផ្តើមថ្មី
+                        </button>
+                    </div>
+                    
+                    <div class="table-scroll w-full overflow-x-auto border border-gray-200 rounded-lg mb-6 flex-grow">
+                        <table class="w-full min-w-[500px] text-center border-collapse">
+                            <thead class="bg-gray-200 text-gray-700">
+                                <tr>
+                                    <th class="p-3 border border-gray-300 w-1/3">ពិសោធន៍</th>
+                                    <th class="p-3 border border-gray-300">1</th>
+                                    <th class="p-3 border border-gray-300">2</th>
+                                    <th class="p-3 border border-gray-300">3</th>
+                                    <th class="p-3 border border-gray-300">4</th>
+                                    <th class="p-3 border border-gray-300">តម្លៃមធ្យម n̄</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 font-medium">
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="p-2 border border-gray-300 text-left pl-4">KH (cm)</td>
+                                    <td id="kh_1" class="p-2 border border-gray-300 h-10"></td>
+                                    <td id="kh_2" class="p-2 border border-gray-300 h-10"></td>
+                                    <td id="kh_3" class="p-2 border border-gray-300 h-10"></td>
+                                    <td id="kh_4" class="p-2 border border-gray-300 h-10"></td>
+                                    <td rowspan="3" class="p-2 border border-gray-300 align-middle">
+                                        <input type="number" step="0.01" id="input_avg_n" placeholder="n̄ = ?" class="w-20 md:w-24 p-2 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="p-2 border border-gray-300 text-left pl-4">K'H' (cm)</td>
+                                    <td id="kphp_1" class="p-2 border border-gray-300 h-10"></td>
+                                    <td id="kphp_2" class="p-2 border border-gray-300 h-10"></td>
+                                    <td id="kphp_3" class="p-2 border border-gray-300 h-10"></td>
+                                    <td id="kphp_4" class="p-2 border border-gray-300 h-10"></td>
+                                </tr>
+                                <tr class="bg-blue-50">
+                                    <td class="p-2 border border-gray-300 text-left pl-4 text-xs md:text-sm">
+                                        n = <span class="inline-block align-middle text-center"><span class="border-b border-gray-500 block">KH</span>K'H'</span>
+                                    </td>
+                                    <td class="p-1 border border-gray-300">
+                                        <input type="number" step="0.01" id="input_n_1" placeholder="n=?" class="w-14 md:w-16 p-1 text-center text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </td>
+                                    <td class="p-1 border border-gray-300">
+                                        <input type="number" step="0.01" id="input_n_2" placeholder="n=?" class="w-14 md:w-16 p-1 text-center text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </td>
+                                    <td class="p-1 border border-gray-300">
+                                        <input type="number" step="0.01" id="input_n_3" placeholder="n=?" class="w-14 md:w-16 p-1 text-center text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </td>
+                                    <td class="p-1 border border-gray-300">
+                                        <input type="number" step="0.01" id="input_n_4" placeholder="n=?" class="w-14 md:w-16 p-1 text-center text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <button onclick="checkAnswers()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-200 text-lg">
+                        ផ្ទៀងផ្ទាត់ចម្លើយ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Message Modal -->
+    <div id="msgModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-[90%] transform scale-95 transition-transform duration-300" id="msgContent">
+            <div id="msgIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4">
+                <!-- Icon injected by JS -->
+            </div>
+            <h3 class="text-lg leading-6 font-bold text-gray-900 text-center mb-2" id="msgTitle">ចំណាំ</h3>
+            <div class="mt-2 text-center">
+                <p class="text-sm text-gray-600" id="msgText"></p>
+            </div>
+            <div class="mt-5 sm:mt-6">
+                <button type="button" onclick="closeMsg()" class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm transition duration-200">
+                    យល់ព្រម
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const angleSlider = document.getElementById('angleSlider');
+        const angleVal = document.getElementById('angleVal');
+        const khDisplay = document.getElementById('currentKH');
+        const kphpDisplay = document.getElementById('currentKpHp');
+        const trialCounterDisplay = document.getElementById('trialCounter');
+        const msgModal = document.getElementById('msgModal');
+        const msgContent = document.getElementById('msgContent');
+        const msgText = document.getElementById('msgText');
+        const msgTitle = document.getElementById('msgTitle');
+        const msgIcon = document.getElementById('msgIcon');
+        
+        // Physics and layout constants
+        let cx = canvas.width / 2;
+        let cy = canvas.height / 2;
+        let R = 180; // Radius for circle (scaled down slightly for padding)
+        let scale = R / 10; // Let 10cm physical length equal R pixels on canvas
+        let n1 = 1.0; // Air
+        let n2 = 1.5; // Glass
+        
+        // App State
+        let currentTrial = 1;
+        let currentKH = 0;
+        let currentKpHp = 0;
+
+        // Custom Modal Function
+        function showMsg(title, message, type = 'info') {
+            msgTitle.textContent = title;
+            msgText.innerHTML = message; // Use innerHTML to allow line breaks
+            
+            // Setup icons and colors based on type
+            if (type === 'success') {
+                msgIcon.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 bg-green-100 text-green-600';
+                msgIcon.innerHTML = `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>`;
+            } else if (type === 'error') {
+                msgIcon.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 bg-red-100 text-red-600';
+                msgIcon.innerHTML = `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>`;
+            } else { // info/warning
+                msgIcon.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 bg-yellow-100 text-yellow-600';
+                msgIcon.innerHTML = `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+            }
+
+            msgModal.classList.remove('hidden');
+            // Small delay to allow display:block to apply before animating opacity
+            setTimeout(() => {
+                msgModal.classList.remove('opacity-0');
+                msgContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeMsg() {
+            msgModal.classList.add('opacity-0');
+            msgContent.classList.add('scale-95');
+            setTimeout(() => {
+                msgModal.classList.add('hidden');
+            }, 300);
+        }
+
+        function draw() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw glass block bottom half
+            ctx.fillStyle = '#e0f2fe'; // Light blue tailwind
+            ctx.fillRect(0, cy, canvas.width, canvas.height - cy);
+            
+            // Draw Interface Line (AD)
+            ctx.beginPath();
+            ctx.moveTo(0, cy);
+            ctx.lineTo(canvas.width, cy);
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            // Draw Normal Line (NN')
+            ctx.beginPath();
+            ctx.setLineDash([8, 6]);
+            ctx.moveTo(cx, 20);
+            ctx.lineTo(cx, canvas.height - 20);
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset line dash
+
+            // Draw Reference Circle
+            ctx.beginPath();
+            ctx.arc(cx, cy, R, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Perform Math Calculations (Snell's Law)
+            let i_deg = parseFloat(angleSlider.value);
+            let i_rad = i_deg * Math.PI / 180;
+            
+            // n1 * sin(i) = n2 * sin(r)
+            let sin_r = (n1 * Math.sin(i_rad)) / n2;
+            let r_rad = Math.asin(sin_r);
+            
+            // Intersections with circle (K and K')
+            let px = cx - R * Math.sin(i_rad);  // K (x)
+            let py = cy - R * Math.cos(i_rad);  // K (y)
+            let ppx = cx + R * Math.sin(r_rad); // K' (x)
+            let ppy = cy + R * Math.cos(r_rad); // K' (y)
+
+            // Draw Incident Ray
+            ctx.beginPath();
+            ctx.moveTo(cx - 1.4*R*Math.sin(i_rad), cy - 1.4*R*Math.cos(i_rad));
+            ctx.lineTo(cx, cy);
+            ctx.strokeStyle = '#ef4444'; // Red-500
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Incident Ray Arrow
+            drawArrowhead(cx - 1.4*R*Math.sin(i_rad), cy - 1.4*R*Math.cos(i_rad), cx, cy, '#ef4444');
+
+            // Draw Refracted Ray
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + 1.4*R*Math.sin(r_rad), cy + 1.4*R*Math.cos(r_rad));
+            ctx.strokeStyle = '#3b82f6'; // Blue-500
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Refracted Ray Arrow
+            let rxMid = cx + 0.7*R*Math.sin(r_rad);
+            let ryMid = cy + 0.7*R*Math.cos(r_rad);
+            drawArrowhead(cx, cy, cx + 1.4*R*Math.sin(r_rad), cy + 1.4*R*Math.cos(r_rad), '#3b82f6', 0.6);
+
+            // Draw KH (Horizontal projection of incident)
+            ctx.beginPath();
+            ctx.moveTo(px, py);
+            ctx.lineTo(cx, py);
+            ctx.strokeStyle = '#10b981'; // Green-500
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            
+            // Draw K'H' (Horizontal projection of refracted)
+            ctx.beginPath();
+            ctx.moveTo(ppx, ppy);
+            ctx.lineTo(cx, ppy);
+            ctx.strokeStyle = '#f59e0b'; // Amber-500
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            // Draw intersection points
+            drawPoint(px, py, '#1f2937');   // K
+            drawPoint(cx, py, '#1f2937');   // H
+            drawPoint(ppx, ppy, '#1f2937'); // K'
+            drawPoint(cx, ppy, '#1f2937');  // H'
+            drawPoint(cx, cy, '#1f2937');   // Q (Origin)
+
+            // Text Labels
+            ctx.fillStyle = '#111827';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('K', px - 20, py - 5);
+            ctx.fillText('H', cx + 10, py - 5);
+            ctx.fillText("K'", ppx + 10, ppy + 20);
+            ctx.fillText("H'", cx - 25, ppy + 20);
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText("Q", cx + 8, cy - 8);
+
+            // Update DOM variables
+            currentKH = (R * Math.sin(i_rad)) / scale;
+            currentKpHp = (R * Math.sin(r_rad)) / scale;
+            
+            angleVal.textContent = i_deg + '°';
+            khDisplay.textContent = currentKH.toFixed(2);
+            kphpDisplay.textContent = currentKpHp.toFixed(2);
+        }
+        
+        function drawPoint(x, y, color) {
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, 2 * Math.PI);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+        
+        function drawArrowhead(fromX, fromY, toX, toY, color, pos = 0.5) {
+            const headlen = 12; // length of head in pixels
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            
+            const pX = fromX + dx * pos;
+            const pY = fromY + dy * pos;
+            
+            ctx.beginPath();
+            ctx.moveTo(pX, pY);
+            ctx.lineTo(pX - headlen * Math.cos(angle - Math.PI / 6), pY - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(pX - headlen * Math.cos(angle + Math.PI / 6), pY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        // Event listener for slider
+        angleSlider.addEventListener('input', draw);
+        
+        // Record Data into Table
+        function recordData() {
+            if (currentTrial > 4) {
+                showMsg('សេចក្តីជូនដំណឹង', 'អ្នកបានកត់ត្រាពេញ ៤ លើកហើយ! សូមចុចប៊ូតុង "ចាប់ផ្តើមថ្មី" ដើម្បីធ្វើការពិសោធន៍ម្តងទៀត។', 'warning');
+                return;
+            }
+            
+            if (parseFloat(angleSlider.value) === 0) {
+                showMsg('សូមចំណាំ', 'សូមកំណត់មុំពន្លឺចូល (i) ឱ្យធំជាង 0° ដើម្បីឱ្យ KH និង K\'H\' មានតម្លៃសម្រាប់គណនា។', 'warning');
+                return;
+            }
+            
+            document.getElementById('kh_' + currentTrial).textContent = currentKH.toFixed(2);
+            document.getElementById('kphp_' + currentTrial).textContent = currentKpHp.toFixed(2);
+            
+            currentTrial++;
+            if (currentTrial <= 4) {
+                trialCounterDisplay.textContent = currentTrial;
+            } else {
+                trialCounterDisplay.textContent = "ពេញ";
+            }
+        }
+
+        // Validate Student Answers
+        function checkAnswers() {
+            let sumN = 0;
+            let validCount = 0;
+            let allCorrect = true;
+            let hasData = false;
+            
+            // Standard CSS classes for correct/incorrect inputs
+            const defaultClasses = "w-14 md:w-16 p-1 text-center text-sm border rounded focus:outline-none focus:ring-2".split(" ");
+            
+            for(let i=1; i<=4; i++) {
+                let kh_str = document.getElementById('kh_'+i).textContent;
+                let kphp_str = document.getElementById('kphp_'+i).textContent;
+                let input_n = document.getElementById('input_n_'+i);
+                
+                // Reset styling
+                input_n.className = "w-14 md:w-16 p-1 text-center text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors";
+                
+                if(kh_str !== "" && kphp_str !== "") {
+                    hasData = true;
+                    let kh = parseFloat(kh_str);
+                    let kphp = parseFloat(kphp_str);
+                    let actual_n = kh / kphp;
+                    let user_n = parseFloat(input_n.value);
+                    
+                    if (!isNaN(user_n)) {
+                        // Allow small margin of error (0.05)
+                        if (Math.abs(user_n - actual_n) <= 0.05) {
+                            input_n.classList.add("bg-green-100", "border-green-500", "text-green-800", "font-bold");
+                            input_n.classList.remove("border-gray-300", "focus:ring-blue-500");
+                            sumN += user_n;
+                            validCount++;
+                        } else {
+                            input_n.classList.add("bg-red-100", "border-red-500", "text-red-800", "font-bold");
+                            input_n.classList.remove("border-gray-300", "focus:ring-blue-500");
+                            allCorrect = false;
+                        }
+                    } else {
+                        input_n.classList.add("bg-red-100", "border-red-500");
+                        input_n.classList.remove("border-gray-300");
+                        allCorrect = false;
+                    }
+                }
+            }
+            
+            let avgInput = document.getElementById('input_avg_n');
+            avgInput.className = "w-20 md:w-24 p-2 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors";
+            
+            let user_avg = parseFloat(avgInput.value);
+            if (validCount > 0 && !isNaN(user_avg)) {
+                let actual_avg = sumN / validCount;
+                if (Math.abs(user_avg - actual_avg) <= 0.05) {
+                    avgInput.classList.add("bg-green-100", "border-green-500", "text-green-800", "font-bold");
+                    avgInput.classList.remove("border-gray-300", "focus:ring-blue-500");
+                } else {
+                    avgInput.classList.add("bg-red-100", "border-red-500", "text-red-800", "font-bold");
+                    avgInput.classList.remove("border-gray-300", "focus:ring-blue-500");
+                    allCorrect = false;
+                }
+            } else if (validCount > 0) {
+                avgInput.classList.add("bg-red-100", "border-red-500");
+                avgInput.classList.remove("border-gray-300");
+                allCorrect = false;
+            }
+            
+            if (!hasData) {
+                showMsg('មិនមានទិន្នន័យ', 'សូមកត់ត្រាទិន្នន័យយ៉ាងហោចណាស់មួយសិន មុននឹងធ្វើការផ្ទៀងផ្ទាត់។', 'warning');
+                return;
+            }
+            
+            if (validCount > 0 && allCorrect) {
+                showMsg('អបអរសាទរ!', 'ការគណនារបស់អ្នកត្រឹមត្រូវទាំងអស់។ ពូកែណាស់!', 'success');
+            } else if (validCount > 0 && !allCorrect) {
+                showMsg('មិនទាន់ត្រឹមត្រូវទេ', 'មានចម្លើយខ្លះមិនទាន់ត្រឹមត្រូវ ឬអ្នកមិនទាន់បានបំពេញ។<br><br><b>រូបមន្ត៖ n = KH / K\'H\'</b>', 'error');
+            }
+        }
+        
+        // Reset Everything
+        function resetData() {
+            currentTrial = 1;
+            trialCounterDisplay.textContent = currentTrial;
+            
+            for(let i=1; i<=4; i++) {
+                document.getElementById('kh_'+i).textContent = "";
+                document.getElementById('kphp_'+i).textContent = "";
+                let input = document.getElementById('input_n_'+i);
+                input.value = "";
+                input.className = "w-14 md:w-16 p-1 text-center text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500";
+            }
+            
+            let avgInput = document.getElementById('input_avg_n');
+            avgInput.value = "";
+            avgInput.className = "w-20 md:w-24 p-2 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500";
+            
+            angleSlider.value = 45;
+            draw();
+        }
+
+        // Initialize simulation on load
+        window.onload = function() {
+            draw();
+        };
+        
+        // Handle window resize to ensure canvas looks sharp
+        window.addEventListener('resize', () => {
+            draw(); // Redraw on resize
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> ការបង្កើតរូបភាពដោយឡង់ទី</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts សម្រាប់ Battambang -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Battambang', 'Khmer OS Battambang', sans-serif;
+            margin: 0;
+            background-color: #f4f6f9; 
+            color: #111;
+            font-size: 18px;
+        }
+
+        .container-custom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ប៊ូតុង និង Input */
+        .btn-toggle {
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .btn-toggle.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        }
+        .btn-toggle.inactive {
+            background-color: #e2e8f0;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* SVG Simulator Container */
+        #svg-container {
+            width: 100%;
+            height: auto;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 2px solid #cbd5e1;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        /* Math HTML Styling */
+        .html-math { display: inline-flex; align-items: center; font-size: 20px; }
+        .html-fraction { display: inline-flex; flex-direction: column; align-items: center; margin: 0 8px; vertical-align: middle; }
+        .html-num { border-bottom: 2px solid #111; padding: 0 6px 4px 6px; }
+        .html-den { padding: 4px 6px 0 6px; }
+        .math-var { font-family: 'Times New Roman', Times, serif; font-style: italic; }
+        .math-sub { font-size: 0.75em; font-family: 'Arial', sans-serif; font-style: normal; vertical-align: sub; }
+
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+<div class="container-custom">
+    
+    <div class="mb-6 text-center">
+        <h1 class="text-3xl font-bold text-slate-800 mb-2 leading-tight">ការបង្កើតរូបភាពដោយឡង់ទី</h1>
+        <p class="text-lg text-slate-500">សមីការឡង់ទី៖ $\frac{1}{p} + \frac{1}{q} = \frac{1}{f}$</p>
+    </div>
+
+    <!-- ផ្ទាំងបញ្ជា (Controls) & Simulator -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-8 shadow-sm flex flex-col lg:flex-row gap-6">
+        
+        <!-- ផ្ទាំងខាងឆ្វេង៖ ប៊ូតុង និង Sliders -->
+        <div class="w-full lg:w-1/3 flex flex-col gap-6 border-r border-slate-200 pr-0 lg:pr-6">
+            
+            <div>
+                <label class="block text-lg font-bold text-slate-700 mb-3">ប្រភេទឡង់ទី៖</label>
+                <div class="flex gap-2">
+                    <button id="btnConvex" class="btn-toggle active flex-1 py-3 rounded-lg font-bold text-lg">បង្រួម (ប៉ោង)</button>
+                    <button id="btnConcave" class="btn-toggle inactive flex-1 py-3 rounded-lg font-bold text-lg">ពង្រីក (ផត)</button>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block font-bold text-slate-700 mb-2">ចម្ងាយវត្ថុ (<span class="math-var">p</span>): <span id="lblP" class="text-blue-600 font-bold ml-1">150 cm</span></label>
+                <input type="range" id="sliderP" min="20" max="300" value="150" step="5">
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block font-bold text-slate-700 mb-2">ចម្ងាយកំនុំ (<span class="math-var">f</span>): <span id="lblF" class="text-emerald-600 font-bold ml-1">100 cm</span></label>
+                <input type="range" id="sliderF" min="40" max="200" value="100" step="5">
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block font-bold text-slate-700 mb-2">កម្ពស់វត្ថុ (<span class="math-var">h</span>): <span id="lblH" class="text-orange-600 font-bold ml-1">50 cm</span></label>
+                <input type="range" id="sliderH" min="10" max="100" value="50" step="5">
+            </div>
+
+            <!-- ប៊ូតុងចលនាកាំពន្លឺ -->
+            <button id="btnPlayAnim" class="bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition shadow-sm text-lg w-full flex items-center justify-center gap-2">
+                ▶ បញ្ចាំងចលនាកាំពន្លឺ
+            </button>
+
+            <!-- Dashboard លទ្ធផល -->
+            <div class="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 class="font-bold text-blue-800 border-b border-blue-200 pb-2 mb-3">លទ្ធផលគណនា៖</h4>
+                <div class="flex justify-between mb-2">
+                    <span class="text-slate-600">ចម្ងាយរូប (<span class="math-var">q</span>)៖</span>
+                    <span id="resQ" class="font-bold text-slate-800">...</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span class="text-slate-600">កម្ពស់រូប (<span class="math-var">h'</span>)៖</span>
+                    <span id="resH" class="font-bold text-slate-800">...</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-600">លក្ខណៈរូប៖</span>
+                    <span id="resType" class="font-bold text-emerald-600">...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ផ្ទាំងខាងស្តាំ៖ SVG Canvas -->
+        <div class="w-full lg:w-2/3 flex flex-col">
+            <svg id="svg-container" viewBox="-400 -200 800 400" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <marker id="arrowHead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                        <polygon points="0,0 6,3 0,6" fill="#111" />
+                    </marker>
+                    <marker id="arrowObj" markerWidth="8" markerHeight="8" refX="4" refY="0" orient="auto">
+                        <polygon points="0,8 4,0 8,8" fill="#3b82f6" />
+                    </marker>
+                    <marker id="arrowImg" markerWidth="8" markerHeight="8" refX="4" refY="0" orient="auto">
+                        <polygon points="0,8 4,0 8,8" fill="#ef4444" />
+                    </marker>
+                </defs>
+
+                <!-- Grid -->
+                <g stroke="#e2e8f0" stroke-width="1">
+                    <line x1="-400" y1="-100" x2="400" y2="-100" />
+                    <line x1="-400" y1="100" x2="400" y2="100" />
+                    <line x1="-200" y1="-200" x2="-200" y2="200" />
+                    <line x1="200" y1="-200" x2="200" y2="200" />
+                </g>
+
+                <!-- អ័ក្សមេ (Principal Axis) -->
+                <line x1="-400" y1="0" x2="400" y2="0" stroke="#64748b" stroke-width="2" />
+                
+                <!-- កំនុំ (Focus Points) -->
+                <circle id="ptF1" cx="-100" cy="0" r="4" fill="#111" />
+                <text id="lblF1" x="-105" y="20" font-family="Arial" font-size="16" font-weight="bold">F</text>
+                
+                <circle id="ptF2" cx="100" cy="0" r="4" fill="#111" />
+                <text id="lblF2" x="95" y="20" font-family="Arial" font-size="16" font-weight="bold">F'</text>
+                
+                <text x="5" y="20" font-family="Arial" font-size="16" font-weight="bold">O</text>
+
+                <!-- កាំពន្លឺទី១ (ស្របអ័ក្ស) - Red -->
+                <path id="ray1Real" d="" fill="none" stroke="#ef4444" stroke-width="2" marker-mid="url(#arrowHead)"/>
+                <path id="ray1Virt" d="" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,5" />
+
+                <!-- កាំពន្លឺទី២ (កាត់ផ្ចិត O) - Green -->
+                <path id="ray2Real" d="" fill="none" stroke="#10b981" stroke-width="2" marker-mid="url(#arrowHead)"/>
+                <path id="ray2Virt" d="" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="5,5" />
+
+                <!-- កាំពន្លឺទី៣ (កាត់កំនុំ) - Purple -->
+                <path id="ray3Real" d="" fill="none" stroke="#a855f7" stroke-width="2" marker-mid="url(#arrowHead)"/>
+                <path id="ray3Virt" d="" fill="none" stroke="#a855f7" stroke-width="2" stroke-dasharray="5,5" />
+
+                <!-- ឡង់ទី (Lens) -->
+                <line x1="0" y1="-150" x2="0" y2="150" stroke="#1e293b" stroke-width="4" />
+                <g id="lensArrows" stroke="#1e293b" stroke-width="4" fill="none">
+                    <!-- គូរតាមប្រភេទឡង់ទីដោយ JS -->
+                </g>
+
+                <!-- វត្ថុ (Object) -->
+                <line id="objLine" x1="-150" y1="0" x2="-150" y2="-50" stroke="#3b82f6" stroke-width="6" />
+                <polygon id="objHead" points="-156,-50 -150,-60 -144,-50" fill="#3b82f6" />
+                <text id="lblObj" x="-165" y="20" font-family="Arial" font-weight="bold" fill="#3b82f6">AB</text>
+
+                <!-- រូបភាព (Image) -->
+                <line id="imgLine" x1="150" y1="0" x2="150" y2="50" stroke="#f59e0b" stroke-width="6" stroke-dasharray="0" data-active-opacity="1" />
+                <polygon id="imgHead" points="144,50 150,60 156,50" fill="#f59e0b" data-active-opacity="1" />
+                <text id="lblImg" x="155" y="20" font-family="Arial" font-weight="bold" fill="#f59e0b" data-active-opacity="1">A'B'</text>
+
+            </svg>
+
+            <!-- កំណត់សម្គាល់កាំពន្លឺ -->
+            <div class="mt-4 flex flex-wrap justify-center gap-6 text-sm font-bold border-t border-slate-200 pt-4">
+                <div class="flex items-center text-red-500"><div class="w-4 h-1 bg-red-500 mr-2"></div> កាំស្របអ័ក្ស</div>
+                <div class="flex items-center text-emerald-500"><div class="w-4 h-1 bg-emerald-500 mr-2"></div> កាំកាត់ O</div>
+                <div class="flex items-center text-purple-500"><div class="w-4 h-1 bg-purple-500 mr-2"></div> កាំកាត់កំនុំ</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- លំហាត់គំរូ -->
+    <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-6 shadow-sm">
+        <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b border-indigo-200 pb-2">📝 លំហាត់គំរូអនុវត្ត</h3>
+        <p class="mb-4 text-lg text-slate-800">
+            វត្ថុមួយមានកម្ពស់ <span class="font-bold text-orange-600">h = 10 cm</span> ត្រូវបានគេដាក់នៅចម្ងាយ <span class="font-bold text-blue-600">p = 30 cm</span> ពីមុខឡង់ទីបង្រួមមួយដែលមានចម្ងាយកំនុំ <span class="font-bold text-emerald-600">f = 20 cm</span> ។<br>
+            គណនាចម្ងាយរូប ($q$) និងកម្ពស់រូប ($h'$) ព្រមទាំងប្រាប់ពីលក្ខណៈនៃរូបភាព។
+        </p>
+
+        <button id="btnShowAns" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition w-full md:w-auto">
+            បង្ហាញ / លាក់ដំណោះស្រាយ
+        </button>
+
+        <!-- ប្រអប់ដំណោះស្រាយ -->
+        <div id="ansBox" class="hidden mt-6 bg-white border border-indigo-100 rounded-lg p-6">
+            <p class="font-bold text-indigo-700 text-xl mb-4">ដំណោះស្រាយ៖</p>
+            <p class="font-bold text-slate-800">១. គណនាចម្ងាយរូប ($q$) ៖</p>
+            <p class="mb-2">តាមសមីការឡង់ទី៖</p>
+            <div class="my-4 w-full text-center text-xl">
+                $$\frac{1}{p} + \frac{1}{q} = \frac{1}{f} \implies \frac{1}{q} = \frac{1}{f} - \frac{1}{p}$$
+                $$\frac{1}{q} = \frac{1}{20} - \frac{1}{30} = \frac{3}{60} - \frac{2}{60} = \frac{1}{60}$$
+                $$\implies q = +60 \text{ cm}$$
+            </div>
+            <p class="mb-4">ដោយ $q$ វិជ្ជមាន នាំឱ្យវាជា <span class="font-bold text-emerald-600">រូបពិត</span> ស្ថិតនៅក្រោយឡង់ទី។</p>
+
+            <p class="font-bold text-slate-800">២. គណនាកម្ពស់រូប ($h'$) ៖</p>
+            <p class="mb-2">តាមរូបមន្តម៉ាញីទុត (កំណើន) ៖</p>
+            <div class="my-4 w-full text-center text-xl">
+                $$M = \frac{h'}{h} = -\frac{q}{p} \implies h' = -\frac{q}{p} \times h$$
+                $$h' = -\frac{60}{30} \times 10 = -2 \times 10 = -20 \text{ cm}$$
+            </div>
+            <p>ដោយ $h'$ អវិជ្ជមាន នាំឱ្យវាជា <span class="font-bold text-emerald-600">រូបបញ្ច្រាស</span> ។</p>
+            <p class="mt-4 font-bold text-center bg-indigo-100 p-3 rounded text-indigo-900">
+                សន្និដ្ឋាន៖ រូបភាពនេះគឺជារូបពិត បញ្ច្រាស និងមានទំហំធំជាងវត្ថុ២ដង។
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- UI Elements ---
+    var btnConvex = document.getElementById('btnConvex');
+    var btnConcave = document.getElementById('btnConcave');
+    var sliderP = document.getElementById('sliderP');
+    var sliderF = document.getElementById('sliderF');
+    var sliderH = document.getElementById('sliderH');
+    var btnPlayAnim = document.getElementById('btnPlayAnim');
+    
+    var btnShowAns = document.getElementById('btnShowAns');
+    var ansBox = document.getElementById('ansBox');
+
+    // --- State ---
+    var isConvex = true;
+    var animTimeout1;
+
+    // --- Event Listeners ---
+    btnConvex.addEventListener('click', function() {
+        isConvex = true;
+        btnConvex.className = "btn-toggle active flex-1 py-3 rounded-lg font-bold text-lg";
+        btnConcave.className = "btn-toggle inactive flex-1 py-3 rounded-lg font-bold text-lg";
+        document.getElementById('lblF1').textContent = "F";
+        document.getElementById('lblF2').textContent = "F'";
+        updateSimulation();
+    });
+
+    btnConcave.addEventListener('click', function() {
+        isConvex = false;
+        btnConcave.className = "btn-toggle active flex-1 py-3 rounded-lg font-bold text-lg";
+        btnConvex.className = "btn-toggle inactive flex-1 py-3 rounded-lg font-bold text-lg";
+        document.getElementById('lblF1').textContent = "F'";
+        document.getElementById('lblF2').textContent = "F";
+        updateSimulation();
+    });
+
+    sliderP.addEventListener('input', updateSimulation);
+    sliderF.addEventListener('input', updateSimulation);
+    sliderH.addEventListener('input', updateSimulation);
+
+    btnShowAns.addEventListener('click', function() {
+        var isHidden = ansBox.classList.contains('hidden');
+        if (isHidden === true) {
+            ansBox.classList.remove('hidden');
+        } else {
+            ansBox.classList.add('hidden');
+        }
+    });
+
+    // ប៊ូតុងបញ្ចាំងចលនាកាំពន្លឺ
+    btnPlayAnim.addEventListener('click', function() {
+        clearTimeout(animTimeout1);
+        
+        var realRays = ['ray1Real', 'ray2Real', 'ray3Real'];
+        var virtRays = ['ray1Virt', 'ray2Virt', 'ray3Virt'];
+        var imgElements = ['imgLine', 'imgHead', 'lblImg'];
+        
+        var maxDuration = 0;
+        var speed = 800; // ល្បឿនរត់របស់កាំពន្លឺ (px ក្នុងមួយវិនាទី)
+
+        // រៀបចំចលនាសម្រាប់កាំពិត (Real Rays)
+        realRays.forEach(function(id) {
+            var ray = document.getElementById(id);
+            var len = ray.getTotalLength();
+            if (len > 0) {
+                var duration = (len / speed) * 1000;
+                var isLonger = (Math.max(duration, maxDuration) === duration);
+                if (isLonger === true) { maxDuration = duration; }
+                
+                ray.style.transition = 'none';
+                ray.style.strokeDasharray = len + ' ' + len;
+                ray.style.strokeDashoffset = len;
+                ray.style.markerMid = 'none'; // លាក់ក្បាលព្រួញបណ្តោះអាសន្ន
+                
+                // Trigger reflow
+                ray.getBoundingClientRect();
+                
+                // ចាប់ផ្តើមរត់
+                ray.style.transition = 'stroke-dashoffset ' + duration + 'ms linear';
+                ray.style.strokeDashoffset = '0';
+            }
+        });
+
+        // លាក់កាំនិម្មិត និងរូបភាពសិន
+        virtRays.forEach(function(id) {
+            var ray = document.getElementById(id);
+            ray.style.transition = 'none';
+            ray.style.opacity = '0';
+        });
+
+        imgElements.forEach(function(id) {
+            var el = document.getElementById(id);
+            el.style.transition = 'none';
+            el.style.opacity = '0';
+        });
+
+        // បង្ហាញកាំនិម្មិត និងរូបភាព ក្រោយកាំពិតរត់ដល់គោលដៅ
+        animTimeout1 = setTimeout(function() {
+            realRays.forEach(function(id) {
+                document.getElementById(id).style.markerMid = 'url(#arrowHead)';
+            });
+            
+            virtRays.forEach(function(id) {
+                var ray = document.getElementById(id);
+                ray.style.transition = 'opacity 0.4s ease-in';
+                ray.style.opacity = '1';
+            });
+            
+            imgElements.forEach(function(id) {
+                var el = document.getElementById(id);
+                var activeOp = el.getAttribute('data-active-opacity');
+                el.style.transition = 'opacity 0.4s ease-in';
+                el.style.opacity = activeOp;
+            });
+        }, maxDuration);
+    });
+
+    // --- Physics & SVG Logic ---
+    function generatePath(points) {
+        if (points.length === 0) return "";
+        var d = "M " + points[0].x + "," + points[0].y;
+        points.forEach(function(pt, index) {
+            if (index !== 0) {
+                d += " L " + pt.x + "," + pt.y;
+            }
+        });
+        return d;
+    }
+
+    function resetAnimations() {
+        var realRays = ['ray1Real', 'ray2Real', 'ray3Real'];
+        var virtRays = ['ray1Virt', 'ray2Virt', 'ray3Virt'];
+        var imgElements = ['imgLine', 'imgHead', 'lblImg'];
+
+        realRays.forEach(function(id) {
+            var el = document.getElementById(id);
+            el.style.transition = 'none';
+            el.style.strokeDasharray = '';
+            el.style.strokeDashoffset = '';
+            el.style.markerMid = 'url(#arrowHead)';
+        });
+
+        virtRays.forEach(function(id) {
+            var el = document.getElementById(id);
+            el.style.transition = 'none';
+            el.style.opacity = '1';
+        });
+
+        imgElements.forEach(function(id) {
+            var el = document.getElementById(id);
+            el.style.transition = 'none';
+            var op = el.getAttribute('data-active-opacity');
+            if (op !== null) { el.style.opacity = op; }
+        });
+    }
+
+    function updateSimulation() {
+        // លុបចលនាចាស់ចេញពេលទាញ Slider
+        clearTimeout(animTimeout1);
+        resetAnimations();
+
+        var p_val = parseFloat(sliderP.value);
+        var f_mag = parseFloat(sliderF.value);
+        var h_val = parseFloat(sliderH.value);
+
+        // ឡង់ទីប៉ោង f > 0, ឡង់ទីផត f < 0
+        var f = isConvex ? f_mag : -f_mag;
+
+        // សមីការឡង់ទី: 1/q = 1/f - 1/p => q = (p*f)/(p-f)
+        var q_val = 0;
+        var diff = p_val - f;
+        var isDiffZero = (diff === 0);
+
+        if (isDiffZero === true) {
+            q_val = 9999; // អនន្ត (Infinity)
+        } else {
+            q_val = (p_val * f) / diff;
+        }
+
+        var m_val = -q_val / p_val;
+        var h_prime = m_val * h_val;
+
+        var isVirtual = (Math.max(q_val, 0) !== q_val); // q < 0
+        var isInfinity = (isDiffZero === true);
+
+        // --- ធ្វើបច្ចុប្បន្នភាព UI ---
+        document.getElementById('lblP').textContent = p_val + " cm";
+        document.getElementById('lblF').textContent = f_mag + " cm";
+        document.getElementById('lblH').textContent = h_val + " cm";
+
+        if (isInfinity === true) {
+            document.getElementById('resQ').textContent = "អនន្ត (Infinity)";
+            document.getElementById('resH').textContent = "អនន្ត (Infinity)";
+            document.getElementById('resType').textContent = "គ្មានរូបភាព (កាំពន្លឺស្របគ្នា)";
+            document.getElementById('resType').className = "font-bold text-red-600";
+        } else {
+            document.getElementById('resQ').textContent = Math.abs(q_val).toFixed(1) + " cm";
+            document.getElementById('resH').textContent = Math.abs(h_prime).toFixed(1) + " cm";
+            
+            var typeStr = "";
+            if (isVirtual === true) {
+                typeStr = "រូបនិម្មិត, ឈរត្រង់, ";
+                document.getElementById('resType').className = "font-bold text-orange-600";
+            } else {
+                typeStr = "រូបពិត, បញ្ច្រាស, ";
+                document.getElementById('resType').className = "font-bold text-emerald-600";
+            }
+
+            var absM = Math.abs(m_val);
+            var isSmaller = (Math.min(absM, 1.0) === absM && absM !== 1.0);
+            var isBigger = (Math.max(absM, 1.0) === absM && absM !== 1.0);
+
+            if (isSmaller === true) {
+                typeStr += "តូចជាងវត្ថុ";
+            } else if (isBigger === true) {
+                typeStr += "ធំជាងវត្ថុ";
+            } else {
+                typeStr += "ប៉ុនវត្ថុ";
+            }
+            document.getElementById('resType').textContent = typeStr;
+        }
+
+        // --- គូរក្នុង SVG ---
+        document.getElementById('ptF1').setAttribute('cx', -f_mag);
+        document.getElementById('ptF2').setAttribute('cx', f_mag);
+        document.getElementById('lblF1').setAttribute('x', -f_mag - 5);
+        document.getElementById('lblF2').setAttribute('x', f_mag - 5);
+
+        var objX = -p_val;
+        var objY = -h_val; 
+        
+        document.getElementById('objLine').setAttribute('x1', objX);
+        document.getElementById('objLine').setAttribute('x2', objX);
+        document.getElementById('objLine').setAttribute('y2', objY);
+        
+        document.getElementById('objHead').setAttribute('points', 
+            (objX-6) + "," + objY + " " + objX + "," + (objY-10) + " " + (objX+6) + "," + objY
+        );
+        document.getElementById('lblObj').setAttribute('x', objX - 10);
+
+        var lensArrows = document.getElementById('lensArrows');
+        if (isConvex === true) {
+            lensArrows.innerHTML = `
+                <polyline points="-10,-140 0,-150 10,-140" />
+                <polyline points="-10,140 0,150 10,140" />
+            `;
+        } else {
+            lensArrows.innerHTML = `
+                <polyline points="-10,-160 0,-150 10,-160" />
+                <polyline points="-10,160 0,150 10,160" />
+            `;
+        }
+
+        var imgX = q_val;
+        var imgY = -h_prime;
+
+        if (isInfinity === true) {
+            document.getElementById('imgLine').setAttribute('data-active-opacity', '0');
+            document.getElementById('imgHead').setAttribute('data-active-opacity', '0');
+            document.getElementById('lblImg').setAttribute('data-active-opacity', '0');
+            document.getElementById('imgLine').style.opacity = '0';
+            document.getElementById('imgHead').style.opacity = '0';
+            document.getElementById('lblImg').style.opacity = '0';
+        } else {
+            document.getElementById('imgLine').setAttribute('data-active-opacity', '1');
+            document.getElementById('imgHead').setAttribute('data-active-opacity', '1');
+            document.getElementById('lblImg').setAttribute('data-active-opacity', '1');
+            document.getElementById('imgLine').style.opacity = '1';
+            document.getElementById('imgHead').style.opacity = '1';
+            document.getElementById('lblImg').style.opacity = '1';
+
+            document.getElementById('imgLine').setAttribute('x1', imgX);
+            document.getElementById('imgLine').setAttribute('x2', imgX);
+            document.getElementById('imgLine').setAttribute('y2', imgY);
+            
+            if (isVirtual === true) {
+                document.getElementById('imgLine').setAttribute('stroke-dasharray', '5,5');
+            } else {
+                document.getElementById('imgLine').setAttribute('stroke-dasharray', '0');
+            }
+
+            var isImgNeg = (Math.max(imgY, 0) !== imgY);
+            var tipDir = (isImgNeg === true) ? -10 : 10;
+            document.getElementById('imgHead').setAttribute('points', 
+                (imgX-6) + "," + imgY + " " + imgX + "," + (imgY+tipDir) + " " + (imgX+6) + "," + imgY
+            );
+            
+            document.getElementById('lblImg').setAttribute('x', imgX + 5);
+            var lblY = (isImgNeg === true) ? imgY - 10 : imgY + 20;
+            document.getElementById('lblImg').setAttribute('y', lblY);
+        }
+
+        // --- គូរកាំពន្លឺ (Ray Tracing) ---
+        var r1Real = [], r1Virt = [];
+        var r2Real = [], r2Virt = [];
+        var r3Real = [], r3Virt = [];
+
+        var drawLen = 450; 
+
+        if (isInfinity === true) {
+            r1Real.push({x: objX, y: objY}, {x: 0, y: objY}, {x: drawLen, y: objY + drawLen*(objY/-f)});
+            r2Real.push({x: objX, y: objY}, {x: 0, y: 0}, {x: drawLen, y: drawLen*(objY/objX)});
+        } else {
+            // Ray 1: ស្របអ័ក្ស
+            r1Real.push({x: objX, y: objY}, {x: 0, y: objY});
+            var slope1 = (imgY - objY) / (imgX - 0);
+            r1Real.push({x: drawLen, y: objY + slope1 * drawLen});
+            
+            if (isVirtual === true) {
+                r1Virt.push({x: 0, y: objY}, {x: imgX, y: imgY});
+            }
+
+            // Ray 2: កាត់ផ្ចិត O
+            r2Real.push({x: objX, y: objY}, {x: 0, y: 0});
+            var slope2 = (imgY - 0) / (imgX - 0);
+            r2Real.push({x: drawLen, y: 0 + slope2 * drawLen});
+            
+            if (isVirtual === true) {
+                r2Virt.push({x: 0, y: 0}, {x: imgX, y: imgY});
+            }
+
+            // Ray 3: កាត់កំនុំ
+            var hitY = imgY; 
+            r3Real.push({x: objX, y: objY}, {x: 0, y: hitY}, {x: drawLen, y: hitY});
+            if (isVirtual === true) {
+                r3Virt.push({x: 0, y: hitY}, {x: imgX, y: imgY});
+            }
+        }
+
+        document.getElementById('ray1Real').setAttribute('d', generatePath(r1Real));
+        document.getElementById('ray1Virt').setAttribute('d', generatePath(r1Virt));
+        
+        document.getElementById('ray2Real').setAttribute('d', generatePath(r2Real));
+        document.getElementById('ray2Virt').setAttribute('d', generatePath(r2Virt));
+        
+        document.getElementById('ray3Real').setAttribute('d', generatePath(r3Real));
+        document.getElementById('ray3Virt').setAttribute('d', generatePath(r3Virt));
+    }
+
+    // Initialize
+    updateSimulation();
+
+</script>
+
+</body>
+</html>

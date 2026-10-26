@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី៨៖ ការគូរកាំពន្លឺ និងគណនាឡង់ទីប៉ោង</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f0f4f8; padding: 20px; color: #1a202c; text-align: center; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fffaf0; color: #7b341e; padding: 20px 25px;
+            border-radius: 10px; border-left: 6px solid #dd6b20;
+            text-align: left; margin-bottom: 25px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #cbd5e0;
+            border-radius: 10px; overflow: hidden;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08); margin: 0 auto 20px;
+            display: block; padding-top: 15px; padding-bottom: 15px;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 450px; margin: 0 auto;
+        }
+
+        .btn-group {
+            display: flex; gap: 15px; margin-bottom: 25px; justify-content: center; flex-wrap: wrap;
+        }
+        button {
+            color: white; padding: 14px 24px; font-size: 17px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            font-family: inherit; transition: all 0.2s ease;
+        }
+        button:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        button:active { transform: scale(0.98); }
+        
+        .btn-action { background: #3182ce; }
+        .btn-reset { background: #718096; }
+        .btn-sol { background: #38a169; width: 100%; margin-bottom: 20px; padding: 16px;}
+
+        .solution-box {
+            background: #edf2f7; padding: 30px; border-radius: 10px;
+            text-align: left; margin-top: 10px; border-left: 6px solid #2b6cb0;
+            font-size: 17px; line-height: 1.9; box-shadow: 0 5px 10px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 { margin-top: 0; color: #2c5282; border-bottom: 2px solid #a0aec0; padding-bottom: 10px; font-size: 22px; }
+        
+        .note-box { 
+            background: #e6fffa; border-left: 6px solid #319795; 
+            padding: 15px 20px; margin-bottom: 25px; border-radius: 6px; color: #234e52; 
+        }
+
+        .ray-desc { display: flex; align-items: center; margin-bottom: 8px; }
+        .color-box { width: 20px; height: 20px; border-radius: 4px; margin-right: 15px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ប្រធានលំហាត់ -->
+    <div class="problem-statement">
+        <strong>លំហាត់ទី ៨ ៖</strong> ចូរគូរកាំពន្លឺពិសេសបំពេញលើរូបខាងក្រោម។ គណនាចម្ងាយរូបភាព និងចម្ងាយកំណុំរបស់វា ដោយដឹងថាកម្រិតពង្រីករបស់ឡង់ទីស្មើនឹង $2.0$ និងចម្ងាយវត្ថុស្មើ $20 \text{ cm}$ ។ (ឡង់ទីនេះជាឡង់ទីប៉ោង)
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា Simulator -->
+    <div class="btn-group">
+        <button class="btn-action" id="btnShoot">🚀 បាញ់កាំពន្លឺ</button>
+        <button class="btn-reset" id="btnReset">🔄 ត្រឡប់ដើម</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <!-- ក្បាលព្រួញសម្រាប់កាំពន្លឺ -->
+                <marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#e53e3e" />
+                </marker>
+                <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#38a169" />
+                </marker>
+                <marker id="arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#3182ce" />
+                </marker>
+                <!-- ក្បាលព្រួញធម្មតា -->
+                <marker id="arrowBlack" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a202c" />
+                </marker>
+                <marker id="arrowOrange" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#dd6b20" />
+                </marker>
+            </defs>
+
+            <!-- អ័ក្សអុបទិច (Principal Axis) -->
+            <line x1="50" y1="200" x2="750" y2="200" stroke="#4a5568" stroke-width="2" />
+            
+            <!-- ឡង់ទីប៉ោង (Convex Lens) -->
+            <path d="M 400 60 Q 425 200 400 340 Q 375 200 400 60 Z" fill="#ebf8ff" stroke="#2b6cb0" stroke-width="2"/>
+            <line x1="400" y1="50" x2="400" y2="350" stroke="#2b6cb0" stroke-width="1" stroke-dasharray="5,5" />
+            <text x="410" y="215" font-family="Arial" font-weight="bold" font-size="16" fill="#2b6cb0">O</text>
+
+            <!-- កំណុំ F និង F' (Focal Points) -->
+            <!-- f = 13.33cm => 66.67px -->
+            <circle cx="333.33" cy="200" r="4" fill="#805ad5" />
+            <text x="325" y="225" font-family="Arial" font-style="italic" font-weight="bold" font-size="16" fill="#805ad5">F</text>
+            
+            <circle cx="466.67" cy="200" r="4" fill="#805ad5" />
+            <text x="460" y="225" font-family="Arial" font-style="italic" font-weight="bold" font-size="16" fill="#805ad5">F'</text>
+
+            <!-- វត្ថុ AB -->
+            <line x1="300" y1="200" x2="300" y2="155" stroke="#1a202c" stroke-width="3" marker-end="url(#arrowBlack)"/>
+            <text x="285" y="150" font-family="Arial" font-weight="bold" font-size="16" fill="#1a202c">B</text>
+            <text x="285" y="215" font-family="Arial" font-weight="bold" font-size="16" fill="#1a202c">A</text>
+
+            <!-- គំនូសបញ្ជាក់ប្រវែង 20cm -->
+            <line x1="300" y1="230" x2="300" y2="250" stroke="#718096" stroke-width="1"/>
+            <line x1="400" y1="230" x2="400" y2="250" stroke="#718096" stroke-width="1"/>
+            <line x1="300" y1="240" x2="400" y2="240" stroke="#718096" stroke-width="1" marker-start="url(#arrowBlack)" marker-end="url(#arrowBlack)"/>
+            <text x="350" y="255" text-anchor="middle" font-family="Arial" font-size="14" fill="#4a5568">20 cm</text>
+
+            <!-- កាំពន្លឺទាំង៣ (នឹងត្រូវគូរដោយ JavaScript) -->
+            <path id="ray1" fill="none" stroke="#e53e3e" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowRed)"/>
+            <path id="ray2" fill="none" stroke="#38a169" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowGreen)"/>
+            <path id="ray3" fill="none" stroke="#3182ce" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowBlue)"/>
+
+            <!-- រូបភាព A'B' (លាក់ទុកសិន) -->
+            <g id="imageGroup" style="opacity: 0; transition: opacity 0.5s ease;">
+                <line x1="600" y1="200" x2="600" y2="295" stroke="#dd6b20" stroke-width="3" marker-end="url(#arrowOrange)"/>
+                <text x="610" y="310" font-family="Arial" font-weight="bold" font-size="16" fill="#dd6b20">B'</text>
+                <text x="610" y="195" font-family="Arial" font-weight="bold" font-size="16" fill="#dd6b20">A'</text>
+                <!-- គំនូសបញ្ជាក់ប្រវែងរូបភាព (40cm) -->
+                <line x1="400" y1="330" x2="400" y2="350" stroke="#718096" stroke-width="1"/>
+                <line x1="600" y1="330" x2="600" y2="350" stroke="#718096" stroke-width="1"/>
+                <line x1="400" y1="340" x2="600" y2="340" stroke="#718096" stroke-width="1" marker-start="url(#arrowBlack)" marker-end="url(#arrowBlack)"/>
+                <text x="500" y="355" text-anchor="middle" font-family="Arial" font-size="14" fill="#4a5568">40 cm</text>
+            </g>
+        </svg>
+    </div>
+
+    <!-- ប៊ូតុងបង្ហាញដំណោះស្រាយ -->
+    <button id="btnToggleSolution" class="btn-sol">📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box">
+            💡 <strong>ការគូរកាំពន្លឺពិសេសទាំង ៣ របស់ឡង់ទីប៉ោង៖</strong><br>
+            <div class="ray-desc" style="margin-top: 10px;">
+                <div class="color-box" style="background: #e53e3e;"></div>
+                <span><strong>កាំទី១៖</strong> កាំស្របអ័ក្សកណ្តាល ឆ្លងកាត់ឡង់ទីរួចកាត់តាមកំណុំរូបភាព $F'$ ។</span>
+            </div>
+            <div class="ray-desc">
+                <div class="color-box" style="background: #38a169;"></div>
+                <span><strong>កាំទី២៖</strong> កាំកាត់តាមផ្ចិតអុបទិច $O$ ឆ្លងកាត់ឡង់ទីដោយគ្មានចម្លាត(ត្រង់ភ្លឹង)។</span>
+            </div>
+            <div class="ray-desc">
+                <div class="color-box" style="background: #3182ce;"></div>
+                <span><strong>កាំទី៣៖</strong> កាំកាត់តាមកំណុំវត្ថុ $F$ ឆ្លងកាត់ឡង់ទីរួចចេញស្របនឹងអ័ក្សកណ្តាល។</span>
+            </div>
+        </div>
+
+        <h3>ដំណោះស្រាយ</h3>
+        
+        <p>បម្រាប់ដែលយើងមាន៖</p>
+        <ul style="line-height: 1.8;">
+            <li>ចម្ងាយវត្ថុ $p = 20 \text{ cm}$</li>
+            <li>កម្រិតពង្រីក $m = 2.0$</li>
+        </ul>
+        <p><em>(ចំណាំ៖ សម្រាប់ការគូរកាំពន្លឺកាត់គ្នាបង្កើតជារូបភាពនៅម្ខាងទៀតនៃឡង់ទី យើងចាត់ទុករូបភាពនេះជា <strong>រូបពិត</strong> ដូចនេះ $p' > 0$)</em></p>
+
+        <p><strong>១. គណនាចម្ងាយរូបភាព $p'$ ៖</strong></p>
+        <p>តាមរូបមន្តកម្រិតពង្រីកនៃរូបពិត៖ $$m = \frac{p'}{p}$$</p>
+        <p>នាំឱ្យ $$p' = m \times p = 2.0 \times 20 = 40 \text{ cm}$$</p>
+
+        <p><strong>២. គណនាចម្ងាយកំណុំ $f$ ៖</strong></p>
+        <p>តាមរូបមន្តឡង់ទីស្តើង៖ $$\frac{1}{f} = \frac{1}{p} + \frac{1}{p'}$$</p>
+        <p>ជំនួសលេខ៖ $$\frac{1}{f} = \frac{1}{20} + \frac{1}{40} = \frac{2}{40} + \frac{1}{40} = \frac{3}{40}$$</p>
+        <p>នាំឱ្យ $$f = \frac{40}{3} \approx 13.33 \text{ cm}$$</p>
+        
+        <p style="color: #2f855a; font-weight: bold; margin-top: 20px;">
+            ដូចនេះ ចម្ងាយរូបភាពគឺ $p' = 40 \text{ cm}$ និងចម្ងាយកំណុំគឺ $f \approx 13.33 \text{ cm}$ ។
+        </p>
+    </div>
+</div>
+
+<!-- JavaScript សម្រាប់ Simulator -->
+<script>
+    const btnShoot = document.getElementById('btnShoot');
+    const btnReset = document.getElementById('btnReset');
+    const btnToggleSolution = document.getElementById('btnToggleSolution');
+    const solutionBox = document.getElementById('solutionBox');
+    
+    const ray1 = document.getElementById('ray1');
+    const ray2 = document.getElementById('ray2');
+    const ray3 = document.getElementById('ray3');
+    const imageGroup = document.getElementById('imageGroup');
+
+    let animationId;
+    let progress = 0; // ពី 0 ដល់ 1 (តំណាងឱ្យចម្ងាយតាមអ័ក្ស X)
+    let isAnimating = false;
+
+    // Toggle ដំណោះស្រាយ
+    btnToggleSolution.addEventListener('click', () => {
+        if (solutionBox.style.display === 'none' || solutionBox.style.display === '') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    // មុខងារគូរគន្លងកាំពន្លឺ
+    function updateRays(xProgress) {
+        // x រត់ពី 300 (វត្ថុ) ទៅ 700 (ហួសរូបភាពបន្តិច)
+        const currentX = 300 + (xProgress * 400); 
+        
+        // កាំទី១ (ក្រហម): ស្របអ័ក្ស ទៅកាត់ F'
+        let path1 = "";
+        if (currentX <= 400) {
+            path1 = `M 300 150 L ${currentX} 150`;
+        } else {
+            // Slope = (300 - 150) / (600 - 400) = 150 / 200 = 0.75
+            let y = 150 + 0.75 * (currentX - 400);
+            path1 = `M 300 150 L 400 150 L ${currentX} ${y}`;
+        }
+        ray1.setAttribute("d", path1);
+
+        // កាំទី២ (បៃតង): កាត់តាម O(400, 200)
+        // Slope = (200 - 150) / (400 - 300) = 50 / 100 = 0.5
+        let y2 = 150 + 0.5 * (currentX - 300);
+        ray2.setAttribute("d", `M 300 150 L ${currentX} ${y2}`);
+
+        // កាំទី៣ (ខៀវ): កាត់តាម F(333.33, 200) ទៅស្របអ័ក្ស
+        let path3 = "";
+        if (currentX <= 400) {
+            // Slope = (200 - 150) / (333.33 - 300) = 50 / 33.33 = 1.5
+            let y = 150 + 1.5 * (currentX - 300);
+            path3 = `M 300 150 L ${currentX} ${y}`;
+        } else {
+            path3 = `M 300 150 L 400 300 L ${currentX} 300`;
+        }
+        ray3.setAttribute("d", path3);
+    }
+
+    function animateLoop() {
+        if (progress < 1) {
+            progress += 0.015; // ល្បឿនលោត
+            if (progress > 1) progress = 1;
+            updateRays(progress);
+            
+            // បង្ហាញរូបភាព A'B' នៅពេលកាំពន្លឺរត់ទៅដល់ x=600 (progress = 0.75)
+            if (progress >= 0.75) {
+                imageGroup.style.opacity = 1;
+            }
+            
+            animationId = requestAnimationFrame(animateLoop);
+        } else {
+            isAnimating = false;
+            btnShoot.innerText = "✅ បានបញ្ចាំងរួចរាល់";
+            btnShoot.style.background = "#38a169";
+        }
+    }
+
+    btnShoot.addEventListener('click', () => {
+        if (!isAnimating && progress === 0) {
+            isAnimating = true;
+            btnShoot.innerText = "⏳ កំពុងបាញ់កាំពន្លឺ...";
+            btnShoot.style.background = "#dd6b20";
+            animateLoop();
+        }
+    });
+
+    btnReset.addEventListener('click', () => {
+        cancelAnimationFrame(animationId);
+        isAnimating = false;
+        progress = 0;
+        
+        // លុបកាំពន្លឺ និងរូបភាពចេញវិញ
+        ray1.setAttribute("d", "");
+        ray2.setAttribute("d", "");
+        ray3.setAttribute("d", "");
+        imageGroup.style.opacity = 0;
+        
+        btnShoot.innerText = "🚀 បាញ់កាំពន្លឺ";
+        btnShoot.style.background = "#3182ce";
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>កម្រងលំហាត់រូបវិទ្យា</title>
+
+    <!-- Tailwind CSS សម្រាប់រចនាប័ទ្ម -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts សម្រាប់អក្សរខ្មែរ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body { font-family: 'Battambang', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        .question-block { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .radio-custom { width: 1.25rem; height: 1.25rem; margin-right: 0.5rem; cursor: pointer; accent-color: #2563eb; }
+        .option-label { display: flex; align-items: flex-start; cursor: pointer; padding: 8px; border-radius: 8px; transition: background 0.2s; }
+        .option-label:hover { background-color: #f8fafc; }
+        .svg-diagram { display: block; margin: 15px auto; max-width: 100%; border: 1px solid #e2e8f0; background: #ffffff; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+<div class="max-w-4xl mx-auto">
+    
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-blue-700 mb-2">កម្រងលំហាត់សាកល្បង</h1>
+        <p class="text-slate-500">សូមបំពេញឈ្មោះ ថ្នាក់ និងជ្រើសរើសចម្លើយដែលត្រឹមត្រូវបំផុត</p>
+    </div>
+
+    <form id="quizForm">
+        
+        <!-- ព័ត៌មានសិស្ស -->
+        <div class="bg-blue-50 p-6 rounded-xl border border-blue-200 mb-6 shadow-sm">
+            <h2 class="font-bold text-blue-800 mb-4 text-lg">ព័ត៌មានសិស្ស</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-slate-700 font-bold mb-2">ឈ្មោះសិស្ស៖</label>
+                    <input type="text" id="studentName" name="studentName" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="បញ្ចូលឈ្មោះ...">
+                </div>
+                <div>
+                    <label class="block text-slate-700 font-bold mb-2">ថ្នាក់ទី៖</label>
+                    <input type="text" id="studentClass" name="studentClass" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="ឧទាហរណ៍៖ ១០ក">
+                </div>
+            </div>
+        </div>
+
+        <!-- សំណួរទី១ -->
+        <div class="question-block">
+            <p class="font-bold text-lg mb-4">១. តាមករណីខាងក្រោមនេះ ករណីណាមួយជាពុំនោលចំណាំងផ្លាត</p>
+            <div class="space-y-2 pl-4">
+                <label class="option-label"><input type="radio" name="q1" value="A" required class="radio-custom mt-1"> <span>ក. មុំដែលកើតឡើងរវាងកាំចំណាំងប៉ះនិងខ្សែកែងនឹងផ្ទៃកញ្ចក់ស្មើនឹងមុំដែលកើតឡើងរវាងផ្ទៃកញ្ចក់និងកាំចំណាំងផ្លាត ។</span></label>
+                <label class="option-label"><input type="radio" name="q1" value="B" class="radio-custom mt-1"> <span>ខ. មុំដែលកើតឡើងរវាងកាំចំណាំងប៉ះនិងផ្ទៃកញ្ចក់ស្មើនឹងមុំដែលកើតឡើងរវាងផ្ទៃកញ្ចក់និងកាំចំណាំងផ្លាត ។</span></label>
+                <label class="option-label"><input type="radio" name="q1" value="C" class="radio-custom mt-1"> <span>គ. មុំដែលកើតឡើងរវាងកាំចំណាំងប៉ះនិងខ្សែកែងនឹងកញ្ចក់ស្មើនឹងមុំដែលកើតឡើងរវាងខ្សែកែងនិងកាំចំណាំងផ្លាត ។</span></label>
+                <label class="option-label"><input type="radio" name="q1" value="D" class="radio-custom mt-1"> <span>ឃ. មុំដែលកើតឡើងរវាងកាំចំណាំងប៉ះនិងខ្សែកែងនឹងផ្ទៃកញ្ចក់ជាមុំបំពេញរវាងខ្សែកែងនិងកាំចំណាំងផ្លាត ។</span></label>
+            </div>
+        </div>
+
+        <!-- សំណួរទី២ -->
+        <div class="question-block">
+            <p class="font-bold text-lg mb-4">២. ខាងក្រោមនេះ តើករណីណាមួយដែលកាំចំណាំងបែរមានលំងាកមកជិតខ្សែកែងន័រម៉ាល់</p>
+            <div class="space-y-2 pl-4">
+                <label class="option-label"><input type="radio" name="q2" value="A" required class="radio-custom mt-1"> <span>ក. $n_1 > n_2$ កាលណា $\theta_1 = 20^\circ$ ។</span></label>
+                <label class="option-label"><input type="radio" name="q2" value="B" class="radio-custom mt-1"> <span>ខ. ពីខ្យល់ទៅកញ្ចក់ មានមុំចំណាំងប៉ះស្មើនឹង $30^\circ$ ។</span></label>
+                <label class="option-label"><input type="radio" name="q2" value="C" class="radio-custom mt-1"> <span>គ. ពីកញ្ចក់ទៅខ្យល់មានមុំចំណាំងប៉ះស្មើនឹង $30^\circ$ ។</span></label>
+            </div>
+        </div>
+
+        <!-- សំណួរទី៣ -->
+        <div class="question-block">
+            <p class="font-bold text-lg mb-4">៣. ខាងក្រោមបង្ហាញកាំពន្លឺចាំងប៉ះលើផ្ទៃអង្គធាតុថ្លា ។ សន្ទស្សន៍ចំណាំងបែរនៃអង្គធាតុថ្លាគឺ</p>
+            
+            <!-- គំនូសបំព្រួញទី៣ (បានកែតម្រូវមុំ 60° តាមរូបភាព) -->
+            <svg class="svg-diagram" width="300" height="180" viewBox="0 0 300 180">
+                <defs>
+                    <pattern id="water" width="20" height="10" patternUnits="userSpaceOnUse">
+                        <line x1="2" y1="5" x2="10" y2="5" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2,2"/>
+                        <line x1="12" y1="9" x2="18" y2="9" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2,2"/>
+                    </pattern>
+                    <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><polygon points="0,0 6,3 0,6" fill="#111" /></marker>
+                </defs>
+                <!-- ទឹក -->
+                <rect x="0" y="0" width="300" height="90" fill="url(#water)" />
+                <rect x="0" y="0" width="300" height="90" fill="#e0f2fe" opacity="0.3" />
+                <text x="260" y="75" font-family="'Battambang', sans-serif" font-size="16">ទឹក</text>
+                
+                <!-- ខ្យល់ -->
+                <text x="260" y="115" font-family="'Battambang', sans-serif" font-size="16">ខ្យល់</text>
+
+                <!-- ខ្សែព្រំដែន និង ខ្សែតែកង -->
+                <line x1="0" y1="90" x2="300" y2="90" stroke="#111" stroke-width="1.5" />
+                <line x1="150" y1="10" x2="150" y2="170" stroke="#111" stroke-width="1.5" />
+
+                <!-- កាំពន្លឺ -->
+                <line x1="63.4" y1="40" x2="150" y2="90" stroke="#111" stroke-width="1.5" marker-mid="url(#arrow)" />
+                <line x1="150" y1="90" x2="226.6" y2="154.2" stroke="#111" stroke-width="1.5" marker-mid="url(#arrow)" />
+                <line x1="150" y1="90" x2="236.6" y2="140" stroke="#111" stroke-width="1" stroke-dasharray="4,4" />
+
+                <!-- ធ្នូមុំ 60° (កែតម្រូវឱ្យនៅចន្លោះខ្សែតែកង និងកាំចំណាំងប៉ះ) -->
+                <path d="M 150 65 A 25 25 0 0 0 128.35 77.5" fill="none" stroke="#111" stroke-width="1.5" />
+                <text x="110" y="55" font-family="Arial" font-size="14" font-weight="bold">60°</text>
+
+                <!-- ធ្នូមុំ 50° (រវាងខ្សែតែកង និងកាំចំណាំងបែរ) -->
+                <path d="M 150 125 A 35 35 0 0 0 176.8 112.5" fill="none" stroke="#111" stroke-width="1.5" />
+                <text x="155" y="135" font-family="Arial" font-size="14" font-weight="bold">50°</text>
+            </svg>
+
+            <div class="grid grid-cols-2 gap-4 pl-4 mt-4">
+                <label class="option-label"><input type="radio" name="q3" value="A" required class="radio-custom mt-2"> <span class="text-xl">ក. $\frac{\sin 60^\circ}{\sin 50^\circ}$</span></label>
+                <label class="option-label"><input type="radio" name="q3" value="B" class="radio-custom mt-2"> <span class="text-xl">ខ. $\frac{\sin 30^\circ}{\sin 50^\circ}$</span></label>
+                <label class="option-label"><input type="radio" name="q3" value="C" class="radio-custom mt-2"> <span class="text-xl">គ. $\frac{\sin 60^\circ}{\sin 40^\circ}$</span></label>
+                <label class="option-label"><input type="radio" name="q3" value="D" class="radio-custom mt-2"> <span class="text-xl">ឃ. $\frac{\sin 50^\circ}{\sin 60^\circ}$</span></label>
+            </div>
+        </div>
+
+        <!-- សំណួរទី៤ -->
+        <div class="question-block">
+            <p class="font-bold text-lg mb-4">៤. សន្ទស្សន៍ចំណាំងបែរនៃបង់សែនគឺ 1.5 ។ តើមុំកម្រិតនៃបង់សែនស្មើនឹងប៉ុន្មាន?</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 pl-4">
+                <label class="option-label"><input type="radio" name="q4" value="A" required class="radio-custom"> <span>ក. $0.667^\circ$</span></label>
+                <label class="option-label"><input type="radio" name="q4" value="B" class="radio-custom"> <span>ខ. $42^\circ$</span></label>
+                <label class="option-label"><input type="radio" name="q4" value="C" class="radio-custom"> <span>គ. $48^\circ$</span></label>
+                <label class="option-label"><input type="radio" name="q4" value="D" class="radio-custom"> <span>ឃ. $90^\circ$</span></label>
+            </div>
+        </div>
+
+        <!-- សំណួរទី៥ -->
+        <div class="question-block">
+            <p class="font-bold text-lg mb-4">៥. ដ្យាក្រាមខាងស្តាំបង្ហាញពីមនុស្សម្នាក់ចង់វាស់ចម្ងាយកំនុំឡង់ទី ។ តើចម្ងាយណាមួយជាចម្ងាយកំនុំឡង់ទី?</p>
+            
+            <!-- គំនូសបំព្រួញទី៥ -->
+            <svg class="svg-diagram" width="400" height="150" viewBox="0 0 400 150">
+                <defs>
+                    <pattern id="hatch" width="4" height="4" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+                        <line x1="0" y1="0" x2="0" y2="4" stroke="#111" stroke-width="1" />
+                    </pattern>
+                    <marker id="arrowL" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto"><polygon points="6,0 0,3 6,6" fill="#111" /></marker>
+                    <marker id="arrowR" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto"><polygon points="0,0 6,3 0,6" fill="#111" /></marker>
+                </defs>
+                <rect x="20" y="20" width="5" height="100" fill="url(#hatch)" stroke="#111" />
+                <line x1="25" y1="20" x2="25" y2="120" stroke="#111" stroke-width="2" />
+                <text x="0" y="80" font-family="'Battambang', sans-serif" font-size="12">កញ្ចក់</text>
+                <path d="M 180 20 Q 195 70 180 120 Q 165 70 180 20" fill="#e2e8f0" stroke="#111" stroke-width="1.5" />
+                <line x1="180" y1="15" x2="180" y2="125" stroke="#111" stroke-width="1" stroke-dasharray="3,3" />
+                <line x1="280" y1="40" x2="280" y2="100" stroke="#111" stroke-width="3" />
+                <circle cx="280" cy="40" r="4" fill="#111" />
+                <circle cx="280" cy="100" r="4" fill="#111" />
+                <text x="290" y="50" font-family="'Battambang', sans-serif" font-size="12">រូបភាព</text>
+                <text x="290" y="90" font-family="'Battambang', sans-serif" font-size="12">ដែកគោល</text>
+                <path d="M 370 60 Q 360 70 370 80 Q 380 70 370 60" fill="none" stroke="#111" stroke-width="1.5" />
+                <circle cx="368" cy="70" r="3" fill="#111" />
+                <line x1="370" y1="50" x2="370" y2="120" stroke="#111" stroke-width="1" stroke-dasharray="3,3" />
+                <line x1="25" y1="40" x2="180" y2="40" stroke="#111" marker-start="url(#arrowL)" marker-end="url(#arrowR)" />
+                <line x1="25" y1="60" x2="180" y2="60" stroke="#111" marker-start="url(#arrowL)" marker-end="url(#arrowR)" />
+                <line x1="25" y1="80" x2="180" y2="80" stroke="#111" marker-start="url(#arrowL)" marker-end="url(#arrowR)" />
+                <line x1="25" y1="100" x2="180" y2="100" stroke="#111" marker-start="url(#arrowL)" marker-end="url(#arrowR)" />
+                <line x1="180" y1="40" x2="280" y2="70" stroke="#111" marker-mid="url(#arrowL)" />
+                <line x1="180" y1="60" x2="280" y2="70" stroke="#111" marker-mid="url(#arrowL)" />
+                <line x1="180" y1="80" x2="280" y2="70" stroke="#111" marker-mid="url(#arrowL)" />
+                <line x1="180" y1="100" x2="280" y2="70" stroke="#111" marker-mid="url(#arrowL)" />
+                <line x1="25" y1="140" x2="180" y2="140" stroke="#111" marker-start="url(#arrowL)" marker-end="url(#arrowR)" />
+                <text x="100" y="135" font-family="Arial" font-size="14" font-style="italic">x</text>
+                <line x1="180" y1="140" x2="280" y2="140" stroke="#111" marker-start="url(#arrowL)" marker-end="url(#arrowR)" />
+                <text x="225" y="135" font-family="Arial" font-size="14" font-style="italic">y</text>
+                <line x1="280" y1="140" x2="370" y2="140" stroke="#111" marker-start="url(#arrowL)" marker-end="url(#arrowR)" />
+                <text x="320" y="135" font-family="Arial" font-size="14" font-style="italic">z</text>
+            </svg>
+
+            <div class="grid grid-cols-2 gap-4 pl-4 mt-4">
+                <label class="option-label"><input type="radio" name="q5" value="A" required class="radio-custom"> <span class="text-lg">ក. $x$</span></label>
+                <label class="option-label"><input type="radio" name="q5" value="B" class="radio-custom"> <span class="text-lg">ខ. $y$</span></label>
+                <label class="option-label"><input type="radio" name="q5" value="C" class="radio-custom"> <span class="text-lg">គ. $z$</span></label>
+                <label class="option-label"><input type="radio" name="q5" value="D" class="radio-custom"> <span class="text-lg">ឃ. $x+z$</span></label>
+            </div>
+        </div>
+
+        <!-- សំណួរទី៦ -->
+        <div class="question-block">
+            <p class="font-bold text-lg mb-4">៦. ដ្យាក្រាមខាងក្រោមបង្ហាញពីអង្គធាតុមូយដាក់ពីមុខឡង់ទីបង្រួមដែលមានចម្ងាយកំនុំ $f$ ។ តើរូបភាពត្រូវបង្កើតត្រង់ទីតាំងណា?</p>
+            
+            <!-- គំនូសបំព្រួញទី៦ -->
+            <svg class="svg-diagram" width="400" height="120" viewBox="0 0 400 120">
+                <line x1="20" y1="60" x2="380" y2="60" stroke="#111" stroke-width="1.5" />
+                <path d="M 200 10 Q 215 60 200 110 Q 185 60 200 10" fill="#e2e8f0" stroke="#111" stroke-width="1.5" />
+                <line x1="200" y1="5" x2="200" y2="115" stroke="#111" stroke-width="1" stroke-dasharray="3,3" />
+                <text x="210" y="25" font-family="'Battambang', sans-serif" font-size="14">ឡង់ទី</text>
+                <circle cx="150" cy="60" r="2" fill="#111" />
+                <circle cx="100" cy="60" r="2" fill="#111" />
+                <text x="145" y="50" font-family="Arial" font-size="14">C</text>
+                <circle cx="250" cy="60" r="2" fill="#111" />
+                <text x="245" y="50" font-family="Arial" font-size="14">A</text>
+                <circle cx="300" cy="60" r="2" fill="#111" />
+                <text x="295" y="50" font-family="Arial" font-size="14">B</text>
+                <circle cx="350" cy="60" r="2" fill="#111" />
+                <text x="345" y="50" font-family="Arial" font-size="14">D</text>
+                <line x1="100" y1="60" x2="100" y2="30" stroke="#111" stroke-width="2" />
+                <polygon points="96,30 100,20 104,30" fill="#111" />
+                <text x="80" y="45" font-family="'Battambang', sans-serif" font-size="12">វត្ថុ</text>
+                <line x1="100" y1="75" x2="150" y2="75" stroke="#111" />
+                <line x1="100" y1="72" x2="100" y2="78" stroke="#111" />
+                <line x1="150" y1="72" x2="150" y2="78" stroke="#111" />
+                <text x="120" y="95" font-family="Arial" font-style="italic">f</text>
+                <line x1="150" y1="75" x2="200" y2="75" stroke="#111" />
+                <line x1="200" y1="72" x2="200" y2="78" stroke="#111" />
+                <text x="170" y="95" font-family="Arial" font-style="italic">f</text>
+                <line x1="200" y1="75" x2="250" y2="75" stroke="#111" />
+                <line x1="250" y1="72" x2="250" y2="78" stroke="#111" />
+                <text x="220" y="95" font-family="Arial" font-style="italic">f</text>
+                <line x1="250" y1="75" x2="300" y2="75" stroke="#111" />
+                <line x1="300" y1="72" x2="300" y2="78" stroke="#111" />
+                <text x="270" y="95" font-family="Arial" font-style="italic">f</text>
+                <line x1="300" y1="75" x2="350" y2="75" stroke="#111" />
+                <line x1="350" y1="72" x2="350" y2="78" stroke="#111" />
+                <text x="320" y="95" font-family="Arial" font-style="italic">f</text>
+            </svg>
+
+            <div class="space-y-2 pl-4 mt-4">
+                <label class="option-label"><input type="radio" name="q6" value="A" required class="radio-custom mt-1"> <span>ក. នៅពីមុខចំណុច A</span></label>
+                <label class="option-label"><input type="radio" name="q6" value="B" class="radio-custom mt-1"> <span>ខ. នៅត្រង់ចំណុច A</span></label>
+                <label class="option-label"><input type="radio" name="q6" value="C" class="radio-custom mt-1"> <span>គ. នៅត្រង់ចំណុច B</span></label>
+                <label class="option-label"><input type="radio" name="q6" value="D" class="radio-custom mt-1"> <span>ឃ. នៅត្រង់ចំណុច D</span></label>
+            </div>
+        </div>
+
+        <!-- សំណួរទី៧ -->
+        <div class="question-block">
+            <p class="font-bold text-lg mb-4">៧. រូបភាពបង្កើតលើហ្វីលនៃម៉ាស៊ីនថតរូបងាយគឺ</p>
+            <div class="space-y-2 pl-4">
+                <label class="option-label"><input type="radio" name="q7" value="A" required class="radio-custom mt-1"> <span>ក. រូបភាពពិត តូចជាងវត្ថុ និងមានទិសដៅផ្ទុយពីវត្ថុ ។</span></label>
+                <label class="option-label"><input type="radio" name="q7" value="B" class="radio-custom mt-1"> <span>ខ. រូបភាពពិត តូចជាងវត្ថុ និងមានទិសដៅដូចវត្ថុ ។</span></label>
+                <label class="option-label"><input type="radio" name="q7" value="C" class="radio-custom mt-1"> <span>គ. រូបភាពពិត ធំជាងវត្ថុ និងមានទិសដៅដូចវត្ថុ ។</span></label>
+                <label class="option-label"><input type="radio" name="q7" value="D" class="radio-custom mt-1"> <span>ឃ. រូបភាពពិត ធំជាងវត្ថុ និងមានទិសដៅផ្ទុយពីវត្ថុ ។</span></label>
+            </div>
+        </div>
+
+        <!-- ប៊ូតុងបញ្ជូន -->
+        <div class="text-center mt-8 mb-10">
+            <button type="submit" id="submitBtn" class="bg-blue-600 text-white font-bold text-xl py-4 px-12 rounded-full hover:bg-blue-700 transition shadow-lg w-full md:w-auto">
+                បញ្ជូនចម្លើយ (Submit)
+            </button>
+            <div id="loadingMsg" class="hidden mt-4 text-blue-600 font-bold text-lg">
+                កំពុងបញ្ជូនទិន្នន័យ... សូមរង់ចាំ!
+            </div>
+            <div id="successMsg" class="hidden mt-4 text-emerald-600 font-bold text-lg border border-emerald-200 bg-emerald-50 p-4 rounded-lg shadow-sm">
+                ✅ បានបញ្ជូនចម្លើយដោយជោគជ័យ! អរគុណ។
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    // -------------------------------------------------------------
+    // សូមចម្លង Web App URL ពី Google Apps Script មកដាក់ក្នុង "https://script.google.com/macros/s/AKfycby1CaS2pQ3CpW_6BLA_piKIb6jmP2LYlnFXcpHDtC5t7lGodtnSQex2gEPPBhBwmXriwA/exec" ខាងក្រោម
+    // ឧទាហរណ៍៖ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1CaS2pQ3CpW_6BLA_piKIb6jmP2LYlnFXcpHDtC5t7lGodtnSQex2gEPPBhBwmXriwA/exec";
+    // -------------------------------------------------------------
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1CaS2pQ3CpW_6BLA_piKIb6jmP2LYlnFXcpHDtC5t7lGodtnSQex2gEPPBhBwmXriwA/exec"; 
+    
+    document.getElementById('quizForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // ការពារកុំឱ្យ Webpage លោត (Reload)
+
+        const form = this;
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingMsg = document.getElementById('loadingMsg');
+        const successMsg = document.getElementById('successMsg');
+
+        // លាក់ប៊ូតុង និងបង្ហាញសារកំពុងបញ្ជូន
+        submitBtn.classList.add('hidden');
+        loadingMsg.classList.remove('hidden');
+        successMsg.classList.add('hidden');
+
+        // ប្រសិនបើមិនទាន់ដាក់ URL ពិតប្រាកដទេ ឱ្យវាដំណើរការសាកល្បង
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === "​ ") {
+            setTimeout(() => {
+                loadingMsg.classList.add('hidden');
+                successMsg.classList.remove('hidden');
+                submitBtn.classList.remove('hidden');
+                form.reset();
+                alert("បញ្ជាក់៖ នេះជាការសាកល្បង (Test Mode) ព្រោះលោកគ្រូមិនទាន់បានដាក់ Google Apps Script URL ចូលកូដនៅឡើយទេ។");
+            }, 1500);
+            return;
+        }
+
+        // ប្រមូលទិន្នន័យដើម្បីបញ្ជូនទៅ Google Script
+        const formData = new FormData(form);
+        const data = new URLSearchParams(formData).toString();
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // សំខាន់! ការពារបញ្ហា CORS ពី Google
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: data
+        })
+        .then(() => {
+            // ដោយសារប្រើ mode: 'no-cors' យើងមិនអាចអាន Response ត្រឡប់បានទេ តែវាបញ្ជូនជោគជ័យ
+            loadingMsg.classList.add('hidden');
+            successMsg.classList.remove('hidden');
+            submitBtn.classList.remove('hidden');
+            form.reset(); // លុបទិន្នន័យចេញពីប្រអប់ក្រោយពេលបញ្ជូនរួច
+        })
+        .catch(error => {
+            console.error('Error!', error.message);
+            loadingMsg.classList.add('hidden');
+            submitBtn.classList.remove('hidden');
+            alert('មានបញ្ហាក្នុងការបញ្ជូនទិន្នន័យ។ សូមពិនិត្យអ៊ីនធឺណិតរួចសាកល្បងម្តងទៀត!');
+        });
+    });
+</script>
+
+</body>
+</html>

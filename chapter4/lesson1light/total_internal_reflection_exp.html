@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ចំណាំងផ្លាតទាំងស្រុង</title>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0275d8;
+            --bg-color: #f4f6f9;
+            --text-color: #333333;
+            --border-color: #ddd;
+            --medium1: #e0f7fa; /* Light blue for water/glass */
+            --medium2: #ffffff; /* White for air */
+            --ray-incident: #d9534f;
+            --ray-refract: #0275d8;
+            --ray-reflect: #f0ad4e;
+        }
+
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .simulator-container {
+            width: 100%;
+            max-width: 600px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Fixed wrapper height for mobile reliability */
+        .canvas-wrapper {
+            width: 100%;
+            height: 60vw; /* Scale with screen width */
+            max-height: 350px;
+            min-height: 250px; 
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--medium2);
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none;
+        }
+
+        .controls {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-size: 0.95rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .val-badge {
+            color: var(--primary);
+            background: #f0f8ff;
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid #bce8f1;
+            font-size: 0.9rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .select-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        select {
+            padding: 10px 8px;
+            font-family: 'Battambang';
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            width: 100%;
+            background-color: #fff;
+        }
+
+        .info-panel {
+            background: #f8f9fa;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .info-panel .status {
+            font-weight: bold;
+            color: #d9534f;
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            min-height: 24px;
+        }
+
+        .formula-box {
+            background: #fff;
+            border: 1px dashed #aaa;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .color-box {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+
+        @media (min-width: 600px) {
+            h2 { font-size: 1.4rem; }
+            .canvas-wrapper { height: 350px; }
+            .info-panel { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>ចំណាំងផ្លាតទាំងស្រុង<br>(Total Internal Reflection)</h2>
+
+    <div class="simulator-container">
+        <!-- ផ្ទាំងគំនូរ Canvas -->
+        <div class="canvas-wrapper">
+            <canvas id="simCanvas"></canvas>
+        </div>
+
+        <!-- ផ្ទាំងបញ្ជា -->
+        <div class="controls">
+            <div class="control-group">
+                <label>
+                    <span>មុំពន្លឺចូល (θ₁) ពីមជ្ឈដ្ឋានទី១៖</span>
+                    <span class="val-badge" id="angle1Val">30°</span>
+                </label>
+                <input type="range" id="angleSlider" min="0" max="89" step="1" value="30">
+            </div>
+
+            <div class="select-row">
+                <div class="control-group" style="flex: 1;">
+                    <label style="font-size: 0.85rem;">មជ្ឈដ្ឋានទី១ (n₁)</label>
+                    <select id="n1Select">
+                        <option value="1.33">ទឹក (n = 1.33)</option>
+                        <option value="1.52" selected>កញ្ចក់ (n = 1.52)</option>
+                        <option value="2.42">ពេជ្រ (n = 2.42)</option>
+                    </select>
+                </div>
+                <div class="control-group" style="flex: 1;">
+                    <label style="font-size: 0.85rem;">មជ្ឈដ្ឋានទី២ (n₂)</label>
+                    <select id="n2Select">
+                        <option value="1.00" selected>ខ្យល់ (n = 1.00)</option>
+                        <option value="1.33">ទឹក (n = 1.33)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="color-box" style="background: var(--ray-incident);"></div>កាំចូល</div>
+                <div class="legend-item"><div class="color-box" style="background: var(--ray-refract);"></div>កាំចំណាំងបែរ</div>
+                <div class="legend-item"><div class="color-box" style="background: var(--ray-reflect);"></div>កាំចំណាំងផ្លាត</div>
+            </div>
+        </div>
+
+        <!-- ផ្ទាំងព័ត៌មាន និងរូបមន្ត -->
+        <div class="info-panel">
+            <div class="status" id="statusText">កំពុងមានចំណាំងបែរធម្មតា</div>
+            
+            <div class="formula-box">
+                <div>មុំកម្រិត (Critical Angle): <strong id="criticalAngleText" style="color:var(--primary);">--</strong></div>
+                <hr style="border: 0; border-top: 1px dashed #eee; margin: 8px 0;">
+                <div>មុំចំណាំងបែរ (θ₂): <strong id="angle2Text">--</strong></div>
+                <div style="font-size: 0.85rem; color: #666; margin-top: 8px;">
+                    រូបមន្ត៖ n₁·sin(θ₁) = n₂·sin(θ₂)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const angleSlider = document.getElementById('angleSlider');
+        const angle1Val = document.getElementById('angle1Val');
+        const n1Select = document.getElementById('n1Select');
+        const n2Select = document.getElementById('n2Select');
+        const criticalAngleText = document.getElementById('criticalAngleText');
+        const angle2Text = document.getElementById('angle2Text');
+        const statusText = document.getElementById('statusText');
+
+        function resizeCanvas() {
+            const wrapper = canvas.parentElement;
+            // ប្រើ offsetWidth/Height ដើម្បីធានាថាចាប់បានទំហំអក្រង់ទូរសព្ទពិតប្រាកដ
+            canvas.width = wrapper.offsetWidth;
+            canvas.height = wrapper.offsetHeight || 250; // កំណត់ទំហំបម្រុងបើចាប់មិនបាន
+            drawSimulation();
+        }
+
+        function drawSimulation() {
+            if (canvas.width === 0 || canvas.height === 0) return;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            
+            const lineLength = Math.min(w, h) * 0.42;
+
+            const theta1_deg = parseFloat(angleSlider.value);
+            const n1 = parseFloat(n1Select.value);
+            const n2 = parseFloat(n2Select.value);
+            
+            let critical_deg = null;
+            if (n1 > n2) {
+                critical_deg = Math.asin(n2 / n1) * (180 / Math.PI);
+                criticalAngleText.textContent = `θc ≈ ${critical_deg.toFixed(1)}°`;
+            } else {
+                criticalAngleText.textContent = "គ្មាន (ព្រោះ n₁ ≤ n₂)";
+            }
+
+            const theta1_rad = theta1_deg * (Math.PI / 180);
+            const sin_theta2 = (n1 / n2) * Math.sin(theta1_rad);
+            let theta2_deg = null;
+            let isTotalInternalReflection = false;
+
+            if (sin_theta2 > 1) {
+                isTotalInternalReflection = true;
+                angle2Text.textContent = "គ្មាន (ចំណាំងផ្លាតទាំងស្រុង)";
+                statusText.textContent = "ស្ថានភាព៖ ចំណាំងផ្លាតទាំងស្រុង (Total Internal Reflection)";
+                statusText.style.color = "#d9534f"; 
+            } else {
+                const theta2_rad = Math.asin(sin_theta2);
+                theta2_deg = theta2_rad * (180 / Math.PI);
+                angle2Text.textContent = `${theta2_deg.toFixed(1)}°`;
+                
+                if (n1 > n2 && Math.abs(theta1_deg - critical_deg) < 0.5) {
+                    statusText.textContent = "ស្ថានភាព៖ មុំកម្រិត θc";
+                    statusText.style.color = "#f0ad4e"; 
+                } else {
+                    statusText.textContent = "ស្ថានភាព៖ មានចំណាំងបែរធម្មតា";
+                    statusText.style.color = "#28a745"; 
+                }
+            }
+
+            // សម្អាត និងគូរផ្ទៃខាងក្រោយ
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, cy);
+            ctx.fillStyle = '#e0f7fa'; 
+            ctx.fillRect(0, cy, w, h - cy);
+            
+            // អក្សរសម្គាល់
+            ctx.fillStyle = '#555';
+            ctx.font = '13px Battambang';
+            ctx.fillText(`មជ្ឈដ្ឋានទី២ (n₂ = ${n2})`, 10, 20);
+            ctx.fillText(`មជ្ឈដ្ឋានទី១ (n₁ = ${n1})`, 10, h - 10);
+
+            // បន្ទាត់ខណ្ឌចែក
+            ctx.beginPath();
+            ctx.moveTo(0, cy);
+            ctx.lineTo(w, cy);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // ខ្សែខែង
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(cx, 10);
+            ctx.lineTo(cx, h - 10);
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // គណនាកាំពន្លឺចូល
+            const dx_in = -lineLength * Math.sin(theta1_rad);
+            const dy_in = lineLength * Math.cos(theta1_rad);
+            
+            drawArrow(ctx, cx + dx_in, cy + dy_in, cx, cy, '#d9534f', 2.5);
+
+            // គណនាកាំចំណាំងផ្លាត
+            const reflectLineWidth = isTotalInternalReflection ? 3 : 1;
+            drawArrow(ctx, cx, cy, cx - dx_in, cy + dy_in, '#f0ad4e', reflectLineWidth);
+
+            // គណនាកាំចំណាំងបែរ
+            if (!isTotalInternalReflection) {
+                const theta2_rad = theta2_deg * (Math.PI / 180);
+                const dx_out = lineLength * Math.sin(theta2_rad);
+                const dy_out = -lineLength * Math.cos(theta2_rad);
+                
+                if (n1 > n2 && Math.abs(theta1_deg - critical_deg) < 0.5) {
+                    drawArrow(ctx, cx, cy, cx + lineLength, cy, '#0275d8', 2.5);
+                } else {
+                    drawArrow(ctx, cx, cy, cx + dx_out, cy + dy_out, '#0275d8', 2.5);
+                }
+            }
+
+            drawAngleArc(ctx, cx, cy, theta1_rad, true, '#d9534f', 'θ₁');
+            
+            if (!isTotalInternalReflection && theta2_deg !== null) {
+                const theta2_rad = theta2_deg * (Math.PI / 180);
+                drawAngleArc(ctx, cx, cy, theta2_rad, false, '#0275d8', 'θ₂');
+            }
+
+            angle1Val.textContent = `${theta1_deg}°`;
+        }
+
+        function drawArrow(ctx, fromx, fromy, tox, toy, color, width) {
+            const headlen = 12; 
+            const dx = tox - fromx;
+            const dy = toy - fromy;
+            const angle = Math.atan2(dy, dx);
+            
+            ctx.beginPath();
+            ctx.moveTo(fromx, fromy);
+            ctx.lineTo(tox, toy);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.stroke();
+            
+            const midX = fromx + dx * 0.6;
+            const midY = fromy + dy * 0.6;
+
+            ctx.beginPath();
+            ctx.moveTo(midX, midY);
+            ctx.lineTo(midX - headlen * Math.cos(angle - Math.PI / 6), midY - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(midX, midY);
+            ctx.lineTo(midX - headlen * Math.cos(angle + Math.PI / 6), midY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.stroke();
+        }
+
+        function drawAngleArc(ctx, cx, cy, angle_rad, isBottom, color, label) {
+            const radius = 35;
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            
+            if (isBottom) {
+                const startAngle = Math.PI / 2; 
+                const endAngle = Math.PI / 2 + angle_rad;
+                ctx.arc(cx, cy, radius, startAngle, endAngle, false);
+                ctx.stroke();
+                
+                const textX = cx + (radius + 15) * Math.cos((startAngle + endAngle) / 2);
+                const textY = cy + (radius + 15) * Math.sin((startAngle + endAngle) / 2);
+                ctx.fillStyle = color;
+                ctx.font = '12px Arial';
+                ctx.fillText(label, textX - 5, textY + 5);
+            } else {
+                const startAngle = -Math.PI / 2;
+                const endAngle = -Math.PI / 2 + angle_rad;
+                ctx.arc(cx, cy, radius, startAngle, endAngle, false);
+                ctx.stroke();
+                
+                const textX = cx + (radius + 15) * Math.cos((startAngle + endAngle) / 2);
+                const textY = cy + (radius + 15) * Math.sin((startAngle + endAngle) / 2);
+                ctx.fillStyle = color;
+                ctx.font = '12px Arial';
+                ctx.fillText(label, textX - 5, textY + 5);
+            }
+        }
+
+        // ភ្ជាប់ Event Listeners
+        angleSlider.addEventListener('input', drawSimulation);
+        n1Select.addEventListener('change', drawSimulation);
+        n2Select.addEventListener('change', drawSimulation);
+        window.addEventListener('resize', resizeCanvas);
+
+        // ធានាថាទំហំត្រូវកំណត់រួចរាល់ពេលបើកដំបូង
+        window.addEventListener('load', resizeCanvas);
+        // ដំណើរការភ្លាមៗពេលកូដរត់ដល់ចំណុចនេះ
+        resizeCanvas();
+    </script>
+</body>
+</html>

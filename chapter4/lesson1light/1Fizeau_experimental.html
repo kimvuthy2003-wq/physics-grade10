@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Fizeau Wheel Simulator - Real Historical Data</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #222;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+        #ui-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #555;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            max-width: 350px;
+            pointer-events: auto;
+            z-index: 10;
+        }
+        h3 {
+            margin-top: 0;
+            color: #4CAF50;
+            font-size: 20px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #ddd;
+        }
+        .instruction {
+            color: #ff9800;
+            font-style: italic;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+        .historical-data {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+        .historical-data ul {
+            padding-left: 20px;
+            margin: 5px 0 0 0;
+        }
+        .historical-data li b { color: #fff; }
+        
+        .calculation-box {
+            background: #1e3a8a;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #60a5fa;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .formula-calc {
+            font-size: 14px;
+            font-weight: bold;
+            color: #93c5fd;
+            margin-bottom: 5px;
+        }
+        .result {
+            font-size: 22px;
+            font-weight: bold;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+        .control-group {
+            margin-top: 15px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        #speed-val {
+            color: #ffeb3b;
+        }
+        .status {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .status-eclipsed { background-color: #7f1d1d; color: #fca5a5; }
+        .status-visible { background-color: #14532d; color: #86efac; }
+        .legend {
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        .legend div {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .color-box {
+            width: 12px;
+            height: 12px;
+            display: inline-block;
+            margin-right: 8px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui-container">
+        <h3>ពិសោធន៍លោក ហ្វីសូ 3D</h3>
+        <p class="instruction">💡 ចុច (Click) ហើយអូសដើម្បីបង្វិលកាមេរ៉ា។ រំកិលកង់កណ្ដុរដើម្បីពង្រីក/បង្រួម។</p>
+        
+        <div class="historical-data">
+            <b>ទិន្នន័យប្រវត្តិសាស្ត្រពិត (ឆ្នាំ ១៨៤៩)៖</b>
+            <ul>
+                <li>ចម្ងាយ (D) = <b>៨,៦៣៣ ម៉ែត្រ</b></li>
+                <li>ចំនួនធ្មេញកង់ (n) = <b>៧២០</b></li>
+                <li>ល្បឿនអតិបរមា = <b>៤១ ជុំ/វិនាទី</b></li>
+            </ul>
+        </div>
+
+        <div class="calculation-box">
+            <div class="formula-calc">ល្បឿនពន្លឺ c = 2 × D × n × N</div>
+            <div class="result" id="c-result">0 m/s</div>
+        </div>
+
+        <div class="control-group">
+            <label>ល្បឿនកង់ N (ជុំ/វិនាទី)៖ <span id="speed-val">0.0</span></label>
+            <input type="range" id="wheel-speed" min="0" max="41" step="0.1" value="0">
+            <div id="light-status" class="status status-visible">ពន្លឺឆ្លងកាត់បាន (Visible)</div>
+        </div>
+
+        <div class="legend">
+            <div><span class="color-box" style="background:#ffeb3b;"></span> ប្រភពពន្លឺ (Light Bulb)</div>
+            <div><span class="color-box" style="background:rgba(136, 204, 255, 0.5); border:1px solid #88ccff;"></span> កញ្ចក់ថ្លាពាក់កណ្ដាល</div>
+            <div><span class="color-box" style="background:#b0a080;"></span> កង់មានធ្មេញ (Cogwheel)</div>
+            <div><span class="color-box" style="background:#4caf50;"></span> កញ្ចក់ចំណាំងផ្លាត</div>
+            <div><span class="color-box" style="background:#f44336;"></span> កាំរស្មីពន្លឺ</div>
+        </div>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- OrbitControls -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <script>
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x222222, 0.015);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(-20, 15, 25); 
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.target.set(0, 0, 0);
+
+        const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
+        scene.add(ambientLight);
+        
+        const spotLight = new THREE.SpotLight(0xffffff, 1);
+        spotLight.position.set(-10, 20, 10);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+
+        const gridHelper = new THREE.GridHelper(100, 50, 0x444444, 0x222222);
+        gridHelper.position.y = -5;
+        scene.add(gridHelper);
+
+        // --- សាងសង់សមាសធាតុ ---
+
+        const bulbGroup = new THREE.Group();
+        bulbGroup.position.set(-15, 0, 10);
+        const bulbMesh = new THREE.Mesh(new THREE.SphereGeometry(1.5, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffeb3b }));
+        const bulbBaseMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.5, 1.5, 16), new THREE.MeshPhongMaterial({ color: 0x222222 }));
+        bulbBaseMesh.rotation.z = Math.PI / 2;
+        bulbBaseMesh.position.set(-2, 0, 0);
+        const pointLight = new THREE.PointLight(0xffeb3b, 1, 20);
+        bulbGroup.add(bulbMesh, bulbBaseMesh, pointLight);
+        scene.add(bulbGroup);
+
+        const splitterMesh = new THREE.Mesh(
+            new THREE.CylinderGeometry(3, 3, 0.3, 32), 
+            new THREE.MeshPhysicalMaterial({ color: 0x88ccff, transparent: true, opacity: 0.5, transmission: 0.5, roughness: 0.1, metalness: 0.5 })
+        );
+        splitterMesh.position.set(0, 0, 10);
+        splitterMesh.rotation.set(Math.PI / 2, -Math.PI / 4, 0);
+        scene.add(splitterMesh);
+
+        const telescopeGroup = new THREE.Group();
+        telescopeGroup.position.set(0, 10, 10);
+        const tubeMat = new THREE.MeshPhongMaterial({ color: 0xd4af37 }); 
+        const tube1 = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 4, 32), tubeMat);
+        const tube2 = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 3, 32), tubeMat);
+        tube2.position.y = 3.5;
+        const lens = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.1, 32), new THREE.MeshPhongMaterial({ color: 0x00aaff }));
+        lens.position.y = 5;
+        telescopeGroup.add(tube1, tube2, lens);
+        scene.add(telescopeGroup);
+
+        // កង់មានធ្មេញ (Fizeau Wheel)
+        const wheelGroup = new THREE.Group();
+        const wheelRadius = 5.5; 
+        wheelGroup.position.set(0, -wheelRadius, 0); 
+        
+        // កំណត់ឱ្យរន្ធ (Hole) ស្ថិតនៅខាងលើបង្អស់នាពេលចាប់ផ្តើម (មុំ 0 ល្បឿន)
+        wheelGroup.rotation.z = Math.PI / 16;
+        
+        const wheelMat = new THREE.MeshStandardMaterial({ color: 0xb0a080, roughness: 0.4, metalness: 0.3 });
+        
+        const wheelShape = new THREE.Shape();
+        wheelShape.absarc(0, 0, wheelRadius, 0, Math.PI * 2, false);
+        const holePath = new THREE.Path();
+        holePath.absarc(0, 0, 1.5, 0, Math.PI * 2, true);
+        wheelShape.holes.push(holePath);
+        
+        const wheelMesh = new THREE.Mesh(new THREE.ExtrudeGeometry(wheelShape, { depth: 1, bevelEnabled: false, curveSegments: 32 }), wheelMat);
+        wheelMesh.position.z = -0.5; 
+        wheelGroup.add(wheelMesh);
+
+        const numTeeth = 16;
+        for (let i = 0; i < numTeeth; i++) {
+            const angle = (i / numTeeth) * Math.PI * 2;
+            const toothMesh = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.5, 1), wheelMat);
+            toothMesh.position.set(Math.cos(angle) * (wheelRadius + 0.5), Math.sin(angle) * (wheelRadius + 0.5), 0);
+            toothMesh.rotation.z = angle;
+            wheelGroup.add(toothMesh);
+        }
+        scene.add(wheelGroup);
+
+        const mirror = new THREE.Mesh(new THREE.BoxGeometry(6, 6, 0.5), new THREE.MeshPhysicalMaterial({ color: 0x4caf50, metalness: 0.9, roughness: 0.1 }));
+        mirror.position.set(0, 0, -35); 
+        scene.add(mirror);
+
+        // --- កាំរស្មីពន្លឺ ---
+        const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 });
+        scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-13, 0, 10), new THREE.Vector3(0, 0, 10)]), lineMat));
+        scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 10), new THREE.Vector3(0, 0, -35)]), lineMat));
+
+        const rayGeo = new THREE.CylinderGeometry(0.15, 0.15, 2, 8);
+        rayGeo.rotateX(Math.PI / 2);
+        const rayMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        
+        const rays = [];
+        const numRays = 1; 
+        for (let i = 0; i < numRays; i++) {
+            const ray = new THREE.Mesh(rayGeo, rayMat);
+            ray.userData = { state: 0, progress: 0, blockedGoing: false, blockedReturning: false };
+            scene.add(ray);
+            rays.push(ray);
+        }
+
+        // អថេរប្រវត្តិសាស្ត្រ
+        const D = 8633;
+        const n = 720;
+        const speedSlider = document.getElementById('wheel-speed');
+        const speedValDisplay = document.getElementById('speed-val');
+        const cResultDisplay = document.getElementById('c-result');
+        const statusDisplay = document.getElementById('light-status');
+
+        const lightSpeed = 1.0; 
+        // ល្បឿនរង្វិលដែលធ្វើឱ្យកាំរស្មី 3D បាំងគ្នាសុក្រឹត ពេល N = 12.6
+        const baseRotationSpeed = (Math.PI / 16) / 90; 
+
+        function isBlockedByTooth() {
+            const toothAngle = (Math.PI * 2) / numTeeth; 
+            let offsetAngle = (Math.PI / 2 + Math.abs(wheelGroup.rotation.z)) % toothAngle;
+            return offsetAngle < (toothAngle / 2);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            const N = parseFloat(speedSlider.value);
+            speedValDisplay.innerText = N.toFixed(1);
+
+            // គណនាល្បឿនពន្លឺតាមរូបមន្តប្រវត្តិសាស្ត្រ
+            const c_calc = 2 * D * n * N;
+            cResultDisplay.innerText = Math.round(c_calc).toLocaleString() + " m/s";
+
+            // បង្ហាញស្ថានភាពពន្លឺតាមទិន្នន័យ (Eclipsed នៅ ១២.៦ និង ៣៧.៨ / Visible នៅ ២៥.២)
+            const isEclipsed = Math.cos((N / 12.6) * Math.PI) < 0;
+            if (isEclipsed) {
+                statusDisplay.innerText = "ពន្លឺត្រូវបាំង (Eclipsed)";
+                statusDisplay.className = "status status-eclipsed";
+            } else {
+                statusDisplay.innerText = "ពន្លឺឆ្លងកាត់បាន (Visible)";
+                statusDisplay.className = "status status-visible";
+            }
+
+            // តម្រូវល្បឿនវិល 3D ឱ្យស៊ីគ្នានឹងម៉ាស្ទ័រ ១២.៦ ជុំ/វិនាទី
+            const currentRotationSpeed = (N / 12.6) * baseRotationSpeed;
+            wheelGroup.rotation.z -= currentRotationSpeed;
+
+            rays.forEach(ray => {
+                ray.userData.progress += lightSpeed;
+                let p = ray.userData.progress;
+                
+                if (p < 13) {
+                    ray.visible = true;
+                    ray.rotation.y = Math.PI / 2; ray.rotation.x = 0;
+                    ray.position.set(-13 + p, 0, 10);
+                    ray.userData.blockedGoing = false;
+                    ray.userData.blockedReturning = false;
+                } else if (p >= 13 && p < 58) {
+                    ray.rotation.y = 0; ray.rotation.x = 0;
+                    let travelZ = 10 - (p - 13);
+                    if (travelZ <= 1 && travelZ >= -1) {
+                        if (isBlockedByTooth()) ray.userData.blockedGoing = true;
+                    }
+                    if (ray.userData.blockedGoing) {
+                        ray.visible = false;
+                    } else {
+                        ray.visible = true;
+                        ray.position.set(0, 0, travelZ);
+                    }
+                } else if (p >= 58 && p < 103) {
+                    if (!ray.userData.blockedGoing) {
+                        ray.rotation.y = 0;
+                        let travelZ = -35 + (p - 58);
+                        if (travelZ <= 1 && travelZ >= -1) {
+                            if (isBlockedByTooth()) ray.userData.blockedReturning = true;
+                        }
+                        if (ray.userData.blockedReturning) {
+                            ray.visible = false;
+                        } else {
+                            ray.visible = true;
+                            ray.position.set(0, 0, travelZ);
+                        }
+                    } else {
+                        ray.visible = false;
+                    }
+                } else if (p >= 103 && p < 113) {
+                    if (ray.userData.blockedGoing || ray.userData.blockedReturning) {
+                        ray.visible = false;
+                    } else {
+                        ray.visible = true;
+                        ray.rotation.y = 0; ray.rotation.x = Math.PI / 2; 
+                        ray.position.set(0, p - 103, 10);
+                    }
+                } else {
+                    ray.userData.progress = 0;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>កម្មវិធីក្លែងធ្វើ៖ ការពិសោធចំណាំងផ្លាតនៃពន្លឺ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Siemreap&display=swap');
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Khmer OS Siemreap', sans-serif;
+            background-color: #f0f4f8; 
+            color: #2c3e50;
+            touch-action: none;
+        }
+        
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border: 1px solid #bdc3c7;
+        }
+
+        /* ផ្ទាំងបញ្ជា UI */
+        .ui-panel {
+            position: absolute;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border: 2px solid #3498db;
+            backdrop-filter: blur(5px);
+        }
+
+        #controls { top: 15px; left: 15px; width: 340px; }
+        #results { top: 15px; right: 15px; width: 330px; }
+
+        h2, h3 {
+            margin-top: 0; color: #2980b9; font-size: 1.1em;
+            border-bottom: 2px solid #ecf0f1; padding-bottom: 10px;
+        }
+        
+        .control-group { margin-bottom: 15px; }
+        .title { display: block; font-weight: bold; margin-bottom: 8px; color: #34495e; }
+        
+        .slider-container { display: flex; align-items: center; gap: 10px; }
+        input[type="range"] { flex-grow: 1; cursor: pointer; }
+        
+        .val-badge { font-weight: bold; color: #e74c3c; font-size: 1.1em;}
+        
+        .math-box {
+            background: #ecf0f1; padding: 10px; border-radius: 5px; 
+            margin-bottom: 10px; border-left: 4px solid #3498db;
+        }
+        .math-box p { margin: 5px 0; font-family: 'Times New Roman', Times, serif; font-size: 1.1em; display: flex; align-items: center;}
+        
+        /* រចនាប្រភាគ HTML សុទ្ធ */
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 5px;
+            font-size: 0.9em;
+        }
+        .frac .num {
+            border-bottom: 2px solid #2c3e50;
+            padding: 0 5px;
+        }
+        .frac .den {
+            padding: 0 5px;
+        }
+
+        .conclusion {
+            background: #e8f8f5; padding: 10px; border-radius: 5px;
+            border: 1px solid #1abc9c; color: #16a085; font-weight: bold;
+            text-align: center; line-height: 1.6;
+        }
+
+        #menuToggle {
+            position: absolute; top: 15px; right: 15px; z-index: 100;
+            background: #3498db; color: white; padding: 8px 12px;
+            border-radius: 8px; cursor: pointer; font-weight: bold;
+            display: none; border: none;
+        }
+
+        /* Responsive សម្រាប់ទូរសព្ទ */
+        @media (max-width: 768px) {
+            #menuToggle { display: block; }
+            #controls { top: 60px; left: 10px; right: 10px; width: auto; max-height: 35vh; overflow-y: auto; }
+            #results { top: auto; bottom: 10px; left: 10px; right: 10px; width: auto; max-height: 45vh; overflow-y: auto; }
+            .ui-panel.hidden { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container">
+        <canvas id="simCanvas"></canvas>
+    </div>
+
+    <button id="menuToggle" onclick="toggleUI()">👁 លាក់/បង្ហាញ ផ្ទាំង</button>
+
+    <!-- ផ្ទាំងបញ្ជាខាងឆ្វេង -->
+    <div class="ui-panel" id="controls">
+        <h2>ការពិសោធន៍ចំណាំងផ្លាតនៃពន្លឺ</h2>
+        
+        <div class="control-group">
+            <label class="title">១. ទាញប្តូរទីតាំងម្ជុល (ប្តូរមុំប៉ះ <i>i</i>)៖</label>
+            <div class="slider-container">
+                <span>10°</span>
+                <input type="range" id="angleSlider" min="10" max="75" step="1" value="45" oninput="updateSim()">
+                <span>75°</span>
+            </div>
+            <div style="text-align: center; margin-top: 5px;">
+                មុំប៉ះ <i>i</i> = <span id="angleVal" class="val-badge">45</span>°
+            </div>
+        </div>
+        
+        <div style="font-size: 0.85em; color: #7f8c8d; line-height: 1.5;">
+            <b>របៀបពិសោធន៍៖</b> ម្ជុល O<sub>1</sub>, O<sub>2</sub> តាងឱ្យកាំប៉ះ។ ម្ជុល R<sub>1</sub>, R<sub>2</sub> ត្រូវបានដាក់ឱ្យត្រង់ជួរជាមួយនឹងរូបភាពនិម្មិត O'<sub>1</sub>, O'<sub>2</sub> នៅក្នុងកញ្ចក់។
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងលទ្ធផលខាងស្តាំ -->
+    <div class="ui-panel" id="results">
+        <h3>តារាងលទ្ធផលពិសោធន៍</h3>
+        
+        <div class="math-box">
+            <p>ប្រវែង ℓ<sub>2</sub> (ថេរ) = <b>200</b> mm</p>
+            <p>ប្រវែង ℓ<sub>0</sub> = &nbsp;<b id="l0_val">200.0</b> mm</p>
+            <p>ប្រវែង ℓ<sub>1</sub> = &nbsp;<b id="l1_val">200.0</b> mm</p>
+        </div>
+
+        <div class="math-box">
+            <p>
+                tan(<i>i</i>) = 
+                <span class="frac"><span class="num">ℓ<sub>0</sub></span><span class="den">ℓ<sub>2</sub></span></span> = 
+                <span class="frac"><span class="num" id="t_l0">200.0</span><span class="den">200</span></span> = 
+                &nbsp;<b id="tan_i" style="color:#e74c3c;">1.000</b>
+            </p>
+            <p>
+                tan(<i>r</i>) = 
+                <span class="frac"><span class="num">ℓ<sub>1</sub></span><span class="den">ℓ<sub>2</sub></span></span> = 
+                <span class="frac"><span class="num" id="t_l1">200.0</span><span class="den">200</span></span> = 
+                &nbsp;<b id="tan_r" style="color:#e74c3c;">1.000</b>
+            </p>
+        </div>
+
+        <div class="conclusion">
+            ដូចនេះ ឃើញថា tan(<i>i</i>) = tan(<i>r</i>)<br>
+            នាំឱ្យ មុំប៉ះ = មុំចំណាំងផ្លាត (<i>i</i> = <i>r</i> = <span id="final_angle">45</span>°)
+        </div>
+    </div>
+
+    <script>
+        // ការគ្រប់គ្រង UI លើទូរសព្ទ
+        let uiVisible = true;
+        function toggleUI() {
+            uiVisible = !uiVisible;
+            document.getElementById('controls').classList.toggle('hidden', !uiVisible);
+            document.getElementById('results').classList.toggle('hidden', !uiVisible);
+        }
+
+        // ការគូរ Canvas
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const width = 800;
+        const height = 600;
+        canvas.width = width;
+        canvas.height = height;
+
+        const originX = width / 2; 
+        const originY = height / 2 - 50; 
+        const L2 = 200; 
+        const pinDist1 = 80; 
+        const pinDist2 = 180; 
+
+        function drawLine(x1, y1, x2, y2, color, width = 2, dash = []) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.setLineDash(dash);
+            ctx.stroke();
+            ctx.setLineDash([]); 
+        }
+
+        function drawPin(x, y, label, color) {
+            ctx.beginPath();
+            ctx.arc(x, y, 6, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(x, y, 2, 0, Math.PI * 2);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText(label, x + 10, y + 5);
+        }
+
+        function drawArc(x, y, radius, startAngle, endAngle, label) {
+            ctx.beginPath();
+            ctx.arc(x, y, radius, startAngle, endAngle);
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            let midAngle = (startAngle + endAngle) / 2;
+            let textX = x + (radius + 15) * Math.cos(midAngle);
+            let textY = y + (radius + 15) * Math.sin(midAngle);
+            
+            ctx.fillStyle = '#e74c3c';
+            ctx.font = 'italic bold 18px Times New Roman';
+            ctx.fillText(label, textX - 5, textY + 5);
+        }
+
+        function updateSim() {
+            const angleDeg = parseFloat(document.getElementById('angleSlider').value);
+            const angleRad = angleDeg * Math.PI / 180;
+
+            const L0 = L2 * Math.tan(angleRad); 
+            const L1 = L0; 
+
+            document.getElementById('angleVal').innerText = angleDeg;
+            document.getElementById('l0_val').innerText = L0.toFixed(1);
+            document.getElementById('l1_val').innerText = L1.toFixed(1);
+            document.getElementById('t_l0').innerText = L0.toFixed(1);
+            document.getElementById('t_l1').innerText = L1.toFixed(1);
+            
+            let tanVal = Math.tan(angleRad).toFixed(3);
+            document.getElementById('tan_i').innerText = tanVal;
+            document.getElementById('tan_r').innerText = tanVal;
+            document.getElementById('final_angle').innerText = angleDeg;
+
+            ctx.clearRect(0, 0, width, height);
+
+            let hY = originY + L2;
+            drawLine(100, hY, 700, hY, '#bdc3c7', 1, [5, 5]);
+            ctx.fillStyle = '#7f8c8d';
+            ctx.font = '14px Arial';
+            ctx.fillText('បន្ទាត់វាស់ l0 និង l1', 600, hY - 10);
+
+            drawLine(200, originY, 600, originY, '#34495e', 4);
+            for(let i=210; i<600; i+=15) {
+                drawLine(i, originY, i-10, originY-10, '#95a5a6', 1);
+            }
+            ctx.fillText('កញ្ចក់ប្លង់', 540, originY - 15);
+
+            drawLine(originX, originY - 150, originX, hY + 20, '#7f8c8d', 2, [5, 5]);
+            ctx.fillText('ខ្សែកែង', originX + 10, originY - 130);
+            ctx.fillText('H', originX - 5, hY + 20);
+
+            let o1_x = originX - pinDist1 * Math.sin(angleRad);
+            let o1_y = originY + pinDist1 * Math.cos(angleRad);
+            let o2_x = originX - pinDist2 * Math.sin(angleRad);
+            let o2_y = originY + pinDist2 * Math.cos(angleRad);
+
+            let r1_x = originX + pinDist1 * Math.sin(angleRad);
+            let r1_y = originY + pinDist1 * Math.cos(angleRad);
+            let r2_x = originX + pinDist2 * Math.sin(angleRad);
+            let r2_y = originY + pinDist2 * Math.cos(angleRad);
+
+            let op1_x = originX + pinDist1 * Math.sin(angleRad);
+            let op1_y = originY - pinDist1 * Math.cos(angleRad);
+            let op2_x = originX + pinDist2 * Math.sin(angleRad);
+            let op2_y = originY - pinDist2 * Math.cos(angleRad);
+
+            drawLine(o2_x, o2_y, originX, originY, '#2980b9', 2);
+            drawLine(originX, originY, r2_x, r2_y, '#e67e22', 2);
+            drawLine(originX, originY, op2_x, op2_y, '#95a5a6', 2, [5, 5]);
+            drawLine(o2_x, o2_y, o2_x, originY, '#bdc3c7', 1, [3, 3]);
+
+            drawArc(originX, originY, 40, Math.PI/2, Math.PI/2 + angleRad, 'i');
+            drawArc(originX, originY, 45, Math.PI/2 - angleRad, Math.PI/2, 'r');
+
+            drawLine(originX, hY, originX - L0, hY, '#c0392b', 3);
+            ctx.fillStyle = '#c0392b'; ctx.fillText('l0', originX - L0/2 - 10, hY - 10);
+            
+            drawLine(originX, hY, originX + L1, hY, '#d35400', 3);
+            ctx.fillStyle = '#d35400'; ctx.fillText('l1', originX + L1/2 - 10, hY - 10);
+            
+            drawLine(originX, originY, originX, hY, '#27ae60', 3);
+            ctx.fillStyle = '#27ae60'; ctx.fillText('l2', originX + 10, originY + L2/2);
+
+            drawPin(o1_x, o1_y, 'O1', '#3498db');
+            drawPin(o2_x, o2_y, 'O2', '#3498db');
+            drawPin(r1_x, r1_y, 'R1', '#e67e22');
+            drawPin(r2_x, r2_y, 'R2', '#e67e22');
+            
+            ctx.globalAlpha = 0.5;
+            drawPin(op1_x, op1_y, "O'1", '#95a5a6');
+            drawPin(op2_x, op2_y, "O'2", '#95a5a6');
+            ctx.globalAlpha = 1.0; 
+            
+            ctx.fillStyle = 'black';
+            ctx.fillText('I', originX + 10, originY - 5);
+        }
+
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            const scale = Math.min(container.clientWidth / width, container.clientHeight / height) * 0.95;
+            canvas.style.transform = `scale(${scale})`;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        updateSim();
+    </script>
+</body>
+</html>

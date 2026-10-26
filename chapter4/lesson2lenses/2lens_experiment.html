@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ការពិសោធន៍៖ ការកំណត់ចម្ងាយកំនុំឡង់ទីបង្រួម</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts សម្រាប់ Battambang -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Battambang', 'Khmer OS Battambang', sans-serif;
+            margin: 0;
+            background-color: #f8fafc; 
+            color: #0f172a;
+            font-size: 16px;
+        }
+
+        .container-custom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ប៊ូតុង និង Input */
+        .btn-action {
+            background-color: #2563eb;
+            color: white;
+            font-weight: bold;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-action:hover {
+            background-color: #1d4ed8;
+        }
+        
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .table-input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .table-input:focus {
+            border-color: #3b82f6;
+        }
+
+        /* SVG Simulator Container */
+        #svg-container {
+            width: 100%;
+            height: auto;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 2px solid #cbd5e1;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+            display: block;
+        }
+
+        /* Screen View */
+        #screen-view-container {
+            width: 120px;
+            height: 120px;
+            background: #111;
+            border-radius: 50%;
+            border: 4px solid #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin: 0 auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        #screenImage {
+            width: 30px;
+            height: 70px;
+            background: linear-gradient(to bottom, #fef08a, #f97316);
+            border-radius: 20px 20px 5px 5px;
+            clip-path: polygon(50% 0%, 100% 40%, 80% 100%, 20% 100%, 0% 40%);
+            transition: filter 0.1s ease;
+            transform: rotate(180deg); /* រូបពិតគឺបញ្ច្រាស */
+        }
+
+        /* Status Icon */
+        .status-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            margin-left: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .correct { background-color: #10b981; opacity: 1; }
+        .incorrect { background-color: #ef4444; opacity: 1; }
+
+        /* រចនាប័ទ្មសម្រាប់អក្សររូបមន្ត */
+        .html-math { display: inline-flex; align-items: center; font-size: 18px; }
+        .html-fraction { display: inline-flex; flex-direction: column; align-items: center; margin: 0 8px; vertical-align: middle; }
+        .html-num { border-bottom: 2px solid #111; padding: 0 6px 4px 6px; }
+        .html-den { padding: 4px 6px 0 6px; }
+        .math-var { font-family: 'Times New Roman', Times, serif; font-style: italic; }
+        .math-sub { font-size: 0.75em; font-family: 'Arial', sans-serif; font-style: normal; vertical-align: sub; }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+<div class="container-custom">
+    
+    <div class="mb-6 text-center">
+        <h1 class="text-3xl font-bold text-slate-800 mb-2">ការពិសោធន៍៖ កំណត់ចម្ងាយកំនុំឡង់ទីបង្រួម</h1>
+        <p class="text-lg text-slate-500">ប្រព័ន្ធដាក់ពិន្ទុស្វ័យប្រវត្តិ (៥០ ពិន្ទុ)</p>
+    </div>
+
+    <!-- សេចក្តីណែនាំ -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6 shadow-sm">
+        <h3 class="text-xl font-bold text-blue-800 mb-3 border-b border-blue-200 pb-2">📋 សេចក្តីណែនាំសម្រាប់ការពិសោធន៍៖</h3>
+        <ol class="list-decimal ml-6 space-y-2 text-slate-700">
+            <li>រំកិលទីតាំងវត្ថុ (<strong>$p$</strong>) ទៅកាន់តម្លៃ 30, 40, 50, 60 cm តាមលំដាប់លំដោយ។</li>
+            <li>នៅរាល់តម្លៃ $p$ នីមួយៗ សូមរំកិលទីតាំងអេក្រង់ (<strong>$q$</strong>) រហូតទាល់តែឃើញរូបភាពអណ្តាតភ្លើងច្បាស់ល្អ (មិនព្រិល) នៅលើផ្ទៃអេក្រង់។</li>
+            <li>កត់ត្រាតម្លៃ $q$ ដែលទទួលបានចូលក្នុងតារាង រួចគណនាតម្លៃ $f$ តាមរូបមន្ត $\frac{1}{p} + \frac{1}{q} = \frac{1}{f}$។</li>
+            <li>គណនាតម្លៃមធ្យម $f$ និងភាគរយផលសង (ចម្ងាយកំនុំស្តង់ដារ <strong>$f_0 = 15 \text{ cm}$</strong>) រួចចុចប៊ូតុងដាក់បញ្ជូន។</li>
+        </ol>
+    </div>
+
+    <!-- ផ្ទាំង Simulator -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-8 shadow-sm flex flex-col lg:flex-row gap-6">
+        
+        <!-- ផ្ទាំងខាងឆ្វេង៖ SVG & Sliders -->
+        <div class="w-full lg:w-2/3 flex flex-col gap-6 border-r-0 lg:border-r border-slate-200 pr-0 lg:pr-6">
+            
+            <h2 class="text-2xl font-bold text-slate-800">⚡ របារអុបទិក (Optical Bench)</h2>
+            
+            <!-- SVG រួមបញ្ចូលគ្នាទាំងមូល -->
+            <svg id="svg-container" viewBox="-100 -40 200 80" preserveAspectRatio="xMidYMid meet">
+                
+                <!-- ផ្ទៃខាងក្រោយ -->
+                <rect x="-100" y="-40" width="200" height="80" fill="#f8fafc" />
+
+                <!-- អ័ក្សមេ (Principal Axis) -->
+                <line x1="-95" y1="0" x2="95" y2="0" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2,2" />
+                <line x1="-95" y1="20" x2="95" y2="20" stroke="#64748b" stroke-width="2" /> <!-- របារខាងក្រោម -->
+
+                <!-- កំនុំ (Focal Points) បង្ហាញជាចំណុច -->
+                <circle cx="-15" cy="0" r="1.5" fill="#475569" />
+                <text x="-18" y="-3" font-family="Arial" font-size="5" fill="#475569">F</text>
+                <circle cx="15" cy="0" r="1.5" fill="#475569" />
+                <text x="13" y="-3" font-family="Arial" font-size="5" fill="#475569">F'</text>
+
+                <!-- ឡង់ទីនៅកណ្តាល x=0 -->
+                <g id="svgLens">
+                    <line x1="0" y1="-30" x2="0" y2="20" stroke="#1e293b" stroke-width="1.5" />
+                    <!-- សញ្ញាព្រួញឡង់ទីប៉ោង -->
+                    <polyline points="-2,-28 0,-30 2,-28" fill="none" stroke="#1e293b" stroke-width="1" />
+                    <polyline points="-2,18 0,20 2,18" fill="none" stroke="#1e293b" stroke-width="1" />
+                    <text x="3" y="-25" font-family="'Battambang', sans-serif" font-size="6" fill="#1e293b" font-weight="bold">ឡង់ទី</text>
+                </g>
+
+                <!-- អេក្រង់ (Screen) ពណ៌ខៀវ -->
+                <g id="svgScreen">
+                    <rect x="-1" y="-30" width="2" height="50" fill="#3b82f6" opacity="0.8" />
+                    <text id="txtQ" x="3" y="15" font-family="Arial" font-size="6" font-weight="bold" fill="#3b82f6">q=30</text>
+                </g>
+
+                <!-- កាំពន្លឺ (Ray tracing) ពណ៌ទឹកក្រូច លោតត្រង់ពីវត្ថុទៅរូប -->
+                <path id="ray1" d="" fill="none" stroke="#f59e0b" stroke-width="0.8" stroke-dasharray="2,1" />
+                <path id="ray2" d="" fill="none" stroke="#f59e0b" stroke-width="0.8" stroke-dasharray="2,1" />
+
+                <!-- វត្ថុ (Candle/Object) ពណ៌ក្រហម -->
+                <g id="svgObj">
+                    <!-- តួវត្ថុ -->
+                    <line x1="0" y1="0" x2="0" y2="-15" stroke="#ef4444" stroke-width="2" />
+                    <!-- ក្បាលព្រួញវត្ថុ -->
+                    <polygon points="-2,-15 0,-18 2,-15" fill="#ef4444" />
+                    <text id="txtP" x="-10" y="15" font-family="Arial" font-size="6" font-weight="bold" fill="#ef4444">p=30</text>
+                </g>
+
+            </svg>
+
+            <!-- Sliders -->
+            <div class="bg-slate-50 p-5 rounded-lg border border-slate-200 mt-2">
+                <div class="mb-6">
+                    <label class="block font-bold text-slate-700 mb-3">ចម្ងាយវត្ថុ $p$ (cm): <span id="valP" class="text-red-500 font-bold ml-1 text-2xl">30</span> cm</label>
+                    <input type="range" id="sliderP" min="20" max="80" value="30" step="1">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-3">ទីតាំងអេក្រង់ $q$ (cm): <span id="valQ" class="text-blue-500 font-bold ml-1 text-2xl">30.0</span> cm</label>
+                    <input type="range" id="sliderQ" min="10" max="90" value="30" step="0.1">
+                </div>
+            </div>
+        </div>
+
+        <!-- ផ្ទាំងខាងស្តាំ៖ ទិដ្ឋភាពអេក្រង់ -->
+        <div class="w-full lg:w-1/3 flex flex-col items-center justify-center bg-slate-50 border border-slate-200 rounded-xl p-6">
+            <h3 class="text-xl font-bold text-slate-700 mb-6">👁️ ទិដ្ឋភាពលើអេក្រង់</h3>
+            <div id="screen-view-container">
+                <div id="screenImage"></div>
+            </div>
+            <p id="blurStatus" class="mt-6 text-center font-bold text-emerald-600 text-lg">
+                រូបភាពច្បាស់ល្អ! (អាចកត់ត្រាបាន)
+            </p>
+            <p class="text-sm text-slate-500 text-center mt-2">រំកិលអេក្រង់ $q$ ឆ្វេងស្តាំ ដើម្បីឱ្យរូបភាពច្បាស់បំផុត។</p>
+        </div>
+
+    </div>
+
+    <!-- ផ្ទាំងតារាង និងប្រព័ន្ធដាក់ពិន្ទុ -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-md">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-slate-800">📋 តារាងកត់ត្រា និងវាយតម្លៃ (ពិន្ទុសរុប៖ ៥០)</h2>
+            <div class="bg-blue-100 text-blue-800 font-bold px-4 py-2 rounded-lg text-xl border border-blue-300 mt-4 md:mt-0 shadow-inner">
+                ពិន្ទុ៖ <span id="finalScore" class="text-blue-600">0 / 50</span>
+            </div>
+        </div>
+
+        <!-- តារាងកត់ត្រា -->
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse mb-6">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-700 border border-slate-300">
+                        <th class="p-3 border border-slate-300 w-1/4">ពិសោធន៍លើកទី</th>
+                        <th class="p-3 border border-slate-300 w-1/4">$p$ (cm)</th>
+                        <th class="p-3 border border-slate-300 w-1/4">$q$ (cm)</th>
+                        <th class="p-3 border border-slate-300 w-1/4">$f$ (cm)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- ជួរទី១ -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 border border-slate-300 text-center font-bold text-slate-600">1</td>
+                        <td class="p-3 border border-slate-300 text-center font-bold text-slate-800 bg-slate-50">30 cm</td>
+                        <td class="p-3 border border-slate-300">
+                            <div class="flex items-center">
+                                <input type="number" id="q0" class="table-input" placeholder="បញ្ចូល q">
+                                <span id="icon-q0" class="status-icon"></span>
+                            </div>
+                        </td>
+                        <td class="p-3 border border-slate-300">
+                            <div class="flex items-center">
+                                <input type="number" id="f0" class="table-input" placeholder="គណនា f">
+                                <span id="icon-f0" class="status-icon"></span>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- ជួរទី២ -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 border border-slate-300 text-center font-bold text-slate-600">2</td>
+                        <td class="p-3 border border-slate-300 text-center font-bold text-slate-800 bg-slate-50">40 cm</td>
+                        <td class="p-3 border border-slate-300">
+                            <div class="flex items-center">
+                                <input type="number" id="q1" class="table-input" placeholder="បញ្ចូល q">
+                                <span id="icon-q1" class="status-icon"></span>
+                            </div>
+                        </td>
+                        <td class="p-3 border border-slate-300">
+                            <div class="flex items-center">
+                                <input type="number" id="f1" class="table-input" placeholder="គណនា f">
+                                <span id="icon-f1" class="status-icon"></span>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- ជួរទី៣ -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 border border-slate-300 text-center font-bold text-slate-600">3</td>
+                        <td class="p-3 border border-slate-300 text-center font-bold text-slate-800 bg-slate-50">50 cm</td>
+                        <td class="p-3 border border-slate-300">
+                            <div class="flex items-center">
+                                <input type="number" id="q2" class="table-input" placeholder="បញ្ចូល q">
+                                <span id="icon-q2" class="status-icon"></span>
+                            </div>
+                        </td>
+                        <td class="p-3 border border-slate-300">
+                            <div class="flex items-center">
+                                <input type="number" id="f2" class="table-input" placeholder="គណនា f">
+                                <span id="icon-f2" class="status-icon"></span>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- ជួរទី៤ -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 border border-slate-300 text-center font-bold text-slate-600">4</td>
+                        <td class="p-3 border border-slate-300 text-center font-bold text-slate-800 bg-slate-50">60 cm</td>
+                        <td class="p-3 border border-slate-300">
+                            <div class="flex items-center">
+                                <input type="number" id="q3" class="table-input" placeholder="បញ្ចូល q">
+                                <span id="icon-q3" class="status-icon"></span>
+                            </div>
+                        </td>
+                        <td class="p-3 border border-slate-300">
+                            <div class="flex items-center">
+                                <input type="number" id="f3" class="table-input" placeholder="គណនា f">
+                                <span id="icon-f3" class="status-icon"></span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ផ្នែកគណនាចុងក្រោយ -->
+        <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-6 mb-6">
+            <h4 class="font-bold text-indigo-800 mb-4 text-lg">ការវិភាគលទ្ធផល៖</h4>
+            
+            <div class="flex flex-col md:flex-row items-center gap-4 mb-4">
+                <div class="html-math text-slate-700 w-full md:w-1/2">
+                    តម្លៃមធ្យម <span class="math-var ml-1">f</span> = 
+                    <div class="html-fraction mx-2">
+                        <div class="html-num"><span class="math-var">f</span><sub class="math-sub">1</sub> + <span class="math-var">f</span><sub class="math-sub">2</sub> + <span class="math-var">f</span><sub class="math-sub">3</sub> + <span class="math-var">f</span><sub class="math-sub">4</sub></div>
+                        <div class="html-den">4</div>
+                    </div>
+                    = 
+                </div>
+                <div class="flex items-center w-full md:w-1/2">
+                    <input type="number" id="avgF" class="table-input" placeholder="បញ្ចូល f មធ្យម">
+                    <span id="icon-avgF" class="status-icon"></span>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row items-center gap-4">
+                <div class="html-math text-slate-700 w-full md:w-1/2">
+                    % ផលសង = 
+                    <div class="html-fraction mx-2">
+                        <div class="html-num">| <span class="math-var">f</span><sub class="math-sub">0</sub> - <span class="math-var">f</span> |</div>
+                        <div class="html-den">(<span class="math-var">f</span><sub class="math-sub">0</sub> + <span class="math-var">f</span>)/2</div>
+                    </div>
+                    &times; 100% = 
+                </div>
+                <div class="flex items-center w-full md:w-1/2">
+                    <input type="number" id="pctErr" class="table-input" placeholder="បញ្ចូល % ផលសង">
+                    <span id="icon-pctErr" class="status-icon"></span>
+                </div>
+            </div>
+            <p class="text-sm text-slate-500 mt-3 italic">* កំណត់សម្គាល់៖ តម្លៃស្តង់ដារ $f_0 = 15 \text{ cm}$ ។ អនុវត្តរូបមន្តខាងលើដើម្បីរក % ផលសង។</p>
+        </div>
+
+        <!-- ប៊ូតុងដាក់ពិន្ទុ -->
+        <button id="btnSubmit" class="btn-action">✅ ដាក់បញ្ជូន និងពិនិត្យពិន្ទុ</button>
+    </div>
+
+</div>
+
+<script>
+    // --- Simulator Logic ---
+    var sliderP = document.getElementById('sliderP');
+    var sliderQ = document.getElementById('sliderQ');
+    var f_ideal = 15; 
+    var obj_h = -15; // កម្ពស់វត្ថុក្នុង SVG (អវិជ្ជមានព្រោះ Y ចុះក្រោមជាវិជ្ជមាន)
+
+    function updateSimulator() {
+        var p = parseFloat(sliderP.value);
+        var q_screen = parseFloat(sliderQ.value);
+        
+        var q_ideal = (p * f_ideal) / (p - f_ideal);
+        
+        document.getElementById('valP').innerText = p.toFixed(0);
+        document.getElementById('valQ').innerText = q_screen.toFixed(1);
+
+        // គណនាកម្រិតព្រិល (Blur) 
+        var error = Math.abs(q_screen - q_ideal);
+        
+        var maxBlur = 15;
+        var finalBlur = error * 1.5;
+        var isBlurLarge = (Math.max(finalBlur, maxBlur) === finalBlur && finalBlur !== maxBlur);
+        if (isBlurLarge === true) {
+            finalBlur = maxBlur;
+        }
+
+        document.getElementById('screenImage').style.filter = "blur(" + finalBlur + "px)";
+
+        var statusEl = document.getElementById('blurStatus');
+        var isErrorSmall = (Math.min(error, 0.5) === error);
+        
+        if (isErrorSmall === true) {
+            statusEl.innerText = "រូបភាពច្បាស់ល្អ! (អាចកត់ត្រាបាន)";
+            statusEl.className = "mt-6 text-center font-bold text-emerald-600 text-lg";
+        } else {
+            statusEl.innerText = "រូបភាពព្រិល! សូមរំកិលអេក្រង់បន្តទៀត។";
+            statusEl.className = "mt-6 text-center font-bold text-orange-500 text-lg";
+        }
+
+        // --- ធ្វើបច្ចុប្បន្នភាព SVG (ViewBox range: x=-100 to 100, y=-40 to 40) ---
+        // វត្ថុនៅខាងឆ្វេង (x = -p)
+        document.getElementById('svgObj').setAttribute('transform', 'translate(' + (-p) + ', 0)');
+        document.getElementById('txtP').textContent = "p=" + p;
+        
+        // អេក្រង់នៅខាងស្តាំ (x = q_screen)
+        document.getElementById('svgScreen').setAttribute('transform', 'translate(' + q_screen + ', 0)');
+        document.getElementById('txtQ').textContent = "q=" + q_screen.toFixed(1);
+
+        // កាំពន្លឺ (Rays)
+        var img_h = obj_h * (-q_ideal / p); // កម្ពស់រូបពិតត្រង់ q_ideal
+
+        // Ray 1: ស្របអ័ក្សកាត់តាមឡង់ទីទៅកាន់កំនុំ និងរូប
+        var d1 = "M " + (-p) + "," + obj_h + " L 0," + obj_h + " L " + q_ideal + "," + img_h; 
+        // Ray 2: កាត់ផ្ចិត O (0,0)
+        var d2 = "M " + (-p) + "," + obj_h + " L 0,0 L " + q_ideal + "," + img_h;   
+        
+        document.getElementById('ray1').setAttribute('d', d1);
+        document.getElementById('ray2').setAttribute('d', d2);
+    }
+
+    sliderP.addEventListener('input', updateSimulator);
+    sliderQ.addEventListener('input', updateSimulator);
+    
+    // Initialize
+    updateSimulator();
+
+    // --- Grading Logic ---
+    var btnSubmit = document.getElementById('btnSubmit');
+
+    function setIcon(id, isCorrect) {
+        var el = document.getElementById('icon-' + id);
+        if (isCorrect === true) {
+            el.innerHTML = "✔";
+            el.className = "status-icon correct";
+        } else {
+            el.innerHTML = "✘";
+            el.className = "status-icon incorrect";
+        }
+    }
+
+    btnSubmit.addEventListener('click', function() {
+        var score = 0;
+        var p_vals = [30, 40, 50, 60];
+
+        // ពិនិត្យ ៤ ជួរ (ប្រអប់នីមួយៗបាន ៥ពិន្ទុ)
+        [0, 1, 2, 3].forEach(function(i) {
+            var p = p_vals[i];
+            var ideal_q = (p * f_ideal) / (p - f_ideal);
+            
+            var u_q = parseFloat(document.getElementById('q' + i).value);
+            var u_f = parseFloat(document.getElementById('f' + i).value);
+
+            // ពិនិត្យ q (លម្អៀង 0.5)
+            var err_q = Math.abs(u_q - ideal_q);
+            var isQCorrect = (Math.min(err_q, 0.5) === err_q && !isNaN(u_q));
+            if (isQCorrect === true) { 
+                score += 5; 
+                setIcon('q' + i, true);
+            } else {
+                setIcon('q' + i, false);
+            }
+
+            // ពិនិត្យ f (លម្អៀង 0.5)
+            var err_f = Math.abs(u_f - f_ideal);
+            var isFCorrect = (Math.min(err_f, 0.5) === err_f && !isNaN(u_f));
+            if (isFCorrect === true) { 
+                score += 5; 
+                setIcon('f' + i, true);
+            } else {
+                setIcon('f' + i, false);
+            }
+        });
+
+        var u_avg = parseFloat(document.getElementById('avgF').value);
+        var u_err = parseFloat(document.getElementById('pctErr').value);
+
+        // ពិនិត្យ f មធ្យម (៥ ពិន្ទុ)
+        var err_avg = Math.abs(u_avg - 15);
+        var isAvgCorrect = (Math.min(err_avg, 0.5) === err_avg && !isNaN(u_avg));
+        if (isAvgCorrect === true) { 
+            score += 5; 
+            setIcon('avgF', true);
+        } else {
+            setIcon('avgF', false);
+        }
+
+        var ideal_err = 0;
+        var isUavgValid = (!isNaN(u_avg));
+        if (isUavgValid === true) {
+            ideal_err = Math.abs(15 - u_avg) / ((15 + u_avg) / 2) * 100;
+        }
+
+        // ពិនិត្យ % ផលសង (៥ ពិន្ទុ)
+        var err_pct = Math.abs(u_err - ideal_err);
+        var isPctCorrect = (Math.min(err_pct, 1.0) === err_pct && !isNaN(u_err));
+        if (isPctCorrect === true) { 
+            score += 5; 
+            setIcon('pctErr', true);
+        } else {
+            setIcon('pctErr', false);
+        }
+
+        // បង្ហាញពិន្ទុ
+        document.getElementById('finalScore').innerText = score + " / 50";
+        
+        var scoreColor = "#ef4444"; 
+        var isScoreHigh = (Math.min(score, 40) === 40); 
+        var isScoreMed = (Math.min(score, 25) === 25);  
+
+        if (isScoreHigh === true) {
+            scoreColor = "#10b981"; 
+        } else if (isScoreMed === true) {
+            scoreColor = "#f59e0b"; 
+        }
+        
+        document.getElementById('finalScore').style.color = scoreColor;
+    });
+
+</script>
+
+</body>
+</html>

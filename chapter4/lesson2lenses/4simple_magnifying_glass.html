@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>កែវពង្រីក និងឡង់ទី</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts សម្រាប់ Battambang -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Battambang', 'Khmer OS Battambang', sans-serif;
+            margin: 0;
+            background-color: #f1f5f9; 
+            color: #0f172a;
+            font-size: 16px;
+        }
+
+        .container-custom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ប៊ូតុង និង Input */
+        .btn-toggle {
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-toggle.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        }
+        .btn-toggle.inactive {
+            background-color: #e2e8f0;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+        .btn-toggle.inactive:hover { background-color: #cbd5e1; }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* SVG Simulator Container */
+        #svg-container {
+            width: 100%;
+            height: auto;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 2px solid #cbd5e1;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+            max-height: 450px;
+        }
+
+        /* រចនាប័ទ្មសម្រាប់អក្សររូបមន្ត */
+        .html-math { display: inline-flex; align-items: center; font-size: 18px; }
+        .html-fraction { display: inline-flex; flex-direction: column; align-items: center; margin: 0 8px; vertical-align: middle; }
+        .html-num { border-bottom: 2px solid #111; padding: 0 6px 4px 6px; }
+        .html-den { padding: 4px 6px 0 6px; }
+        .math-var { font-family: 'Times New Roman', Times, serif; font-style: italic; }
+        .math-sub { font-size: 0.75em; font-family: 'Arial', sans-serif; font-style: normal; vertical-align: sub; }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+<div class="container-custom">
+    
+    <div class="mb-6 text-center">
+        <h1 class="text-3xl font-bold text-slate-800 mb-2"> កែវពង្រីក និងឡង់ទី</h1>
+        <p class="text-lg text-slate-500">ការបង្កើតរូបភាព និងកម្រិតពង្រីកមុំ ($m_{\max}$ និង $m_{\min}$)</p>
+    </div>
+
+    <!-- ផ្ទាំងបញ្ជា (Controls) & Simulator -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-8 shadow-sm flex flex-col lg:flex-row gap-6">
+        
+        <!-- ផ្ទាំងខាងឆ្វេង៖ ប៊ូតុង និង Sliders -->
+        <div class="w-full lg:w-1/3 flex flex-col gap-5 border-r-0 lg:border-r border-slate-200 pr-0 lg:pr-6">
+            
+            <div>
+                <label class="block text-lg font-bold text-slate-700 mb-3">ប្រភេទឡង់ទី៖</label>
+                <div class="flex gap-2">
+                    <button id="btnConvex" class="btn-toggle active flex-1 py-3 rounded-lg font-bold text-lg">បង្រួម (ប៉ោង)</button>
+                    <button id="btnConcave" class="btn-toggle inactive flex-1 py-3 rounded-lg font-bold text-lg">ពង្រីក (ផត)</button>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block font-bold text-slate-700 mb-2">ចម្ងាយវត្ថុ $p$ (cm): <span id="lblP" class="text-blue-600 font-bold ml-1 text-xl">8.0</span></label>
+                <input type="range" id="sliderP" min="2.0" max="40.0" value="8.0" step="0.5">
+                <p class="text-xs text-slate-500 mt-2">* ទាញវត្ថុឱ្យនៅចន្លោះ F ដើម្បីប្រើជាកែវពង្រីក</p>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block font-bold text-slate-700 mb-2">ចម្ងាយកំនុំ $f$ (cm): <span id="lblF" class="text-emerald-600 font-bold ml-1 text-xl">10.0</span></label>
+                <input type="range" id="sliderF" min="5.0" max="25.0" value="10.0" step="1.0">
+            </div>
+
+            <!-- Dashboard លទ្ធផល -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-2">
+                <h4 class="font-bold text-blue-800 border-b border-blue-200 pb-2 mb-3">ការគណនា (កែវពង្រីក)៖</h4>
+                <div class="flex justify-between mb-2">
+                    <span class="text-slate-600 text-sm">ទីតាំងរូបភាព ($q$)៖</span>
+                    <span id="resQ" class="font-bold text-slate-800">-40.0 cm</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span class="text-slate-600 text-sm">ម៉ាញីទុត ($M$)៖</span>
+                    <span id="resM" class="font-bold text-slate-800">+5.0</span>
+                </div>
+                <div id="magInfo" class="mt-3 pt-3 border-t border-blue-200 hidden">
+                    <div class="flex justify-between mb-1">
+                        <span class="text-slate-600 text-sm">កម្រិតពង្រីកអតិបរមា ($m_{\max}$)៖</span>
+                        <span id="resMmax" class="font-bold text-orange-600">3.5</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-600 text-sm">កម្រិតពង្រីកអប្បបរមា ($m_{\min}$)៖</span>
+                        <span id="resMmin" class="font-bold text-emerald-600">2.5</span>
+                    </div>
+                </div>
+                <div id="notMagMsg" class="mt-3 pt-3 border-t border-blue-200 text-sm text-red-600 font-bold hidden">
+                    មិនអាចធ្វើជាកែវពង្រីកបានទេ ព្រោះវត្ថុនៅក្រៅកំនុំ $F$ (បង្កើតរូបពិត) ឬជាឡង់ទីផត។
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ផ្ទាំងខាងស្តាំ៖ SVG Canvas -->
+        <div class="w-full lg:w-2/3 flex flex-col">
+            <h2 class="text-xl font-bold text-slate-800 mb-3">⚡ ដ្យាក្រាមដំណើរនៃកាំពន្លឺ</h2>
+            
+            <svg id="svg-container" viewBox="-250 -150 400 300" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <!-- ក្បាលព្រួញសម្រាប់កាំពន្លឺកណ្តាលខ្សែ -->
+                    <marker id="arrowReal" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+                        <polygon points="0,2 8,5 0,8" fill="#1d4ed8" />
+                    </marker>
+                    
+                    <!-- ក្បាលព្រួញថេរសម្រាប់វត្ថុ និងរូបភាព (ការពារកុំឱ្យរីកធំពេលបន្ទាត់ក្រាស់) -->
+                    <marker id="arrowObj" markerWidth="12" markerHeight="12" refX="12" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+                        <polygon points="0,0 12,6 0,12" fill="#3b82f6" />
+                    </marker>
+                    <marker id="arrowImg" markerWidth="12" markerHeight="12" refX="12" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+                        <polygon points="0,0 12,6 0,12" fill="#f59e0b" />
+                    </marker>
+                </defs>
+
+                <!-- Grid -->
+                <g stroke="#f1f5f9" stroke-width="1">
+                    <line x1="-250" y1="-75" x2="150" y2="-75" />
+                    <line x1="-250" y1="75" x2="150" y2="75" />
+                    <line x1="-100" y1="-150" x2="-100" y2="150" />
+                    <line x1="-200" y1="-150" x2="-200" y2="150" />
+                </g>
+
+                <!-- អ័ក្សមេ (Principal Axis) -->
+                <line x1="-250" y1="0" x2="150" y2="0" stroke="#64748b" stroke-width="1.5" />
+                
+                <!-- ឡង់ទី (Lens) -->
+                <line x1="0" y1="-100" x2="0" y2="100" stroke="#0f172a" stroke-width="2" />
+                <g id="lensSymbol" stroke="#0f172a" stroke-width="2" fill="none">
+                    <!-- គូរតាមប្រភេទឡង់ទីដោយ JS -->
+                </g>
+
+                <!-- កំនុំ (Focus Points) -->
+                <circle id="ptF1" cx="-50" cy="0" r="3" fill="#ef4444" />
+                <text id="lblF1" x="-55" y="15" font-family="Arial" font-size="12" font-weight="bold" fill="#ef4444">F</text>
+                
+                <circle id="ptF2" cx="50" cy="0" r="3" fill="#ef4444" />
+                <text id="lblF2" x="45" y="15" font-family="Arial" font-size="12" font-weight="bold" fill="#ef4444">F'</text>
+                
+                <!-- កែវភ្នែក (Eye icon) នៅខាងស្តាំឡង់ទី -->
+                <g transform="translate(100, 0)">
+                    <path d="M 0 -20 Q -25 0 0 20 Q 25 0 0 -20" fill="#e0f2fe" stroke="#0284c7" stroke-width="2" />
+                    <circle cx="0" cy="0" r="8" fill="#0f172a" />
+                </g>
+
+                <!-- វត្ថុ (Object) -->
+                <line id="objLine" x1="-40" y1="0" x2="-40" y2="-40" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrowObj)" />
+                <text id="lblObj" x="-55" y="-45" font-family="Arial" font-size="14" font-weight="bold" fill="#3b82f6">A</text>
+
+                <!-- រូបភាព (Image) -->
+                <line id="imgLine" x1="-120" y1="0" x2="-120" y2="-120" stroke="#f59e0b" stroke-width="3" stroke-dasharray="5,5" marker-end="url(#arrowImg)" />
+                <text id="lblImg" x="-140" y="-125" font-family="Arial" font-size="14" font-weight="bold" fill="#f59e0b">A'</text>
+
+                <!-- កាំពន្លឺ (Ray Paths) -->
+                <path id="ray1Real" d="" fill="none" stroke="#ef4444" stroke-width="1.5" marker-mid="url(#arrowReal)" />
+                <path id="ray1Virt" d="" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6" />
+
+                <path id="ray2Real" d="" fill="none" stroke="#10b981" stroke-width="1.5" marker-mid="url(#arrowReal)" />
+                <path id="ray2Virt" d="" fill="none" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6" />
+                
+            </svg>
+
+            <!-- កំណត់សម្គាល់កាំពន្លឺ -->
+            <div class="mt-4 flex justify-center gap-6 text-sm font-bold border-t border-slate-200 pt-4">
+                <div class="flex items-center text-red-500"><div class="w-4 h-1 bg-red-500 mr-2"></div> កាំស្របអ័ក្សកាត់កំនុំ</div>
+                <div class="flex items-center text-emerald-500"><div class="w-4 h-1 bg-emerald-500 mr-2"></div> កាំកាត់ផ្ចិត O</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- លំហាត់គំរូ -->
+    <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-6 shadow-sm">
+        <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b border-indigo-200 pb-2">📝 លំហាត់គំរូអនុវត្ត (កែវពង្រីក)</h3>
+        <p class="mb-4 text-lg text-slate-800">
+            តើកម្រិតពង្រីកមុំអតិបរមា និងអប្បបរមារបស់ឡង់ទីមួយដែលមានចម្ងាយកំនុំ <span class="font-bold text-emerald-600">$10 \text{ cm}$</span> មានតម្លៃប៉ុន្មាន? ហើយកម្រិតពង្រីកមុំអប្បបរមាមានតម្លៃនៅពេលណា? កាលណារូបភាពស្ថិតនៅទីណា?
+        </p>
+
+        <button id="btnShowAns" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition w-full md:w-auto shadow">
+            បង្ហាញ / លាក់ដំណោះស្រាយ
+        </button>
+
+        <!-- ប្រអប់ដំណោះស្រាយ -->
+        <div id="ansBox" class="hidden mt-6 bg-white border border-indigo-100 rounded-lg p-6">
+            <p class="font-bold text-indigo-700 text-xl mb-4">ដំណោះស្រាយ៖</p>
+            
+            <p class="font-bold text-slate-800">១. កម្រិតពង្រីកមុំអតិបរមា ($m_{\max}$) ៖</p>
+            <p class="mb-2 text-slate-700">កម្រិតពង្រីកមុំអតិបរមាកើតមាននៅពេលដែលរូបភាពស្ថិតត្រង់ចំណុចជិតបំផុតដែលភ្នែកអាចមើលឃើញ (ដែនគំហើញជិត ដែលមានចម្ងាយ $25 \text{ cm}$ ពីភ្នែក)។ តាមរូបមន្ត៖</p>
+            <div class="my-4 w-full text-center text-xl text-slate-800">
+                $$m_{\max} = 1 + \frac{25}{f}$$
+                $$m_{\max} = 1 + \frac{25}{10} = 1 + 2.5 = 3.5$$
+            </div>
+
+            <p class="font-bold text-slate-800 mt-6">២. កម្រិតពង្រីកមុំអប្បបរមា ($m_{\min}$) ៖</p>
+            <p class="mb-2 text-slate-700">កម្រិតពង្រីកមុំអប្បបរមាកើតមាននៅពេលដែលរូបភាពស្ថិតនៅអនន្ត ($\infty$) គឺកាលណាវត្ថុត្រូវបានដាក់ឱ្យស្ថិតត្រង់ចំណុចកំនុំ ($F$) របស់ឡង់ទី។ តាមរូបមន្ត៖</p>
+            <div class="my-4 w-full text-center text-xl text-slate-800">
+                $$m_{\min} = \frac{25}{f}$$
+                $$m_{\min} = \frac{25}{10} = 2.5$$
+            </div>
+            
+            <p class="mt-4 font-bold text-center bg-indigo-100 p-3 rounded text-indigo-900">
+                សន្និដ្ឋាន៖ កម្រិតពង្រីកមុំអតិបរមាគឺ $3.5$ និងអប្បបរមាគឺ $2.5$ ដែលទទួលបានពេលរូបភាពស្ថិតនៅអនន្ត។
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- State Variables ---
+    var isConvex = true;
+
+    // --- DOM Elements ---
+    var btnConvex = document.getElementById('btnConvex');
+    var btnConcave = document.getElementById('btnConcave');
+    var sliderP = document.getElementById('sliderP');
+    var sliderF = document.getElementById('sliderF');
+    
+    var btnShowAns = document.getElementById('btnShowAns');
+    var ansBox = document.getElementById('ansBox');
+
+    // --- Event Listeners ---
+    function setLensType(convex) {
+        isConvex = convex;
+        if (convex === true) {
+            btnConvex.className = "btn-toggle active flex-1 py-3 rounded-lg font-bold text-lg";
+            btnConcave.className = "btn-toggle inactive flex-1 py-3 rounded-lg font-bold text-lg";
+            document.getElementById('lblF1').textContent = "F";
+            document.getElementById('lblF2').textContent = "F'";
+        } else {
+            btnConcave.className = "btn-toggle active flex-1 py-3 rounded-lg font-bold text-lg";
+            btnConvex.className = "btn-toggle inactive flex-1 py-3 rounded-lg font-bold text-lg";
+            document.getElementById('lblF1').textContent = "F'";
+            document.getElementById('lblF2').textContent = "F";
+        }
+        updateSimulation();
+    }
+
+    btnConvex.addEventListener('click', function() { setLensType(true); });
+    btnConcave.addEventListener('click', function() { setLensType(false); });
+
+    sliderP.addEventListener('input', updateSimulation);
+    sliderF.addEventListener('input', updateSimulation);
+
+    btnShowAns.addEventListener('click', function() {
+        var isHidden = ansBox.classList.contains('hidden');
+        if (isHidden === true) {
+            ansBox.classList.remove('hidden');
+        } else {
+            ansBox.classList.add('hidden');
+        }
+    });
+
+    // --- SVG Helpers ---
+    function generatePath(points) {
+        if (points.length === 0) return "";
+        var d = "M " + points[0].x + "," + points[0].y;
+        points.forEach(function(pt, index) {
+            if (index !== 0) { d += " L " + pt.x + "," + pt.y; }
+        });
+        return d;
+    }
+
+    // --- Physics Logic ---
+    function updateSimulation() {
+        var p_val = parseFloat(sliderP.value);
+        var f_mag = parseFloat(sliderF.value);
+        var h_obj = 30; // កម្ពស់វត្ថុថេរក្នុង SVG
+
+        document.getElementById('lblP').textContent = p_val.toFixed(1);
+        document.getElementById('lblF').textContent = f_mag.toFixed(1);
+
+        // គណនារូបវិទ្យា
+        var f = isConvex ? f_mag : -f_mag;
+        var diff = p_val - f;
+        var isInfinity = (diff === 0);
+        
+        var q_val = 0;
+        var M = 0;
+
+        if (isInfinity === true) {
+            q_val = 9999;
+            M = 9999;
+        } else {
+            q_val = (p_val * f) / diff;
+            M = -q_val / p_val;
+        }
+
+        var isVirtual = (Math.max(q_val, 0) !== q_val); 
+        var isMagMode = (isConvex === true && isVirtual === true); 
+
+        // --- ធ្វើបច្ចុប្បន្នភាព Dashboard ---
+        if (isInfinity === true) {
+            document.getElementById('resQ').textContent = "អនន្ត (Infinity)";
+            document.getElementById('resM').textContent = "អនន្ត";
+        } else {
+            document.getElementById('resQ').textContent = q_val.toFixed(1) + " cm";
+            var mSign = (Math.max(M, 0) === M) ? "+" : "";
+            document.getElementById('resM').textContent = mSign + M.toFixed(2);
+        }
+
+        var magInfo = document.getElementById('magInfo');
+        var notMagMsg = document.getElementById('notMagMsg');
+
+        if (isMagMode === true) {
+            magInfo.classList.remove('hidden');
+            notMagMsg.classList.add('hidden');
+            
+            var m_max = 1 + (25 / f_mag);
+            var m_min = 25 / f_mag;
+            document.getElementById('resMmax').textContent = m_max.toFixed(2);
+            document.getElementById('resMmin').textContent = m_min.toFixed(2);
+        } else {
+            magInfo.classList.add('hidden');
+            notMagMsg.classList.remove('hidden');
+        }
+
+        // --- SVG Drawing Mapping ---
+        var scale = 5; 
+        var p_svg = p_val * scale;
+        var f_svg = f_mag * scale;
+        var q_svg = q_val * scale;
+        var h_img = h_obj * M;
+
+        var max_q_svg = 400;
+        var min_q_svg = -240;
+        var display_q_svg = q_svg;
+        
+        var isQTooLarge = (Math.max(display_q_svg, max_q_svg) === display_q_svg && display_q_svg !== max_q_svg);
+        if (isQTooLarge === true) { display_q_svg = max_q_svg; }
+        
+        var isQTooSmall = (Math.min(display_q_svg, min_q_svg) === display_q_svg && display_q_svg !== min_q_svg);
+        if (isQTooSmall === true) { display_q_svg = min_q_svg; }
+
+        var max_h_img = 200;
+        var min_h_img = -200;
+        var display_h_img = h_img;
+
+        var isHTooLarge = (Math.max(display_h_img, max_h_img) === display_h_img && display_h_img !== max_h_img);
+        if (isHTooLarge === true) { display_h_img = max_h_img; }
+
+        var isHTooSmall = (Math.min(display_h_img, min_h_img) === display_h_img && display_h_img !== min_h_img);
+        if (isHTooSmall === true) { display_h_img = min_h_img; }
+
+
+        // កំនុំ
+        document.getElementById('ptF1').setAttribute('cx', -f_svg);
+        document.getElementById('ptF2').setAttribute('cx', f_svg);
+        document.getElementById('lblF1').setAttribute('x', -f_svg - 5);
+        document.getElementById('lblF2').setAttribute('x', f_svg - 5);
+
+        // វត្ថុ (Object)
+        var objX = -p_svg;
+        var objY = -h_obj; // Y ឡើងលើគឺអវិជ្ជមាន
+
+        document.getElementById('objLine').setAttribute('x1', objX);
+        document.getElementById('objLine').setAttribute('x2', objX);
+        document.getElementById('objLine').setAttribute('y1', 0);
+        document.getElementById('objLine').setAttribute('y2', objY);
+        
+        document.getElementById('lblObj').setAttribute('x', objX - 18);
+        document.getElementById('lblObj').setAttribute('y', objY - 10);
+
+        // ឡង់ទី (Lens Symbol)
+        var lensSymbol = document.getElementById('lensSymbol');
+        if (isConvex === true) {
+            lensSymbol.innerHTML = `
+                <polyline points="-5,-90 0,-100 5,-90" />
+                <polyline points="-5,90 0,100 5,90" />
+            `;
+        } else {
+            lensSymbol.innerHTML = `
+                <polyline points="-5,-110 0,-100 5,-110" />
+                <polyline points="-5,110 0,100 5,110" />
+            `;
+        }
+
+        // រូបភាព (Image)
+        var imgLine = document.getElementById('imgLine');
+        var lblImg = document.getElementById('lblImg');
+
+        if (isInfinity === true) {
+            imgLine.style.opacity = '0';
+            lblImg.style.opacity = '0';
+        } else {
+            imgLine.style.opacity = '1';
+            lblImg.style.opacity = '1';
+
+            var imgX = display_q_svg;
+            var imgY = -display_h_img; // M វិជ្ជមាន -> imgY អវិជ្ជមាន (ឈរត្រង់)
+
+            imgLine.setAttribute('x1', imgX);
+            imgLine.setAttribute('x2', imgX);
+            imgLine.setAttribute('y1', 0);
+            imgLine.setAttribute('y2', imgY);
+
+            if (isVirtual === true) {
+                imgLine.setAttribute('stroke-dasharray', '5,5');
+            } else {
+                imgLine.setAttribute('stroke-dasharray', '0');
+            }
+            
+            lblImg.setAttribute('x', imgX - 20);
+            var lblY = (imgY < 0) ? imgY - 10 : imgY + 20;
+            lblImg.setAttribute('y', lblY);
+        }
+
+        // --- កាំពន្លឺ (Ray Tracing) ---
+        var r1Real = [], r1Virt = [];
+        var r2Real = [], r2Virt = [];
+        var drawLen = 300; 
+
+        var imgRealX = q_svg;
+        var imgRealY = -h_img;
+
+        if (isInfinity === true) {
+            // កាំស្របគ្នា
+            r1Real.push({x: objX, y: objY}, {x: 0, y: objY}, {x: drawLen, y: objY + drawLen*(objY/-f_svg)});
+            r2Real.push({x: objX, y: objY}, {x: 0, y: 0}, {x: drawLen, y: drawLen*(objY/objX)});
+        } else {
+            // Ray 1: ស្របអ័ក្ស
+            r1Real.push({x: objX, y: objY}, {x: 0, y: objY});
+            var slope1 = (imgRealY - objY) / (imgRealX - 0); 
+            
+            if (isVirtual === true) {
+                // ឡង់ទីប៉ោងនិម្មិត ឬ ផត
+                var f_focus_x = isConvex ? f_svg : -f_svg;
+                var slopeOut = (0 - objY) / (f_focus_x - 0);
+                r1Real.push({x: drawLen, y: objY + slopeOut * drawLen});
+                
+                // បន្លាយថយក្រោយ
+                r1Virt.push({x: 0, y: objY}, {x: display_q_svg, y: -display_h_img});
+            } else {
+                // រូបពិត
+                r1Real.push({x: display_q_svg, y: -display_h_img}, {x: drawLen, y: objY + slope1 * drawLen});
+            }
+
+            // Ray 2: កាត់ O
+            r2Real.push({x: objX, y: objY}, {x: 0, y: 0});
+            var slope2 = (imgRealY - 0) / (imgRealX - 0);
+            
+            if (isVirtual === true) {
+                r2Real.push({x: drawLen, y: 0 + slope2 * drawLen});
+                r2Virt.push({x: 0, y: 0}, {x: display_q_svg, y: -display_h_img});
+            } else {
+                r2Real.push({x: display_q_svg, y: -display_h_img}, {x: drawLen, y: 0 + slope2 * drawLen});
+            }
+        }
+
+        document.getElementById('ray1Real').setAttribute('d', generatePath(r1Real));
+        document.getElementById('ray1Virt').setAttribute('d', generatePath(r1Virt));
+        
+        document.getElementById('ray2Real').setAttribute('d', generatePath(r2Real));
+        document.getElementById('ray2Virt').setAttribute('d', generatePath(r2Virt));
+    }
+
+    // Initialize
+    updateSimulation();
+
+</script>
+
+</body>
+</html>

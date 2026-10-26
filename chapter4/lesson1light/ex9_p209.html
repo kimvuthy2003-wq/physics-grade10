@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ការពិសោធន៍ 3D៖ បាតុភូតចំណាំងផ្លាតទាំងស្រុង</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts សម្រាប់ Battambang -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <!-- Three.js និង OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <style>
+        body {
+            font-family: 'Battambang', 'Khmer OS Battambang', sans-serif;
+            margin: 0;
+            background-color: #f4f6f9; 
+            color: #111;
+            font-size: 18px; /* ទំហំអក្សរធំ */
+        }
+
+        .container-custom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ប៊ូតុង និង Input */
+        .action-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border-width: 1px;
+            border-color: #cbd5e1;
+            background-color: #ffffff;
+            color: #334155;
+            font-size: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-weight: bold;
+        }
+        .action-btn:hover {
+            background-color: #f8fafc;
+            border-color: #94a3b8;
+        }
+        .action-btn:active {
+            transform: translateY(2px);
+        }
+        
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 28px;
+            width: 28px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -10px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* SVG Simulator Container */
+        #canvas-container {
+            width: 100%;
+            height: 450px;
+            background: #000000;
+            border-radius: 12px;
+            border: 2px solid #cbd5e1;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* រចនាប័ទ្មសម្រាប់អក្សររូបមន្ត HTML សុវត្ថិភាព */
+        .html-math { display: inline-flex; align-items: center; font-size: 22px; }
+        .html-fraction { display: inline-flex; flex-direction: column; align-items: center; margin: 0 8px; vertical-align: middle; }
+        .html-num { border-bottom: 2px solid #111; padding: 0 6px 4px 6px; }
+        .html-den { padding: 4px 6px 0 6px; }
+        .math-var { font-family: 'Times New Roman', Times, serif; font-style: italic; }
+        .math-sub { font-size: 0.75em; font-family: 'Arial', sans-serif; font-style: normal; vertical-align: sub; }
+        .dynamic-val { color: #d32f2f; font-weight: bold; padding: 0 6px; font-size: 24px; font-family: 'Arial', sans-serif;}
+        .highlight { color: #10b981; font-weight: bold; }
+
+        .custom-scroll::-webkit-scrollbar { width: 8px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="custom-scroll">
+
+<div class="container-custom">
+    
+    <div class="mb-5 text-center">
+        <h1 class="text-3xl font-bold text-slate-800 mb-2 leading-tight">ការពិសោធន៍ 3D ៖ ចំណាំងផ្លាតទាំងស្រុង</h1>
+        <p class="text-lg text-slate-500">Total Internal Reflection និង មុំកម្រិត (Critical Angle)</p>
+    </div>
+
+    <!-- ១. ប្រធានលំហាត់ -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6 shadow-sm text-slate-800">
+        <h3 class="text-xl font-bold text-orange-600 mb-4 border-b border-slate-200 pb-2">📝 ប្រធានលំហាត់ទី៩</h3>
+        <p class="mb-2 leading-relaxed text-lg text-justify">
+            ៩. ដុំកញ្ចក់មួយមានរាងប្រលេពីប៉ែត និងមានសន្ទស្សន៍ <span class="font-bold text-blue-600" id="probN1">1.50</span> ។ គេដាក់ដុំនេះទៅក្នុងទឹកដែលមានសន្ទស្សន៍ <span class="font-bold text-emerald-600" id="probN2">1.33</span> ។<br>
+            ក. តើនៅក្នុងមជ្ឈដ្ឋានណាដែលអាចកើតមានបាតុភូតចំណាំងផ្លាតទាំងស្រុង?<br>
+            ខ. គណនាតម្លៃមុំកម្រិតក្នុងមជ្ឈដ្ឋាននោះ ។
+        </p>
+    </div>
+
+    <!-- ២. ផ្ទាំង Simulator 3D -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+            <h2 class="text-2xl font-bold text-slate-800">⚡ ដ្យាក្រាមពន្លឺ 3D (អូសដើម្បីបង្វិល)</h2>
+            
+            <!-- Dashboard ខ្នាតតូច -->
+            <div class="flex flex-wrap gap-4 md:gap-6 bg-slate-50 px-4 py-3 rounded-lg border border-slate-200 shadow-sm w-full md:w-auto justify-center">
+                <div class="text-center">
+                    <div class="text-sm text-slate-500">មុំចំណាំងប៉ះ ($\theta_1$)</div>
+                    <div class="text-2xl font-bold text-orange-500" id="dashTh1">60.0&deg;</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm text-slate-500">មុំកម្រិត ($\theta_c$)</div>
+                    <div class="text-2xl font-bold text-red-500" id="dashThc">62.5&deg;</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm text-slate-500">មុំចំណាំងបែរ ($\theta_2$)</div>
+                    <div class="text-2xl font-bold text-emerald-600" id="dashTh2">...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3D Canvas -->
+        <div id="canvas-container"></div>
+        
+        <div id="tirWarning" class="hidden mt-4 p-4 bg-red-50 border border-red-300 rounded-lg text-red-600 font-bold text-center text-xl shadow-sm">
+            ⚠️ បាតុភូតចំណាំងផ្លាតសរុប (Total Internal Reflection) បានកើតឡើង!
+        </div>
+
+        <!-- កំណត់សម្គាល់ពណ៌ -->
+        <div class="mt-6 border-t border-slate-200 pt-4">
+            <div class="text-slate-600 font-bold text-lg mb-3">កំណត់សម្គាល់ពណ៌ និងមជ្ឈដ្ឋាន៖</div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-base">
+                <div class="text-orange-500 font-bold flex items-center gap-2"><div class="w-4 h-4 rounded-full bg-orange-500"></div> កាំចំណាំងប៉ះ</div>
+                <div class="text-yellow-500 font-bold flex items-center gap-2"><div class="w-4 h-4 rounded-full bg-yellow-500"></div> កាំចំណាំងផ្លាត</div>
+                <div class="text-emerald-500 font-bold flex items-center gap-2"><div class="w-4 h-4 rounded-full bg-emerald-500"></div> កាំចំណាំងបែរ</div>
+                <div class="text-slate-500 font-bold flex items-center gap-2"><div class="w-4 h-1 bg-slate-500 border-t border-dashed"></div> ខ្សែតែកង</div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-base mt-3">
+                <div class="text-blue-600 font-bold flex items-center gap-2"><div class="w-4 h-4 rounded bg-blue-200 border border-blue-400"></div> មជ្ឈដ្ឋានទី១ (ខាងលើ): <span id="labelMed1">កញ្ចក់ (n1 = 1.50)</span></div>
+                <div class="text-teal-600 font-bold flex items-center gap-2"><div class="w-4 h-4 rounded bg-teal-100 border border-teal-300"></div> មជ្ឈដ្ឋានទី២ (ខាងក្រោម): <span id="labelMed2">ទឹក (n2 = 1.33)</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ៣. ផ្ទាំងបញ្ជាទិន្នន័យ (Sliders) -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6 shadow-sm">
+        <h3 class="text-xl font-bold text-slate-800 mb-4">⚙️ ផ្ទាំងគ្រប់គ្រងទិន្នន័យ</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block text-lg font-bold text-slate-700 mb-3">សន្ទស្សន៍មជ្ឈដ្ឋានទី១ (<span class="math-var">n</span><sub class="math-sub">1</sub>): <span id="lblN1" class="text-blue-600 text-2xl ml-2">1.50</span></label>
+                <input type="range" id="sliderN1" min="1.0" max="2.5" value="1.50" step="0.01">
+                <div class="text-sm text-slate-500 mt-2">(កញ្ចក់ = 1.50)</div>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block text-lg font-bold text-slate-700 mb-3">សន្ទស្សន៍មជ្ឈដ្ឋានទី២ (<span class="math-var">n</span><sub class="math-sub">2</sub>): <span id="lblN2" class="text-emerald-600 text-2xl ml-2">1.33</span></label>
+                <input type="range" id="sliderN2" min="1.0" max="2.5" value="1.33" step="0.01">
+                <div class="text-sm text-slate-500 mt-2">(ទឹក = 1.33)</div>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label class="block text-lg font-bold text-slate-700 mb-3">មុំចំណាំងប៉ះ (<span class="math-var">&theta;</span><sub class="math-sub">1</sub>): <span id="lblTh1" class="text-orange-500 text-2xl ml-2">60&deg;</span></label>
+                <input type="range" id="sliderTh1" min="0" max="89" value="60" step="0.5">
+                <div class="text-sm text-slate-500 mt-2">(មុំរវាងកាំប៉ះ និងខ្សែតែកង)</div>
+            </div>
+        </div>
+        
+        <button id="btnToggleSol" class="action-btn w-full mt-6 py-4 rounded-xl text-blue-700 bg-blue-50 border-blue-300 hover:bg-blue-100">
+            📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត
+        </button>
+    </div>
+
+    <!-- ៤. ដំណោះស្រាយ -->
+    <div id="solutionBox" class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-lg text-slate-800 leading-relaxed hidden mb-6 shadow-sm overflow-x-auto">
+        <h3 class="text-2xl font-bold text-blue-700 mb-4 border-b border-blue-200 pb-3">📝 ដំណោះស្រាយលម្អិត</h3>
+        
+        <p class="font-bold text-slate-800 mt-4 text-xl border-l-4 border-blue-500 pl-3">ក. កំណត់មជ្ឈដ្ឋានដែលអាចកើតមានចំណាំងផ្លាតទាំងស្រុង</p>
+        <p class="mt-2">លក្ខខណ្ឌដើម្បីកើតមានចំណាំងផ្លាតទាំងស្រុង គឺពន្លឺត្រូវដាលពីមជ្ឈដ្ឋានដែលមានសន្ទស្សន៍ចំណាំងបែរធំ ទៅមជ្ឈដ្ឋានដែលមានសន្ទស្សន៍ចំណាំងបែរតូចជាង។</p>
+        <ul class="list-disc ml-8 mb-4 mt-2">
+            <li>សន្ទស្សន៍កញ្ចក់៖ <span id="mathDataN1"></span></li>
+            <li>សន្ទស្សន៍ទឹក៖ <span id="mathDataN2"></span></li>
+        </ul>
+        <div id="mathCompN" class="my-4 w-full text-center text-xl overflow-x-auto overflow-y-hidden">
+            <!-- Rendered by JS -->
+        </div>
+        <p class="mt-4">ដូចនេះ បាតុភូតចំណាំងផ្លាតទាំងស្រុងអាចកើតមាននៅក្នុង <span class="highlight text-2xl bg-white px-4 py-2 rounded border border-blue-200">កញ្ចក់</span> ។</p>
+
+        <p class="font-bold text-slate-800 text-xl border-l-4 border-emerald-500 pl-3 mt-8">ខ. គណនាតម្លៃមុំកម្រិត ($\theta_c$) ក្នុងមជ្ឈដ្ឋាននោះ</p>
+        <p class="mt-2">មុំកម្រិត ($\theta_c$) កើតឡើងនៅពេលដែលមុំចំណាំងបែរ $\theta_2 = 90^\circ$ ។ តាមច្បាប់ស្នេល-ដេកាត ៖</p>
+        <div class="my-4 w-full text-center text-2xl">
+            $$ n_1 \sin\theta_c = n_2 \sin(90^\circ) \implies \sin\theta_c = \frac{n_2}{n_1} $$
+        </div>
+        <p>ជំនួសលេខចូល ៖</p>
+        <div id="mathCalcSinThc" class="my-4 w-full text-center text-xl overflow-x-auto overflow-y-hidden">
+            <!-- Rendered by JS -->
+        </div>
+        <div id="mathCalcThc" class="my-4 w-full text-center text-xl overflow-x-auto overflow-y-hidden">
+             <!-- Rendered by JS -->
+        </div>
+        <p class="mt-4 text-center">
+            ដូចនេះ តម្លៃមុំកម្រិតក្នុងកញ្ចក់គឺ <span class="highlight text-2xl bg-white px-4 py-2 rounded border border-blue-200"><span id="ansFinalThc">...</span>&deg;</span> ។
+        </p>
+
+    </div>
+
+</div>
+
+<script>
+    // អថេរ UI
+    var sliderN1 = document.getElementById('sliderN1');
+    var sliderN2 = document.getElementById('sliderN2');
+    var sliderTh1 = document.getElementById('sliderTh1');
+    
+    var btnToggleSol = document.getElementById('btnToggleSol');
+    var solutionBox = document.getElementById('solutionBox');
+
+    btnToggleSol.addEventListener('click', function() {
+        if (solutionBox.classList.contains('hidden')) {
+            solutionBox.classList.remove('hidden');
+        } else {
+            solutionBox.classList.add('hidden');
+        }
+    });
+
+    // --- ការរៀបចំ Three.js Scene ---
+    var container = document.getElementById('canvas-container');
+    var scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000); 
+
+    var camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(40, 20, 60); 
+
+    var renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+
+    var controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.target.set(0, 0, 0);
+
+    var ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    var dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(10, 20, 10);
+    scene.add(dirLight);
+
+    // Grid និង បន្ទាត់
+    var gridHelper = new THREE.GridHelper(50, 50, 0x475569, 0x1e293b);
+    scene.add(gridHelper);
+
+    // មជ្ឈដ្ឋានទី១ (Medium 1 - ខាងលើ Y > 0)
+    var med1Geo = new THREE.BoxGeometry(50, 20, 50);
+    var med1Mat = new THREE.MeshPhysicalMaterial({
+        color: 0x93c5fd, // Light Blue
+        transparent: true,
+        opacity: 0.2,
+        roughness: 0.1,
+        side: THREE.DoubleSide
+    });
+    var med1Mesh = new THREE.Mesh(med1Geo, med1Mat);
+    med1Mesh.position.y = 10;
+    scene.add(med1Mesh);
+
+    // មជ្ឈដ្ឋានទី២ (Medium 2 - ខាងក្រោម Y < 0)
+    var med2Geo = new THREE.BoxGeometry(50, 20, 50);
+    var med2Mat = new THREE.MeshPhysicalMaterial({
+        color: 0x5eead4, // Teal
+        transparent: true,
+        opacity: 0.15,
+        roughness: 0.1,
+        side: THREE.DoubleSide
+    });
+    var med2Mesh = new THREE.Mesh(med2Geo, med2Mat);
+    med2Mesh.position.y = -10; 
+    scene.add(med2Mesh);
+
+    // ខ្សែតែកង (Normal Line)
+    var normalGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, -30, 0),
+        new THREE.Vector3(0, 30, 0)
+    ]);
+    var normalMat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 1, gapSize: 0.5 });
+    var normalLine = new THREE.Line(normalGeo, normalMat);
+    normalLine.computeLineDistances();
+    scene.add(normalLine);
+
+    // កាំពន្លឺ (Ray Arrows)
+    var rayLength = 35;
+    var headLength = 3;
+    var headWidth = 2;
+
+    var incDir = new THREE.Vector3(0, -1, 0);
+    var incOrigin = new THREE.Vector3(0, rayLength, 0);
+    var arrowInc = new THREE.ArrowHelper(incDir, incOrigin, rayLength, 0xf97316, headLength, headWidth);
+    scene.add(arrowInc);
+
+    var refDir = new THREE.Vector3(0, 1, 0);
+    var refOrigin = new THREE.Vector3(0, 0, 0);
+    var arrowRef = new THREE.ArrowHelper(refDir, refOrigin, rayLength, 0xeab308, headLength, headWidth);
+    scene.add(arrowRef);
+
+    var refrDir = new THREE.Vector3(0, -1, 0);
+    var refrOrigin = new THREE.Vector3(0, 0, 0);
+    var arrowRefr = new THREE.ArrowHelper(refrDir, refrOrigin, rayLength, 0x10b981, headLength, headWidth);
+    scene.add(arrowRefr);
+
+    var mathTimeout;
+
+    function updatePhysics() {
+        var n1 = parseFloat(sliderN1.value);
+        var n2 = parseFloat(sliderN2.value);
+        var th1_deg = parseFloat(sliderTh1.value);
+        
+        var th1_rad = th1_deg * Math.PI / 180;
+        var sin_th1 = Math.sin(th1_rad);
+        
+        var sin_th2 = (n1 / n2) * sin_th1;
+
+        // គណនាមុំកម្រិត
+        var hasCrit = false;
+        var diffN = Math.max(n1, n2) - n2;
+        var isDiffNZero = (diffN === 0);
+        if (isDiffNZero === false) {
+            hasCrit = true;
+        }
+
+        var thc_rad = 0;
+        var thc_deg = 0;
+        var thc_str = "គ្មាន";
+
+        if (hasCrit === true) {
+            thc_rad = Math.asin(n2 / n1);
+            thc_deg = thc_rad * 180 / Math.PI;
+            thc_str = thc_deg.toFixed(1) + "&deg;";
+        }
+
+        // ត្រួតពិនិត្យចំណាំងផ្លាតសរុប (TIR)
+        var isTIR = false;
+        var diffTIR = Math.max(sin_th2, 1.0) - 1.0;
+        var isDiffTIRZero = (diffTIR === 0);
+        
+        if (isDiffTIRZero === false) {
+            isTIR = true; 
+        }
+
+        var th2_rad = 0;
+        var th2_deg = 0;
+
+        // ធ្វើបច្ចុប្បន្នភាពអក្សរលើ UI
+        document.getElementById('lblN1').innerText = n1.toFixed(2);
+        document.getElementById('lblN2').innerText = n2.toFixed(2);
+        document.getElementById('lblTh1').innerHTML = th1_deg.toFixed(1) + "&deg;";
+        
+        document.getElementById('probN1').innerText = n1.toFixed(2);
+        document.getElementById('probN2').innerText = n2.toFixed(2);
+
+        document.getElementById('dashTh1').innerHTML = th1_deg.toFixed(1) + "&deg;";
+        document.getElementById('dashThc').innerHTML = thc_str;
+        
+        document.getElementById('labelMed1').innerText = "មជ្ឈដ្ឋានទី១ (n1 = " + n1.toFixed(2) + ")";
+        document.getElementById('labelMed2').innerText = "មជ្ឈដ្ឋានទី២ (n2 = " + n2.toFixed(2) + ")";
+
+        // --- ធ្វើបច្ចុប្បន្នភាព 3D Arrows ---
+        // Incident Ray (មកពីឆ្វេងលើ)
+        var incO_x = -rayLength * Math.sin(th1_rad);
+        var incO_y = rayLength * Math.cos(th1_rad);
+        arrowInc.position.set(incO_x, incO_y, 0);
+        var dirI = new THREE.Vector3(Math.sin(th1_rad), -Math.cos(th1_rad), 0).normalize();
+        arrowInc.setDirection(dirI);
+
+        // Reflected Ray (ទៅស្តាំលើ)
+        var dirR = new THREE.Vector3(Math.sin(th1_rad), Math.cos(th1_rad), 0).normalize();
+        arrowRef.setDirection(dirR);
+
+        if (isTIR === true) {
+            document.getElementById('dashTh2').innerHTML = "-";
+            document.getElementById('tirWarning').classList.remove('hidden');
+            arrowRefr.visible = false;
+            arrowRef.setColor(new THREE.Color(0xfacc15));
+            arrowRef.setLength(rayLength, headLength, headWidth);
+        } else {
+            th2_rad = Math.asin(sin_th2);
+            th2_deg = th2_rad * 180 / Math.PI;
+            
+            document.getElementById('dashTh2').innerHTML = th2_deg.toFixed(1) + "&deg;";
+            document.getElementById('tirWarning').classList.add('hidden');
+            arrowRefr.visible = true;
+            
+            // កាំផ្លាតស្រអាប់
+            arrowRef.setColor(new THREE.Color(0x854d0e));
+            arrowRef.setLength(rayLength * 0.5, headLength*0.8, headWidth*0.8);
+
+            var dirRefr = new THREE.Vector3(Math.sin(th2_rad), -Math.cos(th2_rad), 0).normalize();
+            arrowRefr.setDirection(dirRefr);
+        }
+
+        // --- ធ្វើបច្ចុប្បន្នភាពរូបមន្ត MathJax ---
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            document.getElementById('mathDataN1').innerHTML = "\\( n_{\\text{កញ្ចក់}} = " + n1.toFixed(2) + " \\)";
+            document.getElementById('mathDataN2').innerHTML = "\\( n_{\\text{ទឹក}} = " + n2.toFixed(2) + " \\)";
+            
+            var compHtml = "";
+            if (hasCrit === true) {
+                compHtml = "$$ n_{\\text{កញ្ចក់}} (" + n1.toFixed(2) + ") > n_{\\text{ទឹក}} (" + n2.toFixed(2) + ") $$";
+            } else {
+                compHtml = "$$ n_1 (" + n1.toFixed(2) + ") \\le n_2 (" + n2.toFixed(2) + ") \\implies \\text{ គ្មានចំណាំងផ្លាតសរុបទេ} $$";
+            }
+            document.getElementById('mathCompN').innerHTML = compHtml;
+
+            if (hasCrit === true) {
+                var sinThc = n2 / n1;
+                document.getElementById('mathCalcSinThc').innerHTML = "$$ \\sin\\theta_c = \\frac{" + n2.toFixed(2) + "}{" + n1.toFixed(2) + "} = " + sinThc.toFixed(4) + " $$";
+                document.getElementById('mathCalcThc').innerHTML = "$$ \\theta_c = \\arcsin(" + sinThc.toFixed(4) + ") = " + thc_deg.toFixed(2) + "^\\circ $$";
+                document.getElementById('ansFinalThc').innerText = thc_deg.toFixed(2);
+            } else {
+                document.getElementById('mathCalcSinThc').innerHTML = "";
+                document.getElementById('mathCalcThc').innerHTML = "";
+                document.getElementById('ansFinalThc').innerText = "គ្មាន";
+            }
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 150);
+    }
+
+    // --- Event Listeners ---
+    sliderN1.addEventListener('input', updatePhysics);
+    sliderN2.addEventListener('input', updatePhysics);
+    sliderTh1.addEventListener('input', updatePhysics);
+
+    // --- Animation Loop ---
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    // --- Responsive ---
+    window.addEventListener('resize', function() {
+        var width = container.clientWidth;
+        var height = container.clientHeight;
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+    });
+
+    // Initialize
+    updatePhysics();
+    animate();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Simulator: ចំណាំងផ្លាត និង ចំណាំងបែកនៃពន្លឺ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Siemreap&display=swap');
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Khmer OS Siemreap', sans-serif;
+            background-color: #0a0a1a;
+            color: white;
+            touch-action: none;
+        }
+        
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        #menuToggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 100;
+            background: #e84118;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid #c23616;
+            transition: 0.3s;
+        }
+        #menuToggle:hover { background: #c23616; }
+
+        .ui-panel {
+            position: absolute;
+            z-index: 2;
+            background: rgba(15, 20, 35, 0.85);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid #3498db;
+            backdrop-filter: blur(5px);
+            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+        }
+        
+        .ui-panel.hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        #controls { top: 15px; left: 15px; width: 330px; }
+        #info { top: 70px; right: 15px; width: 300px; }
+
+        h2, h3 {
+            margin-top: 0; color: #4cd137; font-size: 1.1em;
+            border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px;
+        }
+        
+        .control-group { margin-bottom: 15px; }
+        .title { display: block; font-weight: bold; margin-bottom: 8px; color: #fbc531; }
+        
+        .slider-container { display: flex; align-items: center; gap: 10px; }
+        input[type="range"] { flex-grow: 1; cursor: pointer; }
+        
+        .val-badge { font-weight: bold; color: #00a8ff; }
+        .formula { background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px; text-align: center; color: #e1b12c; font-family: monospace; font-size: 1.1em;}
+
+        .radio-group label {
+            display: block; margin: 8px 0; cursor: pointer; padding: 8px;
+            background: rgba(255,255,255,0.08); border-radius: 5px; transition: 0.2s;
+            border-left: 3px solid transparent;
+        }
+        .radio-group label:hover { background: rgba(255,255,255,0.15); }
+        .radio-group input:checked + span { color: #fbc531; font-weight: bold; }
+        
+        .instruction {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 2; background: rgba(0,0,0,0.7); padding: 8px 15px;
+            border-radius: 20px; font-size: 0.85em; pointer-events: none; color: #dcdde1;
+        }
+
+        @media (max-width: 768px) {
+            #menuToggle { top: 10px; right: 10px; padding: 8px 12px; font-size: 0.9em; }
+            #controls { top: 60px; left: 10px; right: 10px; width: auto; max-height: 45vh; overflow-y: auto; }
+            #info { top: auto; bottom: 60px; left: 10px; right: 10px; width: auto; max-height: 25vh; overflow-y: auto; }
+            .instruction { bottom: 10px; font-size: 0.75em; }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+    <div id="menuToggle" onclick="toggleAllUI()">👁 លាក់ផ្ទាំងបញ្ជា</div>
+
+    <div class="ui-panel" id="controls">
+        <h2>កែសម្រួលលក្ខណៈពន្លឺ</h2>
+        
+        <div class="control-group">
+            <label class="title">១. ជ្រើសរើសបាតុភូតពន្លឺ៖</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="simMode" value="reflection" onchange="updateSim()"> 
+                    <span>៣.១. ចំណាំងផ្លាត (ប៉ះកញ្ចក់)</span>
+                </label>
+                <label>
+                    <input type="radio" name="simMode" value="refraction" checked onchange="updateSim()"> 
+                    <span>៣.២. ចំណាំងបែក (ចូលទឹក/កញ្ចក់)</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="title">២. មុំប៉ះនៃកាំពន្លឺ (θ₁)៖</label>
+            <div class="slider-container">
+                <span>0°</span>
+                <input type="range" id="theta1Slider" min="0" max="85" step="1" value="45" oninput="updateSim()">
+                <span>85°</span>
+            </div>
+            <div style="text-align: center; margin-top: 5px; font-size: 0.9em;">
+                θ₁ = <span id="theta1Val" class="val-badge">45</span>°
+            </div>
+        </div>
+
+        <div id="mediumControl" class="control-group">
+            <label class="title">៣. សន្ទស្សន៍ចំណាំងបែក (n₂)៖</label>
+            <div class="slider-container">
+                <span>1.0</span>
+                <input type="range" id="n2Slider" min="1.0" max="2.5" step="0.1" value="1.5" oninput="updateSim()">
+                <span>2.5</span>
+            </div>
+            <div style="text-align: center; margin-top: 5px; font-size: 0.9em;">
+                n₂ = <span id="n2Val" class="val-badge">1.5</span> (ឧ. កញ្ចក់)
+            </div>
+        </div>
+    </div>
+
+    <div class="ui-panel" id="info">
+        <h3 id="infoTitle">លទ្ធផលគណនា</h3>
+        <p style="margin:5px 0;">មជ្ឈដ្ឋានទី១ (ខ្យល់)៖ n₁ = 1.0</p>
+        <p style="margin:5px 0;">មុំប៉ះ (θ₁) = <span id="outTheta1">45</span>°</p>
+        <hr style="border: 0.5px solid rgba(255,255,255,0.2);">
+        
+        <div id="reflectionInfo">
+            <p style="margin:5px 0; color: #ff6b6b;">មុំចំណាំងផ្លាត (θ'₁) = <span id="outTheta1Prime">45</span>°</p>
+            <div class="formula">θ₁ = θ'₁</div>
+        </div>
+
+        <div id="refractionInfo">
+            <p style="margin:5px 0; color: #48dbfb;">មុំចំណាំងបែក (θ₂) = <span id="outTheta2">28.1</span>°</p>
+            <div class="formula">n₁sin(θ₁) = n₂sin(θ₂)</div>
+        </div>
+    </div>
+
+    <div class="instruction">👆 អូសដើម្បីបង្វិល | 🤏 ពង្រីក/បង្រួម</div>
+
+    <script>
+        // --- ផ្នែកគ្រប់គ្រង UI (លាក់/បង្ហាញ) ---
+        let isUIVisible = true;
+        window.toggleAllUI = function() {
+            isUIVisible = !isUIVisible;
+            document.getElementById('controls').classList.toggle('hidden', !isUIVisible);
+            document.getElementById('info').classList.toggle('hidden', !isUIVisible);
+            const toggleBtn = document.getElementById('menuToggle');
+            toggleBtn.innerText = isUIVisible ? "👁 លាក់ផ្ទាំងបញ្ជា" : "⚙️ បង្ហាញផ្ទាំងបញ្ជា";
+            toggleBtn.style.background = isUIVisible ? "#e84118" : "#3498db";
+        }
+
+        // --- ផ្នែក Three.js 3D ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a1a);
+
+        // កាមេរ៉ាចាប់យកពីចំហៀង ឱ្យត្រូវនឹងទម្រង់សៀវភៅ
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 40);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // ពន្លឺ
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        dirLight.position.set(10, 20, 30);
+        scene.add(dirLight);
+
+        // ក្រុមវត្ថុ
+        const raysGroup = new THREE.Group();
+        const surfaceGroup = new THREE.Group();
+        const arcsGroup = new THREE.Group();
+        scene.add(raysGroup);
+        scene.add(surfaceGroup);
+        scene.add(arcsGroup);
+
+        // បង្កើតផ្ទៃខាងក្រោម
+        let mirrorSurface, glassBlock;
+        
+        // ផ្ទៃកញ្ចក់ (Reflection)
+        const mirrorGeo = new THREE.PlaneGeometry(30, 20);
+        const mirrorMat = new THREE.MeshStandardMaterial({ color: 0x95a5a6, side: THREE.DoubleSide, metalness: 0.8, roughness: 0.2 });
+        mirrorSurface = new THREE.Mesh(mirrorGeo, mirrorMat);
+        mirrorSurface.rotation.x = -Math.PI / 2; // ដេក
+
+        // ដុំកញ្ចក់/ទឹក (Refraction)
+        const glassGeo = new THREE.BoxGeometry(30, 15, 20);
+        const glassMat = new THREE.MeshStandardMaterial({ color: 0x3498db, transparent: true, opacity: 0.3, depthWrite: false });
+        glassBlock = new THREE.Mesh(glassGeo, glassMat);
+        glassBlock.position.y = -7.5; // ទម្លាក់ចុះក្រោមអ័ក្ស XZ
+
+        // ខ្សែកែង (Normal Line) ជាបន្ទាត់ដាច់ៗ
+        const normalPoints = [];
+        normalPoints.push(new THREE.Vector3(0, 15, 0));
+        normalPoints.push(new THREE.Vector3(0, -15, 0));
+        const normalGeo = new THREE.BufferGeometry().setFromPoints(normalPoints);
+        const normalMat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 0.5, gapSize: 0.5 });
+        const normalLine = new THREE.Line(normalGeo, normalMat);
+        normalLine.computeLineDistances();
+        scene.add(normalLine);
+        
+        // អក្សរប្រាប់អ័ក្ស O
+        const canvasSprite = document.createElement('canvas');
+        canvasSprite.width = 64; canvasSprite.height = 64;
+        const ctxSprite = canvasSprite.getContext('2d');
+        ctxSprite.fillStyle = 'white'; ctxSprite.font = '32px Arial'; ctxSprite.fillText('O', 20, 40);
+        const texSprite = new THREE.CanvasTexture(canvasSprite);
+        const spriteMat = new THREE.SpriteMaterial({ map: texSprite });
+        const spriteO = new THREE.Sprite(spriteMat);
+        spriteO.position.set(0.5, -1, 0);
+        spriteO.scale.set(3, 3, 1);
+        scene.add(spriteO);
+
+        let incidentArrow, reflectedArrow, refractedArrow;
+        const rayLength = 12;
+        const n1 = 1.0; // ខ្យល់
+
+        // អនុគមន៍គូសខ្សែធ្នូមុំ (Arcs)
+        function drawArc(radius, startAngle, endAngle, color) {
+            // យើងប្រើ RingGeometry លាតលើប្លង់ XY ដើម្បីគូសមុំ
+            let length = endAngle - startAngle;
+            const arcGeo = new THREE.RingGeometry(radius - 0.05, radius + 0.05, 32, 1, startAngle, length);
+            const arcMat = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
+            const arc = new THREE.Mesh(arcGeo, arcMat);
+            arcsGroup.add(arc);
+        }
+
+        // អនុគមន៍ Update ស៊ីមូឡាទ័រ
+        window.updateSim = function() {
+            const mode = document.querySelector('input[name="simMode"]:checked').value;
+            const theta1Deg = parseFloat(document.getElementById('theta1Slider').value);
+            const theta1Rad = theta1Deg * Math.PI / 180;
+            const n2 = parseFloat(document.getElementById('n2Slider').value);
+
+            // Update UI Labels
+            document.getElementById('theta1Val').innerText = theta1Deg;
+            document.getElementById('n2Val').innerText = n2.toFixed(1);
+            document.getElementById('outTheta1').innerText = theta1Deg;
+            document.getElementById('outTheta1Prime').innerText = theta1Deg;
+            
+            // បិទ/បើកផ្ទាំងគ្រប់គ្រង n2 តាម Mode
+            document.getElementById('mediumControl').style.display = (mode === 'refraction') ? 'block' : 'none';
+            document.getElementById('refractionInfo').style.display = (mode === 'refraction') ? 'block' : 'none';
+            
+            // រៀបចំផ្ទៃ
+            surfaceGroup.clear();
+            if (mode === 'reflection') {
+                surfaceGroup.add(mirrorSurface);
+            } else {
+                surfaceGroup.add(glassBlock);
+            }
+
+            // សម្អាតខ្សែរស្មីចាស់ និងមុំចាស់
+            raysGroup.clear();
+            arcsGroup.clear();
+
+            // 1. កាំពន្លឺប៉ះ (Incident Ray - ពណ៌លឿង)
+            // ទិសដៅពីលើចុះក្រោម ចង្អុលទៅអ័ក្ស O
+            const incDir = new THREE.Vector3(Math.sin(theta1Rad), -Math.cos(theta1Rad), 0).normalize();
+            // ព្រួញចង្អុលពីប្រភពទៅគល់ O
+            const incOrigin = new THREE.Vector3(-incDir.x * rayLength, -incDir.y * rayLength, 0);
+            incidentArrow = new THREE.ArrowHelper(incDir, incOrigin, rayLength, 0xf1c40f, 1.5, 1);
+            raysGroup.add(incidentArrow);
+            
+            // គូសមុំប៉ះ θ₁ (ធ្នូពណ៌លឿង)
+            // មុំចាប់ពីអ័ក្ស Y វិជ្ជមាន ទៅកាន់ខ្សែប៉ះ
+            drawArc(3, Math.PI/2, Math.PI/2 + theta1Rad, 0xf1c40f);
+
+            // 2. កាំពន្លឺផ្លាត (Reflected Ray - ពណ៌ក្រហម)
+            // មុំចំណាំងផ្លាត θ'₁ = θ₁
+            const refDir = new THREE.Vector3(Math.sin(theta1Rad), Math.cos(theta1Rad), 0).normalize();
+            reflectedArrow = new THREE.ArrowHelper(refDir, new THREE.Vector3(0,0,0), rayLength, 0xff4757, 1.5, 1);
+            
+            // បើកញ្ចក់ បង្ហាញច្បាស់ បើទឹក បង្ហាញព្រាលៗ
+            if(mode === 'refraction') reflectedArrow.line.material.opacity = 0.3;
+            raysGroup.add(reflectedArrow);
+
+            // គូសមុំផ្លាត θ'₁ (ធ្នូពណ៌ក្រហម)
+            drawArc(3, Math.PI/2 - theta1Rad, Math.PI/2, 0xff4757);
+
+            // 3. កាំពន្លឺបែក (Refracted Ray - ពណ៌ខៀវខ្ចី) (មានតែ Mode 2)
+            if (mode === 'refraction') {
+                // Snell's Law: n1*sin(θ1) = n2*sin(θ2) => sin(θ2) = (n1/n2)*sin(θ1)
+                let sinTheta2 = (n1 / n2) * Math.sin(theta1Rad);
+                let theta2Rad = 0;
+                
+                if (sinTheta2 <= 1) { // មិនមានចំណាំងផ្លាតសរុបទេព្រោះ n1 < n2 ជាទូទៅក្នុងលំហាត់នេះ
+                    theta2Rad = Math.asin(sinTheta2);
+                    const theta2Deg = (theta2Rad * 180 / Math.PI).toFixed(1);
+                    document.getElementById('outTheta2').innerText = theta2Deg;
+
+                    // ទិសដៅកាំបែក (ចុះក្រោម ចូលមជ្ឈដ្ឋានទី២)
+                    const refrDir = new THREE.Vector3(Math.sin(theta2Rad), -Math.cos(theta2Rad), 0).normalize();
+                    refractedArrow = new THREE.ArrowHelper(refrDir, new THREE.Vector3(0,0,0), rayLength, 0x48dbfb, 1.5, 1);
+                    raysGroup.add(refractedArrow);
+
+                    // គូសមុំបែក θ₂ (ធ្នូពណ៌ខៀវខ្ចី)
+                    drawArc(3, -Math.PI/2, -Math.PI/2 + theta2Rad, 0x48dbfb);
+                }
+            }
+        }
+
+        // Initialize លើកដំបូង
+        updateSim();
+
+        // Responsive Canvas
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
