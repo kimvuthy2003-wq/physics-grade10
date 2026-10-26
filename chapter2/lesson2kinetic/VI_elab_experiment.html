@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Lab: ស្ថានភាពនៃរូបធាតុ (States of Matter)</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #111; color: #fff; padding: 10px; text-align: center; margin: 0;
+        }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #212121; color: #e0e0e0; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #4fc3f7;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .layout-grid {
+            display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start;
+        }
+        @media (max-width: 768px) {
+            .layout-grid { grid-template-columns: 1fr; }
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #1a1a1a; border: 3px solid #455a64;
+            border-radius: 12px; overflow: hidden;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.8); display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 550px; margin: 0 auto;
+        }
+
+        /* ផ្ទាំងបញ្ជាខាងស្តាំ */
+        .controls-panel {
+            background: #263238; padding: 20px; border-radius: 12px;
+            border: 2px solid #37474f;
+        }
+        
+        .btn-state {
+            background: #37474f; color: white; padding: 15px; font-size: 18px; font-weight: bold;
+            border: 2px solid #546e7a; border-radius: 8px; cursor: pointer;
+            width: 100%; margin-bottom: 15px; transition: all 0.2s; font-family: 'Siemreap', sans-serif;
+        }
+        .btn-state:hover { background: #455a64; }
+        .btn-state.active { background: #0288d1; border-color: #4fc3f7; }
+
+        .slider-container {
+            background: #111; padding: 15px; border-radius: 8px; border: 2px solid #333;
+            margin-top: 20px;
+        }
+        .slider-label { font-size: 18px; font-weight: bold; margin-bottom: 10px; color: #ffb74d; }
+        
+        /* Custom Vertical Slider for Heat/Cool */
+        input[type=range] { 
+            -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; margin: 15px 0;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            height: 10px; border-radius: 5px; background: linear-gradient(to right, #29b6f6, #cfd8dc, #ef5350);
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 26px; width: 26px; border-radius: 50%;
+            background: #fff; margin-top: -8px; border: 3px solid #333;
+        }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px;
+        }
+        .data-box {
+            background: #212121; padding: 15px; border-radius: 8px;
+            border: 1px solid #455a64; text-align: center;
+            font-size: 14px; font-weight: bold; color: #b0bec5;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif; color: #fff;
+        }
+
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>VI. ការពិសោធតាម E-Lab</strong><br>
+        ចូរពិនិត្យចលនារបស់ម៉ូលេគុលនៃរូបធាតុ <br>
+        សូមចុចលើប៊ូតុងស្ថានភាពនីមួយៗ (Solid, Liquid, Gas) ឬប្រើរបារអូសដើម្បីផ្តល់កម្ដៅ និងពិនិត្យដំណើរការរបស់វា។
+    </div>
+
+    <div class="layout-grid">
+        <!-- ផ្ទាំង Simulator 2D SVG -->
+        <div class="sim-area">
+            <svg viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <radialGradient id="particleGrad" cx="30%" cy="30%" r="70%">
+                        <stop offset="0%" stop-color="#4dd0e1"/>
+                        <stop offset="100%" stop-color="#006064"/>
+                    </radialGradient>
+                    <linearGradient id="containerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#37474f" stop-opacity="0.8"/>
+                        <stop offset="50%" stop-color="#546e7a" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#37474f" stop-opacity="0.8"/>
+                    </linearGradient>
+                </defs>
+
+                <!-- ទែម៉ូម៉ែត្រ (Thermometer) -->
+                <g transform="translate(140, 40)">
+                    <rect x="0" y="0" width="16" height="100" rx="8" fill="#eceff1" stroke="#546e7a" stroke-width="2"/>
+                    <circle cx="8" cy="95" r="14" fill="#d32f2f"/>
+                    <rect id="thermoLiquid" x="4" y="60" width="8" height="35" fill="#d32f2f"/>
+                    <text id="lblTemp" x="25" y="55" font-family="Arial" font-weight="bold" font-size="16" fill="#fff">14 K</text>
+                </g>
+
+                <!-- នាឡិកាសម្ពាធ (Pressure Gauge) -->
+                <g transform="translate(360, 80)">
+                    <circle cx="0" cy="0" r="35" fill="#eceff1" stroke="#455a64" stroke-width="3"/>
+                    <circle cx="0" cy="0" r="25" fill="#fff" stroke="#cfd8dc" stroke-width="1"/>
+                    
+                    <line x1="0" y1="-25" x2="0" y2="-20" stroke="#111" stroke-width="2" transform="rotate(-60)"/>
+                    <line x1="0" y1="-25" x2="0" y2="-20" stroke="#111" stroke-width="2" transform="rotate(0)"/>
+                    <line x1="0" y1="-25" x2="0" y2="-20" stroke="#111" stroke-width="2" transform="rotate(60)"/>
+                    
+                    <line id="needleP" x1="0" y1="0" x2="0" y2="-18" stroke="#d32f2f" stroke-width="3" stroke-linecap="round" transform="rotate(-120)"/>
+                    <circle cx="0" cy="0" r="4" fill="#111"/>
+                    <text id="lblPress" x="0" y="48" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#fff">0.0 atm</text>
+                </g>
+
+                <!-- ធុងបិទជិត (Container) -->
+                <!-- ខាងឆ្វេង=150, ខាងស្តាំ=350, ខាងលើ=150, ខាងក្រោម=380 -->
+                <path d="M 150 150 L 350 150 L 350 380 A 10 10 0 0 1 340 390 L 160 390 A 10 10 0 0 1 150 380 Z" fill="url(#containerGrad)" stroke="#78909c" stroke-width="4"/>
+                <line x1="150" y1="150" x2="350" y2="150" stroke="#b0bec5" stroke-width="6" stroke-linecap="round"/>
+
+                <!-- ភាគល្អិត (Particles) នឹងបង្កើតដោយ JavaScript -->
+                <g id="particleGroup"></g>
+
+                <!-- ចង្ក្រានកម្ដៅ (Heater Bucket) -->
+                <g transform="translate(250, 420)">
+                    <path d="M -40 0 L 40 0 L 30 40 L -30 40 Z" fill="#455a64" stroke="#cfd8dc" stroke-width="2"/>
+                    <text id="heatIcon" x="0" y="25" text-anchor="middle" font-size="20">🔥</text>
+                </g>
+            </svg>
+
+            <!-- Dashboard បង្ហាញទិន្នន័យនៅខាងក្រោម -->
+            <div class="dashboard">
+                <div class="data-box" style="border-bottom: 4px solid #ef5350;">សីតុណ្ហភាព $T$<br><span id="dashT" class="number-display">14 K</span></div>
+                <div class="data-box" style="border-bottom: 4px solid #4fc3f7;">សម្ពាធ $P$<br><span id="dashP" class="number-display">0.00 atm</span></div>
+                <div class="data-box" style="border-bottom: 4px solid #ffb74d;">មាឌធុង $V$<br><span id="dashV" class="number-display">ថេរ (Constant)</span></div>
+            </div>
+        </div>
+
+        <!-- ផ្ទាំងបញ្ជា (Controls) -->
+        <div class="controls-panel">
+            <div style="font-size: 20px; font-weight: bold; color: #b0bec5; margin-bottom: 20px; border-bottom: 1px solid #455a64; padding-bottom: 10px;">ជម្រើសស្ថានភាព</div>
+            
+            <button class="btn-state active" id="btnSolid">🧊 រឹង (Solid)</button>
+            <button class="btn-state" id="btnLiquid">💧 រាវ (Liquid)</button>
+            <button class="btn-state" id="btnGas">💨 ឧស្ម័ន (Gas)</button>
+
+            <div class="slider-container">
+                <div class="slider-label" id="lblAction">អូសដើម្បីផ្តល់ កម្ដៅ/ត្រជាក់</div>
+                <!-- របារអូសដែលលោតមកកណ្តាលវិញ (PhET Style) -->
+                <input type="range" id="sliderHeat" min="-50" max="50" value="0" step="1">
+                <div style="display: flex; justify-content: space-between; font-size: 24px;">
+                    <span>🧊</span><span>🔥</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > ក្នុងតក្កវិជ្ជា -->
+<script>
+    var btnSolid = document.getElementById('btnSolid');
+    var btnLiquid = document.getElementById('btnLiquid');
+    var btnGas = document.getElementById('btnGas');
+    var sliderHeat = document.getElementById('sliderHeat');
+    var heatIcon = document.getElementById('heatIcon');
+
+    var particleGroup = document.getElementById('particleGroup');
+    var thermoLiquid = document.getElementById('thermoLiquid');
+    var lblTemp = document.getElementById('lblTemp');
+    var needleP = document.getElementById('needleP');
+    var lblPress = document.getElementById('lblPress');
+
+    var dashT = document.getElementById('dashT');
+    var dashP = document.getElementById('dashP');
+
+    // ស្ថានភាពបច្ចុប្បន្ន
+    var currentT = 14; // Kelvin
+    var targetT = 14; 
+    
+    // បង្កើតភាគល្អិត (Particles) ចំនួន 36 (6x6 Grid)
+    var num = 36;
+    var particles = [];
+    var radius = 7;
+    
+    // ព្រំដែនធុង
+    var l_bound = 150 + radius + 4;
+    var r_bound = 350 - radius - 4;
+    var t_bound = 150 + radius + 4;
+    var b_bound = 390 - radius - 4;
+
+    var i = 0;
+    while(i !== num) {
+        var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        c.setAttribute("r", radius);
+        c.setAttribute("fill", "url(#particleGrad)");
+        particleGroup.appendChild(c);
+
+        var col = i % 6;
+        var row = Math.floor(i / 6);
+        
+        // ទីតាំងគោលសម្រាប់សភាពរឹង (Solid Lattice)
+        var bx = 210 + col * 16;
+        var by = 370 - row * 16;
+
+        // ទីតាំងគោលសម្រាប់សភាពរាវ (Liquid Pool) វានឹងរាយប៉ាយនៅបាតធុង
+        var lx = 170 + (i % 12) * 14;
+        var ly = 370 - Math.floor(i / 12) * 14;
+
+        particles.push({
+            el: c,
+            x: bx, y: by,
+            bx: bx, by: by,
+            lx: lx, ly: ly,
+            vx: 0, vy: 0
+        });
+        i++;
+    }
+
+    // មុខងារប្តូរពណ៌ប៊ូតុង
+    function setActiveBtn(btn) {
+        btnSolid.className = "btn-state";
+        btnLiquid.className = "btn-state";
+        btnGas.className = "btn-state";
+        btn.className = "btn-state active";
+    }
+
+    btnSolid.addEventListener('click', function() {
+        targetT = 14; setActiveBtn(btnSolid);
+    });
+    btnLiquid.addEventListener('click', function() {
+        targetT = 80; setActiveBtn(btnLiquid);
+    });
+    btnGas.addEventListener('click', function() {
+        targetT = 300; setActiveBtn(btnGas);
+    });
+
+    // មុខងារផ្តល់កម្ដៅ/ភាពត្រជាក់ (PhET Bucket Style)
+    var isDragging = false;
+
+    sliderHeat.addEventListener('input', function() {
+        isDragging = true;
+        var hVal = parseFloat(sliderHeat.value);
+        if (hVal === 0) {
+            heatIcon.textContent = "➖";
+        } else {
+            var isHeating = (Math.max(hVal, 0) === hVal);
+            if (isHeating === true) {
+                heatIcon.textContent = "🔥";
+                targetT += hVal * 0.1; // បន្ថែមកម្ដៅ
+            } else {
+                heatIcon.textContent = "🧊";
+                targetT += hVal * 0.1; // បន្ថយត្រជាក់
+            }
+        }
+        // កំណត់ដែនសីតុណ្ហភាពពី 0 ទៅ 1000 K
+        targetT = Math.min(1000, Math.max(0, targetT));
+    });
+
+    // ពេលលែងដៃ វាលោតត្រឡប់ទៅកណ្តាលវិញ
+    function resetSlider() {
+        isDragging = false;
+        sliderHeat.value = 0;
+        heatIcon.textContent = "➖";
+    }
+    sliderHeat.addEventListener('mouseup', resetSlider);
+    sliderHeat.addEventListener('touchend', resetSlider);
+    sliderHeat.addEventListener('mouseleave', resetSlider);
+
+    // រង្វិលជុំចលនា (Animation Loop)
+    function loopPhysics() {
+        // តម្រូវសីតុណ្ហភាពយឺតៗ
+        var diff = targetT - currentT;
+        currentT += diff * 0.02; 
+        
+        // កំណត់សភាពផ្អែកលើសីតុណ្ហភាព T
+        var isSolid = (Math.max(currentT, 50) === 50); // T <= 50
+        var isLiquid = (Math.max(currentT, 150) === 150) && (Math.max(currentT, 51) === currentT); // 51 <= T <= 150
+        var isGas = (Math.max(currentT, 151) === currentT); // T >= 151
+
+        // ប្តូរប៊ូតុងដោយស្វ័យប្រវត្តិ
+        if (isDragging === true) {
+            if (isSolid === true) setActiveBtn(btnSolid);
+            else if (isLiquid === true) setActiveBtn(btnLiquid);
+            else setActiveBtn(btnGas);
+        }
+
+        var speed = currentT * 0.05;
+        var j = 0;
+
+        while(j !== num) {
+            var pt = particles[j];
+
+            if (isSolid === true) {
+                // ទាញទៅរកចំណុចគោលរបស់វា
+                pt.vx += (pt.bx - pt.x) * 0.1;
+                pt.vy += (pt.by - pt.y) * 0.1;
+                // រំញ័រតូចៗ
+                pt.vx += (Math.random() - 0.5) * speed * 0.1;
+                pt.vy += (Math.random() - 0.5) * speed * 0.1;
+                pt.vx *= 0.8;
+                pt.vy *= 0.8;
+            } else if (isLiquid === true) {
+                // ទាញទៅបាតធុង (ទំនាញផែនដី និងទាញទៅរកចំណុចរាវ)
+                pt.vy += 0.2; 
+                pt.vx += (pt.lx - pt.x) * 0.01;
+                pt.vy += (pt.ly - pt.y) * 0.01;
+                // ចលនារញ៉េរញ៉ៃ
+                pt.vx += (Math.random() - 0.5) * speed * 0.3;
+                pt.vy += (Math.random() - 0.5) * speed * 0.3;
+                pt.vx *= 0.92;
+                pt.vy *= 0.92;
+            } else {
+                // ឧស្ម័ន (ហោះសេរី គ្មានទំនាញ)
+                pt.vx += (Math.random() - 0.5) * speed * 0.1;
+                pt.vy += (Math.random() - 0.5) * speed * 0.1;
+                // រក្សាល្បឿនកុំឱ្យលឿនពេក
+                pt.vx *= 0.99;
+                pt.vy *= 0.99;
+            }
+
+            pt.x += pt.vx;
+            pt.y += pt.vy;
+
+            // ពិនិត្យការប៉ះទង្គិចជញ្ជាំង (Collision) ដោយសុវត្ថិភាព
+            var isL = (Math.max(pt.x, l_bound) === l_bound);
+            if (isL === true) { pt.x = l_bound; pt.vx = Math.abs(pt.vx); }
+
+            var isR = (Math.min(pt.x, r_bound) === r_bound);
+            if (isR === true) { pt.x = r_bound; pt.vx = -Math.abs(pt.vx); }
+
+            var isT = (Math.max(pt.y, t_bound) === t_bound);
+            if (isT === true) { pt.y = t_bound; pt.vy = Math.abs(pt.vy); }
+
+            var isB = (Math.min(pt.y, b_bound) === b_bound);
+            if (isB === true) { pt.y = b_bound; pt.vy = -Math.abs(pt.vy); }
+
+            pt.el.setAttribute("cx", pt.x);
+            pt.el.setAttribute("cy", pt.y);
+
+            j++;
+        }
+
+        // អាប់ដេតទែម៉ូម៉ែត្រ
+        // 0K = y:95, 1000K = y:10 -> 1K = 0.085px
+        var thermY = 95 - (currentT * 0.085);
+        var safeThermY = Math.max(10, Math.min(thermY, 95));
+        thermoLiquid.setAttribute("y", safeThermY);
+        thermoLiquid.setAttribute("height", 95 - safeThermY);
+        lblTemp.textContent = Math.round(currentT) + " K";
+        dashT.innerText = Math.round(currentT) + " K";
+
+        // អាប់ដេតសម្ពាធ (មានតែឧស្ម័នទេទើបបង្កើតសម្ពាធខ្លាំង)
+        var pressure = 0;
+        var isGasPhase = (Math.max(currentT, 100) === currentT);
+        if (isGasPhase === true) {
+            // P សមាមាត្រនឹង T (Gay-Lussac's Law សម្រាប់មាឌថេរ) + រំញ័រតូចៗ
+            pressure = (currentT - 100) * 0.005 + (Math.random() * 0.05);
+        }
+        
+        // មុំទ្រនិច: 0atm = -120deg, 5atm = 120deg (5atm=240deg ដូច្នេះ 1atm=48deg)
+        var pAngle = -120 + (pressure * 48);
+        var safeAngle = Math.min(120, Math.max(-120, pAngle));
+        
+        needleP.setAttribute("transform", "rotate(" + safeAngle + ")");
+        var pText = Math.max(0, pressure).toFixed(2);
+        lblPress.textContent = pText + " atm";
+        dashP.innerText = pText + " atm";
+
+        requestAnimationFrame(loopPhysics);
+    }
+
+    // ចាប់ផ្តើមចលនា
+    loopPhysics();
+</script>
+
+</body>
+</html>
