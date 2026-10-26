@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>មេរៀនទី៣ កម្មន្តថាមពលអានុភាព </title>
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f6f9;
+            padding: 20px;
+            color: #333;
+        }
+        h2 { color: #1a202c; }
+        
+        .formula-box {
+            background: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            width: 800px;
+            margin: 0 auto 20px;
+            text-align: left;
+            border-left: 5px solid #4a5568;
+            font-size: 16px;
+        }
+        
+        .simulation-container {
+            position: relative;
+            width: 800px;
+            height: 350px;
+            margin: 0 auto;
+            background: linear-gradient(to bottom, #87CEEB, #e0f6ff);
+            border: 2px solid #cbd5e0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            width: 800px;
+            margin: 20px auto;
+            gap: 15px;
+        }
+        
+        .stat-box {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            width: 48%;
+            text-align: left;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        .stat-box h3 { margin-top: 0; margin-bottom: 10px; font-size: 18px; }
+        
+        .controls { margin-top: 20px; }
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            font-family: 'Hanuman', Arial;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            transition: 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        #startBtn { background: #28a745; }
+        #startBtn:hover { background: #218838; }
+        #stopBtn { background: #dc3545; }
+        #stopBtn:hover { background: #c82333; }
+        #resetBtn { background: #6c757d; }
+        #resetBtn:hover { background: #5a6268; }
+        
+        .car {
+            position: absolute;
+            font-size: 35px;
+            z-index: 2;
+            transform-origin: center;
+        }
+        
+        /* ធ្វើឱ្យឡានបង្វែរមុខទៅស្តាំ (ឡើងចំណោទ) */
+        .car-face {
+            display: inline-block;
+            transform: scaleX(-1);
+        }
+        
+        .highlight { font-weight: bold; color: #d32f2f; }
+        .formula-text { font-family: 'Times New Roman', serif; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+    <h2>អានុភាពខណៈនិងអានុភាពមធ្យម រថយន្តឡើងចំណោទ</h2>
+
+    <!-- កន្លែងបង្ហាញរូបមន្ត -->
+    <div class="formula-box">
+        <h4 style="margin: 0 0 10px 0;">📚 រូបមន្តដែលត្រូវប្រើ៖ (ឧបមាថាកម្លាំងទាញរបស់ម៉ាស៊ីនថេរ F = 5,000 N ដើម្បីឈ្នះទំនាញដី)</h4>
+        <div>• <strong>អានុភាពមធ្យម</strong> (Average Power): <span class="formula-text">P<sub>av</sub> = &Delta;W / &Delta;t</span> (គិតជារួមតាំងពីផ្តើមដល់បញ្ចប់)</div>
+        <div>• <strong>អានុភាពខណៈ</strong> (Instantaneous Power): <span class="formula-text">P = F &times; v</span> (ប្រែប្រួលទៅតាមល្បឿនខណៈ v)</div>
+    </div>
+
+    <!-- កន្លែងបង្ហាញលទ្ធផល -->
+    <div class="stats-container">
+        <div class="stat-box" style="border-top: 4px solid #007bff;">
+            <h3 style="color: #007bff;">🚙 រថយន្តទី១ (យឺតជាង)</h3>
+            <p>កម្មន្ត (W) : <span id="w1">0</span> J | រយៈពេល (t) : <span id="t1">0.00</span> s</p>
+            <p>ល្បឿនខណៈ (v) : <span id="v1">0.00</span> m/s</p>
+            <hr style="border:0; border-top:1px dashed #ccc; margin: 8px 0;">
+            <p>អានុភាពខណៈ (P = F&times;v) : <span id="pinst1" class="highlight">0</span> W</p>
+            <p>អានុភាពមធ្យម (P<sub>av</sub> = W/t) : <strong id="pav1" style="color:#007bff;">0</strong> W</p>
+        </div>
+        <div class="stat-box" style="border-top: 4px solid #ff4500;">
+            <h3 style="color: #ff4500;">🏎️ រថយន្តទី២ (លឿនជាង)</h3>
+            <p>កម្មន្ត (W) : <span id="w2">0</span> J | រយៈពេល (t) : <span id="t2">0.00</span> s</p>
+            <p>ល្បឿនខណៈ (v) : <span id="v2">0.00</span> m/s</p>
+            <hr style="border:0; border-top:1px dashed #ccc; margin: 8px 0;">
+            <p>អានុភាពខណៈ (P = F&times;v) : <span id="pinst2" class="highlight">0</span> W</p>
+            <p>អានុភាពមធ្យម (P<sub>av</sub> = W/t) : <strong id="pav2" style="color:#ff4500;">0</strong> W</p>
+        </div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator -->
+    <div class="simulation-container">
+        <!-- ផ្លូវចំណោទ -->
+        <svg width="100%" height="100%" style="position:absolute; top:0; left:0; z-index:1;">
+            <polygon points="50,300 750,300 750,100" fill="#8fbc8f" stroke="#556b2f" stroke-width="2"/>
+            <line x1="50" y1="300" x2="750" y2="100" stroke="#fff" stroke-width="2" stroke-dasharray="10,5" />
+        </svg>
+
+        <div id="car1" class="car"><div class="car-face">🚙</div></div>
+        <div id="car2" class="car"><div class="car-face">🏎️</div></div>
+    </div>
+
+    <div class="controls">
+        <button id="startBtn">▶ ចាប់ផ្តើម</button>
+        <button id="stopBtn">⏸ ស្តុប</button>
+        <button id="resetBtn">🔄 ត្រឡប់ដើម</button>
+    </div>
+
+    <script>
+        // អថេរប្រព័ន្ធ
+        let animationFrame;
+        let isRunning = false;
+        let lastTime = 0;
+        
+        // ទិន្នន័យរូបវិទ្យា (Simulation Scale: 100 ម៉ែត្រ)
+        const trackDistanceMeters = 100; // ចម្ងាយផ្លូវគិតជាម៉ែត្រ
+        const constantForce = 5000;      // កម្លាំងទាញថេរ F = 5000 N (ដើម្បីឱ្យ W ស្មើគ្នា)
+        const totalWork = constantForce * trackDistanceMeters; // W = 500,000 J
+        
+        // កូអរដោនេផ្លូវនៅលើអេក្រង់ (Pixels)
+        const startX = 30, startY = 265;
+        const endX = 720, endY = 65;
+        const angle = Math.atan2(endY - startY, endX - startX); // មុំចំណោទ
+        const trackLengthPx = Math.hypot(endX - startX, endY - startY);
+
+        // អថេរសម្រាប់ឡាននីមួយៗ
+        let time1 = 0, time2 = 0;
+        let posM1 = 0, posM2 = 0; // ចម្ងាយគិតជាម៉ែត្រ
+        let v1 = 0, v2 = 0;       // ល្បឿនគិតជា m/s
+        let isFinished1 = false, isFinished2 = false;
+
+        const elCar1 = document.getElementById('car1');
+        const elCar2 = document.getElementById('car2');
+
+        function updateCarVisuals(carEl, posMeters) {
+            // បម្លែងម៉ែត្រ ទៅជា Pixel ដើម្បីបង្ហាញលើអេក្រង់
+            const posPx = (posMeters / trackDistanceMeters) * trackLengthPx;
+            const x = startX + posPx * Math.cos(angle);
+            const y = startY + posPx * Math.sin(angle);
+            carEl.style.transform = `translate(${x}px, ${y}px) rotate(${angle}rad)`;
+        }
+
+        function updateStats() {
+            // W = F * s
+            let currentW1 = constantForce * posM1;
+            let currentW2 = constantForce * posM2;
+
+            // Update HTML ឡានទី១
+            document.getElementById('w1').innerText = Math.round(currentW1).toLocaleString();
+            document.getElementById('t1').innerText = time1.toFixed(2);
+            document.getElementById('v1').innerText = v1.toFixed(1);
+            document.getElementById('pinst1').innerText = Math.round(constantForce * v1).toLocaleString();
+            document.getElementById('pav1').innerText = time1 > 0 ? Math.round(currentW1 / time1).toLocaleString() : "0";
+
+            // Update HTML ឡានទី២
+            document.getElementById('w2').innerText = Math.round(currentW2).toLocaleString();
+            document.getElementById('t2').innerText = time2.toFixed(2);
+            document.getElementById('v2').innerText = v2.toFixed(1);
+            document.getElementById('pinst2').innerText = Math.round(constantForce * v2).toLocaleString();
+            document.getElementById('pav2').innerText = time2 > 0 ? Math.round(currentW2 / time2).toLocaleString() : "0";
+        }
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = (timestamp - lastTime) / 1000; // វិនាទី
+            lastTime = timestamp;
+
+            if (isRunning) {
+                // រថយន្តទី១ (យឺត: សន្ទុះ 3 m/s², ល្បឿនអតិបរមា 12 m/s)
+                if (!isFinished1) {
+                    time1 += deltaTime;
+                    if (v1 < 12) v1 += 3 * deltaTime; 
+                    posM1 += v1 * deltaTime;
+                    if (posM1 >= trackDistanceMeters) {
+                        posM1 = trackDistanceMeters;
+                        v1 = 0; // ដល់កំពូលឈប់
+                        isFinished1 = true;
+                    }
+                }
+
+                // រថយន្តទី២ (លឿន: សន្ទុះ 6 m/s², ល្បឿនអតិបរមា 25 m/s)
+                if (!isFinished2) {
+                    time2 += deltaTime;
+                    if (v2 < 25) v2 += 6 * deltaTime;
+                    posM2 += v2 * deltaTime;
+                    if (posM2 >= trackDistanceMeters) {
+                        posM2 = trackDistanceMeters;
+                        v2 = 0; // ដល់កំពូលឈប់
+                        isFinished2 = true;
+                    }
+                }
+
+                updateCarVisuals(elCar1, posM1);
+                updateCarVisuals(elCar2, posM2);
+                updateStats();
+
+                if (!isFinished1 || !isFinished2) {
+                    animationFrame = requestAnimationFrame(animate);
+                } else {
+                    isRunning = false;
+                }
+            }
+        }
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            if (!isRunning && (!isFinished1 || !isFinished2)) {
+                isRunning = true;
+                lastTime = performance.now();
+                animationFrame = requestAnimationFrame(animate);
+            }
+        });
+
+        document.getElementById('stopBtn').addEventListener('click', () => {
+            isRunning = false;
+        });
+
+        function resetSimulation() {
+            isRunning = false;
+            cancelAnimationFrame(animationFrame);
+            lastTime = 0;
+            
+            // កំណត់តម្លៃរូបវិទ្យាទៅដើមវិញ
+            time1 = 0; time2 = 0;
+            posM1 = 0; posM2 = 0;
+            v1 = 0; v2 = 0;
+            isFinished1 = false; isFinished2 = false;
+            
+            updateCarVisuals(elCar1, posM1);
+            updateCarVisuals(elCar2, posM2);
+            updateStats();
+        }
+
+        document.getElementById('resetBtn').addEventListener('click', resetSimulation);
+
+        // Setup ទីតាំងដំបូង
+        resetSimulation();
+    </script>
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>មេរៀនទី៣ កម្មន្តនិងថាមពលប៉ូតង់ស្យែល </title>
+    
+    <!-- ទាញយក Library Chart.js សម្រាប់គូសក្រាហ្វ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- ទាញយក Library MathJax សម្រាប់បង្ហាញរូបមន្តគណិតវិទ្យាឱ្យស្រស់ស្អាត -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            color: #333;
+        }
+        h2 { margin-bottom: 10px; color: #2c3e50; }
+        
+        /* រចនាប្រអប់រូបមន្ត */
+        .formula-box {
+            background-color: #e8f4f8;
+            border-left: 5px solid #007bff;
+            padding: 15px 20px;
+            margin: 0 auto 20px auto;
+            max-width: 900px;
+            text-align: left;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-size: 17px;
+            line-height: 1.8;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: stretch; 
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+        
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 45%;
+            min-width: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* រចនាផ្ទាំង 2D */
+        canvas#simCanvas {
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%);
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            display: block;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 400px; 
+            position: relative;
+        }
+        
+        .controls { margin-top: 25px; }
+        
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #27ae60;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: background 0.3s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+        button:hover { background-color: #219150; }
+        button.reset { background-color: #e74c3c; }
+        button.reset:hover { background-color: #c0392b; }
+        
+        .data-display {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>កម្មន្ត និង ថាមពលប៉ូតង់ស្យែល</h2>
+    
+    <!-- ប្រអប់បង្ហាញរូបមន្ត (ប្រើ MathJax \(\) ដើម្បីបង្ហាញជាទម្រង់គណិតវិទ្យាពិតប្រាកដ) -->
+    <div class="formula-box">
+        <strong>📚 រូបមន្តគន្លឹះ៖</strong><br>
+        • ថាមពលប៉ូតង់ស្យែលទាញដី៖ \( U = mgh \) <br>
+        • កម្មន្តនៃកម្លាំងទាញផែនដី (ពេលធ្លាក់ពី \( h_1 \) ទៅ \( h_2 \))៖ \( W = mg(h_1 - h_2) \) ឬ \( W = -\Delta U \) <br>
+        • ទ្រឹស្តីបទកម្មន្ត-ថាមពល៖ ថាមពលប៉ូតង់ស្យែលដែលបាត់បង់ ត្រូវបានបំប្លែងជាកម្មន្ត បង្កើតជាថាមពលស៊ីនេទិច \( K = \frac{1}{2}mv^2 \)។<br>
+        <em>(ថាមពលមេកានិចសរុប \( E = U + K \) តែងតែរក្សាថេរជានិច្ច)</em>
+    </div>
+
+    <div class="container">
+        <!-- ផ្ទាំងខាងឆ្វេង៖ 2D Canvas Animation -->
+        <div class="box">
+            <h3 style="margin-top:0;">ទិដ្ឋភាពវត្ថុធ្លាក់</h3>
+            <canvas id="simCanvas" width="300" height="400"></canvas>
+            <div class="data-display" id="height-display">កម្ពស់បច្ចុប្បន្ន (h) : 50.0 m</div>
+        </div>
+
+        <!-- ផ្ទាំងខាងស្តាំ៖ តារាងថាមពល -->
+        <div class="box">
+            <h3 style="margin-top:0;">ក្រាហ្វថាមពល (Joules)</h3>
+            <div class="chart-container">
+                <canvas id="energyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="playBtn" onclick="togglePlay()">▶ Play / ⏸ Pause</button>
+        <button class="reset" onclick="resetSim()">🔄 Reset</button>
+    </div>
+
+    <script>
+        // --- អថេររូបវិទ្យា ---
+        const m = 1.0;       
+        const g = 9.81;      
+        const h0 = 50.0;     
+        const E_total = m * g * h0; 
+        
+        let t = 0;           
+        let current_h = h0;
+        let isPlaying = false;
+        let animationId;
+
+        // --- ១. រៀបចំ 2D Canvas ---
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const groundY = canvas.height - 30; 
+        const pixelsPerMeter = (groundY - 30) / h0; 
+        const ballRadius = 15;
+
+        function drawScene() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // ដី
+            ctx.fillStyle = '#27ae60';
+            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+            ctx.fillStyle = '#8e44ad';
+            ctx.font = '16px Arial';
+            ctx.fillText('ដី (h = 0)', canvas.width/2 - 30, groundY + 20);
+
+            // បន្ទាត់កម្ពស់
+            ctx.beginPath();
+            ctx.moveTo(50, 30);
+            ctx.lineTo(50, groundY);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            let ballY = groundY - (current_h * pixelsPerMeter) - ballRadius;
+            
+            // ស្រមោល
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, ballY + 5, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fill();
+
+            // គ្រាប់បាល់
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#e74c3c'; 
+            ctx.fill();
+            ctx.strokeStyle = '#c0392b';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = 'white';
+            ctx.font = '14px Arial bold';
+            ctx.fillText('m', canvas.width / 2 - 6, ballY + 5);
+
+            // សញ្ញាបង្ហាញកម្ពស់
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(50, ballY);
+            ctx.lineTo(canvas.width / 2 - ballRadius, ballY);
+            ctx.strokeStyle = '#555';
+            ctx.stroke();
+            ctx.setLineDash([]); 
+            ctx.fillStyle = '#333';
+            ctx.fillText(`h = ${current_h.toFixed(1)}m`, 60, ballY - 10);
+        }
+
+        // --- ២. រៀបចំ Bar Chart ---
+        const chartCtx = document.getElementById('energyChart').getContext('2d');
+        const energyChart = new Chart(chartCtx, {
+            type: 'bar',
+            data: {
+                labels: ['U (ប៉ូតង់ស្យែល)', 'K (កម្មន្ត/ស៊ីនេទិច)', 'E (សរុប)'],
+                datasets: [{
+                    label: 'ថាមពល (Joules)',
+                    data: [E_total, 0, E_total],
+                    backgroundColor: ['#3498db', '#f39c12', '#2ecc71'],
+                    borderColor: ['#2980b9', '#d35400', '#27ae60'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, 
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        max: E_total * 1.1, 
+                        suggestedMax: E_total * 1.1 
+                    }
+                },
+                animation: { duration: 0 },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+
+        const heightDisplay = document.getElementById('height-display');
+
+        // --- ៣. អនុគមន៍ Animation ---
+        function animate() {
+            if (isPlaying) {
+                t += 0.05; 
+                current_h = h0 - 0.5 * g * t * t;
+
+                if (current_h <= 0) { 
+                    current_h = 0; 
+                    isPlaying = false; 
+                }
+
+                let U = m * g * current_h; 
+                let K = E_total - U; 
+
+                drawScene();
+
+                heightDisplay.innerText = `កម្ពស់បច្ចុប្បន្ន (h) : ${current_h.toFixed(1)} m`;
+                
+                // អាប់ដេតទិន្នន័យ Chart
+                energyChart.data.datasets[0].data = [U, K, E_total];
+                energyChart.update();
+            }
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            if (isPlaying && current_h <= 0) {
+                resetSim(); 
+                isPlaying = true;
+            }
+        }
+
+        function resetSim() {
+            t = 0;
+            current_h = h0;
+            isPlaying = false;
+            
+            drawScene();
+            
+            heightDisplay.innerText = `កម្ពស់បច្ចុប្បន្ន (h) : 50.0 m`;
+            energyChart.data.datasets[0].data = [E_total, 0, E_total];
+            energyChart.update();
+        }
+
+        drawScene();
+        animate();
+
+    </script>
+</body>
+</html>

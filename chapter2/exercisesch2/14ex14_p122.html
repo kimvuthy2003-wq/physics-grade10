@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ14ទំព័រ122</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS Styles -->
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .math-font { font-family: 'Lora', serif; }
+
+        /* Solution Toggle */
+        .solution-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out, padding 0.4s ease-in-out;
+            opacity: 0;
+        }
+        .solution-content.open {
+            max-height: 1500px;
+            opacity: 1;
+        }
+
+        /* 2D Apparatus */
+        .apparatus-container {
+            position: relative;
+            width: 100%;
+            height: 380px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 20px;
+        }
+
+        /* Beaker */
+        .beaker {
+            width: 180px;
+            height: 220px;
+            border: 6px solid #cbd5e1; /* glass-like border */
+            border-top: none;
+            border-radius: 0 0 16px 16px;
+            background: rgba(255, 255, 255, 0.4);
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+            box-shadow: inset 0 -4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* Liquid Phase */
+        .liquid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, #38bdf8, #0284c7);
+            height: 0%; /* Starts at 0% */
+            opacity: 0.8;
+            z-index: 1;
+            /* Using JS for height updates to keep sync, no css transition for height to avoid lag behind JS tick */
+        }
+
+        /* Solid Phase */
+        .solid-block {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #e0f2fe, #7dd3fc);
+            border: 2px solid #bae6fd;
+            border-radius: 8px;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #0369a1;
+            font-size: 20px;
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.8);
+            transform-origin: bottom center;
+        }
+
+        /* Heater */
+        .heater {
+            width: 220px;
+            height: 30px;
+            background-color: #475569; /* slate-600 */
+            border-radius: 6px;
+            margin-top: 4px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background-color 0.5s ease;
+        }
+        
+        .sim-active .heater {
+            background-color: #dc2626; /* glowing red when active */
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+        }
+
+        /* Heat Waves */
+        .heat-wave {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 15;
+            color: #ef4444; /* red-500 */
+        }
+        
+        .sim-active .heat-wave {
+            animation: radiate 1.5s infinite ease-out;
+        }
+
+        .hw-1 { left: 20%; animation-delay: 0s !important; }
+        .hw-2 { left: 50%; transform: translateX(-50%); animation-delay: 0.5s !important; }
+        .hw-3 { right: 20%; animation-delay: 1.0s !important; }
+
+        @keyframes radiate {
+            0% {
+                transform: translateY(0) scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-60px) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        .temp-badge {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- Problem Section (Split Layout) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                
+                <!-- Left: Problem Text -->
+                <div class="lg:col-span-3 flex items-start gap-4">
+                    <div class="text-xl font-semibold math-font text-slate-700 mt-1">14.</div>
+                    <div class="text-lg leading-relaxed text-slate-800">
+                        សិស្សរូបវិទ្យាមួយក្រុមធ្វើពិសោធន៍ដោយផ្ដល់កម្ដៅតាមអត្រា <span class="math-font">10.0 kJ/mn</span> ទៅឱ្យអង្គធាតុរឹងមួយដែលមានម៉ាស <span class="math-font">500.0 g</span> រួចកត់ត្រាសីតុណ្ហភាពជាអនុគមន៍នៃពេល។ ពួកគេគូសក្រាបបង្ហាញដូចរូបខាងស្ដាំ។<br><br>
+                        ក. តើកម្ដៅឡាតង់រលាយនៃអង្គធាតុរឹងនេះមានតម្លៃប៉ុន្មាន?<br>
+                        ខ. តើកម្ដៅម៉ាសនៃភាពរាវ និងភាពរឹងនៃរូបធាតុនេះមានតម្លៃប៉ុន្មាន?<br>
+                        <span class="text-slate-600 font-semibold text-base mt-4 inline-block">
+                            ចម្លើយ៖ ក. <span class="math-font text-blue-600">l<sub>f</sub> = 3.00×10<sup>4</sup> J/kg</span> 
+                            &nbsp; ខ. ភាពរាវ <span class="math-font text-blue-600">c<sub>1</sub> = 1000 J/kg·°C</span> 
+                            &nbsp; ភាពរឹង <span class="math-font text-blue-600">c<sub>2</sub> = 1.33×10<sup>3</sup> J/kg·°C</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Right: Static Problem Graph -->
+                <div class="lg:col-span-2 bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-center items-center">
+                    <div class="text-sm text-slate-500 mb-2 font-medium">ក្រាបបម្រែបម្រួលសីតុណ្ហភាពនៃប្រធានលំហាត់</div>
+                    <div class="relative w-full h-[220px]">
+                        <canvas id="staticProblemChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toggle Solution Button -->
+            <div class="mt-6 flex justify-end">
+                <button onclick="toggleSolution()" class="flex items-center gap-2 px-5 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl font-medium transition-colors">
+                    <span>បង្ហាញដំណោះស្រាយ</span>
+                    <svg id="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+            </div>
+
+            <!-- Solution Content -->
+            <div id="solution-box" class="solution-content bg-slate-50 rounded-xl mt-4 border border-slate-100">
+                <div class="p-6 space-y-4 text-slate-700 text-base">
+                    <p class="font-semibold text-blue-700">ដំណោះស្រាយ៖</p>
+                    <p>ទិន្នន័យ៖ អត្រាកម្ដៅ (អានុភាព) <span class="math-font">P = 10.0 kJ/mn = 10,000 J/mn</span>, ម៉ាស <span class="math-font">m = 500.0 g = 0.5 kg</span></p>
+                    
+                    <p class="font-semibold">ក. រកកម្ដៅឡាតង់រលាយ (<span class="math-font">l<sub>f</sub></span>)៖</p>
+                    <p>តាមក្រាប អង្គធាតុរលាយពីនាទីទី <span class="math-font">1 mn</span> ដល់ <span class="math-font">2.5 mn</span> (សីតុណ្ហភាពថេរ 10°C)។</p>
+                    <div class="math-font bg-white p-3 rounded-lg border border-slate-200 inline-block mb-2">
+                        រយះពេលរលាយ Δt = 2.5 - 1 = 1.5 mn<br>
+                        បរិមាណកម្ដៅ Q = P × Δt = 10,000 × 1.5 = 15,000 J<br>
+                        l<sub>f</sub> = Q / m = 15,000 / 0.5 = <span class="font-bold text-red-600">30,000 J/kg ឬ 3.00 × 10<sup>4</sup> J/kg</span>
+                    </div>
+
+                    <p class="font-semibold mt-4">ខ. រកកម្ដៅម៉ាសភាពរាវ (<span class="math-font">c<sub>1</sub></span>) និងភាពរឹង (<span class="math-font">c<sub>2</sub></span>)៖</p>
+                    <ul class="list-disc pl-6 space-y-3">
+                        <li>
+                            <strong>កម្ដៅម៉ាសភាពរាវ (<span class="math-font">c<sub>1</sub></span>)៖</strong> ពីនាទីទី <span class="math-font">2.5</span> ដល់ <span class="math-font">4</span>
+                            <div class="math-font bg-white p-3 rounded-lg border border-slate-200 block mt-2">
+                                Δt = 4 - 2.5 = 1.5 mn → Q = P × Δt = 15,000 J<br>
+                                ΔT = 40°C - 10°C = 30°C<br>
+                                c<sub>1</sub> = Q / (mΔT) = 15,000 / (0.5 × 30) = <span class="font-bold text-red-600">1000 J/kg·°C</span>
+                            </div>
+                        </li>
+                        <li>
+                            <strong>កម្ដៅម៉ាសភាពរឹង (<span class="math-font">c<sub>2</sub></span>)៖</strong> ពីនាទីទី <span class="math-font">0</span> ដល់ <span class="math-font">1</span>
+                            <div class="math-font bg-white p-3 rounded-lg border border-slate-200 block mt-2">
+                                Δt = 1 - 0 = 1 mn → Q = P × Δt = 10,000 J<br>
+                                ΔT = 10°C - (-5°C) = 15°C<br>
+                                c<sub>2</sub> = Q / (mΔT) = 10,000 / (0.5 × 15) = 1333.33 ≈ <span class="font-bold text-red-600">1.33 × 10<sup>3</sup> J/kg·°C</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulator Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
+                <span class="text-2xl">📈</span>
+                <h2 class="text-lg font-bold text-slate-800">ពិសោធន៍ </h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2">
+                <!-- Left: 2D Apparatus -->
+                <div class="p-6 relative bg-gradient-to-b from-slate-50 to-white flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-100" id="sim-area">
+                    
+                    <!-- Temp/Time Badges -->
+                    <div class="flex justify-between items-start w-full relative z-20">
+                        <div class="temp-badge border border-purple-200 rounded-xl p-3 shadow-sm text-center">
+                            <div class="text-xs font-bold text-purple-600 mb-1 uppercase tracking-wider">ពេលវេលា (Time)</div>
+                            <div class="text-2xl font-bold text-purple-600 math-font"><span id="lbl-time">0.00</span> mn</div>
+                        </div>
+                        <div class="temp-badge border border-orange-200 rounded-xl p-3 shadow-sm text-center">
+                            <div class="text-xs font-bold text-orange-600 mb-1 uppercase tracking-wider">សីតុណ្ហភាព (Temp)</div>
+                            <div class="text-2xl font-bold text-orange-600 math-font"><span id="lbl-temp">-5.0</span> °C</div>
+                        </div>
+                    </div>
+
+                    <!-- 2D Canvas Area -->
+                    <div class="apparatus-container">
+                        <!-- Beaker -->
+                        <div class="beaker flex justify-center">
+                            <div class="liquid" id="liquid-level"></div>
+                            <div class="solid-block" id="solid-block">Solid</div>
+                        </div>
+                        
+                        <!-- Heater -->
+                        <div class="heater">
+                            <!-- Heat Waves -->
+                            <svg class="heat-wave hw-1" style="top:-30px;" width="28" height="28" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none"><path d="M12 9v2m0 4v2m-3-4h6m-3-7a9 9 0 110 18 9 9 0 010-18z"></path></svg>
+                            <svg class="heat-wave hw-2" style="top:-30px;" width="28" height="28" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none"><path d="M12 9v2m0 4v2m-3-4h6m-3-7a9 9 0 110 18 9 9 0 010-18z"></path></svg>
+                            <svg class="heat-wave hw-3" style="top:-30px;" width="28" height="28" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none"><path d="M12 9v2m0 4v2m-3-4h6m-3-7a9 9 0 110 18 9 9 0 010-18z"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Dynamic Progress Chart -->
+                <div class="p-6 flex flex-col justify-center">
+                    <div class="relative w-full h-[320px]">
+                        <canvas id="dynamicChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls (Bottom) -->
+            <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-center gap-4">
+                <button id="btn-start" onclick="startSim()" class="flex items-center gap-2 px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-all shadow-sm shadow-red-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                    <span>ចាប់ផ្ដើម (Replay)</span>
+                </button>
+                <button id="btn-reset" onclick="resetSim()" class="flex items-center gap-2 px-8 py-3 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl font-medium transition-all shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                    <span>ត្រឡប់ដើម (Reset)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- UI Interactions ---
+        function toggleSolution() {
+            const content = document.getElementById('solution-box');
+            const icon = document.getElementById('chevron-icon');
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                content.style.padding = "0 1.5rem";
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.classList.add('open');
+                content.style.padding = "1.5rem";
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // --- Static Chart Setup (Problem Matching) ---
+        const staticCtx = document.getElementById('staticProblemChart').getContext('2d');
+        new Chart(staticCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    data: [
+                        {x: 0, y: -5}, 
+                        {x: 1, y: 10}, 
+                        {x: 2.5, y: 10}, 
+                        {x: 4, y: 40}
+                    ],
+                    borderColor: '#1e293b', // Dark slate (black-ish)
+                    borderWidth: 2,
+                    showLine: true,
+                    pointRadius: 0, // No circles
+                    tension: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        min: 0,
+                        max: 5,
+                        title: { display: true, text: 't(mn)', font: { family: 'Lora', size: 14, style: 'italic' } },
+                        ticks: { stepSize: 1, font: { family: 'Lora' } },
+                        grid: { drawBorder: true, color: '#e2e8f0' },
+                        border: { color: '#000', width: 2 } // Strong axis line
+                    },
+                    y: {
+                        min: -10,
+                        max: 50,
+                        title: { display: true, text: 'T(°C)', font: { family: 'Lora', size: 14 }, align: 'end' },
+                        ticks: { stepSize: 10, font: { family: 'Lora' } },
+                        grid: { drawBorder: true, color: '#e2e8f0' },
+                        border: { color: '#000', width: 2 } // Strong axis line
+                    }
+                }
+            },
+            plugins: [{
+                id: 'custom_axis_line',
+                beforeDraw: (chart) => {
+                    const ctx = chart.canvas.getContext('2d');
+                    ctx.save();
+                    const xAxis = chart.scales.x;
+                    const yAxis = chart.scales.y;
+                    
+                    // Draw horizontal line at Y=0
+                    const yZero = yAxis.getPixelForValue(0);
+                    ctx.beginPath();
+                    ctx.moveTo(xAxis.left, yZero);
+                    ctx.lineTo(xAxis.right, yZero);
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }]
+        });
+
+        // --- Physics & Simulation Variables ---
+        const ANIM_DURATION = 20.0; // real seconds
+        const SIM_MAX_MINUTES = 4.0; // physics minutes
+
+        let realTime = 0;
+        let simInterval = null;
+        let isRunning = false;
+
+        // --- DOM Elements ---
+        const lblTime = document.getElementById('lbl-time');
+        const lblTemp = document.getElementById('lbl-temp');
+        const simArea = document.getElementById('sim-area');
+        const solidBlock = document.getElementById('solid-block');
+        const liquidLevel = document.getElementById('liquid-level');
+
+        // --- Dynamic Chart Setup ---
+        const dynamicCtx = document.getElementById('dynamicChart').getContext('2d');
+        const dynChart = new Chart(dynamicCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'សីតុណ្ហភាព',
+                    data: [{x: 0, y: -5}],
+                    borderColor: '#2563eb', // blue-600
+                    backgroundColor: '#2563eb',
+                    showLine: true,
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    pointHitRadius: 10,
+                    tension: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `T: ${context.parsed.y.toFixed(1)}°C, t: ${context.parsed.x.toFixed(2)}mn`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        min: 0,
+                        max: 4.5,
+                        title: { display: true, text: 't (mn)', font: { family: 'Kantumruy Pro' } },
+                        ticks: { stepSize: 1, font: { family: 'Lora' } },
+                        grid: { color: '#f1f5f9' },
+                        border: { color: '#94a3b8' }
+                    },
+                    y: {
+                        min: -10,
+                        max: 50,
+                        title: { display: true, text: 'T (°C)', font: { family: 'Kantumruy Pro' } },
+                        ticks: { stepSize: 10, font: { family: 'Lora' } },
+                        grid: { color: '#f1f5f9' },
+                        border: { color: '#94a3b8' }
+                    }
+                },
+                plugins: [{
+                    id: 'zero_line',
+                    beforeDraw: (chart) => {
+                        const ctx = chart.canvas.getContext('2d');
+                        ctx.save();
+                        const xAxis = chart.scales.x;
+                        const yAxis = chart.scales.y;
+                        const yZero = yAxis.getPixelForValue(0);
+                        ctx.beginPath();
+                        ctx.moveTo(xAxis.left, yZero);
+                        ctx.lineTo(xAxis.right, yZero);
+                        ctx.strokeStyle = '#94a3b8';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }]
+            }
+        });
+
+        // --- Simulation Logic ---
+        function calculateState(simTime) {
+            let temp = -5;
+            let solidScale = 1.0;
+            let liquidHeight = 0; // %
+
+            if (simTime <= 1.0) {
+                // Phase 1: Solid heating (-5 to 10 C)
+                temp = -5 + 15 * (simTime / 1.0);
+                solidScale = 1.0;
+                liquidHeight = 0;
+            } 
+            else if (simTime <= 2.5) {
+                // Phase 2: Melting (10 C constant)
+                temp = 10;
+                let progress = (simTime - 1.0) / 1.5; // 0 to 1
+                solidScale = 1.0 - progress; // shrinks to 0
+                liquidHeight = progress * 60; // fills up to 60% of beaker height
+            } 
+            else if (simTime <= 4.0) {
+                // Phase 3: Liquid heating (10 to 40 C)
+                temp = 10 + 30 * ((simTime - 2.5) / 1.5);
+                solidScale = 0;
+                liquidHeight = 60;
+            }
+            else {
+                // Beyond 4.0 mn
+                temp = 40;
+                solidScale = 0;
+                liquidHeight = 60;
+            }
+
+            return { temp, solidScale, liquidHeight };
+        }
+
+        function updateUI(rTime) {
+            let simTime = (rTime / ANIM_DURATION) * SIM_MAX_MINUTES;
+            simTime = Math.min(simTime, SIM_MAX_MINUTES);
+
+            let state = calculateState(simTime);
+
+            // Update Labels
+            lblTime.textContent = simTime.toFixed(2);
+            lblTemp.textContent = state.temp.toFixed(1);
+
+            // Update 2D Canvas Elements
+            if (state.solidScale > 0) {
+                solidBlock.style.opacity = 1;
+                solidBlock.style.transform = `translateX(-50%) scale(${state.solidScale})`;
+            } else {
+                solidBlock.style.opacity = 0;
+            }
+            liquidLevel.style.height = `${state.liquidHeight}%`;
+
+            // Update Dynamic Chart
+            dynChart.data.datasets[0].data.push({x: simTime, y: state.temp});
+            dynChart.update('none');
+        }
+
+        function startSim() {
+            if (isRunning) return;
+            
+            resetSim(false);
+            isRunning = true;
+            realTime = 0;
+
+            // Start Heater Glow/Waves
+            simArea.classList.add('sim-active');
+
+            const tickRate = 50; 
+            const timeStep = tickRate / 1000; 
+
+            simInterval = setInterval(() => {
+                realTime += timeStep;
+                
+                if (realTime >= ANIM_DURATION) {
+                    realTime = ANIM_DURATION;
+                    clearInterval(simInterval);
+                    isRunning = false;
+                    simArea.classList.remove('sim-active');
+                }
+                
+                updateUI(realTime);
+
+            }, tickRate);
+        }
+
+        function resetSim(fullReset = true) {
+            clearInterval(simInterval);
+            isRunning = fullReset ? false : isRunning;
+            realTime = 0;
+
+            // Reset UI
+            lblTime.textContent = "0.00";
+            lblTemp.textContent = "-5.0";
+            solidBlock.style.opacity = 1;
+            solidBlock.style.transform = `translateX(-50%) scale(1)`;
+            liquidLevel.style.height = "0%";
+            simArea.classList.remove('sim-active');
+
+            // Reset Dynamic Chart
+            dynChart.data.datasets[0].data = [{x: 0, y: -5}];
+            dynChart.update('none');
+        }
+
+        // Init on load
+        window.onload = resetSim;
+
+    </script>
+</body>
+</html>

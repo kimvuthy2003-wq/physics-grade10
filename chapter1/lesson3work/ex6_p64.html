@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ៦ទំព័រ៦៤ ទន្លាក់សេរី </title>
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9;
+            padding: 20px;
+            color: #111;
+            text-align: center;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        /* ប្រធានលំហាត់ */
+        .problem-statement {
+            background: #fff3cd;
+            color: #664d03;
+            padding: 18px 25px;
+            border-radius: 8px;
+            border-left: 6px solid #ffc107;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 19px;
+            font-weight: bold;
+            line-height: 1.7;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        /* ផ្ទាំងបម្រាប់ */
+        .info-panel {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            border-left: 6px solid #28a745;
+            font-size: 18px;
+        }
+        .info-panel strong { color: #d32f2f; font-size: 20px; }
+        
+        /* ផ្ទាំង Simulator បញ្ឈរ */
+        .sim-area {
+            position: relative;
+            width: 100%;
+            height: 400px; /* ដាក់ឱ្យខ្ពស់ជាងមុនដើម្បីមើលការធ្លាក់ */
+            background: linear-gradient(to bottom, #87CEEB, #e0f6ff); /* ពណ៌មេឃ */
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            margin: 0 auto;
+        }
+        
+        /* ផ្ទៃដី */
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40px;
+            background: #5a6268; /* ពណ៌ដី/ស៊ីម៉ង់ត៍ */
+            border-top: 5px solid #2e7d32; /* ពណ៌ស្មៅ */
+        }
+        
+        /* បន្ទាត់រង្វាស់កម្ពស់ (បញ្ឈរ) */
+        .ruler-line {
+            position: absolute;
+            left: 40px;
+            bottom: 45px;
+            width: 4px;
+            height: 300px; /* តំណាងឱ្យ 20m (15px = 1m) */
+            background: #adb5bd;
+        }
+        .tick {
+            position: absolute;
+            left: 30px;
+            width: 10px;
+            height: 3px;
+            background: #495057;
+        }
+        .ruler-text {
+            position: absolute;
+            left: 55px;
+            color: #333;
+            font-size: 16px;
+            font-weight: bold;
+            transform: translateY(50%);
+        }
+        .target-text {
+            color: #d32f2f;
+            font-size: 18px;
+        }
+        .target-line {
+            position: absolute;
+            left: 40px;
+            width: 100%;
+            height: 2px;
+            background: rgba(211, 47, 47, 0.3);
+            border-top: 2px dashed #d32f2f;
+        }
+
+        /* ដុំឥដ្ឋ */
+        .brick {
+            position: absolute;
+            /* ទីតាំងដើម (20m) គឺ 300px ពីលើដី (bottom: 45 + 300 = 345px) */
+            bottom: 345px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 45px;
+            height: 30px;
+            background: #b22222; /* ពណ៌ឥដ្ឋ */
+            border: 2px solid #8b0000;
+            border-radius: 3px;
+            box-shadow: 2px 4px 6px rgba(0,0,0,0.3);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        /* ទិន្នន័យ Live Data */
+        .live-data {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .data-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; 
+            font-size: 26px; 
+            display: inline-block;
+            margin-top: 8px;
+        }
+        
+        #liveTime { color: #212529; }
+        #liveHeight { color: #6f42c1; } /* ពណ៌ស្វាយ */
+        #liveVel { color: #0056b3; } /* ខៀវចាស់ */
+        #liveWork { color: #0f6674; } /* ពណ៌ទឹករលកចាស់ */
+        #liveKE { color: #c9510c; } /* ពណ៌ទឹកក្រូចចាស់ */
+
+        /* ប៊ូតុង */
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            transition: 0.2s;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        #startBtn { background: #28a745; }
+        #startBtn:hover { background: #218838; }
+        #resetBtn { background: #6c757d; }
+        #resetBtn:hover { background: #5a6268; }
+        #solutionBtn { background: #17a2b8; }
+        #solutionBtn:hover { background: #138496; }
+        
+        .status {
+            margin-top: 20px;
+            font-size: 22px;
+            font-weight: 900;
+            color: #dc3545;
+        }
+
+        /* ដំណោះស្រាយ */
+        .solution-box {
+            background: #e2e8f0;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: left;
+            margin-top: 25px;
+            border-left: 6px solid #4a5568;
+            font-size: 18px;
+            line-height: 1.8;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 {
+            margin-top: 0;
+            color: #2d3748;
+            border-bottom: 2px solid #cbd5e0;
+            padding-bottom: 10px;
+            font-size: 22px;
+        }
+        .solution-box ul { padding-left: 30px; }
+        .solution-box strong { color: #000; }
+        .kh-math { font-family: 'Times New Roman', serif; font-size: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- ប្រធានលំហាត់ -->
+    <div class="problem-statement">
+        <strong>ប្រធានលំហាត់ទី៦៖</strong> ឥដ្ឋមួយដុំមានម៉ាស 1.00 kg ធ្លាក់ពីកម្ពស់ 20.0 m ធៀបនឹងផ្ទៃដី។ គេមិនគិតកម្លាំងទប់នៃខ្យល់។ គណនា៖<br>
+        <strong>ក.</strong> កម្មន្តនៃទម្ងន់ក្នុងទម្លាក់នេះ។<br>
+        <strong>ខ.</strong> ថាមពលស៊ីនេទិចនៅខណៈដែលវាធ្លាក់បានកម្ពស់ 10.0 m។<br>
+        <strong>គ.</strong> ល្បឿនដុំឥដ្ឋពេលវាប៉ះដីភ្លាម។
+    </div>
+    
+    <!-- បម្រាប់ -->
+    <div class="info-panel">
+        <div>ម៉ាស (m) = <strong>1.00 kg</strong></div>
+        <div>កម្ពស់ដើម (h<sub>0</sub>) = <strong>20.0 m</strong></div>
+        <div>សំទុះទំនាញដី (g) = <strong>9.8 m/s²</strong></div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator -->
+    <div class="sim-area">
+        <!-- បន្ទាត់រង្វាស់កម្ពស់បញ្ឈរ -->
+        <div class="ruler-line"></div>
+        
+        <!-- គំនូស 0m (ដី) -->
+        <div class="tick" style="bottom: 45px;"></div>
+        <div class="ruler-text" style="bottom: 45px;">0 m</div>
+        
+        <!-- គំនូស 10m (ពាក់កណ្តាល) -->
+        <div class="tick" style="bottom: 195px; background: #d32f2f;"></div>
+        <div class="ruler-text target-text" style="bottom: 195px;">10.0 m (គោលដៅ ខ)</div>
+        <div class="target-line" style="bottom: 195px;"></div>
+        
+        <!-- គំនូស 20m (កម្ពស់ដើម) -->
+        <div class="tick" style="bottom: 345px;"></div>
+        <div class="ruler-text" style="bottom: 345px;">20.0 m</div>
+
+        <!-- ដុំឥដ្ឋ -->
+        <div class="brick" id="brick">1kg</div>
+        
+        <div class="ground"></div>
+    </div>
+
+    <!-- ប្រអប់តម្លៃលេខ Live -->
+    <div class="live-data">
+        <div class="data-box">ពេលវេលា (t)<br><span id="liveTime">0.00</span> s</div>
+        <div class="data-box">កម្ពស់ពីដី (h)<br><span id="liveHeight">20.00</span> m</div>
+        <div class="data-box">ល្បឿន (v)<br><span id="liveVel">0.00</span> m/s</div>
+        <div class="data-box" style="border-top: 5px solid #c9510c;">ថាមពលស៊ីនេទិច (K)<br><span id="liveKE">0.0</span> J</div>
+    </div>
+    <div class="data-box" style="margin-top: 15px; border-top: 5px solid #17a2b8;">
+        កម្មន្តនៃទម្ងន់ដែលបំពេញបាន (W) = <span id="liveWork" style="color: #0f6674;">0.0</span> J
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="controls">
+        <button id="startBtn">▶ ទម្លាក់ឥដ្ឋ</button>
+        <button id="resetBtn">🔄 ត្រឡប់ដើម</button>
+        <button id="solutionBtn">📖 បង្ហាញដំណោះស្រាយ</button>
+    </div>
+    
+    <div class="status" id="statusText">រង់ចាំចាប់ផ្តើម...</div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div id="solutionBox" class="solution-box" style="display: none;">
+        <h3>ដំណោះស្រាយ</h3>
+        <p><strong>បម្រាប់៖</strong> m = 1.00 kg, h<sub>0</sub> = 20.0 m, g = 9.8 m/s²</p>
+        
+        <p><strong>ក. កម្មន្តនៃទម្ងន់ក្នុងទម្លាក់នេះ (ដល់ដី)៖</strong></p>
+        <ul>
+            <li>ទម្ងន់របស់ឥដ្ឋ៖ <span class="kh-math">P = mg = 1.00 &times; 9.8 = 9.8 N</span></li>
+            <li>កម្មន្តនៃទម្ងន់៖ <span class="kh-math">W = P &times; h<sub>0</sub> = 9.8 &times; 20.0 = <strong>196 J</strong></span></li>
+        </ul>
+        
+        <p><strong>ខ. ថាមពលស៊ីនេទិចខណៈវាធ្លាក់បានកម្ពស់ 10.0 m៖</strong></p>
+        <ul>
+            <li>ចម្ងាយដែលវាធ្លាក់ចុះ៖ <span class="kh-math">y = 20.0 - 10.0 = 10.0 m</span></li>
+            <li>តាមទ្រឹស្តីបទថាមពលស៊ីនេទិច (កម្មន្តទម្ងន់ស្មើបម្រែបម្រួលថាមពលស៊ីនេទិច)៖</li>
+            <li><span class="kh-math">&Delta;K = W<sub>P</sub> &rArr; K - 0 = mgy</span></li>
+            <li>នាំឱ្យ <span class="kh-math">K = 1.00 &times; 9.8 &times; 10.0 = <strong>98 J</strong></span></li>
+        </ul>
+        
+        <p><strong>គ. ល្បឿនដុំឥដ្ឋពេលវាប៉ះដីភ្លាម៖</strong></p>
+        <ul>
+            <li>តាមរូបមន្តទម្លាក់សេរី៖ <span class="kh-math">v = &radic;(2gh<sub>0</sub>)</span></li>
+            <li><span class="kh-math">v = &radic;(2 &times; 9.8 &times; 20.0) = &radic;392 &asymp; <strong>19.8 m/s</strong></span></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // ទិន្នន័យរូបវិទ្យា
+    const m = 1.00; // kg
+    const h0 = 20.0; // m
+    const g = 9.8; // m/s^2
+
+    // អថេរសម្រាប់គណនា
+    let time = 0;
+    let isRunning = false;
+    let animationFrame;
+    let lastTimestamp = 0;
+    
+    // Scale: 20m = 300px => 1m = 15px
+    const scalePx = 15; 
+    
+    // គណនាពេលធ្លាក់ដល់ដី (y = 20 => t = sqrt(2y/g))
+    const totalFallTime = Math.sqrt((2 * h0) / g); 
+
+    // Elements
+    const brickEl = document.getElementById('brick');
+    const timeEl = document.getElementById('liveTime');
+    const heightEl = document.getElementById('liveHeight');
+    const velEl = document.getElementById('liveVel');
+    const workEl = document.getElementById('liveWork');
+    const keEl = document.getElementById('liveKE');
+    const statusText = document.getElementById('statusText');
+    const startBtn = document.getElementById('startBtn');
+    
+    const solutionBtn = document.getElementById('solutionBtn');
+    const solutionBox = document.getElementById('solutionBox');
+
+    function updatePhysics() {
+        // រូបមន្តទម្លាក់សេរី
+        let y = 0.5 * g * (time * time); // ចម្ងាយធ្លាក់បាន
+        if (y > h0) y = h0; // ការពារធ្លាក់ទម្លុះដី
+        
+        let currentHeight = h0 - y; // កម្ពស់នៅសល់
+        let v = g * time; // ល្បឿន
+        if (time >= totalFallTime) v = Math.sqrt(2 * g * h0); // ល្បឿនអតិបរមាពេលប៉ះដី
+        
+        let W = m * g * y; // កម្មន្តបំពេញបាន (W = mgy)
+        let KE = 0.5 * m * v * v; // ថាមពលស៊ីនេទិច
+
+        // Update Text
+        timeEl.innerText = time.toFixed(2);
+        heightEl.innerText = currentHeight.toFixed(2);
+        velEl.innerText = v.toFixed(2);
+        workEl.innerText = W.toFixed(1);
+        keEl.innerText = KE.toFixed(1);
+
+        // រំកិលដុំឥដ្ឋចុះក្រោម (TranslateY វិជ្ជមានគឺចុះក្រោម)
+        brickEl.style.transform = `translate(-50%, ${y * scalePx}px)`;
+    }
+
+    function animate(timestamp) {
+        if (!lastTimestamp) lastTimestamp = timestamp;
+        let deltaTime = (timestamp - lastTimestamp) / 1000;
+        lastTimestamp = timestamp;
+
+        if (isRunning) {
+            time += deltaTime;
+
+            // ឆែកមើលបើពេលធ្លាក់ >= ពេលដល់ដី
+            if (time >= totalFallTime) {
+                time = totalFallTime; 
+                isRunning = false;
+                statusText.innerText = `✅ ប៉ះដី! ល្បឿន v = 19.8 m/s | កម្មន្ត W = 196 J`;
+                statusText.style.color = "#28a745";
+                startBtn.disabled = false;
+                startBtn.style.opacity = "1";
+            } else if (Math.abs(h0 - (0.5 * g * time * time) - 10.0) < 0.2) {
+                // បង្ហាញ Status ពេលធ្លាក់មកដល់ 10m 
+                statusText.innerText = "⏳ ឆ្លងកាត់កម្ពស់ 10m... (K = 98 J)";
+                statusText.style.color = "#d32f2f";
+            }
+
+            updatePhysics();
+
+            if (isRunning) {
+                animationFrame = requestAnimationFrame(animate);
+            }
+        }
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+        if (!isRunning && time < totalFallTime) {
+            isRunning = true;
+            lastTimestamp = performance.now();
+            statusText.innerText = "កំពុងធ្លាក់...";
+            statusText.style.color = "#0056b3";
+            startBtn.disabled = true;
+            startBtn.style.opacity = "0.5";
+            
+            animationFrame = requestAnimationFrame(animate);
+        }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        isRunning = false;
+        cancelAnimationFrame(animationFrame);
+        lastTimestamp = 0;
+        time = 0;
+        
+        startBtn.disabled = false;
+        startBtn.style.opacity = "1";
+        statusText.innerText = "រង់ចាំចាប់ផ្តើម...";
+        statusText.style.color = "#dc3545";
+        
+        updatePhysics();
+    });
+
+    solutionBtn.addEventListener('click', () => {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+            solutionBtn.innerHTML = '📖 លាក់ដំណោះស្រាយ';
+        } else {
+            solutionBox.style.display = 'none';
+            solutionBtn.innerHTML = '📖 បង្ហាញដំណោះស្រាយ';
+        }
+    });
+
+    updatePhysics();
+</script>
+
+</body>
+</html>

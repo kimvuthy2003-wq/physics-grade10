@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី១៥៖ ឃ្នាស់មេកានិច និងអ៊ីដ្រូលីក</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        @media (min-width: 600px) {
+            .controls-grid { grid-template-columns: 1fr 1fr 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        button {
+            background: #007bff; color: white; padding: 12px 24px; font-size: 18px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s; width: 100%; margin-bottom: 20px;
+        }
+        button:hover { filter: brightness(1.1); }
+        #btnSetValues { background: #28a745; margin-bottom: 10px; }
+        #btnToggleSolution { background: #17a2b8; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 15px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        
+        .note-box { 
+            background: #e8f5e9; border-left: 6px solid #28a745; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #1b5e20; 
+        }
+
+        .text-outline { text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; }
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>១៥.</strong> ឃ្នាស់អ៊ីដ្រូលីកលើករថយន្តមួយមានពីស្តុងពីរ ដែលពីស្តុងតូចមានអង្កត់ផ្ចិត $0.635 \text{ cm}$ និងពីស្តុងធំមានអង្កត់ផ្ចិត $3.81 \text{ cm}$ ។ កំណត់កម្លាំង $F$ ចាំបាច់ដែលបញ្ចេញដើម្បីលើកផ្នែកមួយនៃរថយន្ត ដែលមានម៉ាស $375 \text{ kg}$ ។ បើគេមិនគិតកកិតនៃពីស្តុង ទម្ងន់នៃពីស្តុង និងទម្ងន់នៃរាវ ឬភាពខុសគ្នានៃកម្ពស់ដែលអាស្រ័យនឹងជម្រៅរបស់ពីស្តុងទាំងពីរ ។ (តាមរូប៖ $L_1 = 5.08 \text{ cm}$ និង $L_2 = 25.4 \text{ cm}$)
+    </div>
+
+    <button id="btnSetValues">🎯 កំណត់តម្លៃតាមលំហាត់ (F = 17.0 N)</button>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 900 550" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="fluidGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#29b6f6"/>
+                    <stop offset="50%" stop-color="#81d4fa"/>
+                    <stop offset="100%" stop-color="#0277bd"/>
+                </linearGradient>
+                <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#cfd8dc"/>
+                    <stop offset="50%" stop-color="#ffffff"/>
+                    <stop offset="100%" stop-color="#90a4ae"/>
+                </linearGradient>
+                <linearGradient id="weightGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#fbc02d"/>
+                    <stop offset="50%" stop-color="#fff59d"/>
+                    <stop offset="100%" stop-color="#f57f17"/>
+                </linearGradient>
+                <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ffcc80"/>
+                    <stop offset="100%" stop-color="#f57c00"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ជញ្ជាំងកាត់ប្លង់ខាងក្រៅនៃបំពង់ (Casing) -->
+            <path d="M 150 150 L 150 480 A 30 30 0 0 0 180 510 L 410 510 A 30 30 0 0 0 440 480 L 440 250
+                     M 290 150 L 290 400 A 30 30 0 0 0 320 430 L 350 430 A 30 30 0 0 0 380 400 L 380 250"
+                  fill="none" stroke="#cfd8dc" stroke-width="16" stroke-linecap="round"/>
+            <path d="M 150 150 L 150 480 A 30 30 0 0 0 180 510 L 410 510 A 30 30 0 0 0 440 480 L 440 250
+                     M 290 150 L 290 400 A 30 30 0 0 0 320 430 L 350 430 A 30 30 0 0 0 380 400 L 380 250"
+                  fill="none" stroke="#78909c" stroke-width="4" stroke-linecap="round"/>
+
+            <!-- ផ្ទៃទឹក (Fluid) Base ថេរ -->
+            <path d="M 158 350 L 158 480 A 22 22 0 0 0 180 502 L 410 502 A 22 22 0 0 0 432 480 L 432 350
+                     L 372 350 L 372 400 A 38 38 0 0 1 334 438 L 306 438 A 38 38 0 0 1 268 400 L 268 350 Z"
+                  fill="url(#fluidGrad)"/>
+            
+            <!-- ផ្ទៃទឹក (Fluid) ចល័តឡើងចុះតាមពីស្តុង (Update by JS) -->
+            <rect id="fluidBig" x="158" y="250" width="134" height="100" fill="url(#fluidGrad)"/>
+            <rect id="fluidSmall" x="372" y="250" width="60" height="100" fill="url(#fluidGrad)"/>
+
+            <!-- អក្សរ (២) និង (១) -->
+            <circle cx="225" cy="300" r="18" fill="#fff" stroke="#333" stroke-width="2"/>
+            <text x="225" y="306" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="20" fill="#333">2</text>
+            
+            <circle cx="402" cy="310" r="15" fill="#fff" stroke="#333" stroke-width="2"/>
+            <text x="402" y="316" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="18" fill="#333">1</text>
+
+            <!-- ព្រួញចលនាពណ៌ក្រហម (Action Arrows) - Update by JS -->
+            <g id="actionArrows" style="opacity: 0;">
+                <!-- ព្រួញពីស្តុងធំឡើងលើ -->
+                <line x1="280" y1="200" x2="280" y2="150" stroke="#d32f2f" stroke-width="6"/>
+                <polygon points="280,140 270,155 290,155" fill="#d32f2f"/>
+                
+                <!-- ព្រួញទឹកហូរក្នុងបំពង់អក្សរ U -->
+                <path d="M 390 420 Q 320 490 250 420" fill="none" stroke="#d32f2f" stroke-width="6" stroke-dasharray="10,5"/>
+                <polygon points="245,415 260,425 250,430" fill="#d32f2f"/>
+
+                <!-- ព្រួញពីស្តុងតូចចុះក្រោម -->
+                <line x1="450" y1="260" x2="450" y2="310" stroke="#d32f2f" stroke-width="6"/>
+                <polygon points="450,320 440,305 460,305" fill="#d32f2f"/>
+            </g>
+
+            <!-- ពីស្តុងធំ (២) ខាងឆ្វេង -->
+            <g id="pistonBigGroup" transform="translate(0, 0)">
+                <!-- ក្បាលពីស្តុង -->
+                <rect x="158" y="230" width="134" height="20" fill="url(#metalGrad)" stroke="#546e7a" stroke-width="2"/>
+                <!-- ដងពីស្តុង -->
+                <rect x="220" y="110" width="10" height="120" fill="#b0bec5" stroke="#546e7a" stroke-width="2"/>
+                <!-- ថាសទ្រទម្ងន់ -->
+                <rect x="175" y="100" width="100" height="10" fill="url(#metalGrad)" stroke="#546e7a" stroke-width="2"/>
+                <!-- ដុំទម្ងន់ពណ៌លឿង -->
+                <ellipse cx="225" cy="50" rx="45" ry="12" fill="#fff59d" stroke="#f57f17" stroke-width="2"/>
+                <rect x="180" y="50" width="90" height="50" fill="url(#weightGrad)" stroke="#f57f17" stroke-width="2"/>
+                <ellipse cx="225" cy="100" rx="45" ry="12" fill="#fbc02d" stroke="#f57f17" stroke-width="2"/>
+                <rect x="195" y="70" width="60" height="25" fill="#fbc02d" rx="4" />
+                <text id="txtWeight" x="225" y="88" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="20" fill="#333">375 kg</text>
+            </g>
+
+            <!-- ជើងទម្រ Pivot -->
+            <path d="M 296 230 L 320 230 L 320 260 L 296 260 Z" fill="#cfd8dc" stroke="#78909c" stroke-width="2"/>
+            <circle cx="310" cy="240" r="8" fill="#37474f"/>
+
+            <!-- ពីស្តុងតូច (១) ខាងស្តាំ -->
+            <g id="pistonSmallGroup" transform="translate(0, 0)">
+                <rect x="372" y="235" width="60" height="15" fill="url(#metalGrad)" stroke="#546e7a" stroke-width="2"/>
+                <rect x="397" y="200" width="10" height="35" fill="#b0bec5" stroke="#546e7a" stroke-width="2"/>
+                <circle cx="402" cy="200" r="5" fill="#333"/>
+            </g>
+
+            <!-- ដងឃ្នាស់ (Lever) វិលជុំវិញ Pivot X=310, Y=240 -->
+            <g id="leverGroup" transform="rotate(0, 310, 240)">
+                <rect x="310" y="232" width="460" height="16" fill="url(#metalGrad)" stroke="#546e7a" stroke-width="2" rx="8"/>
+                <!-- កន្លែងភ្ជាប់ទៅពីស្តុងតូច X=402 -->
+                <circle cx="402" cy="240" r="5" fill="#333"/>
+                
+                <!-- រូបដៃទាញចុះក្រោម (Stylized Hand) -->
+                <g transform="translate(730, 210)">
+                    <path d="M0,20 C10,0 40,0 50,20 C60,40 50,60 30,60 L20,60 C0,60 -10,40 0,20 Z" fill="url(#skinGrad)" stroke="#e65100" stroke-width="2"/>
+                    <!-- ម្រាមដៃ -->
+                    <rect x="-15" y="20" width="40" height="12" rx="6" fill="url(#skinGrad)" stroke="#e65100" stroke-width="1"/>
+                    <rect x="-15" y="35" width="40" height="12" rx="6" fill="url(#skinGrad)" stroke="#e65100" stroke-width="1"/>
+                    <rect x="-15" y="50" width="40" height="12" rx="6" fill="url(#skinGrad)" stroke="#e65100" stroke-width="1"/>
+                </g>
+
+                <!-- ព្រួញកម្លាំង F ពណ៌ខៀវ -->
+                <line x1="745" y1="270" x2="745" y2="350" stroke="#0288d1" stroke-width="6"/>
+                <polygon points="745,360 730,340 760,340" fill="#0288d1"/>
+                <text x="765" y="330" font-family="Arial" font-weight="bold" font-size="32" fill="#0288d1" class="text-outline">F</text>
+            </g>
+
+            <!-- គំនូសវិមាត្រ L1 និង L2 -->
+            <!-- L1: Pivot(310) ទៅ Piston1(402) -->
+            <line x1="310" y1="180" x2="402" y2="180" stroke="#111" stroke-width="2"/>
+            <line x1="310" y1="170" x2="310" y2="190" stroke="#111" stroke-width="2"/>
+            <line x1="402" y1="170" x2="402" y2="190" stroke="#111" stroke-width="2"/>
+            <polygon points="310,180 320,176 320,184" fill="#111"/>
+            <polygon points="402,180 392,176 392,184" fill="#111"/>
+            <text x="356" y="165" text-anchor="middle" font-family="Arial" font-style="italic" font-weight="bold" font-size="22" fill="#111">L₁</text>
+
+            <!-- L2: Piston1(402) ទៅ Hand(745) -->
+            <line x1="402" y1="180" x2="745" y2="180" stroke="#111" stroke-width="2"/>
+            <line x1="745" y1="170" x2="745" y2="190" stroke="#111" stroke-width="2"/>
+            <polygon points="402,180 412,176 412,184" fill="#111"/>
+            <polygon points="745,180 735,176 735,184" fill="#111"/>
+            <text x="573" y="165" text-anchor="middle" font-family="Arial" font-style="italic" font-weight="bold" font-size="22" fill="#111">L₂</text>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            កម្លាំងទាញចុះ $F$ (N):<br>
+            <span id="valF" class="number-display" style="color: #0288d1; font-size:24px;">0 N</span>
+            <input type="range" id="sliderF" min="0" max="35" value="0" step="0.5">
+        </div>
+        <div class="slider-box">
+            ម៉ាសបន្ទុក $m$ (kg):<br>
+            <span id="valM" class="number-display" style="color: #111; font-size:24px;">375 kg</span>
+            <input type="range" id="sliderM" min="100" max="600" value="375" step="5">
+        </div>
+        <div class="slider-box">
+            អង្កត់ផ្ចិតពីស្តុងតូច $d_1$ (cm):<br>
+            <span id="valD1" class="number-display" style="color: #6f42c1; font-size:24px;">0.635 cm</span>
+            <input type="range" id="sliderD1" min="0.300" max="1.500" value="0.635" step="0.005">
+        </div>
+        <div class="slider-box">
+            អង្កត់ផ្ចិតពីស្តុងធំ $d_2$ (cm):<br>
+            <span id="valD2" class="number-display" style="color: #007bff; font-size:24px;">3.81 cm</span>
+            <input type="range" id="sliderD2" min="2.00" max="8.00" value="3.81" step="0.01">
+        </div>
+        <div class="slider-box">
+            ប្រវែងដងឃ្នាស់ $L_1$ (cm):<br>
+            <span id="valL1" class="number-display" style="color: #d32f2f; font-size:24px;">5.08 cm</span>
+            <input type="range" id="sliderL1" min="2.00" max="10.00" value="5.08" step="0.01">
+        </div>
+        <div class="slider-box">
+            ប្រវែងដងឃ្នាស់ $L_2$ (cm):<br>
+            <span id="valL2" class="number-display" style="color: #e65100; font-size:24px;">25.4 cm</span>
+            <input type="range" id="sliderL2" min="10.0" max="50.0" value="25.4" step="0.1">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Grid) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #6f42c1;">កម្លាំងនៅពីស្តុងតូច $F_1$<br><span id="liveF1" class="number-display">0 N</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">កម្លាំងលើកនៅពីស្តុងធំ $F_2$<br><span id="liveF2" class="number-display">0 N</span></div>
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">ស្ថានភាពលើក (Lift Status)<br><span id="liveStatus" style="font-family: 'Siemreap', sans-serif; color: #6f42c1;">នៅនឹងថ្កល់</span></div>
+    </div>
+
+    <button id="btnToggleSolution">📖 បង្ហាញ / លាក់ដំណោះស្រាយ</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box" id="theoryNote">
+            💡 <strong>អត្ថប្រយោជន៍មេកានិចសរុប (Total MA)៖</strong> កើតចេញពីការគុណបញ្ចូលគ្នារវាង MA នៃឃ្នាស់ដងថ្លឹង និង MA នៃឃ្នាស់អ៊ីដ្រូលីក។ 
+            $MA_{total} = \left(\frac{L_1 + L_2}{L_1}\right) \times \left(\frac{d_2}{d_1}\right)^2$
+        </div>
+
+        <h3>ដំណោះស្រាយ</h3>
+        
+        <div id="mathContainer">
+            <p><strong>១. គណនាកម្លាំងនៅពីស្តុងតូច ($F_1$) តាមច្បាប់ឃ្នាស់មេកានិច៖</strong></p>
+            <p>ម៉ូម៉ង់កម្លាំងទាញចុះ = ម៉ូម៉ង់កម្លាំងទប់</p>
+            <div id="mathLine1">$$ F \times (L_1 + L_2) = F_1 \times L_1 \implies F_1 = F \frac{L_1 + L_2}{L_1} $$</div>
+            
+            <p><strong>២. គណនាកម្លាំងនៅពីស្តុងធំ ($F_2$) តាមច្បាប់ប៉ាស្កាល់៖</strong></p>
+            <div id="mathLine2">$$ \frac{F_1}{A_1} = \frac{F_2}{A_2} \implies F_2 = F_1 \frac{A_2}{A_1} = F_1 \left(\frac{d_2}{d_1}\right)^2 $$</div>
+            
+            <p><strong>៣. ជំនួស $F_1$ ចូល និងទាញរក $F$ ចាំបាច់៖</strong></p>
+            <div id="mathLine3">$$ F_2 = F \left(\frac{L_1 + L_2}{L_1}\right) \left(\frac{d_2}{d_1}\right)^2 $$</div>
+            <p>ដើម្បីលើកបន្ទុករួច $F_2$ ត្រូវស្មើទម្ងន់បន្ទុក $W = m \cdot g = 375 \times 9.80 = 3675 \text{ N}$</p>
+            <div id="mathLine4">$$ F = \frac{F_2}{\left(\frac{L_1 + L_2}{L_1}\right) \left(\frac{d_2}{d_1}\right)^2} = \frac{3675}{\left(\frac{5.08 + 25.4}{5.08}\right) \times \left(\frac{3.81}{0.635}\right)^2} $$</div>
+            <div id="mathLine5" style="color: #d32f2f; font-weight: bold; text-align: center; margin-top: 15px; font-size: 1.2em;">
+                $$ F = \frac{3675}{(6) \times (36)} = \frac{3675}{216} \approx 17.0 \text{ N} $$
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > -->
+<script>
+    var sF = document.getElementById('sliderF');
+    var sM = document.getElementById('sliderM');
+    var sD1 = document.getElementById('sliderD1');
+    var sD2 = document.getElementById('sliderD2');
+    var sL1 = document.getElementById('sliderL1');
+    var sL2 = document.getElementById('sliderL2');
+
+    var btnSet = document.getElementById('btnSetValues');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    var leverGroup = document.getElementById('leverGroup');
+    var pistonBigGroup = document.getElementById('pistonBigGroup');
+    var pistonSmallGroup = document.getElementById('pistonSmallGroup');
+    var fluidBig = document.getElementById('fluidBig');
+    var fluidSmall = document.getElementById('fluidSmall');
+    var txtWeight = document.getElementById('txtWeight');
+    var actionArrows = document.getElementById('actionArrows');
+
+    var g = 9.80; // m/s^2
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    btnSet.addEventListener('click', function() {
+        sF.value = 17.0;
+        sM.value = 375;
+        sD1.value = 0.635;
+        sD2.value = 3.81;
+        sL1.value = 5.08;
+        sL2.value = 25.4;
+        updatePhysics();
+    });
+
+    var mathTimeout;
+    function updatePhysics() {
+        var f_applied = parseFloat(sF.value);
+        var mass = parseFloat(sM.value);
+        var d1 = parseFloat(sD1.value);
+        var d2 = parseFloat(sD2.value);
+        var L1 = parseFloat(sL1.value);
+        var L2 = parseFloat(sL2.value);
+
+        // អាប់ដេតលេខសកលនៅលើផ្ទាំងបញ្ជា
+        document.getElementById('valF').innerText = f_applied.toFixed(1) + " N";
+        document.getElementById('valM').innerText = mass + " kg";
+        document.getElementById('valD1').innerText = d1.toFixed(3) + " cm";
+        document.getElementById('valD2').innerText = d2.toFixed(2) + " cm";
+        document.getElementById('valL1').innerText = L1.toFixed(2) + " cm";
+        document.getElementById('valL2').innerText = L2.toFixed(1) + " cm";
+        txtWeight.textContent = mass + " kg";
+
+        // ការគណនា
+        var w_load = mass * g; 
+        var L_tot = L1 + L2;
+        
+        var ma_mech = L_tot / L1;
+        var f1 = f_applied * ma_mech; 
+        
+        var ma_hydro = Math.pow((d2 / d1), 2);
+        var f2 = f1 * ma_hydro;
+
+        document.getElementById('liveF1').innerText = f1.toFixed(2) + " N";
+        document.getElementById('liveF2').innerText = Math.round(f2).toLocaleString() + " N";
+
+        // កំណត់កម្លាំងដែលត្រូវការដើម្បីលើករួច
+        var req_f = w_load / (ma_mech * ma_hydro);
+
+        // ត្រួតពិនិត្យការលើកធៀបកម្លាំង F ជាមួយកម្លាំងដែលត្រូវការ
+        var forceRatio = f_applied / req_f;
+        var progress = Math.min(1, forceRatio); 
+        
+        var isLifting = false;
+        // ប្រើ Math.max ដើម្បីចៀសវាងសញ្ញា >
+        if (Math.max(f_applied, req_f) === f_applied && req_f !== 0) {
+            isLifting = true;
+            progress = 1;
+        }
+
+        var statusEl = document.getElementById('liveStatus');
+
+        if (isLifting === true) {
+            statusEl.innerText = "លើកបានសម្រេច!";
+            statusEl.style.color = "#28a745";
+            actionArrows.style.opacity = "1"; // បង្ហាញព្រួញក្រហមច្បាស់
+        } else if (f_applied !== 0) {
+            statusEl.innerText = "កំពុងប្រឹងឡើង...";
+            statusEl.style.color = "#e65100";
+            actionArrows.style.opacity = progress.toFixed(2); // ព្រួញក្រហមលេចចេញតាមទំហំកម្លាំង
+        } else {
+            statusEl.innerText = "នៅនឹងថ្កល់";
+            statusEl.style.color = "#6f42c1";
+            actionArrows.style.opacity = "0"; // លាក់ព្រួញក្រហម
+        }
+
+        // ធ្វើចលនាក្រាហ្វិក (Animation)
+        // មុំបង្វិលដងឃ្នាស់ (អតិបរមា 12 ដឺក្រេចុះក្រោម)
+        var maxAngle = 12;
+        var currentAngle = progress * maxAngle;
+        leverGroup.setAttribute("transform", "rotate(" + currentAngle + ", 310, 240)");
+
+        // ពីស្តុងតូចចុះក្រោម (Pivot នៅ 310, Piston1 នៅ 402, ចម្ងាយ 92px)
+        var distToSmallPiston = 92; 
+        var angleRad = currentAngle * Math.PI / 180;
+        var dy_small = distToSmallPiston * Math.tan(angleRad);
+        
+        // Piston Base Y = 250 (Small Piston)
+        var piston1_Y = dy_small;
+        pistonSmallGroup.setAttribute("transform", "translate(0, " + piston1_Y + ")");
+
+        // ពីស្តុងធំឡើងលើ (Scale ឱ្យឃើញច្បាស់ អតិបរមា 45px)
+        var maxLiftBig = 45; 
+        var dy_big = progress * maxLiftBig;
+        
+        // Piston Base Y = 250 (Big Piston)
+        var piston2_Y = -dy_big;
+        pistonBigGroup.setAttribute("transform", "translate(0, " + piston2_Y + ")");
+
+        // អាប់ដេតកម្ពស់ទឹក (Fluid Rectangles)
+        fluidBig.setAttribute("y", 250 - dy_big);
+        fluidBig.setAttribute("height", 100 + dy_big);
+
+        fluidSmall.setAttribute("y", 250 + dy_small);
+        fluidSmall.setAttribute("height", 100 - dy_small);
+
+        // Update MathJax (Debounced)
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            document.getElementById('mathLine4').innerHTML = "$$ F = \\frac{" + Math.round(w_load) + "}{\\left(\\frac{" + L1.toFixed(2) + " + " + L2.toFixed(1) + "}{" + L1.toFixed(2) + "}\\right) \\times \\left(\\frac{" + d2.toFixed(2) + "}{" + d1.toFixed(3) + "}\\right)^2} $$";
+            document.getElementById('mathLine5').innerHTML = "$$ F = \\frac{" + Math.round(w_load) + "}{(" + ma_mech.toFixed(2) + ") \\times (" + Math.round(ma_hydro) + ")} = \\frac{" + Math.round(w_load) + "}{" + Math.round(ma_mech * ma_hydro) + "} \\approx " + req_f.toFixed(1) + " \\text{ N} $$";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    sF.addEventListener('input', updatePhysics);
+    sM.addEventListener('input', updatePhysics);
+    sD1.addEventListener('input', updatePhysics);
+    sD2.addEventListener('input', updatePhysics);
+    sL1.addEventListener('input', updatePhysics);
+    sL2.addEventListener('input', updatePhysics);
+
+    // Initial run
+    updatePhysics();
+</script>
+
+</body>
+</html>

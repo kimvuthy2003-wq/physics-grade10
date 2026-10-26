@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ១១ - អានុភាពជណ្តើរយន្ត (ចលនាជាក់ស្តែង)</title>
+    
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center;
+        }
+        .container { max-width: 1050px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 19px;
+            font-weight: bold; line-height: 1.7; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .info-panel {
+            background: #fff; padding: 15px; border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;
+            display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px;
+            border-left: 6px solid #28a745; font-size: 17px;
+        }
+        .info-panel strong { color: #d32f2f; font-size: 19px; }
+        
+        .missing-info {
+            background: #ffebee; color: #c62828; padding: 12px;
+            border-radius: 4px; font-weight: bold; width: 100%; margin-top: 10px;
+            border: 1px dashed #c62828; text-align: left; line-height: 1.6;
+        }
+
+        /* ផ្ទាំង Simulator */
+        .sim-area {
+            position: relative; width: 100%; height: 480px;
+            background: #e9ecef; border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); margin: 0 auto;
+            display: flex; justify-content: center;
+        }
+
+        /* តួជណ្តើរយន្ត (Shaft) - តំណាងឱ្យផ្លូវរអិល */
+        .shaft {
+            position: relative; width: 130px; height: 100%;
+            background: #e0e0e0; border-left: 6px solid #607d8b; border-right: 6px solid #607d8b;
+        }
+
+        /* គំនូសកម្ពស់នៅលើជញ្ជាំង */
+        .height-marker {
+            position: absolute; width: 10px; height: 2px; background: #999; left: 0;
+        }
+
+        /* ខ្សែរ៉ត (Cable) */
+        .cable {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 6px; background: #616161; z-index: 1;
+        }
+
+        /* ប្រអប់ជណ្តើរយន្ត (Elevator Car) */
+        .elevator {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            width: 100px; height: 120px; background: #f8f9fa;
+            border: 3px solid #495057; border-radius: 4px; z-index: 2;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            background-image: linear-gradient(to right, #e9ecef 48%, #495057 49%, #495057 51%, #e9ecef 52%);
+        }
+        
+        /* ព្រួញកម្លាំង T (ទាញខ្សែឡើងលើ) */
+        .force-arrow-T {
+            position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 50px; background: #28a745;
+        }
+        .force-arrow-T::before {
+            content: ''; position: absolute; top: -8px; left: -6px;
+            border-bottom: 10px solid #28a745; border-left: 8px solid transparent; border-right: 8px solid transparent;
+        }
+        .force-label { position: absolute; left: 15px; top: 10px; color: #28a745; font-weight: bold; font-size: 18px; text-shadow: 1px 1px 0 #fff; }
+
+        /* ព្រួញទម្ងន់ P (ចុះក្រោម) */
+        .force-arrow-P {
+            position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 40px; background: #6f42c1;
+        }
+        .force-arrow-P::after {
+            content: ''; position: absolute; bottom: -8px; left: -6px;
+            border-top: 10px solid #6f42c1; border-left: 8px solid transparent; border-right: 8px solid transparent;
+        }
+        .force-label-P { position: absolute; left: 12px; top: 20px; color: #6f42c1; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 0 #fff; }
+
+        /* ព្រួញកកិត f (ចុះក្រោម) */
+        .force-arrow-f-left, .force-arrow-f-right {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 4px; height: 35px; background: #d32f2f;
+        }
+        .force-arrow-f-left { left: -10px; }
+        .force-arrow-f-right { right: -10px; }
+        
+        .force-arrow-f-left::after, .force-arrow-f-right::after {
+            content: ''; position: absolute; bottom: -8px; left: -6px;
+            border-top: 10px solid #d32f2f; border-left: 8px solid transparent; border-right: 8px solid transparent;
+        }
+        
+        .force-label-f { position: absolute; top: 35px; left: -18px; color: #d32f2f; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 0 #fff; }
+        .force-arrow-f-right .force-label-f { left: 8px; }
+
+        /* ទិន្នន័យ Live Data (មាន ៥ ជួរឈរ) */
+        .live-data {
+            display: grid; grid-template-columns: 1fr 1.2fr 1fr 1.2fr 1.2fr;
+            gap: 10px; margin-top: 20px;
+        }
+        .data-box {
+            background: white; padding: 12px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+            font-size: 15px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 24px; 
+            display: inline-block; margin-top: 8px;
+        }
+        
+        #liveTime { color: #212529; } 
+        #liveAcc { color: #8e44ad; } 
+        #liveVel { color: #0056b3; } 
+        #liveTension { color: #28a745; } 
+        #livePower { color: #d32f2f; } 
+
+        /* ប៊ូតុងបញ្ជា */
+        .controls {
+            margin-top: 20px; display: flex; justify-content: center;
+            gap: 12px; flex-wrap: wrap; align-items: center;
+        }
+        button {
+            padding: 12px 20px; font-size: 17px; font-weight: bold;
+            font-family: inherit; cursor: pointer; border: none;
+            border-radius: 6px; color: white; transition: 0.2s;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        .btn-a { background: #007bff; } .btn-a:hover { background: #0056b3; }
+        .btn-b { background: #6f42c1; } .btn-b:hover { background: #5a32a3; }
+        #resetBtn { background: #6c757d; } #resetBtn:hover { background: #5a6268; }
+        #solutionBtn { background: #17a2b8; } #solutionBtn:hover { background: #138496; }
+
+        .status {
+            margin-top: 15px; font-size: 18px; font-weight: bold;
+            background: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #333; min-height: 25px; border-left: 5px solid #ccc;
+        }
+
+        /* ដំណោះស្រាយ */
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 {
+            margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0;
+            padding-bottom: 10px; font-size: 22px;
+        }
+        .solution-box ul { padding-left: 30px; margin-top: 5px; }
+        .highlight { font-weight: bold; color: #d32f2f; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>លំហាត់ទី ១១ ៖</strong> ជណ្តើរយន្តមួយមានម៉ាស $1600 \text{ kg}$ និងផ្ទុកមនុស្សដែលមានម៉ាស $250 \text{ kg}$។ គណនា៖<br>
+        <strong>ក.</strong> អានុភាពដែលម៉ូទ័រផ្តល់ឱ្យដើម្បីលើកបន្ទុកដោយល្បឿនថេរ $2.00 \text{ m/s}$។<br>
+        <strong>ខ.</strong> អានុភាពដែលម៉ូទ័រផ្តល់ឱ្យដើម្បីលើកបន្ទុកដល់ល្បឿនខណៈ $v$ ដែលឱ្យនៅសំណួរ(ក) ដោយសំទុះឡើងលើ $1.00 \text{ m/s}^2$។
+    </div>
+    
+    <div class="info-panel">
+        <div>ម៉ាសសរុប ($m$) = <strong>1850 kg</strong></div>
+        <div>សន្ទុះទំនាញ ($g$) = <strong>9.8 m/s²</strong></div>
+        <div>ល្បឿនគោលដៅ ($v$) = <strong>2.00 m/s</strong></div>
+        <div class="missing-info">
+            ⚠️ <strong>បម្រាប់បន្ថែមដើម្បីឱ្យចម្លើយដូចសៀវភៅ៖</strong> ឧបមាថាមានកម្លាំងកកិតរវាងតួ និងផ្លូវរអិល $f = 4000 \text{ N}$ ទាញចុះក្រោម។
+        </div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator -->
+    <div class="sim-area">
+        <div class="shaft" id="shaft">
+            <div class="cable" id="cable"></div>
+            <div class="elevator" id="elevator">
+                🧍🧍
+                <div class="force-arrow-T"><div class="force-label">T</div></div>
+                <div class="force-arrow-f-left"><div class="force-label-f">f/2</div></div>
+                <div class="force-arrow-f-right"><div class="force-label-f">f/2</div></div>
+                <div class="force-arrow-P"><div class="force-label-P">P</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ប្រអប់តម្លៃលេខ Live Data (៥ ប្រអប់ដើម្បីប្រៀបធៀប) -->
+    <div class="live-data">
+        <div class="data-box" style="border-top: 5px solid #333;">ពេលវេលា ($t$)<br><span id="liveTime">0.00</span> s</div>
+        <div class="data-box" style="border-top: 5px solid #8e44ad;">សំទុះ ($a$)<br><span id="liveAcc">0.00</span> m/s²</div>
+        <div class="data-box" style="border-top: 5px solid #0056b3;">ល្បឿន ($v$)<br><span id="liveVel">0.00</span> m/s</div>
+        <div class="data-box" style="border-top: 5px solid #28a745;">កម្លាំងខ្សែ ($T$)<br><span id="liveTension">0</span> N</div>
+        <div class="data-box" style="border-top: 5px solid #d32f2f;">អានុភាព ($P = Tv$)<br><span id="livePower">0.00</span> kW</div>
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="controls">
+        <button class="btn-a" onclick="startSim('A')">▶ សំណួរ ក (ល្បឿនថេរ)</button>
+        <button class="btn-b" onclick="startSim('B')">▶ សំណួរ ខ (ចលនាស្ទុះស្មើ)</button>
+        <button id="resetBtn">🔄 ត្រឡប់ដើម</button>
+        <button id="solutionBtn">📖 លាក់/បង្ហាញ ដំណោះស្រាយ</button>
+    </div>
+
+    <div class="status" id="statusText">សូមជ្រើសរើសសំណួរខាងលើដើម្បីមើលចលនា...</div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div id="solutionBox" class="solution-box" style="display: none;">
+        <h3>ដំណោះស្រាយ</h3>
+        <p><strong>បម្រាប់៖</strong> ម៉ាសសរុប $m = 1600 + 250 = 1850 \text{ kg}$។ កម្លាំងកកិត $f = 4000 \text{ N}$។ $g = 9.8 \text{ m/s}^2$។</p>
+        
+        <p><strong>ក. អានុភាពម៉ូទ័រពេលលើកដោយល្បឿនថេរ ($v = 2.00 \text{ m/s}$):</strong></p>
+        <ul>
+            <li>ដោយល្បឿនថេរ នាំឱ្យសំទុះ $\mathbf{a = 0}$។ តាមច្បាប់ទី២ញូតុន៖ $\sum \vec{F} = 0 \implies \vec{T} + \vec{P} + \vec{f} = 0$</li>
+            <li>ចំណោលលើអ័ក្សឈរ៖ $T - mg - f = 0 \implies T = mg + f$</li>
+            <li>$T = (1850 \times 9.8) + 4000 = 18130 + 4000 = \mathbf{22130 \text{ N}}$</li>
+            <li>អានុភាព (ថេររហូត)៖ $\mathcal{P} = T \times v = 22130 \times 2.00 = 44260 \text{ W} =$ <span class="highlight">44.3 kW</span></li>
+        </ul>
+
+        <p><strong>ខ. អានុភាពម៉ូទ័រពេលលើកដោយសំទុះ ($a = 1.00 \text{ m/s}^2$) ដល់ល្បឿន $v = 2.00 \text{ m/s}$:</strong></p>
+        <ul>
+            <li>មានសំទុះឡើងលើ $\mathbf{a = 1.00 \text{ m/s}^2}$។ តាមច្បាប់ទី២ញូតុន៖ $\sum \vec{F} = m\vec{a}$</li>
+            <li>ចំណោលលើអ័ក្សឈរ៖ $T - mg - f = ma \implies T = m(g + a) + f$</li>
+            <li>$T = 1850(9.8 + 1.00) + 4000 = (1850 \times 10.8) + 4000 = 19980 + 4000 = \mathbf{23980 \text{ N}}$</li>
+            <li>អានុភាពនៅខណៈដែលល្បឿនទើបតែកើនដល់ $2 \text{ m/s}$ ៖ $\mathcal{P} = T \times v = 23980 \times 2.00 = 47960 \text{ W} \approx$ <span class="highlight">48.0 kW</span></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const m = 1850; 
+    const g = 9.8; 
+    const f = 4000; 
+    const targetV = 2.00;
+    
+    // Scale សម្រាប់ UI (Px)
+    const shaftHeight = 480;
+    const elevatorHeight = 120;
+    const startY = 350; // ចម្ងាយពីលើ (top)
+    const scalePx = 40; // 1m = 40px
+
+    const elevator = document.getElementById('elevator');
+    const cable = document.getElementById('cable');
+    const timeDisp = document.getElementById('liveTime');
+    const accDisp = document.getElementById('liveAcc');
+    const velDisp = document.getElementById('liveVel');
+    const tensionDisp = document.getElementById('liveTension');
+    const powerDisp = document.getElementById('livePower');
+    const statusText = document.getElementById('statusText');
+    const solutionBtn = document.getElementById('solutionBtn');
+    const solutionBox = document.getElementById('solutionBox');
+
+    // គូសគំនូសកម្ពស់លើជញ្ជាំង
+    const shaft = document.getElementById('shaft');
+    for(let i=0; i<10; i++) {
+        let marker = document.createElement('div');
+        marker.className = 'height-marker';
+        marker.style.top = `${i * scalePx + 20}px`;
+        shaft.appendChild(marker);
+        
+        let marker2 = document.createElement('div');
+        marker2.className = 'height-marker';
+        marker2.style.top = `${i * scalePx + 20}px`;
+        marker2.style.left = 'auto';
+        marker2.style.right = '0';
+        shaft.appendChild(marker2);
+    }
+
+    let animationFrameId;
+    let isRunning = false;
+    let currentMode = '';
+    let time = 0;
+    let y = 0; 
+    let v = 0; 
+    let a = 0;
+    let lastTimeMs = 0;
+    let T = 0; 
+
+    function updateUI() {
+        let P_kW = (T * v) / 1000; 
+
+        timeDisp.innerText = time.toFixed(2);
+        accDisp.innerText = a.toFixed(2);
+        velDisp.innerText = v.toFixed(2);
+        tensionDisp.innerText = Math.round(T).toLocaleString();
+        powerDisp.innerText = P_kW.toFixed(2);
+
+        let currentTop = startY - (y * scalePx);
+        elevator.style.top = `${currentTop}px`; 
+        cable.style.height = `${currentTop}px`;
+    }
+
+    function animate(timestamp) {
+        if (!lastTimeMs) lastTimeMs = timestamp;
+        let dt = (timestamp - lastTimeMs) / 1000;
+        if (dt > 0.1) dt = 0.1;
+        lastTimeMs = timestamp;
+
+        if (isRunning) {
+            time += dt;
+
+            if (currentMode === 'A') {
+                // សំណួរ ក: ល្បឿនថេរ v = 2.0 (ចាប់ផ្តើមភ្លាម ល្បឿន 2 ភ្លាម)
+                v = targetV;
+                y += v * dt;
+                
+                if (y >= 8.0) { // រត់បាន 8m បញ្ឈប់
+                    isRunning = false;
+                    v = 0; a = 0; T = 0; // ពេលឈប់ លែងមានអានុភាព
+                    statusText.innerText = `✅ បញ្ចប់! អានុភាពពេលកំពុងរត់ល្បឿនថេរ គឺ P = 44.3 kW ថេររហូត។`;
+                    statusText.style.borderLeftColor = "#28a745";
+                }
+            } 
+            else if (currentMode === 'B') {
+                // សំណួរ ខ: ចលនាស្ទុះស្មើ a = 1.0 (ល្បឿនកើនពី 0 ទៅ 2)
+                v += a * dt;
+                y += v * dt;
+
+                if (v >= targetV) {
+                    v = targetV; 
+                    isRunning = false;
+                    statusText.innerText = `✅ ដល់ល្បឿនខណៈ v = 2.00 m/s! អានុភាពខណៈឡើងដល់ P = 48.0 kW គត់។`;
+                    statusText.style.borderLeftColor = "#28a745";
+                }
+            }
+
+            updateUI();
+
+            if (isRunning) {
+                animationFrameId = requestAnimationFrame(animate);
+            }
+        }
+    }
+
+    window.startSim = function(mode) {
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        
+        currentMode = mode;
+        isRunning = true;
+        time = 0; y = 0; lastTimeMs = 0;
+        
+        if (mode === 'A') {
+            a = 0.00;
+            v = targetV; // ល្បឿនថេរ
+            T = (m * g) + f; 
+            statusText.innerHTML = `<strong>សំណួរ ក (a = 0):</strong> ល្បឿនថេរ $v = 2.0 \text{ m/s}$ តាំងពីដើមទី។ កម្លាំង $T$ ថេរ អានុភាព $P$ ថេរ។`;
+            statusText.style.borderLeftColor = "#007bff";
+        } else {
+            a = 1.00;
+            v = 0.00; // ចាប់ផ្តើមពីសូន្យ
+            T = m * (g + a) + f; 
+            statusText.innerHTML = `<strong>សំណួរ ខ (a = 1):</strong> ចាប់ផ្តើមពី $v = 0$ ស្ទុះឡើង។ ល្បឿន $v$ កើន នាំឱ្យអានុភាពខណៈ $P$ កើនបន្តិចម្តងៗ!`;
+            statusText.style.borderLeftColor = "#6f42c1";
+        }
+        
+        // ប្រើ MathJax ឱ្យ render អត្ថបទថ្មីក្នុង status
+        MathJax.typesetPromise([statusText]);
+        
+        updateUI();
+        animationFrameId = requestAnimationFrame(animate);
+    };
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        isRunning = false;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        time = 0; y = 0; v = 0; a = 0; T = 0;
+        updateUI();
+        statusText.innerText = "សូមជ្រើសរើសសំណួរខាងលើដើម្បីមើលចលនា...";
+        statusText.style.borderLeftColor = "#ccc";
+        
+        elevator.style.top = `${startY}px`;
+        cable.style.height = `${startY}px`;
+    });
+
+    solutionBtn.addEventListener('click', () => {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    document.getElementById('resetBtn').click();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី៤៖ ឃ្នាស់អ៊ីដ្រូលីក (ច្បាប់ប៉ាស្កាល់)</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        @media (min-width: 600px) {
+            .controls-grid { grid-template-columns: 1fr 1fr 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        button {
+            background: #007bff; color: white; padding: 12px 24px; font-size: 18px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s; width: 100%; margin-bottom: 20px;
+        }
+        button:hover { filter: brightness(1.1); }
+        #btnSetValues { background: #28a745; margin-bottom: 10px; }
+        #btnToggleSolution { background: #17a2b8; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 16px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 24px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        
+        .note-box { 
+            background: #e8f5e9; border-left: 6px solid #28a745; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #1b5e20; 
+        }
+
+        .text-outline { text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; }
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>៤.</strong> មុខកាត់នៃពីស្តុងពីររបស់ឃ្នាស់អ៊ីដ្រូលីកមួយមានតម្លៃ $8 \text{ cm}^2$ និង $120 \text{ cm}^2$ រៀងគ្នា។ តើដំណោលលើពីស្តុងធំមានតម្លៃប៉ុន្មាន ប្រសិនបើកម្មករម្នាក់ប្រើកម្លាំង $3000 \text{ N}$ សង្កត់ទៅលើពីស្តុងតូចតាមឃ្នាស់មួយ?
+    </div>
+
+    <button id="btnSetValues">🎯 កំណត់តម្លៃតាមលំហាត់ (F₁ = 3000 N)</button>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="fluidGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#29b6f6"/>
+                    <stop offset="50%" stop-color="#81d4fa"/>
+                    <stop offset="100%" stop-color="#0277bd"/>
+                </linearGradient>
+                <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#cfd8dc"/>
+                    <stop offset="50%" stop-color="#ffffff"/>
+                    <stop offset="100%" stop-color="#90a4ae"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ជញ្ជាំងកាត់ប្លង់ខាងក្រៅនៃបំពង់ (Casing) -->
+            <path d="M 150 150 L 150 380 A 20 20 0 0 0 170 400 L 630 400 A 20 20 0 0 0 650 380 L 650 150
+                     M 350 150 L 350 320 A 20 20 0 0 0 370 340 L 530 340 A 20 20 0 0 0 550 320 L 550 150"
+                  fill="none" stroke="#78909c" stroke-width="12" stroke-linecap="round"/>
+
+            <!-- ផ្ទៃទឹក (Fluid) Base ថេរ -->
+            <path d="M 156 300 L 156 380 A 14 14 0 0 0 170 394 L 630 394 A 14 14 0 0 0 644 380 L 644 300
+                     L 556 300 L 556 320 A 26 26 0 0 1 530 346 L 370 346 A 26 26 0 0 1 344 320 L 344 300 Z"
+                  fill="url(#fluidGrad)"/>
+            
+            <!-- ផ្ទៃទឹក (Fluid) ចល័តឡើងចុះតាមពីស្តុង -->
+            <rect id="fluidBig" x="156" y="250" width="188" height="50" fill="url(#fluidGrad)"/>
+            <rect id="fluidSmall" x="556" y="250" width="88" height="50" fill="url(#fluidGrad)"/>
+
+            <!-- ពីស្តុងធំ (ខាងឆ្វេង) -->
+            <g id="pistonBigGroup" transform="translate(0, 0)">
+                <rect x="156" y="230" width="188" height="20" fill="url(#metalGrad)" stroke="#546e7a" stroke-width="2"/>
+                <text x="250" y="245" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#333">A₂</text>
+                
+                <!-- វ៉ិចទ័រកម្លាំង F2 (រុញឡើងលើ) -->
+                <line id="vecF2" x1="250" y1="220" x2="250" y2="120" stroke="#28a745" stroke-width="8"/>
+                <polygon id="headF2" points="250,110 240,125 260,125" fill="#28a745"/>
+                <text id="txtF2" x="250" y="90" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="24" fill="#28a745" class="text-outline">F₂</text>
+            </g>
+
+            <!-- ពីស្តុងតូច (ខាងស្តាំ) -->
+            <g id="pistonSmallGroup" transform="translate(0, 0)">
+                <rect x="556" y="230" width="88" height="20" fill="url(#metalGrad)" stroke="#546e7a" stroke-width="2"/>
+                <text x="600" y="245" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#333">A₁</text>
+
+                <!-- វ៉ិចទ័រកម្លាំង F1 (សង្កត់ចុះក្រោម) -->
+                <line id="vecF1" x1="600" y1="120" x2="600" y2="220" stroke="#d32f2f" stroke-width="6"/>
+                <polygon id="headF1" points="600,230 590,215 610,215" fill="#d32f2f"/>
+                <text id="txtF1" x="600" y="100" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="24" fill="#d32f2f" class="text-outline">F₁</text>
+            </g>
+
+            <!-- គំនូសតំណាងទំហំផ្ទៃមុខកាត់ A1 និង A2 -->
+            <path d="M 130 240 L 110 240 L 110 180" fill="none" stroke="#546e7a" stroke-width="2"/>
+            <text x="60" y="170" font-family="Arial" font-weight="bold" font-size="16" fill="#333">Area A₂</text>
+
+            <path d="M 670 240 L 690 240 L 690 180" fill="none" stroke="#546e7a" stroke-width="2"/>
+            <text x="670" y="170" font-family="Arial" font-weight="bold" font-size="16" fill="#333">Area A₁</text>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            កម្លាំងសង្កត់ $F_1$ (N):<br>
+            <span id="valF1" class="number-display" style="color: #d32f2f; font-size:24px;">3000 N</span>
+            <input type="range" id="sliderF1" min="0" max="6000" value="3000" step="100">
+        </div>
+        <div class="slider-box">
+            ផ្ទៃមុខកាត់ពីស្តុងតូច $A_1$ (cm²):<br>
+            <span id="valA1" class="number-display" style="color: #6f42c1; font-size:24px;">8 cm²</span>
+            <input type="range" id="sliderA1" min="2" max="20" value="8" step="1">
+        </div>
+        <div class="slider-box">
+            ផ្ទៃមុខកាត់ពីស្តុងធំ $A_2$ (cm²):<br>
+            <span id="valA2" class="number-display" style="color: #007bff; font-size:24px;">120 cm²</span>
+            <input type="range" id="sliderA2" min="50" max="300" value="120" step="5">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Grid) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #6f42c1;">សម្ពាធក្នុងអង្គធាតុរាវ $P$<br><span id="liveP" class="number-display">375 N/cm²</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">ដំណោលលើពីស្តុងធំ $F_2$<br><span id="liveF2" class="number-display">45,000 N</span></div>
+    </div>
+
+    <button id="btnToggleSolution">📖 បង្ហាញ / លាក់ដំណោះស្រាយ</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box" id="theoryNote">
+            💡 <strong>គោលការណ៍ប៉ាស្កាល់ (Pascal's Principle)៖</strong> សម្ពាធដែលបញ្ចេញទៅលើអង្គធាតុរាវដែលនៅនឹងថ្កល់ ត្រូវបានបញ្ជូនស្មើៗគ្នាទៅគ្រប់ចំណុចទាំងអស់នៃអង្គធាតុរាវ និងទៅលើជញ្ជាំងនៃប្រអប់ផ្ទុក ($P_1 = P_2$)។
+        </div>
+
+        <h3>ដំណោះស្រាយលំហាត់គំរូ</h3>
+        
+        <div id="mathContainer">
+            <p><strong>១. រូបមន្តគ្រឹះ៖</strong></p>
+            <p>តាមច្បាប់ប៉ាស្កាល់ សម្ពាធនៅពីស្តុងតូច ស្មើនឹងសម្ពាធនៅពីស្តុងធំ៖</p>
+            <div id="mathLine1">$$ P_1 = P_2 \implies \frac{F_1}{A_1} = \frac{F_2}{A_2} $$</div>
+            
+            <p><strong>២. ទាញរកកម្លាំងដំណោលលើពីស្តុងធំ ($F_2$) ៖</strong></p>
+            <div id="mathLine2">$$ F_2 = F_1 \times \frac{A_2}{A_1} $$</div>
+            
+            <p><strong>៣. ជំនួសលេខចូល៖</strong></p>
+            <ul style="font-size: 16px; line-height: 2;">
+                <li id="mathValF1">\( F_1 = 3000 \text{ N} \)</li>
+                <li id="mathValA1">\( A_1 = 8 \text{ cm}^2 \)</li>
+                <li id="mathValA2">\( A_2 = 120 \text{ cm}^2 \)</li>
+            </ul>
+            <p><em>(ចំណាំ៖ ដោយសារផ្ទៃមុខកាត់ $A_1$ និង $A_2$ មានខ្នាតដូចគ្នា $\text{cm}^2$ យើងមិនចាំបាច់បំប្លែងទៅជា $\text{m}^2$ ទេ ព្រោះវាសម្រួលគ្នាអស់)</em></p>
+            
+            <div id="mathLine3" style="color: #28a745; font-weight: bold; text-align: center; margin-top: 15px; font-size: 1.2em;">
+                $$ F_2 = 3000 \times \frac{120}{8} = 45000 \text{ N} $$
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > -->
+<script>
+    var sF1 = document.getElementById('sliderF1');
+    var sA1 = document.getElementById('sliderA1');
+    var sA2 = document.getElementById('sliderA2');
+
+    var btnSet = document.getElementById('btnSetValues');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    var pistonBigGroup = document.getElementById('pistonBigGroup');
+    var pistonSmallGroup = document.getElementById('pistonSmallGroup');
+    var fluidBig = document.getElementById('fluidBig');
+    var fluidSmall = document.getElementById('fluidSmall');
+    
+    var vecF1 = document.getElementById('vecF1');
+    var headF1 = document.getElementById('headF1');
+    var vecF2 = document.getElementById('vecF2');
+    var headF2 = document.getElementById('headF2');
+    var txtF2 = document.getElementById('txtF2');
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    btnSet.addEventListener('click', function() {
+        sF1.value = 3000;
+        sA1.value = 8;
+        sA2.value = 120;
+        updatePhysics();
+    });
+
+    var mathTimeout;
+    function updatePhysics() {
+        var f1 = parseFloat(sF1.value);
+        var a1 = parseFloat(sA1.value);
+        var a2 = parseFloat(sA2.value);
+
+        // អាប់ដេតលេខសកលនៅលើផ្ទាំងបញ្ជា
+        document.getElementById('valF1').innerText = f1.toLocaleString() + " N";
+        document.getElementById('valA1').innerText = a1 + " cm\u00B2";
+        document.getElementById('valA2').innerText = a2 + " cm\u00B2";
+
+        // ការគណនា
+        var pressure = f1 / a1; // N/cm^2
+        var f2 = f1 * (a2 / a1);
+
+        document.getElementById('liveP').innerText = Math.round(pressure).toLocaleString() + " N/cm\u00B2";
+        document.getElementById('liveF2').innerText = Math.round(f2).toLocaleString() + " N";
+
+        // ធ្វើចលនាក្រាហ្វិក (Animation based on F1)
+        var maxF1 = 6000;
+        var dy_small = (f1 / maxF1) * 60;
+        
+        var areaRatioVis = a1 / a2;
+        var dy_big = dy_small * (areaRatioVis * 5); 
+
+        // ពីស្តុងតូចចុះក្រោម
+        pistonSmallGroup.setAttribute("transform", "translate(0, " + dy_small + ")");
+        fluidSmall.setAttribute("y", 250 + dy_small);
+        fluidSmall.setAttribute("height", 50 - dy_small);
+
+        // ពីស្តុងធំឡើងលើ
+        pistonBigGroup.setAttribute("transform", "translate(0, " + (-dy_big) + ")");
+        fluidBig.setAttribute("y", 250 - dy_big);
+        fluidBig.setAttribute("height", 50 + dy_big);
+
+        // ផ្លាស់ប្តូរប្រវែងព្រួញ F1 តាមកម្លាំង
+        var baseF1_Y1 = 120;
+        var baseF1_Y2 = 220; 
+        var newF1_Y1 = baseF1_Y2 - (100 * (f1/maxF1)) - 20; 
+        
+        if (f1 === 0) {
+            vecF1.style.opacity = "0";
+            headF1.style.opacity = "0";
+            document.getElementById('txtF1').style.opacity = "0";
+        } else {
+            vecF1.style.opacity = "1";
+            headF1.style.opacity = "1";
+            document.getElementById('txtF1').style.opacity = "1";
+            
+            vecF1.setAttribute("y1", newF1_Y1);
+            document.getElementById('txtF1').setAttribute("y", newF1_Y1 - 20);
+        }
+
+        // ផ្លាស់ប្តូរប្រវែងព្រួញ F2 តាមកម្លាំង
+        var lenF2 = (f2 / 100000) * 100 + 40; 
+        var newF2_Y2 = 220;
+        var newF2_Y1 = 220 - lenF2;
+
+        if (f2 === 0) {
+            vecF2.style.opacity = "0";
+            headF2.style.opacity = "0";
+            txtF2.style.opacity = "0";
+        } else {
+            vecF2.style.opacity = "1";
+            headF2.style.opacity = "1";
+            txtF2.style.opacity = "1";
+
+            vecF2.setAttribute("y2", newF2_Y1);
+            headF2.setAttribute("points", "250,"+(newF2_Y1-10)+" 240,"+(newF2_Y1+5)+" 260,"+(newF2_Y1+5));
+            txtF2.setAttribute("y", newF2_Y1 - 30);
+        }
+
+        // Update MathJax (Debounced)
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            // អាប់ដេតតម្លៃក្នងបញ្ជីដោយប្រើ innerHTML ការពារការដាច់អក្សរ MathJax
+            document.getElementById('mathValF1').innerHTML = "\\( F_1 = " + f1 + " \\text{ N} \\)";
+            document.getElementById('mathValA1').innerHTML = "\\( A_1 = " + a1 + " \\text{ cm}^2 \\)";
+            document.getElementById('mathValA2').innerHTML = "\\( A_2 = " + a2 + " \\text{ cm}^2 \\)";
+            
+            document.getElementById('mathLine3').innerHTML = "$$ F_2 = " + f1 + " \\times \\frac{" + a2 + "}{" + a1 + "} = " + Math.round(f2) + " \\text{ N} $$";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    sF1.addEventListener('input', updatePhysics);
+    sA1.addEventListener('input', updatePhysics);
+    sA2.addEventListener('input', updatePhysics);
+
+    // Initial run
+    updatePhysics();
+</script>
+
+</body>
+</html>

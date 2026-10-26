@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់គំរូ ជណ្តើរយន្តឬបន្ទប់យោង</title>
+    
+    <!-- Library MathJax -->
+    <script>
+        MathJax = { tex: { inlineMath: [['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        /* កែតម្រូវទំហំនិងអក្សរជាទូទៅ */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            text-align: center;
+        }
+        h2 { color: #2c3e50; margin-bottom: 5px; font-size: 24px; }
+        
+        .problem-statement {
+            background: #fff;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 950px;
+            margin: 0 auto 20px auto;
+            text-align: left;
+            border-left: 5px solid #e67e22;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* ផ្នែកគ្រប់គ្រងការរៀបចំ Layout (ឆ្វេង និង ស្តាំ) */
+        .container {
+            display: flex;
+            justify-content: space-between; /* រុញផ្ទាំងទាំងពីរឱ្យឃ្លាតគ្នាទៅឆ្វេងនិងស្តាំ */
+            align-items: stretch; /* ធ្វើឱ្យប្រអប់ទាំងពីរមានកម្ពស់ស្មើគ្នា */
+            gap: 20px;
+            max-width: 950px;
+            margin: 0 auto;
+        }
+        
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 49%; /* បង្ខំឱ្យយកទំហំ ៤៩% ម្នាក់ ដើម្បីនៅទន្ទឹមគ្នា */
+            box-sizing: border-box; /* ការពារកុំឱ្យ padding ធ្វើឱ្យខូចទំហំ */
+            position: relative;
+        }
+
+        /* បើអេក្រង់តូចជាង 768px (ដូចជាទូរសព្ទ) ទើបឱ្យវាធ្លាក់តម្រៀបលើក្រោមវិញ */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .box {
+                width: 100%;
+            }
+        }
+
+        canvas#elevatorCanvas {
+            background: #ecf0f1;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .data-panel {
+            text-align: left;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+        .data-panel hr { border: 0; border-top: 1px solid #ddd; margin: 10px 0; }
+        .data-panel span.val {
+            font-weight: bold;
+            color: #2980b9;
+        }
+        .highlight {
+            background-color: #e8f8f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            border: 1px solid #1abc9c;
+        }
+
+        .controls { margin-top: 25px; }
+        
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #3498db;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: background 0.3s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        button:hover { background-color: #2980b9; }
+        button.reset { background-color: #e74c3c; }
+        button.reset:hover { background-color: #c0392b; }
+    </style>
+</head>
+<body>
+
+    <h2>លំហាត់គំរូទី២៖ ជណ្តើរយន្ត ឬ បន្ទប់យោង </h2>
+    
+    <div class="problem-statement">
+        <strong>📝 បម្រាប់លំហាត់៖</strong> ជណ្តើរយន្តមួយមានម៉ាស \( m = 500 \text{ kg} \) ផ្លាស់ទីចុះក្រោមដោយសំទុះ \( a = g/5 \) និងល្បឿនដើម \( v_0 = 5.00 \text{ m/s} \)។ វាចុះបានចម្ងាយ \( d = 16.0 \text{ m} \)។ (\( g = 9.80 \text{ m/s}^2 \))<br>
+        <strong>គោលដៅគណនា៖</strong> ក. កម្មន្តនៃទម្ងន់ (\( W_P \)), ខ. កម្មន្តនៃតំណឹងខ្សែ (\( W_T \)), គ. កម្មន្តសរុប (\( W_{net} \)), ឃ. ថាមពលស៊ីនេទិចខណៈ (\( K \))។
+    </div>
+
+    <div class="container">
+        <!-- ផ្ទាំងខាងឆ្វេង៖ Animation -->
+        <div class="box">
+            <h3 style="margin-top:0; margin-bottom: 15px;">ទិដ្ឋភាពចលនាជណ្តើរយន្ត</h3>
+            <canvas id="elevatorCanvas" width="280" height="420"></canvas>
+            <div style="margin-top: 15px; font-weight: bold; color: #d35400; font-size: 16px;">
+                ចម្ងាយធ្លាក់ (y) : <span id="dist-display">0.00</span> m
+            </div>
+        </div>
+
+        <!-- ផ្ទាំងខាងស្តាំ៖ ការគណនា -->
+        <div class="box">
+            <h3 style="margin-top:0; margin-bottom: 15px;">លទ្ធផលគណនា (Real-time)</h3>
+            <div class="data-panel">
+                <div>ល្បឿនខណៈ (v) : <span class="val" id="v-val">5.00</span> m/s</div>
+                <hr>
+                <div>កម្លាំងទម្ងន់ (P = mg) : <span class="val">4900</span> N</div>
+                <div>កម្លាំងខ្សែ (T = m(g-a)) : <span class="val">3920</span> N</div>
+                <hr>
+                <div>ក. កម្មន្តទម្ងន់ (\( W_P = P \cdot y \)) : <span class="val" id="wp-val">0</span> J</div>
+                <div>ខ. កម្មន្តខ្សែ (\( W_T = -T \cdot y \)) : <span class="val" id="wt-val">0</span> J</div>
+                <div>គ. កម្មន្តសរុប (\( W_{net} = W_P + W_T \)) : <span class="val" id="wnet-val">0</span> J</div>
+                <div class="highlight">
+                    ឃ. ថាមពលស៊ីនេទិច (\( K = \frac{1}{2}mv^2 \)) : <br>
+                    <span class="val" style="font-size: 24px; color: #16a085; display: inline-block; margin-top: 8px;" id="k-val">6,250</span> <span style="color: #16a085; font-weight: bold;">J</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="playBtn" onclick="togglePlay()">▶ Play / ⏸ Pause</button>
+        <button class="reset" onclick="resetSim()">🔄 Reset</button>
+    </div>
+
+    <script>
+        // --- អថេររូបវិទ្យា ---
+        const m = 500.0;       
+        const g = 9.80;        
+        const a = g / 5.0;     
+        const v0 = 5.00;       
+        const d_max = 16.0;    
+
+        const P = m * g;       
+        const T = m * (g - a); 
+
+        let t = 0;             
+        let current_y = 0;     
+        let current_v = v0;    
+        let isPlaying = false;
+
+        // --- រៀបចំ Canvas ---
+        const canvas = document.getElementById('elevatorCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const topY = 60; 
+        const bottomY = 360; 
+        const pixelsPerMeter = (bottomY - topY) / d_max; 
+
+        const elevatorWidth = 50;
+        const elevatorHeight = 60;
+
+        // Elements
+        const distDisplay = document.getElementById('dist-display');
+        const vVal = document.getElementById('v-val');
+        const wpVal = document.getElementById('wp-val');
+        const wtVal = document.getElementById('wt-val');
+        const wnetVal = document.getElementById('wnet-val');
+        const kVal = document.getElementById('k-val');
+
+        function drawScene() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // គូរអ័ក្សចម្ងាយ 
+            ctx.beginPath();
+            ctx.moveTo(40, topY);
+            ctx.lineTo(40, bottomY);
+            ctx.strokeStyle = '#7f8c8d';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.fillText('0m', 15, topY + 4);
+            ctx.fillText('16m', 10, bottomY + 4);
+
+            let eleY = topY + (current_y * pixelsPerMeter);
+
+            // ខ្សែទាញ
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, eleY);
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // តួជណ្តើរយន្ត
+            ctx.fillStyle = '#95a5a6'; 
+            ctx.fillRect(canvas.width/2 - elevatorWidth/2, eleY, elevatorWidth, elevatorHeight);
+            ctx.strokeStyle = '#34495e';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(canvas.width/2 - elevatorWidth/2, eleY, elevatorWidth, elevatorHeight);
+            
+            // ដំបូលជណ្តើរយន្ត
+            ctx.beginPath();
+            ctx.arc(canvas.width/2, eleY, elevatorWidth/2, Math.PI, 0);
+            ctx.fillStyle = '#7f8c8d';
+            ctx.fill();
+            ctx.stroke();
+
+            // T ចាប់ផ្តើមពីដំបូលកោងចុះក្រោមបន្តិច ទៅលើ
+            let roofTopY = eleY - (elevatorWidth/2);
+            drawArrow(canvas.width/2, roofTopY, canvas.width/2, roofTopY - 35, 'blue', 'T');
+            
+            // P ចាប់ផ្តើមពីបាតជណ្តើរយន្ត ទៅក្រោម
+            drawArrow(canvas.width/2, eleY + elevatorHeight, canvas.width/2, eleY + elevatorHeight + 40, 'red', 'P');
+            
+            // ព្រួញ v, a នៅចំហៀង
+            drawArrow(canvas.width/2 + elevatorWidth/2 + 15, eleY + 15, canvas.width/2 + elevatorWidth/2 + 15, eleY + 45, 'green', 'v, a');
+        }
+
+        function drawArrow(fromx, fromy, tox, toy, color, label) {
+            const headlen = 7;
+            const dx = tox - fromx;
+            const dy = toy - fromy;
+            const angle = Math.atan2(dy, dx);
+            ctx.beginPath();
+            ctx.moveTo(fromx, fromy);
+            ctx.lineTo(tox, toy);
+            ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(tox, toy);
+            ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.fillStyle = color;
+            ctx.font = '13px Arial bold';
+            ctx.fillText(label, tox + 5, toy + (dy>0 ? 10 : -5));
+        }
+
+        function updateData() {
+            let W_P = P * current_y;           
+            let W_T = -T * current_y;          
+            let W_net = W_P + W_T;             
+            let K = 0.5 * m * current_v * current_v;
+
+            distDisplay.innerText = current_y.toFixed(2);
+            vVal.innerText = current_v.toFixed(2);
+            wpVal.innerText = Math.round(W_P).toLocaleString();
+            wtVal.innerText = (W_T === 0 ? "0" : Math.round(W_T).toLocaleString());
+            wnetVal.innerText = Math.round(W_net).toLocaleString();
+            kVal.innerText = Math.round(K).toLocaleString();
+        }
+
+        function animate() {
+            if (isPlaying) {
+                const dt = 0.04; 
+                t += dt;
+
+                current_y = v0 * t + 0.5 * a * t * t;
+                current_v = v0 + a * t;
+
+                if (current_y >= d_max) { 
+                    current_y = d_max; 
+                    current_v = Math.sqrt(v0*v0 + 2*a*d_max); 
+                    isPlaying = false; 
+                }
+
+                drawScene();
+                updateData();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function togglePlay() {
+            if (current_y >= d_max) {
+                resetSim(); 
+            }
+            isPlaying = !isPlaying;
+        }
+
+        function resetSim() {
+            t = 0;
+            current_y = 0;
+            current_v = v0;
+            isPlaying = false;
+            
+            drawScene();
+            updateData();
+        }
+
+        drawScene();
+        updateData();
+        animate(); 
+    </script>
+</body>
+</html>

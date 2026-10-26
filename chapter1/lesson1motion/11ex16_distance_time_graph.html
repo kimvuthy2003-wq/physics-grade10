@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ១៦ទំព័រ៣៦</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            font-family: 'Khmer OS Battambang', sans-serif; 
+            background-color: #1a1a1a; 
+            /* Fix for mobile viewport height issues */
+            height: 100vh; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Container for the 3D Scene */
+        #canvas-container {
+            flex-grow: 1; /* Takes up remaining space */
+            position: relative;
+            width: 100%;
+        }
+
+        /* Information Panel Container */
+        #info-panel {
+            background: rgba(20, 20, 20, 0.95);
+            color: white;
+            padding: 15px;
+            border-top: 2px solid #2196F3;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
+            max-height: 40vh; /* Don't take up more than 40% of screen height */
+            overflow-y: auto;  /* Allow scrolling within the panel */
+            font-size: 14px;
+            line-height: 1.5;
+            z-index: 10; /* Ensure it stays on top */
+        }
+
+        /* Header within Info Panel */
+        #info-panel h3 { 
+            margin-top: 0; 
+            color: #2196F3; 
+            border-bottom: 1px solid #444; 
+            padding-bottom: 5px;
+            font-size: 16px;
+        }
+
+        /* Responsive Graph Container */
+        .graph-container {
+            text-align: center;
+            margin-bottom: 15px;
+            background: #ffffff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+            /* Make graph scalable */
+            width: 100%; 
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
+        }
+        
+        canvas#graphCanvas {
+            width: 100%; /* Scale canvas to fit container */
+            height: auto;
+            display: block;
+        }
+
+        .problem-text {
+            color: #ccc;
+            margin-bottom: 10px;
+            border-left: 3px solid #2196F3;
+            padding-left: 10px;
+            font-size: 0.95em;
+        }
+
+        /* Controls Section (now fixed at the top or bottom of the 3D view, not over it) */
+        #controls { 
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+        }
+
+        button { 
+            padding: 8px 15px; 
+            font-size: 14px; 
+            cursor: pointer; 
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            color: white;
+            transition: 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            flex: 1; /* Make buttons share space equally on small screens */
+            max-width: 120px;
+        }
+
+        #startBtn { background-color: #4CAF50; }
+        #startBtn:hover { background-color: #45a049; }
+        #pauseBtn { background-color: #ff9800; }
+        #pauseBtn:hover { background-color: #e68a00; }
+        #resetBtn { background-color: #f44336; }
+        #resetBtn:hover { background-color: #d32f2f; }
+        
+        .highlight-t { color: #ffeb3b; font-weight: bold; font-size: 1.1em; }
+        .highlight-x { color: #00bcd4; font-weight: bold; font-size: 1.1em; }
+        .highlight-v { color: #ff5722; font-weight: bold; font-size: 1.1em; }
+        .data-panel { 
+            background: rgba(255,255,255,0.05); 
+            padding: 10px; 
+            border-radius: 5px; 
+            margin-top: 10px;
+        }
+        .ans { color: #8bc34a; font-weight: bold; }
+        
+        /* Custom Scrollbar */
+        #info-panel::-webkit-scrollbar { width: 6px; }
+        #info-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        #info-panel::-webkit-scrollbar-thumb { background: #2196F3; border-radius: 4px; }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 600px) {
+            button { font-size: 12px; padding: 8px 10px; }
+            #info-panel { padding: 10px; max-height: 50vh; }
+        }
+    </style>
+    <!-- Include Three.js via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    
+    <!-- Controls positioned above the 3D view -->
+    <div id="controls">
+        <button id="startBtn">ចាប់ផ្តើម</button>
+        <button id="pauseBtn">បញ្ឈប់</button>
+        <button id="resetBtn">កំណត់ថ្មី</button>
+    </div>
+
+    <!-- Container for Three.js Canvas -->
+    <div id="canvas-container"></div>
+
+    <!-- Scrollable Information Panel at the bottom -->
+    <div id="info-panel">
+        <h3>លំហាត់ទី១៦៖ ក្រាបជាអនុគមន៍នៃពេល</h3>
+        
+        <div class="graph-container">
+            <!-- Canvas resolution is fixed, but CSS makes it scale -->
+            <canvas id="graphCanvas" width="400" height="250"></canvas>
+        </div>
+
+        <div class="problem-text">
+            ១៦. ក្រាបនៃទីតាំង x ជាអនុគមន៍នៃពេល t របស់ចំណុចរូបធាតុមួយដែលផ្លាស់ទីតាមបណ្ដោយអ័ក្ស x បង្ហាញដូចរូបខាងលើ។ កំណត់៖<br>
+            ក. វ៉ិចទ័រល្បឿនមធ្យមក្នុងចន្លោះពេល t = 1.50 s ទៅ t = 4.00 s ។<br>
+            ខ. វ៉ិចទ័រល្បឿនខណៈត្រង់ t = 2.00 s ។<br>
+            គ. តម្លៃ t ដែលមានវ៉ិចទ័រល្បឿនស្មើស្មូន្យ ។
+        </div>
+        
+        <!-- Dynamic Data Panel -->
+        <div class="data-panel" id="stats"></div>
+    </div>
+
+    <script>
+        // --- 1. Graph Drawing Logic (x vs t) ---
+        function drawGraph() {
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const margin = { left: 40, right: 20, top: 20, bottom: 30 };
+            const w = canvas.width - margin.left - margin.right;
+            const h = canvas.height - margin.top - margin.bottom;
+
+            const mapX = (t) => margin.left + (t / 7) * w;
+            const mapY = (x) => margin.top + h - (x / 13) * h;
+
+            // Draw Grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let t = 0; t <= 6.5; t += 0.5) {
+                ctx.moveTo(mapX(t), mapY(0));
+                ctx.lineTo(mapX(t), mapY(13));
+            }
+            for (let x = 0; x <= 13; x += 1) {
+                ctx.moveTo(mapX(0), mapY(x));
+                ctx.lineTo(mapX(6.5), mapY(x));
+            }
+            ctx.stroke();
+
+            // Draw Axes
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            // t-axis
+            ctx.moveTo(mapX(0), mapY(0));
+            ctx.lineTo(mapX(6.8), mapY(0));
+            ctx.lineTo(mapX(6.8)-5, mapY(0)-3); 
+            ctx.moveTo(mapX(6.8), mapY(0));
+            ctx.lineTo(mapX(6.8)-5, mapY(0)+3);
+            // x-axis
+            ctx.moveTo(mapX(0), mapY(0));
+            ctx.lineTo(mapX(0), mapY(13.2));
+            ctx.lineTo(mapX(0)-3, mapY(13.2)+5); 
+            ctx.moveTo(mapX(0), mapY(13.2));
+            ctx.lineTo(mapX(0)+3, mapY(13.2)+5);
+            ctx.stroke();
+
+            // Axis Labels
+            ctx.fillStyle = '#000';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            for (let t = 0; t <= 6; t++) {
+                ctx.fillText(t, mapX(t), mapY(0) + 18);
+            }
+            ctx.fillText("t(s)", mapX(6.8), mapY(0) + 18);
+
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            for (let x = 2; x <= 12; x += 2) {
+                ctx.fillText(x, mapX(0) - 5, mapY(x));
+            }
+            ctx.textBaseline = 'bottom';
+            ctx.fillText("x(m)", mapX(0) + 15, mapY(13.5));
+
+            // Draw Parabola x(t) = t^2 - 8t + 18
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            let isFirstPoint = true;
+            for (let t = 0; t <= 6.2; t += 0.1) {
+                let x = t*t - 8*t + 18;
+                if (x <= 13) {
+                    if (isFirstPoint) {
+                        ctx.moveTo(mapX(t), mapY(x));
+                        isFirstPoint = false;
+                    } else {
+                        ctx.lineTo(mapX(t), mapY(x));
+                    }
+                }
+            }
+            ctx.stroke();
+
+            // Tangent line at t=2
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(mapX(1.1), mapY(9.6)); 
+            ctx.lineTo(mapX(3.5), mapY(0));
+            ctx.stroke();
+        }
+
+        drawGraph();
+
+        // --- 2. Three.js 3D Scene Setup ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a1a);
+
+        // Adjust camera aspect ratio based on the container, not full window
+        const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(0, 50, 20);
+        scene.add(dirLight);
+
+        const gridHelper = new THREE.GridHelper(40, 40, 0x444444, 0x222222);
+        gridHelper.position.y = -2;
+        scene.add(gridHelper);
+
+        const axisMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+        const axisPoints = [];
+        axisPoints.push(new THREE.Vector3(-5, 0, 0));
+        axisPoints.push(new THREE.Vector3(25, 0, 0));
+        const axisGeo = new THREE.BufferGeometry().setFromPoints(axisPoints);
+        const axisLine = new THREE.Line(axisGeo, axisMat);
+        scene.add(axisLine);
+
+        // Markers along x-axis
+        for (let i = 0; i <= 20; i+=2) {
+            const markerGeo = new THREE.BoxGeometry(0.1, 0.5, 0.1);
+            const markerMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const marker = new THREE.Mesh(markerGeo, markerMat);
+            marker.position.set(i, 0, 0);
+            scene.add(marker);
+            
+            // Optional: Add basic number text sprites if needed, skipped for simplicity
+        }
+
+        // The Moving Particle
+        const particleGeo = new THREE.SphereGeometry(0.8, 32, 32);
+        const particleMat = new THREE.MeshStandardMaterial({ 
+            color: 0x00bcd4, 
+            emissive: 0x00bcd4, 
+            emissiveIntensity: 0.5 
+        });
+        const particle = new THREE.Mesh(particleGeo, particleMat);
+        scene.add(particle);
+
+        // Velocity Vector Arrow
+        const arrowDir = new THREE.Vector3(1, 0, 0);
+        const arrowOrigin = new THREE.Vector3(0, 0, 0);
+        const arrowColor = 0xff5722;
+        const velocityArrow = new THREE.ArrowHelper(arrowDir, arrowOrigin, 1, arrowColor, 0.6, 0.4);
+        scene.add(velocityArrow);
+
+        // Simulation Variables
+        let time = 0;
+        const maxTime = 6.0;
+        let x_pos = 18;
+        let v_vel = -8;
+        let isRunning = false;
+        let isFinished = false;
+        const clock = new THREE.Clock();
+
+        // Initial Positions
+        particle.position.set(x_pos, 0, 0);
+        // Adjust camera to fit mobile screens better
+        camera.position.set(10, 15, 25);
+        camera.lookAt(10, 0, 0);
+
+        // --- 3. UI Updates & Logic ---
+        function updateUI() {
+            const stats = document.getElementById('stats');
+            
+            let statusText = "";
+            if (!isRunning && !isFinished && time > 0) statusText = `<span style="color:#ff9800;"><i>(កំពុងផ្អាក)</i></span>`;
+            if (isFinished) statusText = `<span style="color:#4CAF50;"><i>(បញ្ចប់)</i></span>`;
+
+            let html = `នាឡិកា (t): <span class="highlight-t">${time.toFixed(2)} s</span> ${statusText}<br>`;
+            html += `ទីតាំង (x): <span class="highlight-x">${x_pos.toFixed(2)} m</span><br>`;
+            html += `ល្បឿន (v): <span class="highlight-v">${v_vel.toFixed(2)} m/s</span><br><br>`;
+            
+            html += `<b>ចម្លើយ៖</b><br>`;
+            html += `ក. v_avg (1.5s ទៅ 4.0s) = <span class="ans">-2.5 m/s</span><br>`;
+            
+            if (time >= 2.0) {
+                html += `ខ. v(2.00s) = <span class="ans">-4.0 m/s</span><br>`;
+            } else {
+                html += `ខ. v(2.00s) = <i>រង់ចាំដល់ t=2s...</i><br>`;
+            }
+
+            if (time >= 4.0) {
+                html += `គ. t ដែលល្បឿន v=0 គឺ <span class="ans">t = 4.0 s</span>`;
+            } else {
+                html += `គ. t ដែលល្បឿន v=0 គឺ <i>រង់ចាំដល់ v=0...</i>`;
+            }
+
+            stats.innerHTML = html;
+        }
+
+        // Button Event Listeners
+        document.getElementById('startBtn').addEventListener('click', () => {
+            if (!isFinished) {
+                isRunning = true;
+                clock.getDelta(); 
+                updateUI();
+            }
+        });
+
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            isRunning = false;
+            updateUI();
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            isRunning = false;
+            isFinished = false;
+            time = 0;
+            x_pos = 18;
+            v_vel = -8;
+            particle.position.set(x_pos, 0, 0);
+            velocityArrow.position.set(x_pos, 0, 0);
+            velocityArrow.setDirection(new THREE.Vector3(-1, 0, 0));
+            velocityArrow.setLength(Math.abs(v_vel) * 0.5 + 0.1);
+            updateUI();
+        });
+
+        // --- 4. Main Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta();
+
+            if (isRunning) {
+                time += dt * 0.5; // Slow down time for observation
+                
+                if (time >= maxTime) {
+                    time = maxTime;
+                    isRunning = false;
+                    isFinished = true;
+                }
+
+                // Physics Equations: x(t) = t^2 - 8t + 18, v(t) = 2t - 8
+                x_pos = (time * time) - (8 * time) + 18;
+                v_vel = (2 * time) - 8;
+
+                particle.position.x = x_pos;
+
+                // Update Velocity Arrow
+                velocityArrow.position.x = x_pos;
+                velocityArrow.position.y = 1.5; 
+                
+                if (Math.abs(v_vel) > 0.1) {
+                    velocityArrow.visible = true;
+                    if (v_vel > 0) {
+                        velocityArrow.setDirection(new THREE.Vector3(1, 0, 0));
+                    } else {
+                        velocityArrow.setDirection(new THREE.Vector3(-1, 0, 0));
+                    }
+                    velocityArrow.setLength(Math.abs(v_vel) * 0.4);
+                } else {
+                    velocityArrow.visible = false; 
+                }
+
+                updateUI();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Start
+        updateUI();
+        animate();
+
+        // --- 5. Window Resize Handler ---
+        window.addEventListener('resize', () => {
+            // Update based on the container's size, not the full window
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            
+            // Redraw 2D graph to fix any scaling issues on resize
+            drawGraph();
+        });
+    </script>
+</body>
+</html>

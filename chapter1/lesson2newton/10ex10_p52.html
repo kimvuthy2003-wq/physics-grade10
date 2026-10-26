@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ១០ទំព័រ៥២</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Khmer OS Battambang', sans-serif; background-color: #2c3e50; }
+        #info { 
+            position: absolute; top: 15px; left: 15px; color: white; background: rgba(20, 20, 20, 0.92); 
+            padding: 18px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            line-height: 1.6; max-width: 480px; font-size: 15px; border: 2px solid #2ecc71;
+            max-height: 85vh; overflow-y: auto; z-index: 10;
+        }
+        #info h3 { margin-top: 0; color: #2ecc71; border-bottom: 1px solid #444; padding-bottom: 5px; font-size: 17px;}
+        .problem-text { color: #ddd; margin-bottom: 12px; border-left: 4px solid #2ecc71; padding-left: 10px; font-size: 14px;}
+        
+        .legend { display: flex; gap: 12px; margin-top: 8px; font-size: 13px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .color-box { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+
+        #controls { position: absolute; bottom: 20px; left: 20px; z-index: 100; display: flex; flex-wrap: wrap; gap: 10px; max-width: 700px; }
+        button { padding: 10px 18px; font-size: 14px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; color: white; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+        button:hover { filter: brightness(1.1); }
+        
+        #startBtn { background-color: #27ae60; }
+        #resetBtn { background-color: #e74c3c; }
+        #frictionBtn { background-color: #9b59b6; }
+        #forcesBtn { background-color: #f39c12; }
+        #viewBtn { background-color: #2980b9; }
+        
+        .live-data { color: #f1c40f; font-weight: bold; }
+        .instruction { position: absolute; bottom: 80px; left: 20px; color: rgba(255,255,255,0.9); font-size: 14px; pointer-events: none; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 4px;}
+        
+        #info::-webkit-scrollbar { width: 6px; }
+        #info::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        #info::-webkit-scrollbar-thumb { background: #2ecc71; border-radius: 4px; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+    <div id="info">
+        <h3>លំហាត់ទី១០៖ ដុំឈើរអិលលើប្លង់ទេរ</h3>
+        <div class="problem-text">
+            ១០. ដុំឈើមួយរអិលដោយគ្មានកកិតចុះតាមប្លង់ទេរដែលមុំនៃប្លង់ទេរគឺ 20.0° ។ ដុំឈើចាប់ផ្ដើមរអិលពីកំពូលនៃប្លង់ទេរដោយគ្មានល្បឿនដើមនិងប្រវែងនៃប្លង់ទេរគឺ 1.0 m ។<br>
+            ក. គូសដ្យាក្រាមនៃកម្លាំងលើដុំឈើនេះ ។<br>
+            ខ. កំណត់សំទុះនិងល្បឿននៃដុំឈើ កាលណាវាមកដល់បាតនៃប្លង់ទេរ ។<br>
+            គ. ធ្វើសំណួរ(ខ)ឡើងវិញ ក្នុងករណីគិតកកិត និងគេឱ្យមេគុណកកិត μₖ = 0.2 ។
+        </div>
+        
+        <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 5px;">
+            <b>ទិន្នន័យជាក់ស្តែង (Live Data):</b><br>
+            ពេលវេលា (t): <span class="live-data" id="txt-time">0.00 s</span><br>
+            ល្បឿន (v): <span class="live-data" id="txt-vel">0.00 m/s</span><br>
+            សំទុះ (a): <span class="live-data" id="txt-acc">3.35 m/s²</span> <span id="txt-mode" style="color:#aaa; font-size:12px;">(គ្មានកកិត)</span><br>
+            ចម្ងាយចរ (d): <span class="live-data" id="txt-dist">0.00 m</span> / 1.00 m
+            
+            <div class="legend" id="forceLegend" style="display:none;">
+                <div class="legend-item"><span class="color-box" style="background:#e74c3c;"></span> ទម្ងន់ (W)</div>
+                <div class="legend-item"><span class="color-box" style="background:#2ecc71;"></span> ប្រតិកម្មកែង (N)</div>
+                <div class="legend-item"><span class="color-box" style="background:#9b59b6;"></span> កកិត (fₖ)</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="instruction" id="instruction-txt">💡 របៀប 2D៖ ងាយស្រួលសង្កេតវ៉ិចទ័រកម្លាំងបានយ៉ាងត្រឹមត្រូវ</div>
+
+    <div id="controls">
+        <button id="startBtn">ចាប់ផ្តើមរអិល</button>
+        <button id="resetBtn">កំណត់ឡើងវិញ</button>
+        <button id="frictionBtn">របៀប៖ គ្មានកកិត</button>
+        <button id="forcesBtn">បង្ហាញកម្លាំង (Forces)</button>
+        <button id="viewBtn">ទិដ្ឋភាព៖ 2D (មើលពីចំហៀង)</button>
+    </div>
+
+    <script>
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x2c3e50);
+
+        const aspect = window.innerWidth / window.innerHeight;
+        
+        // --- 1. កែសម្រួលទីតាំងកាមេរ៉ា ---
+        // 3D Camera (រំកិលទៅឆ្វេង និងថយក្រោយ ដើម្បីឱ្យប្លង់ទេរនៅខាងស្តាំ)
+        const camera3D = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
+        camera3D.position.set(-2, 10, 26); 
+        
+        // 2D Camera (Orthographic) (រំកិលទីតាំងកណ្តាលទៅខាងស្តាំ)
+        const viewSize = 17; // ពង្រីកការមើលដើម្បីកុំឱ្យបាត់កន្ទុយប្លង់ទេរ
+        const camera2D = new THREE.OrthographicCamera(
+            -viewSize * aspect / 2, viewSize * aspect / 2, 
+            viewSize / 2, -viewSize / 2, 
+            0.1, 1000
+        );
+        camera2D.position.set(3, 4, 20);
+        camera2D.lookAt(3, 4, 0);
+
+        let is2DMode = true; 
+        let activeCamera = camera2D;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera3D, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enabled = false; 
+        controls.target.set(7, 3, 0); // កំណត់ចំណុចកណ្តាលនៃការបង្វិលនៅចំកណ្តាលប្លង់ទេរ
+
+        // Lights
+        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 15);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // Physics Constants
+        const theta_deg = 20.0;
+        const theta = theta_deg * Math.PI / 180;
+        const g = 9.80;
+        const mu_k = 0.2;
+        const realLength = 1.0; 
+        
+        // Visual Scale (1m = 15 units visually)
+        const scale = 15.0; 
+        const visLength = realLength * scale;
+        const wedgeHeight = visLength * Math.sin(theta);
+        const wedgeBase = visLength * Math.cos(theta);
+
+        // Wedge
+        const wedgeShape = new THREE.Shape();
+        wedgeShape.moveTo(0, wedgeHeight);
+        wedgeShape.lineTo(0, 0);
+        wedgeShape.lineTo(wedgeBase, 0);
+        wedgeShape.lineTo(0, wedgeHeight);
+
+        const wedgeGeo = new THREE.ExtrudeGeometry(wedgeShape, { depth: 3, bevelEnabled: false });
+        const wedgeMat = new THREE.MeshStandardMaterial({ color: 0x95a5a6, roughness: 0.8 });
+        const wedge = new THREE.Mesh(wedgeGeo, wedgeMat);
+        wedge.position.z = -1.5; 
+        wedge.receiveShadow = true;
+        scene.add(wedge);
+
+        // Block
+        const blockSize = 1.5;
+        const blockGeo = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
+        const blockMat = new THREE.MeshStandardMaterial({ color: 0xe67e22, roughness: 0.5 });
+        const block = new THREE.Mesh(blockGeo, blockMat);
+        block.castShadow = true;
+        scene.add(block);
+
+        // Forces
+        const forceGroup = new THREE.Group();
+        scene.add(forceGroup);
+        let showForces = false;
+        forceGroup.visible = showForces;
+
+        function setAlwaysOnTop(arrow) {
+            arrow.line.material.depthTest = false; arrow.line.renderOrder = 999;
+            arrow.cone.material.depthTest = false; arrow.cone.renderOrder = 999;
+        }
+
+        const arrowW = new THREE.ArrowHelper(new THREE.Vector3(0,-1,0), new THREE.Vector3(), 4, 0xe74c3c, 0.6, 0.3);
+        const arrowN = new THREE.ArrowHelper(new THREE.Vector3(Math.sin(theta), Math.cos(theta), 0), new THREE.Vector3(), 3, 0x2ecc71, 0.6, 0.3);
+        const arrowFric = new THREE.ArrowHelper(new THREE.Vector3(-Math.cos(theta), Math.sin(theta), 0), new THREE.Vector3(), 1.5, 0x9b59b6, 0.6, 0.3);
+        
+        setAlwaysOnTop(arrowW); setAlwaysOnTop(arrowN); setAlwaysOnTop(arrowFric);
+        forceGroup.add(arrowW); forceGroup.add(arrowN); forceGroup.add(arrowFric);
+
+        // Simulation State
+        let time = 0;
+        let s_real = 0; 
+        let v_real = 0;
+        
+        const a_no_fric = g * Math.sin(theta);
+        const a_fric = g * (Math.sin(theta) - mu_k * Math.cos(theta));
+        
+        let current_a = a_no_fric;
+        let hasFriction = false;
+        let isRunning = false;
+        const clock = new THREE.Clock();
+
+        function updatePositions() {
+            // Calculate visual position
+            const s_vis = s_real * scale;
+            const bX = s_vis * Math.cos(theta);
+            const bY = wedgeHeight - s_vis * Math.sin(theta);
+            
+            // Offset block so it sits on the surface
+            const offsetX = (blockSize/2) * Math.sin(theta);
+            const offsetY = (blockSize/2) * Math.cos(theta);
+            
+            block.position.set(bX + offsetX, bY + offsetY, 0);
+            block.rotation.z = -theta;
+
+            // Update force vectors
+            const forcePos = new THREE.Vector3(block.position.x, block.position.y, 1.6);
+            arrowW.position.copy(forcePos);
+            arrowN.position.copy(forcePos);
+            
+            if (hasFriction) {
+                arrowFric.position.copy(forcePos);
+                arrowFric.position.add(new THREE.Vector3(0, -blockSize/2, 0).applyAxisAngle(new THREE.Vector3(0,0,1), -theta));
+                arrowFric.visible = true;
+            } else {
+                arrowFric.visible = false;
+            }
+
+            // Update UI
+            document.getElementById('txt-time').innerText = time.toFixed(2) + " s";
+            document.getElementById('txt-vel').innerText = v_real.toFixed(2) + " m/s";
+            document.getElementById('txt-dist').innerText = s_real.toFixed(2) + " m";
+            
+            // លុប controls.target.set() នៅទីនេះចេញ ដើម្បីឱ្យអ្នកប្រើអាចទាញ (Pan) កាមេរ៉ា 3D បាន
+        }
+
+        // Controls
+        document.getElementById('startBtn').addEventListener('click', () => {
+            if (s_real < realLength) { isRunning = true; clock.getDelta(); }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            isRunning = false; time = 0; s_real = 0; v_real = 0;
+            updatePositions();
+        });
+
+        const fricBtn = document.getElementById('frictionBtn');
+        fricBtn.addEventListener('click', () => {
+            hasFriction = !hasFriction;
+            current_a = hasFriction ? a_fric : a_no_fric;
+            fricBtn.innerText = hasFriction ? "របៀប៖ មានកកិត (μ = 0.2)" : "របៀប៖ គ្មានកកិត";
+            document.getElementById('txt-acc').innerText = current_a.toFixed(2) + " m/s²";
+            document.getElementById('txt-mode').innerText = hasFriction ? "(មានកកិត)" : "(គ្មានកកិត)";
+            if (time > 0) document.getElementById('resetBtn').click();
+            updatePositions();
+        });
+
+        const forcesBtn = document.getElementById('forcesBtn');
+        const legend = document.getElementById('forceLegend');
+        forcesBtn.addEventListener('click', () => {
+            showForces = !showForces;
+            forceGroup.visible = showForces;
+            legend.style.display = showForces ? 'flex' : 'none';
+            forcesBtn.innerText = showForces ? "លាក់កម្លាំង (Forces)" : "បង្ហាញកម្លាំង (Forces)";
+        });
+
+        const viewBtn = document.getElementById('viewBtn');
+        const instructionTxt = document.getElementById('instruction-txt');
+        viewBtn.addEventListener('click', () => {
+            is2DMode = !is2DMode;
+            if (is2DMode) {
+                activeCamera = camera2D; controls.enabled = false;
+                viewBtn.innerText = "ទិដ្ឋភាព៖ 2D (មើលពីចំហៀង)"; viewBtn.style.backgroundColor = "#2980b9";
+                instructionTxt.innerText = "💡 របៀប 2D៖ ងាយស្រួលសង្កេតវ៉ិចទ័រកម្លាំងបានយ៉ាងត្រឹមត្រូវ";
+            } else {
+                activeCamera = camera3D; controls.enabled = true;
+                viewBtn.innerText = "ទិដ្ឋភាព៖ 3D (អាចបង្វិលបាន)"; viewBtn.style.backgroundColor = "#8e44ad";
+                instructionTxt.innerText = "💡 របៀប 3D៖ ចុច Mouse ឆ្វេងអូសដើម្បីបង្វិល | ស្ក្រូលដើម្បី Zoom";
+            }
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (isRunning) {
+                const dt = clock.getDelta();
+                time += dt;
+                v_real = current_a * time;
+                s_real = 0.5 * current_a * time * time;
+
+                if (s_real >= realLength) {
+                    s_real = realLength;
+                    v_real = Math.sqrt(2 * current_a * realLength);
+                    isRunning = false; 
+                }
+                updatePositions();
+            }
+            if (!is2DMode) controls.update(); // ធ្វើបច្ចុប្បន្នភាព OrbitControls ពេលនៅ 3D
+            renderer.render(scene, activeCamera);
+        }
+
+        updatePositions();
+        animate();
+
+        window.addEventListener('resize', () => {
+            const aspect = window.innerWidth / window.innerHeight;
+            camera3D.aspect = aspect; camera3D.updateProjectionMatrix();
+            camera2D.left = -viewSize * aspect / 2; camera2D.right = viewSize * aspect / 2;
+            camera2D.top = viewSize / 2; camera2D.bottom = -viewSize / 2; camera2D.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

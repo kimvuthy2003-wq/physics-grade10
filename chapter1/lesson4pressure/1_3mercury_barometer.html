@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>១.៣ បារ៉ូម៉ែត្របារត (ការពិសោធន៍លោក តូរីសែល្លី)</title>
+    
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center;
+            margin: 0;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 18px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; max-width: 500px; height: auto;
+            background: #e0f7fa; border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+        }
+
+        .slider-container {
+            margin: 20px auto; padding: 15px; background: white;
+            border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 600px; font-size: 18px; font-weight: bold;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 16px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 24px; display: block; margin-top: 8px;
+        }
+        
+        #liveAtm { color: #007bff; }
+        #liveMmHg { color: #d32f2f; }
+        #livePa { color: #e65100; }
+
+        .controls {
+            margin-top: 20px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; align-items: center;
+        }
+        button {
+            padding: 12px 20px; font-size: 17px; font-weight: bold;
+            font-family: inherit; cursor: pointer; border: none;
+            border-radius: 6px; color: white; transition: 0.2s; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        .btn-play { background: #28a745; } .btn-play:hover { background: #218838; }
+        #resetBtn { background: #6c757d; } #resetBtn:hover { background: #5a6268; }
+        #solutionBtn { background: #17a2b8; } #solutionBtn:hover { background: #138496; }
+
+        .status-bar {
+            margin-top: 20px; font-size: 18px; font-weight: bold;
+            background: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #333; border-left: 6px solid #ccc;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        .solution-box ul { padding-left: 30px; margin-top: 5px; }
+        .highlight { font-weight: bold; color: #d32f2f; font-size: 19px; }
+        .note-box { background: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin-bottom: 15px; border-radius: 4px; color: #664d03;}
+        
+        .text-outline { text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>១.៣ បារ៉ូម៉ែត្របារត ៖</strong> បារ៉ូម៉ែត្រ ជាឧបករណ៍សម្រាប់វាស់សម្ពាធបរិយាកាស ដែលសញ្ញាណរកឃើញដោយលោក តូរីសែល្លី (Torricelli)។ គេយកបំពង់កែវមួយមានប្រវែងប្រហែល $1\text{ m}$ បំពេញបារតរួចផ្កាប់ចូលក្នុងឆ្នាំងបារតមួយ។ បារតនឹងស្រកចុះក្រោម រហូតដល់ទម្ងន់សសរបារតស្មើនឹងកម្លាំងនៃសម្ពាធបរិយាកាសដែលសង្កត់លើផ្ទៃបារតក្នុងឆ្នាំង ទើបវាឈប់ស្រក។ កម្ពស់សសរបារតដែលវាស់បាននៅនីវ៉ូទឹកសមុទ្រគឺ $h = 760 \text{ mm}$។
+    </div>
+
+    <!-- ផ្ទាំង Simulator SVG សុទ្ធ -->
+    <div class="sim-area">
+        <svg viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="dishGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#90a4ae"/>
+                    <stop offset="50%" stop-color="#cfd8dc"/>
+                    <stop offset="100%" stop-color="#90a4ae"/>
+                </linearGradient>
+                <linearGradient id="tubeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#78909c"/>
+                    <stop offset="50%" stop-color="#eceff1"/>
+                    <stop offset="100%" stop-color="#78909c"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ជញ្ជាំងឆ្នាំង (ខាងក្រោយ) -->
+            <path d="M 120 350 L 120 460 Q 120 480 140 480 L 360 480 Q 380 480 380 460 L 380 350" fill="rgba(255,255,255,0.5)" stroke="none" />
+            
+            <!-- បារតក្នុងឆ្នាំង -->
+            <path d="M 122 410 L 122 460 Q 122 478 140 478 L 360 478 Q 378 478 378 460 L 378 410 Z" fill="url(#dishGrad)" />
+            <line x1="122" y1="410" x2="378" y2="410" stroke="#78909c" stroke-width="2" />
+            
+            <!-- ស្រមោលបំពង់ខាងក្រោយ -->
+            <path d="M 235 450 L 235 50 A 15 15 0 0 1 265 50 L 265 450" fill="rgba(255,255,255,0.3)" stroke="#fff" stroke-width="4" />
+
+            <!-- បារតក្នុងបំពង់ -->
+            <rect id="tubeLiq" x="237" y="70" width="26" height="380" fill="url(#tubeGrad)" />
+            <rect id="tubeLiqTop" x="237" y="65" width="26" height="10" rx="5" ry="5" fill="#cfd8dc" />
+
+            <!-- ជញ្ជាំងឆ្នាំង (ខាងមុខ) -->
+            <path d="M 120 350 L 120 460 Q 120 480 140 480 L 360 480 Q 380 480 380 460 L 380 350" fill="none" stroke="#546e7a" stroke-width="4" />
+
+            <!-- Group សម្គាល់មេរៀន -->
+            <g id="annotations" style="opacity: 0; transition: opacity 0.5s;">
+                <!-- សុញ្ញាកាស -->
+                <text id="vacuumText" x="251" y="85" font-family="Arial" font-size="14" fill="#333" font-weight="bold" writing-mode="vertical-rl">សុញ្ញាកាស</text>
+                
+                <!-- ចំណុច M និង N -->
+                <circle cx="250" cy="410" r="4" fill="#d32f2f" />
+                <text x="260" y="425" font-family="Arial" font-size="18" font-weight="bold" fill="#111" class="text-outline">M</text>
+                
+                <circle cx="160" cy="410" r="4" fill="#d32f2f" />
+                <text x="140" y="425" font-family="Arial" font-size="18" font-weight="bold" fill="#111" class="text-outline">N</text>
+
+                <!-- ព្រួញសម្ពាធ P_at ខាងឆ្វេង -->
+                <line x1="150" y1="350" x2="150" y2="400" stroke="#0056b3" stroke-width="3" />
+                <polygon points="145,395 155,395 150,405" fill="#0056b3" />
+                <line x1="180" y1="350" x2="180" y2="400" stroke="#0056b3" stroke-width="3" />
+                <polygon points="175,395 185,395 180,405" fill="#0056b3" />
+                <text x="165" y="340" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#0056b3">P_at</text>
+
+                <!-- ព្រួញសម្ពាធ P_at ខាងស្តាំ -->
+                <line x1="320" y1="350" x2="320" y2="400" stroke="#0056b3" stroke-width="3" />
+                <polygon points="315,395 325,395 320,405" fill="#0056b3" />
+                <line x1="350" y1="350" x2="350" y2="400" stroke="#0056b3" stroke-width="3" />
+                <polygon points="345,395 355,395 350,405" fill="#0056b3" />
+                <text x="335" y="340" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#0056b3">P_at</text>
+
+                <!-- បន្ទាត់វាស់កម្ពស់ h -->
+                <line id="hTopLine" x1="270" y1="150" x2="410" y2="150" stroke="#d32f2f" stroke-width="2" stroke-dasharray="4,4" />
+                <line x1="270" y1="410" x2="410" y2="410" stroke="#d32f2f" stroke-width="2" stroke-dasharray="4,4" />
+                <line id="hVertLine" x1="390" y1="150" x2="390" y2="410" stroke="#d32f2f" stroke-width="2" />
+                
+                <polygon id="hArrTop" points="385,160 395,160 390,150" fill="#d32f2f" />
+                <polygon id="hArrBot" points="385,400 395,400 390,410" fill="#d32f2f" />
+                
+                <text id="hText" x="400" y="280" font-family="Arial" font-weight="bold" font-size="18" fill="#d32f2f" dominant-baseline="middle">h = 760 mm</text>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Slider កែប្រែសម្ពាធ -->
+    <div class="slider-container">
+        បញ្ជាប្តូរសម្ពាធបរិយាកាស (P_at): <span id="sliderValue" style="color: #007bff;">1.00</span> atm
+        <input type="range" id="pressureSlider" min="0.5" max="1.1" value="1.0" step="0.01" disabled>
+        <div style="font-size: 13px; font-weight: normal; color: #666; margin-top: 5px;">* (ឧទាហរណ៍៖ ការយកបារ៉ូម៉ែត្រឡើងភ្នំខ្ពស់ ធ្វើឱ្យសម្ពាធធ្លាក់ចុះ)</div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Grid) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #007bff;">សម្ពាធគិតជា (atm)<br><span id="liveAtm">1.00 atm</span></div>
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">កម្ពស់បារត (h)<br><span id="liveMmHg">760 mm</span></div>
+        <div class="data-box" style="border-top: 4px solid #e65100;">សម្ពាធគិតជា (Pa)<br><span id="livePa">101,325 Pa</span></div>
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="controls">
+        <button class="btn-play" id="playBtn">▶ លែងដៃឱ្យបារតស្រក (ចាប់ផ្តើមពិសោធន៍)</button>
+        <button id="resetBtn">🔄 ចាក់បារតឱ្យពេញវិញ</button>
+        <button id="solutionBtn">📖 បង្ហាញទ្រឹស្តី M និង N</button>
+    </div>
+
+    <div class="status-bar" id="statusText">រង់ចាំចាប់ផ្តើម... (បំពង់កែវដាក់ពេញដោយបារត h = 1000mm)</div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div id="solutionBox" class="solution-box" style="display: none;">
+        <h3>ការទាញរូបមន្តតាមរយៈចំណុច M និង N</h3>
+        <p>យើងយកចំណុចពីរគឺ ចំណុច $M$ នៅក្នុងបំពង់ និងចំណុច $N$ នៅក្រៅបំពង់ដែលស្ថិតនៅលើប្លង់ដេកតែមួយ (កម្រិតផ្ទៃបារតក្នុងឆ្នាំង)។ យើងអាចសរសេរសម្ពាធត្រង់ $M$ និងសម្ពាធត្រង់ $N$៖</p>
+        <ul>
+            <li>សម្ពាធត្រង់ $N$ ជាសម្ពាធបរិយាកាស៖ $P_N = P_{at}$</li>
+            <li>សម្ពាធត្រង់ $M$ ជាសម្ពាធរបស់សសរបារតក្នុងបំពង់៖ $P_M = \rho g h$</li>
+        </ul>
+        <p>តាមគោលការណ៍គ្រឹះនៃអ៊ីដ្រូស្តាទិច ចំណុចនៅលើប្លង់ដេកតែមួយនៃអង្គធាតុរាវតែមួយ មានសម្ពាធស្មើគ្នា៖</p>
+        <p style="text-align: center; font-size: 20px;"><strong>$P_M = P_N \implies P_{at} = \rho_{Hg} \cdot g \cdot h$</strong></p>
+        <p>ដូច្នេះ គេកំណត់យកកម្ពស់សសរបារត ដើម្បីវាស់សម្ពាធបរិយាកាស។</p>
+    </div>
+</div>
+
+<!-- JavaScript ត្រូវបានសរសេរយ៉ាងប្រុងប្រយ័ត្នដើម្បីកុំឱ្យមានការលោត Error -->
+<script>
+    var pxPerMm = 0.34; 
+    var surfaceY = 410;
+
+    var targetAtm = 1.0; 
+    var currentAtm = 1.315; 
+    var hasStarted = false;
+    var isAnimating = false;
+
+    var tubeLiq = document.getElementById('tubeLiq');
+    var tubeLiqTop = document.getElementById('tubeLiqTop');
+    var hTopLine = document.getElementById('hTopLine');
+    var hVertLine = document.getElementById('hVertLine');
+    var hArrTop = document.getElementById('hArrTop');
+    var hText = document.getElementById('hText');
+    var annotations = document.getElementById('annotations');
+    var slider = document.getElementById('pressureSlider');
+    var sliderVal = document.getElementById('sliderValue');
+    
+    var atmDisp = document.getElementById('liveAtm');
+    var mmhgDisp = document.getElementById('liveMmHg');
+    var paDisp = document.getElementById('livePa');
+    var statusText = document.getElementById('statusText');
+
+    function render(atmValue) {
+        var h_mm = atmValue * 760;
+        var paValue = atmValue * 101325;
+        
+        if(h_mm > 1000) h_mm = 1000; 
+
+        var h_px = h_mm * pxPerMm; 
+        var topY = surfaceY - h_px; 
+        
+        tubeLiq.setAttribute("y", topY);
+        tubeLiq.setAttribute("height", surfaceY - topY); 
+        tubeLiqTop.setAttribute("y", topY - 5);
+
+        hTopLine.setAttribute("y1", topY);
+        hTopLine.setAttribute("y2", topY);
+        hVertLine.setAttribute("y1", topY);
+        
+        hArrTop.setAttribute("points", "385," + (topY + 10) + " 395," + (topY + 10) + " 390," + topY);
+        
+        hText.setAttribute("y", topY + (surfaceY - topY)/2);
+        hText.textContent = "h = " + Math.round(h_mm) + " mm";
+
+        sliderVal.innerText = atmValue.toFixed(2);
+        atmDisp.innerText = atmValue.toFixed(2) + " atm";
+        mmhgDisp.innerText = Math.round(h_mm) + " mm";
+        paDisp.innerText = Math.round(paValue).toLocaleString() + " Pa";
+    }
+
+    function loop() {
+        var diff = Math.abs(targetAtm - currentAtm);
+        if (diff > 0.005) {
+            currentAtm += (targetAtm - currentAtm) * 0.1; 
+            render(currentAtm);
+            requestAnimationFrame(loop);
+        } else {
+            currentAtm = targetAtm;
+            render(currentAtm);
+            isAnimating = false;
+        }
+    }
+
+    function setAtm(val) {
+        targetAtm = val;
+        if (isAnimating === false) {
+            isAnimating = true;
+            loop();
+        }
+    }
+
+    slider.addEventListener('input', function() {
+        setAtm(parseFloat(this.value));
+    });
+
+    document.getElementById('playBtn').addEventListener('click', function() {
+        if (hasStarted === false) {
+            hasStarted = true;
+            slider.disabled = false;
+            annotations.style.opacity = '1';
+            setAtm(parseFloat(slider.value));
+            
+            statusText.innerText = "✅ បារតស្រកមកនៅនីវ៉ូ h = 760 mm ដោយសារវាស្មើនឹងសម្ពាធបរិយាកាសសង្កត់ពីក្រៅ។ លោកគ្រូអាចសាកល្បងអូសប្តូរសម្ពាធបាន!";
+            statusText.style.borderLeftColor = '#28a745';
+        }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', function() {
+        hasStarted = false;
+        slider.disabled = true;
+        slider.value = 1.0;
+        annotations.style.opacity = '0';
+        setAtm(1.315); 
+        
+        statusText.innerText = "រង់ចាំចាប់ផ្តើម... (បំពង់កែវដាក់ពេញដោយបារត h \u2248 1000mm)";
+        statusText.style.borderLeftColor = '#ccc';
+    });
+
+    document.getElementById('solutionBtn').addEventListener('click', function() {
+        var box = document.getElementById('solutionBox');
+        if (box.style.display === 'none') {
+            box.style.display = 'block';
+        } else {
+            box.style.display = 'none';
+        }
+    });
+
+    render(1.315);
+</script>
+
+</body>
+</html>

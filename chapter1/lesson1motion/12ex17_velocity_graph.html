@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ១៧</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Khmer OS Battambang', sans-serif; background-color: #111; }
+        
+        /* ផ្ទាំងព័ត៌មានខាងឆ្វេង (បិទបើកបាន) */
+        #info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 480px;
+            max-width: 85vw;
+            background: rgba(15, 15, 15, 0.95);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            border: 2px solid #4CAF50;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #info-panel.hidden {
+            transform: translateX(calc(-100% - 15px));
+        }
+
+        /* ប៊ូតុងលាក់/បង្ហាញទិន្នន័យ (នៅជាប់នឹងផ្ទាំង) */
+        #togglePanelBtn {
+            position: absolute;
+            top: 15px;
+            right: -40px;
+            width: 40px;
+            height: 40px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 3px 0 6px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #togglePanelBtn:hover { background: #45a049; }
+
+        #info-content {
+            padding: 15px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #info-content h3 { margin-top: 0; color: #4CAF50; border-bottom: 1px solid #444; padding-bottom: 5px; font-size: 16px;}
+        .problem-text { color: #ccc; margin-bottom: 15px; font-size: 13px; border-left: 3px solid #4CAF50; padding-left: 10px; }
+        
+        .graph-container {
+            text-align: center;
+            background: #fff;
+            padding: 5px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        canvas.graph { width: 100%; height: 160px; display: block; }
+        .graph-title { position: absolute; top: 5px; left: 10px; color: #000; font-weight: bold; font-size: 12px; z-index: 10;}
+        
+        /* ប៊ូតុងបញ្ជាផ្នែកខាងក្រោម ឆ្វេង */
+        #controls { 
+            position: absolute; 
+            bottom: 20px; 
+            left: 20px; 
+            z-index: 100; 
+            display: flex; 
+            gap: 10px; 
+            background: rgba(15, 15, 15, 0.85);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* ឱ្យផ្ទាំងបញ្ជាលាក់ខ្លួនតាមផ្ទាំងមេ ប្រសិនបើចង់ */
+        #controls.hidden {
+            transform: translateX(calc(-100% - 25px));
+        }
+
+        button.ctrl-btn { 
+            font-family: 'Khmer OS Battambang', sans-serif;
+            padding: 10px 20px; 
+            font-size: 15px; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 5px; 
+            font-weight: bold; 
+            color: white; 
+            transition: 0.3s; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+        #startBtn { background-color: #4CAF50; } #startBtn:hover { background-color: #45a049; }
+        #pauseBtn { background-color: #ff9800; } #pauseBtn:hover { background-color: #e68a00; }
+        #resetBtn { background-color: #f44336; } #resetBtn:hover { background-color: #d32f2f; }
+        
+        .data-panel { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; font-size: 13px;}
+        .hl-t { color: #ffeb3b; font-weight: bold; }
+        .hl-x { color: #00bcd4; font-weight: bold; }
+        .hl-v { color: #ff5722; font-weight: bold; }
+        .hl-a { color: #9c27b0; font-weight: bold; }
+        .ans { color: #8bc34a; font-weight: bold; }
+        
+        #info-content::-webkit-scrollbar { width: 6px; }
+        #info-content::-webkit-scrollbar-track { background: #222; }
+        #info-content::-webkit-scrollbar-thumb { background: #4CAF50; border-radius: 4px; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="info-panel">
+        <button id="togglePanelBtn" onclick="togglePanel()">◀</button>
+        <div id="info-content">
+            <h3>លំហាត់ទី១៧៖ ចលនាចំណុចរូបធាតុ និង ក្រាប</h3>
+            <div class="problem-text">
+                ១៧. ក្រាបនៃវ៉ិចទ័រល្បឿន v ជាអនុគមន៍នៃពេល t របស់ចំណុចរូបធាតុមួយដែលផ្លាស់ទីតាមបណ្តោយអ័ក្ស x ដូចរូប។<br>
+                ក. គូសក្រាបនៃសំទុះ a ជាអនុគមន៍នៃពេល t ។<br>
+                ខ. កំណត់សំទុះមធ្យមចន្លោះពេល t = 5.00s ទៅ t = 15.0s ។<br>
+                គ. កំណត់សំទុះមធ្យមចន្លោះពេល t = 0s ទៅ t = 20.0s ។
+            </div>
+
+            <!-- Canvas សម្រាប់ក្រាបទាំង២ -->
+            <div class="graph-container">
+                <div class="graph-title">ប្រធាន៖ ក្រាបល្បឿន v(t)</div>
+                <canvas id="vGraph" class="graph" width="450" height="180"></canvas>
+            </div>
+            <div class="graph-container" style="border: 2px solid #9c27b0;">
+                <div class="graph-title" style="color: #9c27b0;">ចម្លើយ ក៖ ក្រាបសំទុះ a(t)</div>
+                <canvas id="aGraph" class="graph" width="450" height="140"></canvas>
+            </div>
+
+            <div class="data-panel" id="stats"></div>
+        </div>
+    </div>
+    
+    <div id="controls">
+        <button class="ctrl-btn" id="startBtn">ចាប់ផ្តើម (Start)</button>
+        <button class="ctrl-btn" id="pauseBtn">បញ្ឈប់ (Pause)</button>
+        <button class="ctrl-btn" id="resetBtn">កំណត់ឡើងវិញ</button>
+    </div>
+
+    <script>
+        // មុខងារបិទ/បើកផ្ទាំងទិន្នន័យ និងផ្ទាំងបញ្ជា
+        let panelOpen = true;
+        function togglePanel() {
+            const panel = document.getElementById('info-panel');
+            const controls = document.getElementById('controls');
+            const btn = document.getElementById('togglePanelBtn');
+            panelOpen = !panelOpen;
+            if (panelOpen) {
+                panel.classList.remove('hidden');
+                controls.classList.remove('hidden');
+                btn.innerText = "◀";
+            } else {
+                panel.classList.add('hidden');
+                controls.classList.add('hidden');
+                btn.innerText = "▶";
+            }
+        }
+
+        // --- ផ្នែកទី១៖ គណិតវិទ្យា និង រូបវិទ្យា (Physics Logic) ---
+        let time = 0;
+        const maxTime = 20.0;
+        let x_pos = 0; 
+        let v_vel = -8;
+        let a_accel = 0;
+        let isRunning = false;
+        let isFinished = false;
+        const clock = new THREE.Clock();
+
+        function calculatePhysics(t) {
+            let a, v, x;
+            if (t <= 5) {
+                a = 0;
+                v = -8;
+                x = -8 * t; // តាងទីតាំងដើម x(0)=0
+            } else if (t <= 15) {
+                a = 1.6;
+                v = -8 + 1.6 * (t - 5);
+                x = -40 + (-8 * (t - 5)) + 0.5 * 1.6 * Math.pow(t - 5, 2);
+            } else { // t <= 20
+                a = 0;
+                v = 8;
+                x = -40 + 8 * (t - 15); // x(15) = -40
+            }
+            return { a, v, x };
+        }
+
+        // --- ផ្នែកទី២៖ ក្រាប 2D (Canvas Graphs) ---
+        function drawGraphs(currentTime) {
+            drawVGraph(currentTime);
+            drawAGraph(currentTime);
+        }
+
+        function drawVGraph(t_current) {
+            const cvs = document.getElementById('vGraph');
+            const ctx = cvs.getContext('2d');
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+            
+            const m = { l: 40, r: 20, t: 30, b: 25 };
+            const w = cvs.width - m.l - m.r; const h = cvs.height - m.t - m.b;
+            const mapX = (t) => m.l + (t / 22) * w;
+            const mapY = (v) => m.t + h/2 - (v / 10) * (h/2);
+
+            // Grid
+            ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1; ctx.beginPath();
+            for(let t=0; t<=20; t+=2.5) { ctx.moveTo(mapX(t), m.t); ctx.lineTo(mapX(t), m.t+h); }
+            for(let v=-8; v<=8; v+=2) { ctx.moveTo(m.l, mapY(v)); ctx.lineTo(m.l+w, mapY(v)); }
+            ctx.stroke();
+
+            // Axes
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath();
+            ctx.moveTo(mapX(0), mapY(0)); ctx.lineTo(mapX(22), mapY(0)); // t-axis
+            ctx.moveTo(mapX(0), mapY(-10)); ctx.lineTo(mapX(0), mapY(10)); // v-axis
+            ctx.stroke();
+            
+            ctx.fillStyle = '#000'; ctx.font = '11px Arial';
+            ctx.fillText("5", mapX(5)-3, mapY(0)+12);
+            ctx.fillText("10", mapX(10)-6, mapY(0)+12);
+            ctx.fillText("15", mapX(15)-6, mapY(0)+12);
+            ctx.fillText("20", mapX(20)-6, mapY(0)+12);
+            ctx.fillText("8", mapX(0)-15, mapY(8)+4);
+            ctx.fillText("-8", mapX(0)-18, mapY(-8)+4);
+            ctx.fillText("v(m/s)", mapX(0)-10, m.t-10);
+            ctx.fillText("t(s)", mapX(22), mapY(0)+15);
+
+            // Draw Path up to current time
+            ctx.strokeStyle = '#ff5722'; ctx.lineWidth = 3; ctx.beginPath();
+            ctx.moveTo(mapX(0), mapY(-8));
+            for(let t=0; t<=t_current; t+=0.2) {
+                let v = calculatePhysics(t).v;
+                ctx.lineTo(mapX(t), mapY(v));
+            }
+            ctx.stroke();
+
+            // Moving Dot
+            let currentV = calculatePhysics(t_current).v;
+            ctx.fillStyle = '#f00'; ctx.beginPath();
+            ctx.arc(mapX(t_current), mapY(currentV), 5, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        function drawAGraph(t_current) {
+            const cvs = document.getElementById('aGraph');
+            const ctx = cvs.getContext('2d');
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+            
+            const m = { l: 40, r: 20, t: 30, b: 25 };
+            const w = cvs.width - m.l - m.r; const h = cvs.height - m.t - m.b;
+            const mapX = (t) => m.l + (t / 22) * w;
+            const mapY = (a) => m.t + h - ((a + 0.5) / 2.5) * h; // scale -0.5 to 2.0
+
+            // Grid
+            ctx.strokeStyle = '#eee'; ctx.lineWidth = 1; ctx.beginPath();
+            for(let t=0; t<=20; t+=5) { ctx.moveTo(mapX(t), m.t); ctx.lineTo(mapX(t), m.t+h); }
+            for(let a=0; a<=2; a+=0.8) { ctx.moveTo(m.l, mapY(a)); ctx.lineTo(m.l+w, mapY(a)); }
+            ctx.stroke();
+
+            // Axes
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath();
+            ctx.moveTo(mapX(0), mapY(0)); ctx.lineTo(mapX(22), mapY(0)); 
+            ctx.moveTo(mapX(0), mapY(-0.5)); ctx.lineTo(mapX(0), mapY(2.2)); 
+            ctx.stroke();
+
+            ctx.fillStyle = '#000'; ctx.font = '11px Arial';
+            ctx.fillText("5", mapX(5)-3, mapY(0)+12);
+            ctx.fillText("15", mapX(15)-6, mapY(0)+12);
+            ctx.fillText("1.6", mapX(0)-20, mapY(1.6)+4);
+            ctx.fillText("a(m/s²)", mapX(0)-10, m.t-10);
+
+            // Draw Path
+            ctx.strokeStyle = '#9c27b0'; ctx.lineWidth = 3; ctx.beginPath();
+            ctx.moveTo(mapX(0), mapY(calculatePhysics(0).a));
+            for(let t=0.1; t<=t_current; t+=0.1) {
+                let prevA = calculatePhysics(t-0.1).a;
+                let a = calculatePhysics(t).a;
+                if(Math.abs(a - prevA) > 1) ctx.lineTo(mapX(t), mapY(prevA));
+                ctx.lineTo(mapX(t), mapY(a));
+            }
+            ctx.stroke();
+
+            // Moving Dot
+            let currentA = calculatePhysics(t_current).a;
+            ctx.fillStyle = '#9c27b0'; ctx.beginPath();
+            ctx.arc(mapX(t_current), mapY(currentA), 5, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // --- ផ្នែកទី៣៖ 3D Scene ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x222222);
+
+        // Adjust camera to look correctly along the path
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(-30, 25, 45); 
+        camera.lookAt(-30, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(0, 50, 20);
+        scene.add(dirLight);
+
+        // Grid & X-Axis
+        const gridHelper = new THREE.GridHelper(100, 10, 0x555555, 0x333333);
+        gridHelper.position.set(-30, -2, 0);
+        scene.add(gridHelper);
+
+        const axisMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+        const axisGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(10, 0, 0), new THREE.Vector3(-80, 0, 0)]);
+        scene.add(new THREE.Line(axisGeo, axisMat));
+
+        // Markers along axis (every 10m)
+        for (let i = 10; i >= -70; i -= 10) {
+            const mGeo = new THREE.BoxGeometry(0.2, 1, 0.2);
+            const mMat = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+            const m = new THREE.Mesh(mGeo, mMat);
+            m.position.set(i, 0, 0);
+            scene.add(m);
+        }
+
+        // Particle Object
+        const particleGeo = new THREE.SphereGeometry(1.5, 32, 32);
+        const particleMat = new THREE.MeshStandardMaterial({ color: 0x00bcd4 });
+        const particle = new THREE.Mesh(particleGeo, particleMat);
+        scene.add(particle);
+
+        // Arrows (Velocity and Acceleration)
+        const vArrow = new THREE.ArrowHelper(new THREE.Vector3(1,0,0), new THREE.Vector3(0,0,0), 1, 0xff5722, 1.5, 1);
+        const aArrow = new THREE.ArrowHelper(new THREE.Vector3(1,0,0), new THREE.Vector3(0,0,0), 1, 0x9c27b0, 1.5, 1);
+        scene.add(vArrow);
+        scene.add(aArrow);
+
+        function updateUI() {
+            const stats = document.getElementById('stats');
+            let status = (isFinished) ? " <span style='color:#4CAF50'>(ចប់)</span>" : (isRunning ? "" : " <span style='color:#ff9800'>(ផ្អាក)</span>");
+            
+            let html = `នាឡិកា <span class="hl-t">t = ${time.toFixed(2)} s</span> ${status}<br>`;
+            html += `ទីតាំង <span class="hl-x">x = ${x_pos.toFixed(2)} m</span><br>`;
+            html += `ល្បឿន <span class="hl-v">v = ${v_vel.toFixed(2)} m/s</span><br>`;
+            html += `សំទុះ <span class="hl-a">a = ${a_accel.toFixed(2)} m/s²</span><br><br>`;
+            
+            html += `<b>ចម្លើយ៖</b><br>`;
+            html += `ខ. <span class="hl-a">a_avg(5 ទៅ 15s)</span> = [8 - (-8)] / 10 = <span class="ans">1.6 m/s²</span><br>`;
+            html += `គ. <span class="hl-a">a_avg(0 ទៅ 20s)</span> = [8 - (-8)] / 20 = <span class="ans">0.8 m/s²</span>`;
+            
+            stats.innerHTML = html;
+        }
+
+        // --- Control Listeners ---
+        document.getElementById('startBtn').addEventListener('click', () => { if (!isFinished) { isRunning = true; clock.getDelta(); } });
+        document.getElementById('pauseBtn').addEventListener('click', () => { isRunning = false; updateUI(); });
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            isRunning = false; isFinished = false; time = 0; 
+            updateSimulationState(); 
+        });
+
+        function updateSimulationState() {
+            let phys = calculatePhysics(time);
+            x_pos = phys.x; v_vel = phys.v; a_accel = phys.a;
+
+            particle.position.x = x_pos;
+            
+            // Update V Arrow
+            vArrow.position.set(x_pos, 2, 0);
+            if(Math.abs(v_vel) > 0.1) {
+                vArrow.visible = true;
+                vArrow.setDirection(new THREE.Vector3(Math.sign(v_vel), 0, 0));
+                vArrow.setLength(Math.abs(v_vel) * 0.5); 
+            } else vArrow.visible = false;
+
+            // Update A Arrow
+            aArrow.position.set(x_pos, 4, 0);
+            if(Math.abs(a_accel) > 0.1) {
+                aArrow.visible = true;
+                aArrow.setDirection(new THREE.Vector3(Math.sign(a_accel), 0, 0));
+                aArrow.setLength(Math.abs(a_accel) * 3); 
+            } else aArrow.visible = false;
+
+            // Camera follow smoothly
+            camera.position.x = x_pos + 10; 
+            camera.lookAt(x_pos, 0, 0);
+
+            drawGraphs(time);
+            updateUI();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (isRunning) {
+                const dt = clock.getDelta() * 1.5; 
+                time += dt;
+                if (time >= maxTime) { time = maxTime; isRunning = false; isFinished = true; }
+                updateSimulationState();
+            }
+            renderer.render(scene, camera);
+        }
+
+        updateSimulationState();
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ១៣ - ការប្រៀបធៀបថាមពល (សាំងសមមូល)</title>
+    
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        /* ប្រធានលំហាត់ */
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 18px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        /* ផ្ទាំងបម្រាប់ */
+        .info-panel {
+            background: #fff; padding: 15px; border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;
+            display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px;
+            border-left: 6px solid #28a745; font-size: 16px;
+        }
+        .info-panel strong { color: #d32f2f; font-size: 18px; }
+
+        /* ផ្ទាំង Simulator */
+        .sim-area {
+            position: relative; width: 100%; height: 260px;
+            background: #e9ecef; border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); margin: 0 auto 20px;
+        }
+
+        /* ផ្លូវថ្នល់ */
+        .road {
+            position: absolute; bottom: 20px; width: 100%; height: 180px;
+            background: #78909c; border-top: 5px solid #4caf50; border-bottom: 5px solid #4caf50;
+        }
+        .road-line {
+            position: absolute; top: 50%; width: 100%; height: 4px;
+            background: repeating-linear-gradient(90deg, #fff 0, #fff 20px, transparent 20px, transparent 40px);
+            transform: translateY(-50%);
+        }
+
+        /* គំនូសរង្វាស់ចម្ងាយ (រៀងរាល់ 4 km) */
+        .distance-marker {
+            position: absolute; top: 0; height: 100%; width: 2px;
+            background: rgba(255, 255, 255, 0.4); z-index: 1;
+        }
+        .marker-text {
+            position: absolute; top: 5px; color: #fff; font-weight: bold; font-size: 12px;
+            transform: translateX(-50%); z-index: 1; text-shadow: 1px 1px 2px #000;
+        }
+
+        /* តួអង្គប្រកួត */
+        .racer-container {
+            position: absolute; left: 10px; width: 60px; height: 60px;
+            z-index: 3; display: flex; align-items: center; justify-content: center;
+        }
+        .cyclist { bottom: 100px; } /* គន្លងលើ */
+        .walker { bottom: 20px; }   /* គន្លងក្រោម */
+        
+        .racer-emoji { font-size: 50px; transform: scaleX(-1); }
+        .racer-label {
+            position: absolute; top: -15px; background: rgba(0,0,0,0.7);
+            color: white; padding: 2px 8px; border-radius: 4px; font-size: 14px; font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* ផ្ទាំងប្រៀបធៀបទិន្នន័យ (Grid) */
+        .comparison-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;
+        }
+        
+        .stats-box {
+            background: white; padding: 20px; border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: left;
+        }
+        .stats-header {
+            font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 3px solid #ccc; padding-bottom: 8px;
+        }
+        .header-c { color: #007bff; border-bottom-color: #007bff; }
+        .header-w { color: #28a745; border-bottom-color: #28a745; }
+
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 16px; border-bottom: 1px dashed #eee; padding-bottom: 5px;}
+        .stat-value { font-weight: bold; font-size: 18px; }
+        .val-c { color: #007bff; }
+        .val-w { color: #28a745; }
+        
+        /* Highlight លទ្ធផលចុងក្រោយ */
+        .final-result {
+            background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 15px;
+            text-align: center; font-size: 18px; border: 2px solid #ddd;
+        }
+        .final-result span { font-size: 28px; font-weight: 900; display: block; margin-top: 5px; }
+
+        /* ប៊ូតុងបញ្ជា */
+        .controls {
+            margin-top: 20px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; align-items: center;
+        }
+        button {
+            padding: 12px 25px; font-size: 17px; font-weight: bold;
+            font-family: inherit; cursor: pointer; border: none;
+            border-radius: 6px; color: white; transition: 0.2s; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        .btn-play { background: #6f42c1; font-size: 18px; } .btn-play:hover { background: #5a32a3; }
+        #resetBtn { background: #6c757d; } #resetBtn:hover { background: #5a6268; }
+        #solutionBtn { background: #17a2b8; } #solutionBtn:hover { background: #138496; }
+
+        .status-bar {
+            margin-top: 20px; font-size: 18px; font-weight: bold;
+            background: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #333; border-left: 6px solid #ccc;
+        }
+
+        /* ដំណោះស្រាយ */
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 {
+            margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px;
+        }
+        .solution-box ul { padding-left: 30px; margin-top: 5px; }
+        .highlight { font-weight: bold; color: #d32f2f; font-size: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>លំហាត់ទី ១៣ ៖</strong> ក្នុងសរីរវិទ្យាខ្នាតអានុភាពគិតជា $\text{kcal/h}$ ក្នុងរូបវិទ្យាគិតជា ($\text{W}$) និងត្រូវបានចងចាំថា $1 \text{ kcal} = 1 \text{ Calorie} = 4190 \text{ J}$។ អ្នកជិះកង់ម្នាក់ជិះដោយល្បឿន $16.0 \text{ km/h}$ និងប្រើថាមពលដោយអត្រាប្រហែល $400 \text{ kcal/h}$។ ថ្មើរជើងម្នាក់ដើរដោយល្បឿនប្រហែល $4.80 \text{ km/h}$ ត្រូវការប្រហែល $220 \text{ kcal/h}$។ សាំងមានទិន្នផលប្រហែលជា $0.343 \times 10^8 \text{ J/L}$។ កំណត់ការសន្សំសំចៃឥន្ធនៈដែលសមមូលនឹង $\text{km/L}$ សម្រាប់អ្នកជិះកង់ និងថ្មើរជើង។
+    </div>
+
+    <div class="info-panel">
+        <div>ថាមពលបំប្លែង៖ <strong>1 kcal = 4190 J</strong></div>
+        <div>ទិន្នផលសាំង៖ <strong>E_g = 0.343 &times; 10⁸ J/L = 3.43 &times; 10⁷ J/L</strong></div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator -->
+    <div class="sim-area">
+        <div class="road" id="road">
+            <div class="road-line"></div>
+            <!-- Marker រៀងរាល់ 4km នឹងត្រូវបាន Generate ដោយ JS -->
+            
+            <div class="racer-container cyclist" id="cyclist">
+                <div class="racer-label" style="background: #007bff;">អ្នកជិះកង់ 🚴</div>
+                <div class="racer-emoji">🚴</div>
+            </div>
+            
+            <div class="racer-container walker" id="walker">
+                <div class="racer-label" style="background: #28a745;">អ្នកដើរ 🚶</div>
+                <div class="racer-emoji">🚶</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងប្រៀបធៀបទិន្នន័យ -->
+    <div class="comparison-grid">
+        <!-- អ្នកជិះកង់ -->
+        <div class="stats-box">
+            <div class="stats-header header-c">🚴 អ្នកជិះកង់ (Cyclist)</div>
+            <div class="stat-row">
+                <span>ពេលវេលាសរុប ($t$):</span>
+                <span class="stat-value"><span id="t_c">0.00</span> h</span>
+            </div>
+            <div class="stat-row">
+                <span>ចម្ងាយចរ ($d = v \times t$):</span>
+                <span class="stat-value val-c"><span id="d_c">0.0</span> km</span>
+            </div>
+            <div class="stat-row">
+                <span>ថាមពលបានប្រើ ($E$):</span>
+                <span class="stat-value"><span id="e_c">0</span> kcal</span>
+            </div>
+            <div class="stat-row">
+                <span>សាំងដែលត្រូវឆេះសមមូល ($V$):</span>
+                <span class="stat-value"><span id="l_c">0.000</span> L</span>
+            </div>
+            <div class="final-result" style="border-color: #007bff;">
+                កម្រិតសន្សំសំចៃ ($Economy = \frac{d}{V}$)
+                <span class="val-c" id="eco_c">0.0 km/L</span>
+            </div>
+        </div>
+
+        <!-- អ្នកដើរ -->
+        <div class="stats-box">
+            <div class="stats-header header-w">🚶 ថ្មើរជើង (Walker)</div>
+            <div class="stat-row">
+                <span>ពេលវេលាសរុប ($t$):</span>
+                <span class="stat-value"><span id="t_w">0.00</span> h</span>
+            </div>
+            <div class="stat-row">
+                <span>ចម្ងាយចរ ($d = v \times t$):</span>
+                <span class="stat-value val-w"><span id="d_w">0.0</span> km</span>
+            </div>
+            <div class="stat-row">
+                <span>ថាមពលបានប្រើ ($E$):</span>
+                <span class="stat-value"><span id="e_w">0</span> kcal</span>
+            </div>
+            <div class="stat-row">
+                <span>សាំងដែលត្រូវឆេះសមមូល ($V$):</span>
+                <span class="stat-value"><span id="l_w">0.000</span> L</span>
+            </div>
+            <div class="final-result" style="border-color: #28a745;">
+                កម្រិតសន្សំសំចៃ ($Economy = \frac{d}{V}$)
+                <span class="val-w" id="eco_w">0.0 km/L</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="controls">
+        <button class="btn-play" id="playBtn">▶ ចាប់ផ្តើមធ្វើដំណើរ (រយៈពេល ១ ម៉ោង)</button>
+        <button id="resetBtn">🔄 ត្រឡប់ដើម</button>
+        <button id="solutionBtn">📖 លាក់/បង្ហាញ ដំណោះស្រាយ</button>
+    </div>
+
+    <div class="status-bar" id="statusText">រង់ចាំចាប់ផ្តើម...</div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div id="solutionBox" class="solution-box" style="display: none;">
+        <h3>ដំណោះស្រាយ</h3>
+        <p><strong>បម្រាប់៖</strong> ទិន្នផលសាំង $E_g = 0.343 \times 10^8 \text{ J/L} = 3.43 \times 10^7 \text{ J/L}$។ $1 \text{ kcal} = 4190 \text{ J}$។<br>
+        រូបមន្តសន្សំសំចៃឥន្ធនៈ (Fuel Economy) គិតជា $\text{km/L}$ គឺស្មើនឹង ចម្ងាយដែលធ្វើបានក្នុង១ម៉ោង ចែកនឹង បរិមាណសាំងដែលប្រើអស់ក្នុង១ម៉ោង ($Economy = \frac{v}{\text{L/h}}$)។</p>
+        
+        <p><strong>១. សម្រាប់អ្នកជិះកង់៖</strong></p>
+        <ul>
+            <li>ល្បឿន $v_c = 16.0 \text{ km/h}$។ អានុភាព $P_c = 400 \text{ kcal/h}$។</li>
+            <li>បម្លែងថាមពលជា J/h ៖ $P_c = 400 \times 4190 = 1,676,000 \text{ J/h}$។</li>
+            <li>បរិមាណសាំងត្រូវប្រើក្នុង១ម៉ោង ៖ $V_c = \frac{1,676,000}{3.43 \times 10^7} \approx 0.04886 \text{ L/h}$។</li>
+            <li>កម្រិតសន្សំសំចៃ ៖ $Economy_c = \frac{v_c}{V_c} = \frac{16.0}{0.04886} \approx $ <span class="highlight">327 km/L</span></li>
+        </ul>
+
+        <p><strong>២. សម្រាប់ថ្មើរជើង (អ្នកដើរ)៖</strong></p>
+        <ul>
+            <li>ល្បឿន $v_w = 4.80 \text{ km/h}$។ អានុភាព $P_w = 220 \text{ kcal/h}$។</li>
+            <li>បម្លែងថាមពលជា J/h ៖ $P_w = 220 \times 4190 = 921,800 \text{ J/h}$។</li>
+            <li>បរិមាណសាំងត្រូវប្រើក្នុង១ម៉ោង ៖ $V_w = \frac{921,800}{3.43 \times 10^7} \approx 0.02687 \text{ L/h}$។</li>
+            <li>កម្រិតសន្សំសំចៃ ៖ $Economy_w = \frac{v_w}{V_w} = \frac{4.80}{0.02687} \approx $ <span class="highlight">179 km/L</span></li>
+        </ul>
+        <p><em>ការសន្និដ្ឋាន៖ ការជិះកង់មានភាពសន្សំសំចៃថាមពលខ្ពស់ជាងការដើររហូតដល់ជិត ២ ដង បើធៀបទៅនឹងចម្ងាយផ្លូវដូចគ្នា!</em></p>
+    </div>
+</div>
+
+<script>
+    // ទិន្នន័យរូបវិទ្យា
+    const kcal_to_j = 4190;
+    const gas_j_per_l = 3.43e7; // 3.43 * 10^7
+    const simTimeLimit = 1.0; // ដំណើរការរយៈពេល 1 ម៉ោង
+
+    // អ្នកជិះកង់
+    const v_c = 16.0; // km/h
+    const p_c_kcal = 400; // kcal/h
+    const p_c_j = p_c_kcal * kcal_to_j; // 1,676,000 J/h
+    const vol_c = p_c_j / gas_j_per_l; // L/h
+    const eco_c_final = v_c / vol_c; // ~327.4 km/L
+
+    // អ្នកដើរ
+    const v_w = 4.80; // km/h
+    const p_w_kcal = 220; // kcal/h
+    const p_w_j = p_w_kcal * kcal_to_j; // 921,800 J/h
+    const vol_w = p_w_j / gas_j_per_l; // L/h
+    const eco_w_final = v_w / vol_w; // ~178.6 km/L
+
+    // Scale UI: ចម្ងាយអតិបរមា 16km
+    // Container ~1100px. 16km = 900px => 1km = ~56px
+    const scalePx = 56; 
+    
+    // បង្កើត Marker លើថ្នល់
+    const road = document.getElementById('road');
+    for(let i=1; i<=4; i++) {
+        let km = i * 4; // 4, 8, 12, 16 km
+        
+        let marker = document.createElement('div');
+        marker.className = 'distance-marker';
+        marker.style.left = `${km * scalePx + 40}px`; // 40px offset
+        
+        let label = document.createElement('div');
+        label.className = 'marker-text';
+        label.innerText = `${km} km`;
+        marker.appendChild(label);
+        
+        road.appendChild(marker);
+    }
+
+    let animationFrameId;
+    let isRunning = false;
+    let timeH = 0; // ពេលវេលាគិតជា ម៉ោង (h)
+    let lastTimeMs = 0;
+    const animDuration = 6000; // ឱ្យ 1 ម៉ោងក្នុង simulation ស្មើនឹង 6 វិនាទីពិត
+
+    const cyclistEl = document.getElementById('cyclist');
+    const walkerEl = document.getElementById('walker');
+    
+    // UI Elements
+    const ids = ['t_c', 'd_c', 'e_c', 'l_c', 'eco_c', 't_w', 'd_w', 'e_w', 'l_w', 'eco_w'];
+    const ui = {};
+    ids.forEach(id => ui[id] = document.getElementById(id));
+    
+    const statusText = document.getElementById('statusText');
+
+    function updateUI() {
+        // គណនាទិន្នន័យ
+        let dC = v_c * timeH;
+        let eC = p_c_kcal * timeH;
+        let lC = vol_c * timeH;
+        let ecoC = lC > 0 ? (dC / lC) : 0;
+
+        let dW = v_w * timeH;
+        let eW = p_w_kcal * timeH;
+        let lW = vol_w * timeH;
+        let ecoW = lW > 0 ? (dW / lW) : 0;
+
+        // បង្ហាញលេខ
+        ui.t_c.innerText = timeH.toFixed(2);
+        ui.t_w.innerText = timeH.toFixed(2);
+        
+        ui.d_c.innerText = dC.toFixed(2);
+        ui.d_w.innerText = dW.toFixed(2);
+        
+        ui.e_c.innerText = Math.round(eC);
+        ui.e_w.innerText = Math.round(eW);
+        
+        ui.l_c.innerText = lC.toFixed(3);
+        ui.l_w.innerText = lW.toFixed(3);
+
+        ui.eco_c.innerText = ecoC > 0 ? ecoC.toFixed(0) + " km/L" : "0 km/L";
+        ui.eco_w.innerText = ecoW > 0 ? ecoW.toFixed(0) + " km/L" : "0 km/L";
+
+        // រំកិលទីតាំងរូបភាព
+        cyclistEl.style.transform = `translateX(${dC * scalePx}px)`;
+        walkerEl.style.transform = `translateX(${dW * scalePx}px)`;
+    }
+
+    function animate(timestamp) {
+        if (!lastTimeMs) lastTimeMs = timestamp;
+        let dtMs = timestamp - lastTimeMs;
+        lastTimeMs = timestamp;
+
+        if (isRunning) {
+            // បម្លែង ms ទៅជា ម៉ោងក្នុង simulation
+            let dtSim = dtMs / animDuration; 
+            timeH += dtSim;
+
+            if (timeH >= simTimeLimit) {
+                timeH = simTimeLimit;
+                isRunning = false;
+                
+                statusText.innerHTML = `✅ បញ្ចប់រយៈពេល ១ ម៉ោង! <strong>អ្នកជិះកង់សន្សំសំចៃជាង (327 km/L) ធៀបនឹងអ្នកដើរ (179 km/L)!</strong>`;
+                statusText.style.borderLeftColor = "#28a745";
+            }
+
+            updateUI();
+
+            if (isRunning) {
+                animationFrameId = requestAnimationFrame(animate);
+            }
+        }
+    }
+
+    document.getElementById('playBtn').addEventListener('click', () => {
+        if (!isRunning && timeH < simTimeLimit) {
+            isRunning = true;
+            lastTimeMs = performance.now();
+            statusText.innerText = "កំពុងធ្វើដំណើរ... សង្កេតមើលកម្រិតស៊ីសាំង (L) ធៀបនឹងចម្ងាយ (km)!";
+            statusText.style.borderLeftColor = "#ffc107";
+            animationFrameId = requestAnimationFrame(animate);
+        }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        isRunning = false;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        timeH = 0;
+        lastTimeMs = 0;
+        updateUI();
+        statusText.innerText = "រង់ចាំចាប់ផ្តើម...";
+        statusText.style.borderLeftColor = "#ccc";
+    });
+
+    document.getElementById('solutionBtn').addEventListener('click', () => {
+        const box = document.getElementById('solutionBox');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // កំណត់តម្លៃដើម
+    updateUI();
+</script>
+
+</body>
+</html>

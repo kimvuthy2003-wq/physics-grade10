@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>៤.២ គោលការណ៍អាកស៊ីម៉ែត និងកម្លាំងដំណោល (3D)</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center;
+            margin: 0;
+        }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; max-width: 500px; height: auto;
+            background: #e0f7fa; border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 16px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 8px;
+        }
+        
+        #liveFb { color: #28a745; }
+        #liveV { color: #007bff; }
+        #liveRho { color: #d32f2f; font-size: 24px;}
+
+        .btn-toggle {
+            background: #007bff; color: white; padding: 15px 30px; font-size: 18px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-family: inherit; margin-bottom: 20px; transition: background 0.3s;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        
+        .note-box { 
+            background: #e8f5e9; border-left: 6px solid #28a745; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #1b5e20; 
+        }
+
+        .text-outline { text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>៤.២ អង្គធាតុលិចទាំងស្រុង ៖</strong> មនុស្សម្នាក់មានទម្ងន់ពិត $W = 720.0 \text{ N}$។ នៅពេលគាត់អង្គុយក្នុងសង្រែក ហើយជ្រមុជទាំងស្រុងទៅក្នុងទឹកដែលមានម៉ាសមាឌ $\rho = 1000 \text{ kg/m}^3$ ទម្ងន់ដែលអានបាននៅលើជញ្ជីង (កម្លាំងតំណឹងខ្សែ $T$) ធ្លាក់ចុះសល់ត្រឹមតែ $34.3 \text{ N}$ ប៉ុណ្ណោះ។ តាមលំនឹង <strong>$T + F_b - W = 0$</strong>។<br>ចូរគណនាមាឌ ($V$) និងម៉ាសមាឌរបស់មនុស្ស ($\rho'$ )។
+    </div>
+
+    <button id="toggleBtn" class="btn-toggle">ទម្លាក់មនុស្សចូលទៅក្នុងទឹក</button>
+
+    <!-- ផ្ទាំង Simulator 3D SVG សុទ្ធ -->
+    <div class="sim-area">
+        <svg viewBox="0 0 500 550" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <!-- 3D Gradients -->
+                <linearGradient id="waterBody" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#0288d1" stop-opacity="0.8"/>
+                    <stop offset="50%" stop-color="#4fc3f7" stop-opacity="0.6"/>
+                    <stop offset="100%" stop-color="#01579b" stop-opacity="0.85"/>
+                </linearGradient>
+                <linearGradient id="tankBody" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#cfd8dc" stop-opacity="0.5"/>
+                    <stop offset="50%" stop-color="#ffffff" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="#90a4ae" stop-opacity="0.6"/>
+                </linearGradient>
+                <radialGradient id="headGrad" cx="35%" cy="30%" r="65%">
+                    <stop offset="0%" stop-color="#ffcc80"/>
+                    <stop offset="100%" stop-color="#e65100"/>
+                </radialGradient>
+                <linearGradient id="shirtGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#1e88e5"/>
+                    <stop offset="50%" stop-color="#64b5f6"/>
+                    <stop offset="100%" stop-color="#0d47a1"/>
+                </linearGradient>
+                <linearGradient id="woodGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#a1887f"/>
+                    <stop offset="100%" stop-color="#5d4037"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ជញ្ជាំងធុងទឹក (ខាងក្រោយ) -->
+            <path d="M 120 230 A 130 20 0 0 1 380 230" fill="none" stroke="#546e7a" stroke-width="4" opacity="0.4" />
+            
+            <!-- តួធុងទឹក -->
+            <path d="M 120 230 L 120 520 A 130 20 0 0 0 380 520 L 380 230" fill="url(#tankBody)" stroke="#546e7a" stroke-width="4" />
+            
+            <!-- តួទឹក -->
+            <path d="M 122 280 L 122 520 A 128 18 0 0 0 378 520 L 378 280 Z" fill="url(#waterBody)" />
+            
+            <!-- ជញ្ជីងរង្វាស់ -->
+            <rect x="220" y="10" width="60" height="90" rx="10" fill="#fff" stroke="#333" stroke-width="3" />
+            <circle cx="250" cy="45" r="20" fill="#f4f6f9" stroke="#333" stroke-width="2" />
+            <line id="scaleNeedle" x1="250" y1="45" x2="250" y2="25" stroke="#d32f2f" stroke-width="2" transform="rotate(60 250 45)" />
+            <text id="scaleText" x="250" y="85" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#d32f2f">720 N</text>
+
+            <!-- ខ្សែយោងពណ៌ក្រហម -->
+            <line id="mainRope" x1="250" y1="100" x2="250" y2="150" stroke="#d32f2f" stroke-width="4" />
+
+            <!-- តួអង្គមនុស្ស និងទោង -->
+            <g id="personGroup" transform="translate(0, 0)">
+                <!-- ខ្សែទោងពណ៌ក្រហម -->
+                <line x1="250" y1="150" x2="215" y2="280" stroke="#d32f2f" stroke-width="3" />
+                <line x1="250" y1="150" x2="285" y2="280" stroke="#d32f2f" stroke-width="3" />
+                
+                <rect x="205" y="280" width="90" height="12" rx="6" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="2" />
+
+                <!-- រូបមនុស្ស 3D -->
+                <line x1="240" y1="260" x2="230" y2="305" stroke="#333" stroke-width="9" stroke-linecap="round" />
+                <line x1="260" y1="260" x2="270" y2="305" stroke="#333" stroke-width="9" stroke-linecap="round" />
+                <rect x="233" y="220" width="34" height="45" rx="8" fill="url(#shirtGrad)" />
+                <circle cx="250" cy="195" r="20" fill="url(#headGrad)" stroke="#e65100" stroke-width="1"/>
+                <line x1="233" y1="225" x2="210" y2="265" stroke="#ffb74d" stroke-width="7" stroke-linecap="round" />
+                <line x1="267" y1="225" x2="290" y2="265" stroke="#ffb74d" stroke-width="7" stroke-linecap="round" />
+
+                <!-- វ៉ិចទ័រកម្លាំង W (ពណ៌ស្វាយចុះក្រោម) -->
+                <line id="vecW" x1="260" y1="245" x2="260" y2="345" stroke="#6f42c1" stroke-width="4" />
+                <polygon id="headW" points="255,345 265,345 260,355" fill="#6f42c1" />
+                <text x="270" y="350" font-family="Arial" font-weight="bold" font-size="20" fill="#6f42c1" class="text-outline">W</text>
+
+                <!-- វ៉ិចទ័រកម្លាំង T (ពណ៌ក្រហមឡើងលើ) -->
+                <line id="vecT" x1="230" y1="235" x2="230" y2="185" stroke="#d32f2f" stroke-width="4" />
+                <polygon id="headT" points="225,185 235,185 230,175" fill="#d32f2f" />
+                <text x="205" y="190" font-family="Arial" font-weight="bold" font-size="20" fill="#d32f2f" class="text-outline">T</text>
+
+                <!-- វ៉ិចទ័រកម្លាំង Fb (ពណ៌បៃតងឡើងលើពីក្រោម) -->
+                <g id="vecFbGroup" style="opacity: 0;">
+                    <line id="vecFb" x1="285" y1="285" x2="285" y2="205" stroke="#28a745" stroke-width="5" />
+                    <polygon id="headFb" points="280,205 290,205 285,195" fill="#28a745" />
+                    <text x="295" y="215" font-family="Arial" font-weight="bold" font-size="20" fill="#28a745" class="text-outline">F_b</text>
+                </g>
+            </g>
+
+            <!-- ផ្ទៃទឹកផ្នែកខាងលើ -->
+            <ellipse cx="250" cy="280" rx="128" ry="18" fill="#81d4fa" opacity="0.9" />
+            <path d="M 120 230 A 130 20 0 0 0 380 230" fill="none" stroke="#546e7a" stroke-width="4" />
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            ទម្ងន់ពិតនៅលើគោក ($W$) គិតជា ញូតុន:<br>
+            <span id="valW" style="color: #6f42c1; font-size:22px;">720.0</span> N
+            <input type="range" id="sliderW" min="500" max="1000" value="720.0" step="1.0">
+        </div>
+        <div class="slider-box">
+            កម្លាំងតំណឹងខ្សែពេលលិចទឹក ($T$) គិតជា ញូតុន:<br>
+            <span id="valT" style="color: #d32f2f; font-size:22px;">34.3</span> N
+            <input type="range" id="sliderT" min="10" max="100" value="34.3" step="0.1">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Grid) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #28a745;">ដំណោលអាកស៊ីម៉ែត F<sub>b</sub><br><span id="liveFb">685.7 N</span></div>
+        <div class="data-box" style="border-top: 4px solid #007bff;">មាឌមនុស្ស V<br><span id="liveV">0.0699 m&sup3;</span></div>
+        <div class="data-box" style="border-top: 4px solid #6f42c1;">ម៉ាសមាតមនុស្ស &rho;'<br><span id="liveRho">1050 kg/m&sup3;</span></div>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយលំហាត់គំរូ -->
+    <div class="solution-box">
+        <div class="note-box">
+            💡 <strong>សម្គាល់ពីសៀវភៅពុម្ព៖</strong> ម៉ាសមាតរបស់មនុស្សមានតម្លៃធំជាងម៉ាសមាតទឹកបន្តិចបន្តួចប៉ុណ្ណោះ ($\rho' \approx 1050 \text{ kg/m}^3$)។ បើយើងដកដង្ហើមបញ្ចូលខ្យល់ពេញសួត មាឌយើងធំឡើង ម៉ាសមាតយើងនឹងតូចជាងទឹក នោះយើងនឹងអណ្តែត!
+        </div>
+
+        <h3>ដំណោះស្រាយលំហាត់គំរូ</h3>
+        
+        <div id="mathContainer">
+            <p><strong>១. គណនាកម្លាំងដំណោលអាកស៊ីម៉ែត ($F_b$) ៖</strong></p>
+            <div id="mathLine1">$$ F_b = W - T = 720.0 - 34.3 = 685.7 \text{ N} $$</div>
+
+            <p><strong>២. គណនាមាឌផ្នែកលិចទឹក ដែលស្មើនឹងមាឌមនុស្ស ($V$) ៖</strong></p>
+            <div id="mathLine2">$$ V = \frac{F_b}{\rho \cdot g} = \frac{685.7}{1000 \times 9.80} = 0.0699 \text{ m}^3 $$</div>
+
+            <p><strong>៣. គណនាម៉ាសមាឌមនុស្ស ($\rho'$) ៖</strong></p>
+            <div id="mathLine3">$$ \rho' = \frac{W}{V \cdot g} = \frac{720.0}{0.0699 \times 9.80} = 1050 \text{ kg/m}^3 $$</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var sliderW = document.getElementById('sliderW');
+    var sliderT = document.getElementById('sliderT');
+    var valW = document.getElementById('valW');
+    var valT = document.getElementById('valT');
+
+    var toggleBtn = document.getElementById('toggleBtn');
+    var personGroup = document.getElementById('personGroup');
+    var scaleNeedle = document.getElementById('scaleNeedle');
+    var scaleText = document.getElementById('scaleText');
+    var mainRope = document.getElementById('mainRope');
+    
+    var vecW = document.getElementById('vecW');
+    var headW = document.getElementById('headW');
+    var vecT = document.getElementById('vecT');
+    var headT = document.getElementById('headT');
+    var vecFbGroup = document.getElementById('vecFbGroup');
+    var vecFb = document.getElementById('vecFb');
+    var headFb = document.getElementById('headFb');
+
+    var targetProgress = 0; 
+    var currentProgress = 0;
+    var isAnimating = false;
+
+    var wValue = 720.0;
+    var tValue = 34.3;
+    var fbValue = 685.7;
+
+    function loopAnimation() {
+        var diff = targetProgress - currentProgress;
+        if (diff.toFixed(3) !== "0.000" && diff.toFixed(3) !== "-0.000") {
+            currentProgress += diff * 0.05; 
+            updateGraphics();
+            requestAnimationFrame(loopAnimation);
+        } else {
+            currentProgress = targetProgress;
+            updateGraphics();
+            isAnimating = false;
+        }
+    }
+
+    function updateGraphics() {
+        var currentY = currentProgress * 200;
+        personGroup.setAttribute("transform", "translate(0, " + currentY + ")");
+        mainRope.setAttribute("y2", 150 + currentY);
+
+        var currentWeight = wValue - (currentProgress * fbValue);
+        
+        scaleText.textContent = currentWeight.toFixed(1) + " N";
+        
+        var angle = -60 + (currentWeight / 1000) * 120;
+        scaleNeedle.setAttribute("transform", "rotate(" + angle + " 250 45)");
+
+        var lenW = (wValue / 1000) * 120;
+        var yEndW = 245 + lenW;
+        vecW.setAttribute("y2", yEndW);
+        headW.setAttribute("points", "255," + yEndW + " 265," + yEndW + " 260," + (yEndW + 10));
+
+        var lenT = (currentWeight / 1000) * 120;
+        var yEndT = 235 - lenT;
+        vecT.setAttribute("y2", yEndT);
+        headT.setAttribute("points", "225," + yEndT + " 235," + yEndT + " 230," + (yEndT - 10));
+
+        vecFbGroup.style.opacity = currentProgress; 
+        var currentFb = currentProgress * fbValue;
+        var lenFb = (currentFb / 1000) * 120;
+        var yEndFb = 285 - lenFb;
+        vecFb.setAttribute("y2", yEndFb);
+        headFb.setAttribute("points", "280," + yEndFb + " 290," + yEndFb + " 285," + (yEndFb - 10));
+    }
+
+    var mathTimeout;
+    function updateMathJax() {
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            var v = fbValue / (1000 * 9.8);
+            var rho = wValue / (v * 9.8);
+
+            document.getElementById('mathLine1').textContent = "$$ F_b = W - T = " + wValue.toFixed(1) + " - " + tValue.toFixed(1) + " = " + fbValue.toFixed(1) + " \\text{ N} $$";
+            document.getElementById('mathLine2').textContent = "$$ V = \\frac{F_b}{\\rho \\cdot g} = \\frac{" + fbValue.toFixed(1) + "}{1000 \\times 9.80} = " + v.toFixed(4) + " \\text{ m}^3 $$";
+            document.getElementById('mathLine3').textContent = "$$ \\rho' = \\frac{W}{V \\cdot g} = \\frac{" + wValue.toFixed(1) + "}{" + v.toFixed(4) + " \\times 9.80} = " + Math.round(rho) + " \\text{ kg/m}^3 $$";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    function handleSliderChange() {
+        wValue = parseFloat(sliderW.value);
+        tValue = parseFloat(sliderT.value);
+        
+        tValue = Math.min(wValue - 10, tValue);
+        sliderT.value = tValue.toFixed(1);
+
+        fbValue = wValue - tValue;
+        var volume = fbValue / (1000 * 9.80);
+        var rhoPerson = wValue / (volume * 9.80);
+
+        valW.innerText = wValue.toFixed(1);
+        valT.innerText = tValue.toFixed(1);
+
+        document.getElementById('liveFb').innerText = fbValue.toFixed(1) + " N";
+        document.getElementById('liveV').innerText = volume.toFixed(4) + " m\u00B3"; 
+        document.getElementById('liveRho').innerText = Math.round(rhoPerson).toLocaleString() + " kg/m\u00B3";
+
+        updateGraphics();
+        updateMathJax();
+    }
+
+    toggleBtn.addEventListener('click', function() {
+        if (targetProgress === 0) {
+            targetProgress = 1; 
+            toggleBtn.innerText = "ទាញមនុស្សឡើងលើគោកវិញ";
+            toggleBtn.style.background = "#d32f2f";
+        } else {
+            targetProgress = 0; 
+            toggleBtn.innerText = "ទម្លាក់មនុស្សចូលទៅក្នុងទឹក";
+            toggleBtn.style.background = "#007bff";
+        }
+        
+        if (isAnimating === false) {
+            isAnimating = true;
+            loopAnimation();
+        }
+    });
+
+    sliderW.addEventListener('input', handleSliderChange);
+    sliderT.addEventListener('input', handleSliderChange);
+
+    updateGraphics();
+</script>
+
+</body>
+</html>

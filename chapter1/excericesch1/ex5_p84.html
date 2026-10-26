@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី៥៖ កម្លាំងដំណោលអាកស៊ីម៉ែត និងទម្ងន់ព្រាងក្នុងទឹក</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 550px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 600px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .action-btn-container {
+            min-height: 50px; margin-bottom: 20px;
+        }
+        button {
+            background: #007bff; color: white; padding: 12px 24px; font-size: 18px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s; width: 100%;
+        }
+        button:hover { filter: brightness(1.1); }
+        #btnSetValues { background: #28a745; margin-bottom: 10px; }
+        #btnAction { background: #d32f2f; }
+        #btnToggleSolution { background: #17a2b8; margin-bottom: 20px; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        @media (max-width: 600px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 14px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 10px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 20px; }
+        
+        .note-box { 
+            background: #e8f5e9; border-left: 6px solid #28a745; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #1b5e20; 
+        }
+
+        .text-outline { text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; }
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ប្រធានលំហាត់ -->
+    <div class="problem-statement">
+        <strong>៥.</strong> គេពន្លិចអង្គធាតុមួយមានម៉ាស $200 \text{ g}$ និងម៉ាសមាត $7800 \text{ kg/m}^3$ ចូលទៅក្នុងទឹក ។<br>
+        ក. រកតម្លៃនៃកម្លាំងដំណោលអាកស៊ីម៉ែត ?<br>
+        ខ. ទម្ងន់ក្នុងទឹក (ទម្ងន់ទំនង) របស់អង្គធាតុដែលលិចទាំងស្រុង ?
+    </div>
+
+    <button id="btnSetValues">🎯 កំណត់តម្លៃតាមលំហាត់ពិតប្រាកដ</button>
+    <div class="action-btn-container">
+        <button id="btnAction">👇 ទម្លាក់អង្គធាតុចូលក្នុងទឹក</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 600 650" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#4fc3f7" stop-opacity="0.8"/>
+                    <stop offset="100%" stop-color="#0277bd" stop-opacity="0.95"/>
+                </linearGradient>
+                <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#cfd8dc"/>
+                    <stop offset="50%" stop-color="#ffffff"/>
+                    <stop offset="100%" stop-color="#90a4ae"/>
+                </linearGradient>
+                <linearGradient id="blockGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#78909c"/>
+                    <stop offset="100%" stop-color="#37474f"/>
+                </linearGradient>
+            </defs>
+
+            <!-- កែវបេស៊ែរផ្ទុកទឹក -->
+            <path d="M 150 400 L 150 600 A 20 20 0 0 0 170 620 L 430 620 A 20 20 0 0 0 450 600 L 450 400" fill="none" stroke="#90a4ae" stroke-width="6"/>
+            <!-- ផ្ទៃទឹក -->
+            <path d="M 153 430 L 153 600 A 17 17 0 0 0 170 617 L 430 617 A 17 17 0 0 0 447 600 L 447 430 Z" fill="url(#waterGrad)"/>
+            <line x1="153" y1="430" x2="447" y2="430" stroke="#0288d1" stroke-width="3"/>
+
+            <!-- ជើងទម្រខាងលើ -->
+            <line x1="180" y1="30" x2="420" y2="30" stroke="#37474f" stroke-width="12" stroke-linecap="round"/>
+
+            <!-- ខ្សែយោងពីជើងទម្រមកឌីណាម៉ូម៉ែត្រ (ដកចេញពីក្រុមចល័ត ដើម្បីកុំឱ្យដាច់ពីជើងទម្រ) -->
+            <line id="topRope" x1="300" y1="30" x2="300" y2="80" stroke="#555" stroke-width="4"/>
+
+            <!-- ប្រព័ន្ធឌីណាម៉ូម៉ែត្រ និងដុំវត្ថុ (ចល័ត) -->
+            <g id="measuringSystem" transform="translate(0, 0)">
+                <!-- តួឌីណាម៉ូម៉ែត្រ -->
+                <rect x="270" y="80" width="60" height="150" fill="url(#metalGrad)" stroke="#455a64" stroke-width="4" rx="8"/>
+                <rect x="285" y="90" width="30" height="130" fill="#fff" stroke="#ccc" stroke-width="1"/>
+                
+                <!-- គំនូសមាត្រដ្ឋាន -->
+                <line x1="285" y1="100" x2="295" y2="100" stroke="#333" stroke-width="2"/>
+                <line x1="285" y1="130" x2="295" y2="130" stroke="#333" stroke-width="2"/>
+                <line x1="285" y1="160" x2="295" y2="160" stroke="#333" stroke-width="2"/>
+                <line x1="285" y1="190" x2="295" y2="190" stroke="#333" stroke-width="2"/>
+
+                <!-- ទ្រនិចពណ៌ក្រហម (រំកិលតាមទម្ងន់ព្រាង) -->
+                <line id="needle" x1="285" y1="170" x2="315" y2="170" stroke="#d32f2f" stroke-width="4"/>
+
+                <!-- ប្រអប់បង្ហាញតម្លៃឌីជីថល -->
+                <rect x="340" y="130" width="85" height="30" fill="#212121" rx="4"/>
+                <text id="txtDisplay" x="382" y="151" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#00e676">1.96 N</text>
+
+                <!-- ខ្សែយោងទៅដុំវត្ថុ -->
+                <line id="bottomRope" x1="300" y1="230" x2="300" y2="330" stroke="#555" stroke-width="3"/>
+
+                <!-- ដុំវត្ថុរឹង -->
+                <g id="solidBlock" transform="translate(0, 0)">
+                    <rect id="objRect" x="260" y="330" width="80" height="60" fill="url(#blockGrad)" stroke="#111" stroke-width="3" rx="4"/>
+                    <!-- ផ្លែសន្ទូចថ្ពក់ -->
+                    <path id="objHook" d="M 290 330 Q 300 310 310 330" fill="none" stroke="#757575" stroke-width="4"/> 
+                    
+                    <!-- វ៉ិចទ័រកម្លាំង W (ទម្ងន់ពិត - ចុះក្រោម ពណ៌ស្វាយ) -->
+                    <line id="vecW" x1="300" y1="360" x2="300" y2="450" stroke="#6f42c1" stroke-width="4" />
+                    <polygon id="headW" points="295,450 305,450 300,460" fill="#6f42c1" />
+                    <text id="txtW" x="315" y="455" font-family="Arial" font-weight="bold" font-size="20" fill="#6f42c1" class="text-outline">W</text>
+
+                    <!-- វ៉ិចទ័រកម្លាំងតំណឹងខ្សែ T (ទម្ងន់ព្រាង - ឡើងលើ ពណ៌ក្រហម) -->
+                    <line id="vecT" x1="300" y1="330" x2="300" y2="240" stroke="#d32f2f" stroke-width="4" />
+                    <polygon id="headT" points="295,240 305,240 300,230" fill="#d32f2f" />
+                    <text id="txtT" x="270" y="250" font-family="Arial" font-weight="bold" font-size="20" fill="#d32f2f" class="text-outline">T</text>
+
+                    <!-- វ៉ិចទ័រកម្លាំងដំណោល FA (ឡើងលើ ពណ៌បៃតង - លេចចេញពេលចូលទឹក) -->
+                    <g id="vecFbGroup" style="opacity: 0;">
+                        <line id="vecFb" x1="335" y1="360" x2="335" y2="300" stroke="#28a745" stroke-width="5" />
+                        <polygon id="headFb" points="330,300 340,300 335,290" fill="#28a745" />
+                        <text id="txtFbLabel" x="345" y="310" font-family="Arial" font-weight="bold" font-size="20" fill="#28a745" class="text-outline">F_A</text>
+                    </g>
+                </g>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            ម៉ាសអង្គធាតុ $m$ (g):<br>
+            <span id="valM" class="number-display" style="color: #111; font-size:24px;">200 g</span>
+            <input type="range" id="sliderM" min="50" max="1000" value="200" step="10">
+        </div>
+        <div class="slider-box">
+            ម៉ាសមាតអង្គធាតុ $\rho$ (kg/m³):<br>
+            <span id="valRho" class="number-display" style="color: #6f42c1; font-size:24px;">7800 kg/m³</span>
+            <input type="range" id="sliderRho" min="1500" max="12000" value="7800" step="100">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #6f42c1;">ទម្ងន់ពិតក្នុងខ្យល់ $W$<br><span id="liveW" class="number-display">1.96 N</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">ក. ដំណោលអាកស៊ីម៉ែត $F_A$<br><span id="liveFb" class="number-display">0.251 N</span></div>
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">ខ. ទម្ងន់ក្នុងទឹក $W'$<br><span id="liveT" class="number-display">1.709 N</span></div>
+    </div>
+
+    <button id="btnToggleSolution">📖 បង្ហាញ / លាក់ដំណោះស្រាយ</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box">
+            💡 <strong>គន្លឹះ៖</strong> ដើម្បីរកកម្លាំងដំណោលអាកស៊ីម៉ែត $F_A$ យើងត្រូវរកមាឌវត្ថុសិនតាមរូបមន្ត $V = \frac{m}{\rho}$ ។ រីឯទម្ងន់ក្នុងទឹក (ទម្ងន់ព្រាង) $W'$ គឺស្មើនឹងផលដកនៃទម្ងន់ពិត $W$ និងកម្លាំងដំណោល $F_A$ ។
+        </div>
+
+        <h3>ដំណោះស្រាយ</h3>
+        
+        <div id="mathContainer">
+            <p><strong>បម្រាប់៖</strong></p>
+            <ul>
+                <li id="mathValM">\( m = 200 \text{ g} = 0.20 \text{ kg} \)</li>
+                <li id="mathValRho">\( \rho = 7800 \text{ kg/m}^3 \)</li>
+                <li>\( \rho_w = 1000 \text{ kg/m}^3 \) ព្រមទាំងយក \( g = 9.80 \text{ m/s}^2 \)</li>
+            </ul>
+
+            <p><strong>ក. រកតម្លៃនៃកម្លាំងដំណោលអាកស៊ីម៉ែត ($F_A$) ៖</strong></p>
+            <p>រកមាឌរបស់អង្គធាតុរឹង៖</p>
+            <div id="mathLine1">$$ V = \frac{m}{\rho} = \frac{0.20}{7800} \approx 2.564 \times 10^{-5} \text{ m}^3 $$</div>
+            <p>តាមច្បាប់អាកស៊ីម៉ែត៖</p>
+            <div id="mathLine2">$$ F_A = \rho_w \cdot V \cdot g = 1000 \times (2.564 \times 10^{-5}) \times 9.80 \approx 0.251 \text{ N} $$</div>
+
+            <p><strong>ខ. រកទម្ងន់ក្នុងទឹករបស់អង្គធាតុដែលលិចទាំងស្រុង ($W'$) ៖</strong></p>
+            <p>ទម្ងន់ពិតរបស់វត្ថុក្នុងខ្យល់ ($W$) ៖</p>
+            <div id="mathLine3">$$ W = m \cdot g = 0.20 \times 9.80 = 1.96 \text{ N} $$</div>
+            <p>ទម្ងន់ក្នុងទឹក ឬទម្ងន់ទំនង ($W'$) ៖</p>
+            <div id="mathLine4" style="color: #d32f2f; font-weight: bold; text-align: center; margin-top: 15px; font-size: 1.2em;">
+                $$ W' = W - F_A = 1.96 - 0.251 = 1.709 \text{ N} $$
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > ក្នុងតក្កវិជ្ជា -->
+<script>
+    var sM = document.getElementById('sliderM');
+    var sRho = document.getElementById('sliderRho');
+
+    var btnSet = document.getElementById('btnSetValues');
+    var btnAction = document.getElementById('btnAction');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    var measuringSystem = document.getElementById('measuringSystem');
+    var topRope = document.getElementById('topRope');
+    var needle = document.getElementById('needle');
+    var txtDisplay = document.getElementById('txtDisplay');
+    
+    var vecW = document.getElementById('vecW');
+    var headW = document.getElementById('headW');
+    var vecT = document.getElementById('vecT');
+    var headT = document.getElementById('headT');
+    
+    var vecFbGroup = document.getElementById('vecFbGroup');
+    var vecFb = document.getElementById('vecFb');
+    var headFb = document.getElementById('headFb');
+    var objRect = document.getElementById('objRect');
+
+    var rho_water = 1000; // kg/m^3
+    var g = 9.80; // m/s^2
+
+    var targetProgress = 0; // 0 = ក្នុងខ្យល់, 1 = លិចក្នុងទឹក
+    var currentProgress = 0;
+    var isAnimating = false;
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    btnSet.addEventListener('click', function() {
+        sM.value = 200;
+        sRho.value = 7800;
+        updatePhysics();
+    });
+
+    function loopAnimation() {
+        var diff = targetProgress - currentProgress;
+        if (Math.abs(diff).toFixed(3) !== "0.000") {
+            currentProgress += diff * 0.08; 
+            drawGraphics();
+            requestAnimationFrame(loopAnimation);
+        } else {
+            currentProgress = targetProgress;
+            drawGraphics();
+            isAnimating = false;
+        }
+    }
+
+    btnAction.addEventListener('click', function() {
+        if (targetProgress === 0) {
+            targetProgress = 1; // ទម្លាក់ចូលទឹក
+            btnAction.innerText = "👆 ទាញអង្គធាតុត្រឡប់មកក្នុងខ្យល់វិញ";
+            btnAction.style.background = "#28a745";
+        } else {
+            targetProgress = 0; // ទាញឡើងគោក
+            btnAction.innerText = "👇 ទម្លាក់អង្គធាតុចូលក្នុងទឹក";
+            btnAction.style.background = "#d32f2f";
+        }
+        
+        if (isAnimating === false) {
+            isAnimating = true;
+            loopAnimation();
+        }
+    });
+
+    function drawGraphics() {
+        var m_g = parseFloat(sM.value);
+        var rho_obj = parseFloat(sRho.value);
+        
+        var m_kg = m_g / 1000;
+        var w_real = m_kg * g;
+        var vol_m3 = m_kg / rho_obj;
+        var f_b_max = rho_water * vol_m3 * g;
+
+        // ១. ចលនាចុះក្រោមនៃប្រព័ន្ធចល័ត (Max Drop = 160px)
+        var dropY = currentProgress * 160;
+        measuringSystem.setAttribute("transform", "translate(0, " + dropY + ")");
+        
+        // អាប់ដេតខ្សែយោងខាងលើឱ្យលូតតាម (ដោយសារខ្សែនៅក្រៅប្រព័ន្ធចល័ត)
+        topRope.setAttribute("y2", 80 + dropY); 
+
+        // ២. ការអានតម្លៃលើឌីណាម៉ូម៉ែត្រ (ទម្ងន់ព្រាង)
+        var currentWeight = w_real - (currentProgress * f_b_max);
+        txtDisplay.textContent = currentWeight.toFixed(2) + " N";
+
+        // ៣. ចលនាទ្រនិចឌីណាម៉ូម៉ែត្រ (0N នៅ y=100, 10N នៅ y=190)
+        var maxPossibleWeight = 9.8; 
+        var pointerY = 100 + (currentWeight / maxPossibleWeight) * 90;
+        needle.setAttribute("y1", pointerY);
+        needle.setAttribute("y2", pointerY);
+
+        // ប្តូរទំហំដុំវត្ថុតាមមាឌ ដោយចាក់សោផ្ទៃខាងលើឱ្យជាប់នៅ y=330 ជានិច្ច
+        var scaleVol = Math.pow((rho_obj / 7800), -0.33); 
+        var objW = 80 * scaleVol;
+        var objH = 60 * scaleVol;
+        objRect.setAttribute("width", objW);
+        objRect.setAttribute("height", objH);
+        objRect.setAttribute("x", 300 - objW/2);
+        objRect.setAttribute("y", 330); 
+
+        // ចំណុចកណ្តាលនៃវត្ថុសម្រាប់ដាក់ព្រួញ
+        var centerY = 330 + (objH / 2);
+
+        // ៤. វ៉ិចទ័រកម្លាំង W (ចេញពីកណ្តាលចុះក្រោម)
+        var lenW = (w_real / maxPossibleWeight) * 100 + 30;
+        var yEndW = centerY + lenW;
+        vecW.setAttribute("y1", centerY);
+        vecW.setAttribute("y2", yEndW);
+        headW.setAttribute("points", "295," + yEndW + " 305," + yEndW + " 300," + (yEndW + 10));
+        document.getElementById('txtW').setAttribute("y", yEndW + 20);
+
+        // ៥. វ៉ិចទ័រកម្លាំង T (ទម្ងន់ព្រាង ឡើងលើចេញពីផ្លែសន្ទូច)
+        var lenT = (currentWeight / maxPossibleWeight) * 100 + 30;
+        var yEndT = 330 - lenT;
+        vecT.setAttribute("y1", 330);
+        vecT.setAttribute("y2", yEndT);
+        headT.setAttribute("points", "295," + yEndT + " 305," + yEndT + " 300," + (yEndT - 10));
+        document.getElementById('txtT').setAttribute("y", yEndT - 20);
+
+        // ៦. វ៉ិចទ័រកម្លាំងដំណោល FA (ចេញពីកណ្តាលឡើងលើ)
+        vecFbGroup.style.opacity = currentProgress;
+        var currentFb = currentProgress * f_b_max;
+        var lenFb = (currentFb / maxPossibleWeight) * 150; 
+        var safeLenFb = Math.max(lenFb, 15); 
+        
+        var yEndFb = centerY - safeLenFb;
+        vecFb.setAttribute("y1", centerY);
+        vecFb.setAttribute("y2", yEndFb);
+        headFb.setAttribute("points", "330," + yEndFb + " 340," + yEndFb + " 335," + (yEndFb - 10));
+        document.getElementById('txtFbLabel').setAttribute("y", yEndFb - 20);
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var m_g = parseFloat(sM.value);
+        var rho_obj = parseFloat(sRho.value);
+
+        var m_kg = m_g / 1000;
+        var w_real = m_kg * g;
+        var vol_m3 = m_kg / rho_obj;
+        var f_b = rho_water * vol_m3 * g;
+        var w_apparent = w_real - f_b;
+
+        document.getElementById('valM').innerText = m_g + " g";
+        document.getElementById('valRho').innerText = rho_obj + " kg/m\u00B3";
+
+        document.getElementById('liveW').innerText = w_real.toFixed(2) + " N";
+        document.getElementById('liveFb').innerText = f_b.toFixed(3) + " N";
+        document.getElementById('liveT').innerText = w_apparent.toFixed(3) + " N";
+
+        drawGraphics();
+
+        // Update MathJax Safely (Debounced)
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            var expVol = vol_m3.toExponential(3);
+            var volBase = expVol.split('e')[0];
+            var volExp = expVol.split('e')[1].replace('+', '');
+
+            document.getElementById('mathValM').innerHTML = "\\( m = " + m_g + " \\text{ g} = " + m_kg.toFixed(2) + " \\text{ kg} \\)";
+            document.getElementById('mathValRho').innerHTML = "\\( \\rho = " + rho_obj + " \\text{ kg/m}^3 \\)";
+
+            document.getElementById('mathLine1').innerHTML = "$$ V = \\frac{m}{\\rho} = \\frac{" + m_kg.toFixed(2) + "}{" + rho_obj + "} \\approx " + volBase + " \\times 10^{" + volExp + "} \\text{ m}^3 $$";
+            document.getElementById('mathLine2').innerHTML = "$$ F_A = 1000 \\times (" + volBase + " \\times 10^{" + volExp + "}) \\times 9.80 \\approx " + f_b.toFixed(3) + " \\text{ N} $$";
+            document.getElementById('mathLine3').innerHTML = "$$ W = m \\cdot g = " + m_kg.toFixed(2) + " \\times 9.80 = " + w_real.toFixed(2) + " \\text{ N} $$";
+            document.getElementById('mathLine4').innerHTML = "$$ W' = W - F_A = " + w_real.toFixed(2) + " - " + f_b.toFixed(3) + " = " + w_apparent.toFixed(3) + " \\text{ N} $$";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    sM.addEventListener('input', updatePhysics);
+    sRho.addEventListener('input', updatePhysics);
+
+    // Initial run
+    updatePhysics();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ការពិសោធន៍៖ ទែម៉ូម៉ែត្រឧស្ម័ន និងសូន្យដាច់ខាត</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block; padding-top: 10px;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 500px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .btn-group {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .btn-group { grid-template-columns: 1fr; }
+        }
+
+        button {
+            color: white; padding: 12px 15px; font-size: 16px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s, transform 0.1s;
+        }
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: scale(0.98); }
+        
+        .btn-zero { background: #d32f2f; }
+        .btn-triple { background: #0288d1; }
+        .btn-boil { background: #e65100; }
+        .btn-sol { background: #17a2b8; width: 100%; margin-bottom: 20px; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 15px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 24px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 10px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>ការពិសោធន៍ទែម៉ូម៉ែត្រឧស្ម័ន៖</strong> គេវាស់សម្ពាធឧស្ម័ន ៣ ប្រភេទផ្សេងគ្នានៅមាឌថេរ ធៀបនឹងសីតុណ្ហភាពអង្សាសេ ($^\circ\text{C}$)。<br>
+        ការពិសោធន៍បង្ហាញថា បើគេបន្លាយក្រាហ្វត្រលប់ក្រោយទៅរកសម្ពាធសូន្យ ($P=0$) បន្ទាត់ទាំង ៣ នឹងទៅជួបគ្នានៅសីតុណ្ហភាពតែមួយគត់គឺ $-273.15^\circ\text{C}$ ដែលហៅថា <strong>សូន្យដាច់ខាត (Absolute Zero)</strong>។
+    </div>
+
+    <!-- ប៊ូតុងជ្រើសរើសទីតាំងសីតុណ្ហភាព -->
+    <div class="btn-group">
+        <button class="btn-zero" id="btnZero">❄️ សូន្យដាច់ខាត (-273.15 °C)</button>
+        <button class="btn-triple" id="btnTriple">💧 ចំណុចទ្រីបទឹក (0.01 °C)</button>
+        <button class="btn-boil" id="btnBoil">🔥 ចំណុចទឹកពុះ (100.00 °C)</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 900 450" preserveAspectRatio="xMidYMid meet">
+            <!-- ផ្ទៃក្រាហ្វ (Graph Area) -->
+            <!-- អ័ក្ស X ពី -300 ដល់ 150 -->
+            <!-- អ័ក្ស Y ពី 0 ដល់ 3.5 atm -->
+            
+            <!-- បន្ទាត់ Grid Y (ផ្ដេក) -->
+            <line x1="80" y1="350" x2="850" y2="350" stroke="#e0e0e0" stroke-width="1"/> <!-- P=0 -->
+            <line x1="80" y1="250" x2="850" y2="250" stroke="#e0e0e0" stroke-width="1"/> <!-- P=1 -->
+            <line x1="80" y1="150" x2="850" y2="150" stroke="#e0e0e0" stroke-width="1"/> <!-- P=2 -->
+            <line x1="80" y1="50" x2="850" y2="50" stroke="#e0e0e0" stroke-width="1"/>  <!-- P=3 -->
+
+            <!-- បន្ទាត់ Grid X (ឈរ) -->
+            <line x1="580" y1="350" x2="580" y2="50" stroke="#e0e0e0" stroke-width="1"/> <!-- 0°C -->
+            <line x1="746" y1="350" x2="746" y2="50" stroke="#e0e0e0" stroke-width="1"/> <!-- 100°C -->
+
+            <!-- អ័ក្ស Y (Pressure) -->
+            <line x1="580" y1="350" x2="580" y2="30" stroke="#111" stroke-width="3"/>
+            <polygon points="580,20 575,35 585,35" fill="#111"/>
+            <text x="540" y="20" font-family="Arial" font-weight="bold" font-size="16">P (atm)</text>
+            
+            <text x="560" y="255" font-family="Arial" font-size="14">1</text>
+            <text x="560" y="155" font-family="Arial" font-size="14">2</text>
+            <text x="560" y="55" font-family="Arial" font-size="14">3</text>
+
+            <!-- អ័ក្ស X (Temperature °C) -->
+            <line x1="80" y1="350" x2="850" y2="350" stroke="#111" stroke-width="3"/>
+            <polygon points="850,350 835,345 835,355" fill="#111"/>
+            <text x="810" y="380" font-family="Arial" font-weight="bold" font-size="16">t (°C)</text>
+
+            <text x="575" y="375" font-family="Arial" font-size="14">0</text>
+            <text x="735" y="375" font-family="Arial" font-size="14">100</text>
+
+            <!-- ចំណុច -273.15 (Absolute Zero) -->
+            <circle cx="124.6" cy="350" r="5" fill="#d32f2f"/>
+            <text x="95" y="380" font-family="Arial" font-weight="bold" font-size="14" fill="#d32f2f">-273.15</text>
+
+            <!-- បន្ទាត់ក្រាហ្វ ឧស្ម័នទី១ (Gas 1) -> ពណ៌ខៀវ -->
+            <!-- Extrapolated (Dashed) ពី -273.15 ដល់ 0 -->
+            <line x1="124.6" y1="350" x2="580" y2="150" stroke="#1565c0" stroke-width="3" stroke-dasharray="8,4"/>
+            <!-- Real (Solid) ពី 0 ដល់ 150 -->
+            <line x1="580" y1="150" x2="830" y2="40" stroke="#1565c0" stroke-width="3"/>
+            <text x="820" y="30" font-family="Siemreap, Arial" font-weight="bold" font-size="14" fill="#1565c0">ឧស្ម័នទី ១</text>
+
+            <!-- បន្ទាត់ក្រាហ្វ ឧស្ម័នទី២ (Gas 2) -> ពណ៌បៃតង -->
+            <line x1="124.6" y1="350" x2="580" y2="216.7" stroke="#2e7d32" stroke-width="3" stroke-dasharray="8,4"/>
+            <line x1="580" y1="216.7" x2="830" y2="143.3" stroke="#2e7d32" stroke-width="3"/>
+            <text x="820" y="135" font-family="Siemreap, Arial" font-weight="bold" font-size="14" fill="#2e7d32">ឧស្ម័នទី ២</text>
+
+            <!-- បន្ទាត់ក្រាហ្វ ឧស្ម័នទី៣ (Gas 3) -> ពណ៌ទឹកក្រូច -->
+            <line x1="124.6" y1="350" x2="580" y2="283.3" stroke="#e65100" stroke-width="3" stroke-dasharray="8,4"/>
+            <line x1="580" y1="283.3" x2="830" y2="246.7" stroke="#e65100" stroke-width="3"/>
+            <text x="820" y="240" font-family="Siemreap, Arial" font-weight="bold" font-size="14" fill="#e65100">ឧស្ម័នទី ៣</text>
+
+            <!-- Marker បង្ហាញទីតាំងបច្ចុប្បន្ន -->
+            <g id="currentMarker">
+                <line id="markerLineX" x1="580" y1="350" x2="580" y2="50" stroke="#ff1744" stroke-width="2" stroke-dasharray="4,2"/>
+                
+                <circle id="ptGas1" cx="580" cy="150" r="7" fill="#1565c0"/>
+                <circle id="ptGas2" cx="580" cy="216.7" r="7" fill="#2e7d32"/>
+                <circle id="ptGas3" cx="580" cy="283.3" r="7" fill="#e65100"/>
+                
+                <rect id="lblBox" x="550" y="390" width="60" height="25" fill="#ff1744" rx="4"/>
+                <text id="lblCurrentT" x="580" y="408" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#fff">0 °C</text>
+            </g>
+        </svg>
+    </div>
+
+    <!-- របារអូសបញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            អូសដើម្បីផ្លាស់ប្តូរសីតុណ្ហភាព $t$ (°C):<br>
+            <span id="valT" class="number-display" style="color: #ff1744; font-size:24px;">0.00 °C</span>
+            <input type="range" id="sliderT" min="-273.15" max="150.00" value="0.00" step="0.01">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #ff1744;">សីតុណ្ហភាព $t$<br><span id="dashT" class="number-display">0.00 °C</span></div>
+        <div class="data-box" style="border-top: 4px solid #9c27b0;">សីតុណ្ហភាព $T$<br><span id="dashK" class="number-display">273.15 K</span></div>
+        <div class="data-box" style="border-top: 4px solid #1565c0;">សម្ពាធឧស្ម័នទី១ $P_1$<br><span id="dashP1" class="number-display">2.000 atm</span></div>
+    </div>
+
+    <button id="btnToggleSolution" class="btn-sol">📖 បង្ហាញ / លាក់ការពន្យល់លម្អិត</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box">
+            💡 <strong>ទំនាក់ទំនងសីតុណ្ហភាព៖</strong> សីតុណ្ហភាពដាច់ខាត កែលវិន (K) និងសីតុណ្ហភាពអង្សាសេ (°C) មានទំនាក់ទំនងគ្នាតាមរូបមន្ត $T = t + 273.15$។
+        </div>
+
+        <h3>ការវិភាគទិន្នន័យក្រាហ្វ</h3>
+        <div id="mathContainer">
+            <p><strong>១. សីតុណ្ហភាពកែលវិន (K) បច្ចុប្បន្ន៖</strong></p>
+            <div id="mathLine1">$$ T = t + 273.15 = 0.00 + 273.15 = 273.15 \text{ K} $$</div>
+            
+            <p><strong>២. សម្ពាធឧស្ម័នទី១ ($P_1$) បច្ចុប្បន្ន៖</strong></p>
+            <p>ឧស្ម័នទី១ មានសម្ពាធគោល $P_0 = 2.00 \text{ atm}$ នៅ $0^\circ\text{C}$ ។ តាមច្បាប់ហ្គេលុយសាក់៖</p>
+            <div id="mathLine2">$$ P_1 = P_0 \times \frac{T}{273.15} = 2.00 \times \frac{273.15}{273.15} = 2.000 \text{ atm} $$</div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > -->
+<script>
+    var sT = document.getElementById('sliderT');
+    
+    var btnZero = document.getElementById('btnZero');
+    var btnTriple = document.getElementById('btnTriple');
+    var btnBoil = document.getElementById('btnBoil');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    // SVG Elements
+    var currentMarker = document.getElementById('currentMarker');
+    var markerLineX = document.getElementById('markerLineX');
+    var ptGas1 = document.getElementById('ptGas1');
+    var ptGas2 = document.getElementById('ptGas2');
+    var ptGas3 = document.getElementById('ptGas3');
+    var lblBox = document.getElementById('lblBox');
+    var lblCurrentT = document.getElementById('lblCurrentT');
+
+    var T_abs0 = -273.15; // °C
+    var pxPerDeg = 1.6667; // (580 - 124.6) / 273.15 = 1.6667 px/°C
+    var xOrigin = 580; // X coordinate for 0°C
+    var yOrigin = 350; // Y coordinate for P=0
+
+    // Reference pressures at 0°C (in atm)
+    var P0_1 = 2.0;
+    var P0_2 = 1.333; // 4/3
+    var P0_3 = 0.667; // 2/3
+    
+    var pxPerAtm = 100; // 1 atm = 100px on Y axis
+
+    var targetT = 0;
+    var currentTval = 0;
+    var isAnimating = false;
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    function startAnimation(t_target) {
+        targetT = t_target;
+        if (isAnimating === false) {
+            isAnimating = true;
+            transitionLoop();
+        }
+    }
+
+    btnZero.addEventListener('click', function() { startAnimation(-273.15); });
+    btnTriple.addEventListener('click', function() { startAnimation(0.01); });
+    btnBoil.addEventListener('click', function() { startAnimation(100.0); });
+
+    sT.addEventListener('input', function() {
+        currentTval = parseFloat(sT.value);
+        targetT = currentTval;
+        isAnimating = false; // Stop auto animation if user drags
+        updatePhysics();
+    });
+
+    function transitionLoop() {
+        var diff = targetT - currentTval;
+        // ពិនិត្យភាពខុសគ្នាដោយមិនប្រើសញ្ញា
+        if (Math.abs(diff).toFixed(2) !== "0.00") {
+            currentTval += diff * 0.1; // Smooth interpolation
+            sT.value = currentTval;
+            updatePhysics();
+            requestAnimationFrame(transitionLoop);
+        } else {
+            currentTval = targetT;
+            sT.value = currentTval;
+            updatePhysics();
+            isAnimating = false;
+        }
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var t_C = currentTval;
+        var t_K = t_C + 273.15;
+
+        // គណនាសម្ពាធ (P = P0 * T/273.15)
+        var p1 = P0_1 * (t_K / 273.15);
+        var p2 = P0_2 * (t_K / 273.15);
+        var p3 = P0_3 * (t_K / 273.15);
+
+        // Update Text UI
+        document.getElementById('valT').innerText = t_C.toFixed(2) + " °C";
+        document.getElementById('dashT').innerText = t_C.toFixed(2) + " °C";
+        document.getElementById('dashK').innerText = t_K.toFixed(2) + " K";
+        document.getElementById('dashP1').innerText = p1.toFixed(3) + " atm";
+
+        // Update SVG Graphics
+        var xPos = xOrigin + (t_C * pxPerDeg);
+        
+        markerLineX.setAttribute("x1", xPos);
+        markerLineX.setAttribute("x2", xPos);
+
+        ptGas1.setAttribute("cx", xPos);
+        ptGas1.setAttribute("cy", yOrigin - (p1 * pxPerAtm));
+
+        ptGas2.setAttribute("cx", xPos);
+        ptGas2.setAttribute("cy", yOrigin - (p2 * pxPerAtm));
+
+        ptGas3.setAttribute("cx", xPos);
+        ptGas3.setAttribute("cy", yOrigin - (p3 * pxPerAtm));
+
+        lblBox.setAttribute("x", xPos - 30);
+        lblCurrentT.setAttribute("x", xPos);
+        lblCurrentT.textContent = t_C.toFixed(0) + " °C";
+
+        // ប្តូរពណ៌ marker ពេលដល់សូន្យដាច់ខាត
+        var isAbsoluteZero = (Math.max(t_C, -273.1) === -273.1);
+        if (isAbsoluteZero === false) { // i.e., t_C is around -273.15
+            markerLineX.setAttribute("stroke", "#d32f2f");
+            lblBox.setAttribute("fill", "#d32f2f");
+        } else {
+            markerLineX.setAttribute("stroke", "#ff1744");
+            lblBox.setAttribute("fill", "#ff1744");
+        }
+
+        // Update MathJax Safely (No Khmer in Math)
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            var tC_str = t_C.toFixed(2);
+            var tK_str = t_K.toFixed(2);
+            var p1_str = p1.toFixed(3);
+
+            document.getElementById('mathLine1').innerHTML = "$$ T = t + 273.15 = " + tC_str + " + 273.15 = " + tK_str + " \\text{ K} $$";
+            document.getElementById('mathLine2').innerHTML = "$$ P_1 = 2.00 \\times \\frac{" + tK_str + "}{273.15} = " + p1_str + " \\text{ atm} $$";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    // Initial run
+    updatePhysics();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់រូបវិទ្យា</title>
+    <style>
+        body {
+            font-family: 'Khmer OS Siemreap', 'Suwannaphum', Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.8;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .section-title {
+            margin-top: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .qa-container {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+        .question {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .options {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+        .answer {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #27ae60;
+            border-radius: 4px;
+            color: #444;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.95em;
+            font-family: 'Khmer OS Siemreap', sans-serif;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-hide {
+            background-color: #e74c3c;
+        }
+        .btn-hide:hover {
+            background-color: #c0392b;
+        }
+        .blank {
+            border-bottom: 1px solid #333;
+            display: inline-block;
+            min-width: 100px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 style="text-align: center;">លំហាត់រូបវិទ្យា</h1>
+
+    <h2 class="section-title">I. ចូរគូសសញ្ញា ✓ ក្នុងប្រអប់ខាងមុខចម្លើយដែលត្រឹមត្រូវមានតែមួយគត់</h2>
+
+    <!-- I.1 -->
+    <div class="qa-container">
+        <div class="question">1. ការបម្លែងថាមពលកម្ដៅទៅជាថាមពលមេកានិចនៅក្នុងម៉ាស៊ីនចំហេះក្នុង ធ្វើឡើងតាមលំដាប់តំណាក់កាល៖</div>
+        <div class="options">
+            ក. បឺត បង្ហាប់ ផ្ទុះ បញ្ចេញ<br>
+            ខ. បឺត ផ្ទុះ បង្ហាប់ បញ្ចេញ<br>
+            គ. បឺត បញ្ចេញ បង្ហាប់ ផ្ទុះ<br>
+            ឃ. បឺត បង្ហាប់ បញ្ចេញ ផ្ទុះ
+        </div>
+        <button id="btn-1" onclick="toggleAnswer(1)">បង្ហាញចម្លើយ</button>
+        <div id="answer-1" class="answer">
+            <b>ចម្លើយ៖</b> ក. បឺត បង្ហាប់ ផ្ទុះ បញ្ចេញ
+        </div>
+    </div>
+
+    <!-- I.2 -->
+    <div class="qa-container">
+        <div class="question">2. តើសីតុណ្ហភាពដាច់ខាតនៃអង្គធាតុមួយស្មើនឹងប៉ុន្មាន?</div>
+        <div class="options">
+            ក. 0 K<br>
+            ខ. 100 K<br>
+            គ. 273 K<br>
+            ឃ. 373 K
+        </div>
+        <button id="btn-2" onclick="toggleAnswer(2)">បង្ហាញចម្លើយ</button>
+        <div id="answer-2" class="answer">
+            <b>ចម្លើយ៖</b> ក. 0 K (សូន្យដាច់ខាត)
+        </div>
+    </div>
+
+    <!-- I.3 -->
+    <div class="qa-container">
+        <div class="question">3. ពេលយើងយកដៃទៅប៉ះទឹកក្តៅ យើងមានអារម្មណ៍ថាក្តៅពីព្រោះ៖</div>
+        <div class="options">
+            ក. កម្ដៅផ្ទេរពីដៃយើងទៅទឹកក្តៅ<br>
+            ខ. កម្ដៅផ្ទេរពីទឹកក្តៅទៅដៃយើង<br>
+            គ. ដៃយើងនិងទឹកក្តៅមិនផ្ទេរកម្ដៅឲ្យគ្នាទេ<br>
+            ឃ. សីតុណ្ហភាពនៃទឹកក្តៅមានការប្រែប្រួល
+        </div>
+        <button id="btn-3" onclick="toggleAnswer(3)">បង្ហាញចម្លើយ</button>
+        <div id="answer-3" class="answer">
+            <b>ចម្លើយ៖</b> ខ. កម្ដៅផ្ទេរពីទឹកក្តៅទៅដៃយើង
+        </div>
+    </div>
+
+    <h2 class="section-title">II. បំពេញចន្លោះឲ្យបានត្រឹមត្រូវ</h2>
+
+    <!-- II.1 -->
+    <div class="qa-container">
+        <div class="question">1. កម្រិតក្ដៅឬត្រជាក់នៃអង្គធាតុមួយហៅថា <span class="blank"></span> ។</div>
+        <button id="btn-4" onclick="toggleAnswer(4)">បង្ហាញចម្លើយ</button>
+        <div id="answer-4" class="answer">
+            <b>ចម្លើយ៖</b> សីតុណ្ហភាព
+        </div>
+    </div>
+
+    <!-- II.2 -->
+    <div class="qa-container">
+        <div class="question">2. <span class="blank"></span> ជាថាមពលដែលផ្ទេរពីអង្គធាតុក្ដៅទៅអង្គធាតុត្រជាក់ ។</div>
+        <button id="btn-5" onclick="toggleAnswer(5)">បង្ហាញចម្លើយ</button>
+        <div id="answer-5" class="answer">
+            <b>ចម្លើយ៖</b> កម្ដៅ
+        </div>
+    </div>
+
+    <!-- II.3 -->
+    <div class="qa-container">
+        <div class="question">3. ចំណុចប្រែប្រួលមួយនៃសីតុណ្ហភាពនិងសម្ពាធដែលទឹកអាចស្ថិតនៅជារូបធាតុទាំងបីហៅថា <span class="blank"></span> ។</div>
+        <button id="btn-6" onclick="toggleAnswer(6)">បង្ហាញចម្លើយ</button>
+        <div id="answer-6" class="answer">
+            <b>ចម្លើយ៖</b> ចំណុចទ្រីបនៃទឹក
+        </div>
+    </div>
+
+    <!-- II.4 -->
+    <div class="qa-container">
+        <div class="question">4. ទ្រឹស្ដីដែលពន្យល់ថា ភាគល្អិតនៃរូបធាតុធ្វើចលនាឥតឈប់ឈរ ហើយចលនានេះកើនឡើងនៅពេលសីតុណ្ហភាពកើនឡើង ហៅថា ទ្រឹស្ដី <span class="blank"></span> ។</div>
+        <button id="btn-7" onclick="toggleAnswer(7)">បង្ហាញចម្លើយ</button>
+        <div id="answer-7" class="answer">
+            <b>ចម្លើយ៖</b> ស៊ីនេទិចម៉ូលេគុល
+        </div>
+    </div>
+
+    <!-- II.5 -->
+    <div class="qa-container">
+        <div class="question">5. ថាមពលកម្ដៅចាំបាច់ដើម្បីធ្វើឲ្យអង្គធាតុមួយប្រែប្រួលសីតុណ្ហភាព 1 K ឬ 1 °C ហៅថា <span class="blank"></span> ។</div>
+        <button id="btn-8" onclick="toggleAnswer(8)">បង្ហាញចម្លើយ</button>
+        <div id="answer-8" class="answer">
+            <b>ចម្លើយ៖</b> ចំណុះកម្ដៅ
+        </div>
+    </div>
+
+    <!-- II.6 -->
+    <div class="qa-container">
+        <div class="question">6. ថាមពលកម្ដៅចាំបាច់ដែលផ្ទេរផ្ដល់ឲ្យអង្គធាតុ 1 kg ដើម្បីធ្វើឲ្យវាប្រែប្រួលសីតុណ្ហភាព 1 K ឬ 1 °C ហៅថា <span class="blank"></span> ។</div>
+        <button id="btn-9" onclick="toggleAnswer(9)">បង្ហាញចម្លើយ</button>
+        <div id="answer-9" class="answer">
+            <b>ចម្លើយ៖</b> កម្ដៅម៉ាស
+        </div>
+    </div>
+
+    <!-- II.7 -->
+    <div class="qa-container">
+        <div class="question">7. <span class="blank"></span> នៃអង្គធាតុជាសីតុណ្ហភាពកំណត់មួយដែលពេលនោះ អង្គធាតុរលាយប្រែភាពពីរឹងទៅជារាវ។</div>
+        <button id="btn-10" onclick="toggleAnswer(10)">បង្ហាញចម្លើយ</button>
+        <div id="answer-10" class="answer">
+            <b>ចម្លើយ៖</b> ចំណុចរលាយ
+        </div>
+    </div>
+
+    <!-- II.8 -->
+    <div class="qa-container">
+        <div class="question">8. ក្រោមសម្ពាធដដែលសីតុណ្ហភាព <span class="blank"></span> ដូចគ្នានឹងសីតុណ្ហភាព <span class="blank"></span> ។</div>
+        <button id="btn-11" onclick="toggleAnswer(11)">បង្ហាញចម្លើយ</button>
+        <div id="answer-11" class="answer">
+            <b>ចម្លើយ៖</b> ដាច់ខាត / សែលស៊ុស បូក 273 (ឬ 0K និង -273°C) <i>(ចំណាំ៖ សំណួរនេះអាចមានចម្លើយច្រើនបែបអាស្រ័យលើមេរៀនជាក់ស្តែង)</i>
+        </div>
+    </div>
+
+    <script>
+        function toggleAnswer(id) {
+            var answerDiv = document.getElementById('answer-' + id);
+            var btn = document.getElementById('btn-' + id);
+            
+            if (answerDiv.style.display === 'none' || answerDiv.style.display === '') {
+                answerDiv.style.display = 'block';
+                btn.innerText = 'លាក់ចម្លើយ';
+                btn.classList.add('btn-hide');
+            } else {
+                answerDiv.style.display = 'none';
+                btn.innerText = 'បង្ហាញចម្លើយ';
+                btn.classList.remove('btn-hide');
+            }
+        }
+    </script>
+</body>
+</html>

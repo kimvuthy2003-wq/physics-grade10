@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <title>លំហាត់ទី ១៤ ទំព័រ៥៣</title>
+    <style>
+        body {
+            font-family: 'Khmer OS Battambang', 'Segoe UI', Tahoma, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h2 { color: #2c3e50; }
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .problem-box {
+            background: #eef2f7;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            border-left: 5px solid #007bff;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            background: #f1f3f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            align-items: center;
+            text-align: left;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .control-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .control-group input {
+            padding: 6px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .buttons {
+            margin-top: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-family: inherit;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #0056b3; }
+        button.reset { background-color: #6c757d; }
+        button.reset:hover { background-color: #5a6268; }
+        canvas {
+            background-color: #ffffff;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4fd;
+            border-left: 5px solid #007bff;
+            text-align: left;
+            border-radius: 4px;
+        }
+        .results h3 { margin-top: 0; color: #0056b3; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>លំហាត់ទី១៤ ទំព័រ៥៣ ចលនារបស់វត្ថុឆ្លងកាត់រ៉ក</h2>
+    
+    <div class="problem-box">
+        <strong>១៤.</strong> វត្ថុមួយមានម៉ាស <i>m</i><sub>1</sub> = 1.00 kg ដាក់លើតុដេករាបស្មើមួយ ដោយគ្មានកកិត ហើយចងភ្ជាប់ទៅនឹងខ្សែឆ្លងកាត់រ៉កមួយ មួយទៀតចងទៅនឹងម៉ាស <i>m</i><sub>2</sub> = 3.00 kg។<br>
+        <strong>ក.</strong> គូសដ្យាក្រាមនៃកម្លាំងដែលមានអំពើលើម៉ាសទាំងពីរ ។<br>
+        <strong>ខ.</strong> កំណត់សំទុះនៃម៉ាសទាំងពីរ និងតំណឹងខ្សែ ។<br>
+        <strong>គ.</strong> ធ្វើសំណួរ (ខ) ឡើងវិញ ក្នុងករណីគិតកកិតរវាងម៉ាស <i>m</i><sub>1</sub> និងតុ ។ ឱ្យមេគុណកកិត <i>μ</i><sub><i>k</i></sub> = 0.2 ។
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>ម៉ាស m₁ (kg): <span id="m1Val">1.00</span></label>
+            <input type="range" id="m1Range" min="0.5" max="5.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-group">
+            <label>ម៉ាស m₂ (kg): <span id="m2Val">3.00</span></label>
+            <input type="range" id="m2Range" min="0.5" max="10.0" step="0.1" value="3.0">
+        </div>
+        <div class="control-group">
+            <label>មេគុណកកិត μₖ: <span id="muVal">0.20</span></label>
+            <input type="range" id="muRange" min="0.0" max="1.0" step="0.05" value="0.2">
+        </div>
+        <div class="control-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 20px;">
+            <input type="checkbox" id="hasFriction" checked style="width: 20px; height: 20px;">
+            <label for="hasFriction" style="margin-bottom:0; cursor:pointer;">គិតគូរពីកកិត (Friction)</label>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button onclick="startSimulation()">ចាប់ផ្តើម (Start)</button>
+        <button onclick="pauseSimulation()" class="reset" style="background-color: #ffc107; color: #333;">ផ្អាក (Pause)</button>
+        <button onclick="resetSimulation()" class="reset">កំណត់ឡើងវិញ (Reset)</button>
+    </div>
+
+    <br>
+    <canvas id="simCanvas" width="860" height="420"></canvas>
+
+    <div class="results" id="resultBox">
+        <h3>លទ្ធផលគណនាតាមទ្រឹស្តី៖</h3>
+        <p id="calcText">កំពុងគណនា...</p>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const m1Input = document.getElementById('m1Range');
+    const m2Input = document.getElementById('m2Range');
+    const muInput = document.getElementById('muRange');
+    const hasFrictionCheckbox = document.getElementById('hasFriction');
+
+    const m1ValSpan = document.getElementById('m1Val');
+    const m2ValSpan = document.getElementById('m2Val');
+    const muValSpan = document.getElementById('muVal');
+    const calcText = document.getElementById('calcText');
+
+    let isRunning = false;
+    let animationId = null;
+    const startX1 = 150;
+    const maxX1 = 580;
+    let currentX1 = startX1;
+    let velocity = 0;
+
+    function updateValues() {
+        m1ValSpan.innerText = parseFloat(m1Input.value).toFixed(2);
+        m2ValSpan.innerText = parseFloat(m2Input.value).toFixed(2);
+        muValSpan.innerText = parseFloat(muInput.value).toFixed(2);
+    }
+
+    function calculatePhysics() {
+        const m1 = parseFloat(m1Input.value);
+        const m2 = parseFloat(m2Input.value);
+        const mu = hasFrictionCheckbox.checked ? parseFloat(muInput.value) : 0;
+        const g = 9.8;
+
+        const fk = mu * m1 * g;
+        const drivingForce = (m2 * g) - fk;
+        const totalMass = m1 + m2;
+
+        let a = 0;
+        let T = 0;
+
+        if (drivingForce > 0) {
+            a = drivingForce / totalMass;
+            T = m2 * (g - a);
+        } else {
+            a = 0;
+            T = m2 * g;
+        }
+
+        return { m1, m2, mu, fk, a, T };
+    }
+
+    function updateResultsText() {
+        const p = calculatePhysics();
+        let text = `• ទម្ងន់ m₁: P₁ = ${(p.m1 * 9.8).toFixed(2)} N | ទម្ងន់ m₂: P₂ = ${(p.m2 * 9.8).toFixed(2)} N<br>`;
+        if (hasFrictionCheckbox.checked && p.mu > 0) {
+            text += `• កម្លាំងកកិត: fₖ = μₖ N₁ = ${p.fk.toFixed(2)} N<br>`;
+        } else {
+            text += `• កម្លាំងកកិត: fₖ = 0.00 N (គ្មានកកិត)<br>`;
+        }
+        text += `• សំទុះប្រព័ន្ធ (Acceleration): <b>a = ${p.a.toFixed(2)} m/s²</b><br>`;
+        text += `• តំណឹងខ្សែ (Tension): <b>T = ${p.T.toFixed(2)} N</b>`;
+        calcText.innerHTML = text;
+    }
+
+    function drawArrow(fromX, fromY, toX, toY, color, label) {
+        if (Math.abs(toX - fromX) < 2 && Math.abs(toY - fromY) < 2) return;
+        const headlen = 8;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const angle = Math.atan2(dy, dx);
+        
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+        ctx.stroke();
+
+        if (label) {
+            ctx.fillStyle = color;
+            ctx.font = "bold 13px 'Khmer OS Battambang', sans-serif";
+            ctx.fillText(label, toX + 5, toY + 5);
+        }
+    }
+
+    function drawScene() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const p = calculatePhysics();
+        const surfaceY = 200;
+
+        // Draw Table Surface
+        ctx.fillStyle = "#ced4da";
+        ctx.fillRect(40, surfaceY, 590, 15);
+        ctx.fillStyle = "#adb5bd";
+        ctx.fillRect(60, surfaceY + 15, 20, 160);
+        ctx.fillRect(600, surfaceY + 15, 20, 160);
+
+        // Pulley settings (Smaller size)
+        const pulleyRadius = 14; 
+        const actualPulleyX = 620;
+        const blockWidth = 60;
+        const blockHeight = 40;
+        const m1DrawY = surfaceY - blockHeight;
+        const stringY = m1DrawY + blockHeight / 2; // Center of block
+        const actualPulleyY = stringY + pulleyRadius; // Top of pulley matches stringY
+
+        // Draw Pulley
+        ctx.beginPath();
+        ctx.arc(actualPulleyX, actualPulleyY, pulleyRadius, 0, 2 * Math.PI);
+        ctx.fillStyle = "#adb5bd";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#343a40";
+        ctx.stroke();
+
+        const m1DrawX = currentX1;
+        const displacement = currentX1 - startX1;
+        const m2DrawX = actualPulleyX + pulleyRadius - (blockWidth / 2);
+        const m2DrawY = surfaceY + 40 + displacement;
+
+        // Draw Strings (Horizontal & Vertical strictly aligned)
+        ctx.beginPath();
+        ctx.strokeStyle = "#212529";
+        ctx.lineWidth = 2;
+        // Horizontal string from m1 to top of pulley
+        ctx.moveTo(m1DrawX + blockWidth, stringY);
+        ctx.lineTo(actualPulleyX, stringY);
+        // Vertical string from right edge of pulley going down to m2
+        ctx.moveTo(actualPulleyX + pulleyRadius, actualPulleyY);
+        ctx.lineTo(actualPulleyX + pulleyRadius, m2DrawY);
+        ctx.stroke();
+
+        // Draw m1 block
+        ctx.fillStyle = "#3498db";
+        ctx.fillRect(m1DrawX, m1DrawY, blockWidth, blockHeight);
+        ctx.strokeStyle = "#2980b9";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(m1DrawX, m1DrawY, blockWidth, blockHeight);
+        
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 14px sans-serif";
+        ctx.fillText("m₁", m1DrawX + blockWidth/2 - 10, m1DrawY + blockHeight/2 + 5);
+
+        // Draw m2 block
+        ctx.fillStyle = "#e74c3c";
+        ctx.fillRect(m2DrawX, m2DrawY, blockWidth, blockHeight);
+        ctx.strokeStyle = "#c0392b";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(m2DrawX, m2DrawY, blockWidth, blockHeight);
+        
+        ctx.fillStyle = "#fff";
+        ctx.fillText("m₂", m2DrawX + blockWidth/2 - 10, m2DrawY + blockHeight/2 + 5);
+
+        // Force Vectors on m1
+        const m1CenterX = m1DrawX + blockWidth / 2;
+        const m1CenterY = m1DrawY + blockHeight / 2;
+
+        drawArrow(m1CenterX, m1CenterY, m1CenterX, m1CenterY + 45, "#e74c3c", "P₁");
+        drawArrow(m1CenterX, m1CenterY, m1CenterX, m1CenterY - 45, "#27ae60", "N₁");
+        drawArrow(m1CenterX, m1CenterY, m1CenterX + 50, m1CenterY, "#8e44ad", "T");
+        if (p.fk > 0) {
+            drawArrow(m1CenterX, m1CenterY, m1CenterX - 40, m1CenterY, "#d35400", "fₖ");
+        }
+
+        // Force Vectors on m2
+        const m2CenterX = m2DrawX + blockWidth / 2;
+        const m2CenterY = m2DrawY + blockHeight / 2;
+
+        drawArrow(m2CenterX, m2CenterY, m2CenterX, m2CenterY + 55, "#e74c3c", "P₂");
+        drawArrow(m2CenterX, m2CenterY, m2CenterX, m2CenterY - 45, "#8e44ad", "T");
+
+        // Info overlay
+        ctx.fillStyle = "#2c3e50";
+        ctx.font = "bold 15px 'Khmer OS Battambang', sans-serif";
+        ctx.fillText(`សំទុះ (a) = ${p.a.toFixed(2)} m/s²`, 30, 40);
+        ctx.fillText(`តំណឹងខ្សែ (T) = ${p.T.toFixed(2)} N`, 30, 65);
+    }
+
+    function animate() {
+        if (!isRunning) return;
+
+        const p = calculatePhysics();
+        if (p.a > 0) {
+            velocity += p.a * 0.005;
+            currentX1 += velocity;
+
+            if (currentX1 >= maxX1) {
+                currentX1 = maxX1;
+                isRunning = false;
+            }
+        } else {
+            isRunning = false;
+        }
+
+        drawScene();
+        if (isRunning) {
+            animationId = requestAnimationFrame(animate);
+        }
+    }
+
+    function startSimulation() {
+        if (isRunning) return;
+        if (currentX1 >= maxX1) {
+            currentX1 = startX1;
+            velocity = 0;
+        }
+        isRunning = true;
+        animate();
+    }
+
+    function pauseSimulation() {
+        isRunning = false;
+        cancelAnimationFrame(animationId);
+    }
+
+    function resetSimulation() {
+        pauseSimulation();
+        currentX1 = startX1;
+        velocity = 0;
+        drawScene();
+        updateResultsText();
+    }
+
+    [m1Input, m2Input, muInput, hasFrictionCheckbox].forEach(el => {
+        el.addEventListener('input', () => {
+            updateValues();
+            updateResultsText();
+            if (!isRunning) {
+                drawScene();
+            }
+        });
+    });
+
+    updateValues();
+    updateResultsText();
+    drawScene();
+</script>
+</body>
+</html>

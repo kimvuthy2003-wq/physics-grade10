@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី១៣៖ សីតុណ្ហភាព និងកម្រិតលម្អៀង</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            padding: 20px 0; display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 250px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .btn-group {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .btn-group { grid-template-columns: 1fr; }
+        }
+
+        button {
+            color: white; padding: 12px 15px; font-size: 16px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s, transform 0.1s;
+        }
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: scale(0.98); }
+        
+        .btn-earth { background: #e65100; }
+        .btn-sun { background: #d50000; }
+        .btn-water { background: #0288d1; }
+        .btn-sol { background: #17a2b8; width: 100%; margin-bottom: 20px; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 15px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 24px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 20px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+        .text-outline { text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; }
+    </style>
+</head>
+<body>
+
+
+
+    <!-- ប៊ូតុងជ្រើសរើសករណី -->
+    <div class="btn-group">
+        <button class="btn-water" id="btnWater">💧 ទឹកពុះ (100 °C)</button>
+        <button class="btn-earth" id="btnEarth">🌍 ស្នូលផែនដី (5.7 × 10³ °C)</button>
+        <button class="btn-sun" id="btnSun">☀️ ស្នូលព្រះអាទិត្យ (15 × 10⁶ °C)</button>
+<div class="container">
+   <div class="problem-statement">
+        <strong>១៣.</strong> សីតុណ្ហភាពក្នុងស្នូលផែនដីនិងព្រះអាទិត្យមានតម្លៃប្រហែល $5.7 \times 10^3 {}^{\circ}\text{C}$ និង $15 \times 10^6 {}^{\circ}\text{C}$ រៀងគ្នា ។<br>
+        ក. តើសីតុណ្ហភាពនេះមានតម្លៃប៉ុន្មានគិតជាកែលវិន K ?<br>
+        ខ. គណនាកម្រិតលម្អៀងក្នុងករណីនីមួយៗ បើគេភ្លេចប្ដូរពី $^\circ\text{C}$ ទៅ K ។
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <h3 style="margin-top: 0; color: #455a64; font-family: 'Siemreap', sans-serif;">ការប្រៀបធៀបទំហំកម្រិតលម្អៀង (Visualizing Percentage Error)</h3>
+        <svg viewBox="0 0 800 150" preserveAspectRatio="xMidYMid meet">
+            
+            <!-- ស៊ុមរបារសរុប (Total Kelvin Value) -->
+            <rect x="50" y="50" width="700" height="50" fill="#eceff1" stroke="#90a4ae" stroke-width="2" rx="4"/>
+            
+            <!-- របារតម្លៃអង្សាសេ (Value Used = t) -->
+            <rect id="barC" x="50" y="50" width="500" height="50" fill="#0288d1" rx="4"/>
+            
+            <!-- របារតម្លៃលម្អៀង (Missing 273) -->
+            <rect id="barErr" x="550" y="50" width="200" height="50" fill="#d32f2f" rx="4"/>
+
+            <!-- អក្សរបង្ហាញលើរបារ -->
+            <text id="lblC" x="300" y="82" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="20" fill="#fff">t (°C)</text>
+            <text id="lblErr" x="650" y="82" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="18" fill="#fff">+ 273</text>
+            
+            <!-- ស្លាកនៅពេលកំហុសតូចពេក (Invisible Error) -->
+            <text id="lblInvisible" x="400" y="130" text-anchor="middle" font-family="Siemreap, Arial" font-weight="bold" font-size="16" fill="#d32f2f" style="opacity: 0;">
+                កម្រិតលម្អៀងតូចខ្លាំងរហូតដល់មើលលែងឃើញនឹងភ្នែក!
+            </text>
+
+            <line x1="50" y1="110" x2="50" y2="120" stroke="#546e7a" stroke-width="2"/>
+            <text x="50" y="140" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#546e7a">0 K</text>
+            
+            <line x1="750" y1="110" x2="750" y2="120" stroke="#546e7a" stroke-width="2"/>
+            <text x="750" y="140" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#546e7a">T (Kelvin ពិតប្រាកដ)</text>
+        </svg>
+    </div>
+
+    <!-- របារអូសសម្រាប់តម្លៃទូទៅ (Custom Input) -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            កំណត់សីតុណ្ហភាពតាមចិត្ត $t$ (°C) [អតិបរមា 10,000 °C]:<br>
+            <span id="valCustomC" class="number-display" style="color: #0288d1; font-size:24px;">100 °C</span>
+            <input type="range" id="sliderCustom" min="0" max="10000" value="100" step="50">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #0288d1;">សីតុណ្ហភាពអង្សាសេ $t$<br><span id="dashC" class="number-display">100 °C</span></div>
+        <div class="data-box" style="border-top: 4px solid #e65100;">សីតុណ្ហភាពកែលវិន $T$<br><span id="dashK" class="number-display">373 K</span></div>
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">កម្រិតលម្អៀង %<br><span id="dashErr" class="number-display">73.19 %</span></div>
+    </div>
+
+    <button id="btnToggleSolution" class="btn-sol">📖 បង្ហាញ / លាក់ដំណោះស្រាយ</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box">
+            💡 <strong>រូបមន្តកម្រិតលម្អៀង៖</strong> ភាគរយកម្រិតលម្អៀង ស្មើនឹងផលធៀបរវាងគម្លាតសីតុណ្ហភាព (273) ជាមួយនឹងសីតុណ្ហភាពពិតប្រាកដ (T) រួចគុណនឹង 100។
+            <div style="text-align: center; font-size: 1.1em; margin-top: 10px;">
+                $$\% \text{ Error} = \frac{\vert{}\Delta T\vert{}}{T} \times 100% = \frac{273}{T} \times 100$$
+            </div>
+        </div>
+
+        <h3 id="solTitle">ដំណោះស្រាយសម្រាប់៖ ទឹកពុះ</h3>
+        <div id="mathContainer">
+            <!-- មាតិកា MathJax នឹងត្រូវ Update ដោយ JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > -->
+<script>
+    var sCustom = document.getElementById('sliderCustom');
+    
+    var btnWater = document.getElementById('btnWater');
+    var btnEarth = document.getElementById('btnEarth');
+    var btnSun = document.getElementById('btnSun');
+    
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    var barC = document.getElementById('barC');
+    var barErr = document.getElementById('barErr');
+    var lblC = document.getElementById('lblC');
+    var lblErr = document.getElementById('lblErr');
+    var lblInvisible = document.getElementById('lblInvisible');
+    var solTitle = document.getElementById('solTitle');
+
+    // ស្ថានភាពបច្ចុប្បន្ន (State)
+    // 0: Water, 1: Earth, 2: Sun, 3: Custom
+    var currentState = 0; 
+    var customVal = 100;
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    btnWater.addEventListener('click', function() {
+        currentState = 0;
+        sCustom.value = 100;
+        updatePhysics();
+    });
+
+    btnEarth.addEventListener('click', function() {
+        currentState = 1;
+        updatePhysics();
+    });
+
+    btnSun.addEventListener('click', function() {
+        currentState = 2;
+        updatePhysics();
+    });
+
+    sCustom.addEventListener('input', function() {
+        currentState = 3; // Custom mode
+        customVal = parseFloat(sCustom.value);
+        updatePhysics();
+    });
+
+    // អនុគមន៍ជំនួយក្នុងការបង្ហាញលេខស្វ័យគុណ
+    function formatSci(num) {
+        if (num === 5700) return "5.7 \\times 10^3";
+        if (num === 15000000) return "15 \\times 10^6";
+        return num.toString();
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var t_C = 0;
+        var titleStr = "";
+
+        // កំណត់តម្លៃតាមស្ថានភាព
+        if (currentState === 0) {
+            t_C = 100;
+            titleStr = "ទឹកពុះ";
+        } else if (currentState === 1) {
+            t_C = 5700;
+            titleStr = "ស្នូលផែនដី";
+        } else if (currentState === 2) {
+            t_C = 15000000;
+            titleStr = "ស្នូលព្រះអាទិត្យ";
+        } else {
+            t_C = customVal;
+            titleStr = "តម្លៃកំណត់ដោយដៃ (" + t_C + " °C)";
+        }
+
+        document.getElementById('valCustomC').innerText = t_C.toLocaleString() + " °C";
+
+        // ការគណនា
+        var t_K = t_C + 273;
+        var errPercent = (273 / t_K) * 100;
+
+        // Update Dashboard
+        var tC_display = t_C.toLocaleString() + " °C";
+        var tK_display = t_K.toLocaleString() + " K";
+        var err_display = errPercent.toFixed(2) + " %";
+
+        // កែតម្រូវទម្រង់បង្ហាញសម្រាប់ស្នូលព្រះអាទិត្យ និងផែនដី ឱ្យដូចសៀវភៅ
+        if (currentState === 1) {
+            tC_display = "5.7 × 10³ °C";
+            tK_display = "6.0 × 10³ K";
+            err_display = "4.6 %";
+        } else if (currentState === 2) {
+            tC_display = "15 × 10⁶ °C";
+            tK_display = "15 × 10⁶ K";
+            err_display = "1.8 × 10⁻³ %";
+        }
+
+        document.getElementById('dashC').innerText = tC_display;
+        document.getElementById('dashK').innerText = tK_display;
+        document.getElementById('dashErr').innerText = err_display;
+        solTitle.innerText = "ដំណោះស្រាយសម្រាប់៖ " + titleStr;
+
+        // ធ្វើចលនាក្រាហ្វិក (SVG Bar Chart Update)
+        var totalWidth = 700;
+        var errWidth = (273 / t_K) * totalWidth;
+        
+        // បើ Error ធំពេក (ទឹកកក 0°C -> err = 100%)
+        var safeErrWidth = Math.min(errWidth, totalWidth);
+        var cWidth = totalWidth - safeErrWidth;
+
+        barC.setAttribute("width", cWidth);
+        barErr.setAttribute("x", 50 + cWidth);
+        barErr.setAttribute("width", safeErrWidth);
+
+        // ដាក់ទីតាំងអក្សរ
+        lblC.setAttribute("x", 50 + (cWidth / 2));
+        lblErr.setAttribute("x", 50 + cWidth + (safeErrWidth / 2));
+
+        // ពិនិត្យមើលថាតើទំហំកំហុសតូចជាង 2px ដែរឬទេ (ប្រើ Math.max ដើម្បីចៀសវាងសញ្ញាធំជាងតូចជាង)
+        var isTiny = (Math.max(safeErrWidth, 2) === 2);
+        var isC_Tiny = (Math.max(cWidth, 20) === 20);
+
+        if (isTiny === true) {
+            lblErr.style.opacity = "0";
+            lblInvisible.style.opacity = "1";
+            barErr.setAttribute("width", 2); // រក្សាឱ្យឃើញឆ្នូតក្រហមបន្តិច
+        } else {
+            lblErr.style.opacity = "1";
+            lblInvisible.style.opacity = "0";
+        }
+
+        if (isC_Tiny === true) {
+            lblC.style.opacity = "0";
+        } else {
+            lblC.style.opacity = "1";
+        }
+
+        // Update MathJax (Debounced)
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            var mathHTML = "";
+
+            if (currentState === 1) { // Earth
+                mathHTML = `
+                    <p><strong>ក. សីតុណ្ហភាពគិតជាកែលវិន K៖</strong></p>
+                    <div style="font-size: 1.1em; margin: 15px 0;">$$ T_1 = 5700 + 273 = 5973 \\text{ K} \\approx 6.0 \\times 10^3 \\text{ K} $$</div>
+                    <p><strong>ខ. កម្រិតលម្អៀង៖</strong></p>
+                    <div style="font-size: 1.1em; margin: 15px 0; color: #d32f2f;">$$ \\% \\text{ Error} = \\frac{273}{5973} \\times 100 \\approx 4.6 \\% $$</div>
+                `;
+            } else if (currentState === 2) { // Sun
+                mathHTML = `
+                    <p><strong>ក. សីតុណ្ហភាពគិតជាកែលវិន K៖</strong></p>
+                    <div style="font-size: 1.1em; margin: 15px 0;">$$ T_2 = (15 \\times 10^6) + 273 \\approx 15 \\times 10^6 \\text{ K} $$</div>
+                    <p><strong>ខ. កម្រិតលម្អៀង៖</strong></p>
+                    <div style="font-size: 1.1em; margin: 15px 0; color: #d32f2f;">$$ \\% \\text{ Error} = \\frac{273}{15 \\times 10^6} \\times 100 = 1.8 \\times 10^{-3} \\% $$</div>
+                `;
+            } else { // Custom & Water
+                mathHTML = `
+                    <p><strong>ក. សីតុណ្ហភាពគិតជាកែលវិន K៖</strong></p>
+                    <div style="font-size: 1.1em; margin: 15px 0;">$$ T = ${t_C} + 273 = ${t_K} \\text{ K} $$</div>
+                    <p><strong>ខ. កម្រិតលម្អៀង៖</strong></p>
+                    <div style="font-size: 1.1em; margin: 15px 0; color: #d32f2f;">$$ \\% \\text{ Error} = \\frac{273}{${t_K}} \\times 100 \\approx ${errPercent.toFixed(2)} \\% $$</div>
+                `;
+            }
+
+            document.getElementById('mathContainer').innerHTML = mathHTML;
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    // Initial run
+    updatePhysics();
+</script>
+
+</body>
+</html>
+<p></p><p></p><p></p>

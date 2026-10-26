@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ១៥ - កម្មន្តនៃទំនាញផែនដី</title>
+    
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center;
+        }
+        .container { max-width: 1050px; margin: 0 auto; }
+        
+        /* ប្រធានលំហាត់ */
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 18px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        /* ផ្ទាំងបម្រាប់ */
+        .info-panel {
+            background: #fff; padding: 15px; border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;
+            display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px;
+            border-left: 6px solid #28a745; font-size: 16px;
+        }
+        .info-panel strong { color: #d32f2f; font-size: 18px; }
+
+        /* ផ្ទាំង Simulator */
+        .sim-area {
+            position: relative; width: 100%; height: 420px;
+            background: #e0f7fa; border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); margin: 0 auto 20px;
+        }
+
+        /* SVG Environment */
+        svg { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+        .wall { fill: #cfd8dc; stroke: #90a4ae; stroke-width: 4; }
+        .ground { fill: #8d6e63; stroke: #5d4037; stroke-width: 4; }
+        .ladder-rail { stroke: #795548; stroke-width: 8; stroke-linecap: round; }
+        .ladder-rung { stroke: #8d6e63; stroke-width: 4; }
+        
+        /* គំនូសមុំ និង រង្វាស់ */
+        .measure-line { stroke: #d32f2f; stroke-width: 2; stroke-dasharray: 5,5; }
+        .measure-text { fill: #d32f2f; font-weight: bold; font-size: 16px; font-family: Arial; }
+        .angle-arc { fill: rgba(211, 47, 47, 0.2); stroke: #d32f2f; stroke-width: 2; }
+
+        /* តួអង្គជាងលាបថ្នាំ */
+        .painter {
+            position: absolute; width: 50px; height: 50px;
+            font-size: 40px; display: flex; align-items: center; justify-content: center;
+            z-index: 3; transform: translate(-50%, -50%);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+        }
+        
+        /* ព្រួញទម្ងន់ P */
+        .force-arrow-P {
+            position: absolute; top: 25px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 45px; background: #6f42c1; z-index: 2;
+        }
+        .force-arrow-P::after {
+            content: ''; position: absolute; bottom: -8px; left: -6px;
+            border-top: 10px solid #6f42c1; border-left: 8px solid transparent; border-right: 8px solid transparent;
+        }
+        .force-label-P { position: absolute; left: 10px; top: 25px; color: #6f42c1; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 0 #fff; }
+
+        /* ផ្ទាំងទិន្នន័យ (Grid) */
+        .dashboard {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 16px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 26px; display: block; margin-top: 8px;
+        }
+        
+        #liveDist { color: #007bff; }
+        #liveHeight { color: #28a745; }
+        #liveVel { color: #e65100; }
+        #liveWork { color: #d32f2f; }
+
+        /* ប៊ូតុងបញ្ជា */
+        .controls {
+            margin-top: 20px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; align-items: center;
+        }
+        button {
+            padding: 12px 20px; font-size: 17px; font-weight: bold;
+            font-family: inherit; cursor: pointer; border: none;
+            border-radius: 6px; color: white; transition: 0.2s; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        .btn-const { background: #007bff; } .btn-const:hover { background: #0056b3; }
+        .btn-acc { background: #e65100; } .btn-acc:hover { background: #bf360c; }
+        #resetBtn { background: #6c757d; } #resetBtn:hover { background: #5a6268; }
+        #solutionBtn { background: #17a2b8; } #solutionBtn:hover { background: #138496; }
+
+        .status-bar {
+            margin-top: 20px; font-size: 18px; font-weight: bold;
+            background: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #333; border-left: 6px solid #ccc;
+        }
+
+        /* ដំណោះស្រាយ */
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        .solution-box ul { padding-left: 30px; margin-top: 5px; }
+        .highlight { font-weight: bold; color: #d32f2f; font-size: 19px; }
+        .note-box { background: #ffebee; border-left: 5px solid #d32f2f; padding: 15px; margin-bottom: 15px; border-radius: 4px; color: #b71c1c; font-weight: bold;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>លំហាត់ទី ១៥ ៖</strong> ជាងលាបថ្នាំផ្ទះម្នាក់មានម៉ាស $65.0 \text{ kg}$ ឡើងតាមជណ្តើរទ្រេតមួយបានប្រវែង $3.50 \text{ m}$ និងផ្អែកខ្លួនទល់នឹងជញ្ជាំងឈរ។ ជណ្តើរបង្កើតបានមុំ $30.0^\circ$ ធៀបនឹងជញ្ជាំង។<br>
+        <strong>ក.</strong> កំណត់កម្មន្តនៃទំនាញផែនដីដែលធ្វើលើជាង។<br>
+        <strong>ខ.</strong> តើចម្លើយនៃសំណួរ អាស្រ័យលើការឡើងរបស់ជាងតាមជណ្តើរដោយល្បឿនថេរ ឬសំទុះថេរដែរឬទេ?
+    </div>
+
+    <div class="info-panel">
+        <div>ម៉ាស ($m$) = <strong>65.0 kg</strong></div>
+        <div>ប្រវែងឡើង ($L$) = <strong>3.50 m</strong></div>
+        <div>មុំធៀបជញ្ជាំង ($\theta$) = <strong>30.0&deg;</strong></div>
+        <div>សន្ទុះទំនាញ ($g$) = <strong>9.8 m/s²</strong></div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator -->
+    <div class="sim-area">
+        <svg id="svgEnv">
+            <!-- គូសជញ្ជាំង (Wall) ខាងស្តាំ -->
+            <rect x="650" y="20" width="150" height="360" class="wall" />
+            
+            <!-- គូសដី (Ground) -->
+            <rect x="0" y="380" width="100%" height="40" class="ground" />
+            
+            <!-- គំនូសបន្ទាត់ឈរស្របជញ្ជាំង -->
+            <line x1="650" y1="20" x2="650" y2="380" stroke="#999" stroke-width="2" stroke-dasharray="5,5" />
+
+            <!-- ជណ្តើរ និង មុំ នឹងត្រូវបានគូសតាមរយៈ JS ខាងក្រោម -->
+            <g id="ladderGroup"></g>
+            
+            <!-- គំនូសវាស់កម្ពស់ h -->
+            <line class="measure-line" x1="250" y1="380" x2="250" y2="80" id="hLine" />
+            <line class="measure-line" x1="240" y1="80" x2="260" y2="80" id="hLineTop" />
+            <text x="180" y="230" class="measure-text" id="hText">h = 0.00 m</text>
+        </svg>
+        
+        <!-- តួអង្គជាង -->
+        <div class="painter" id="painter">
+            👨‍🎨
+            <div class="force-arrow-P"><div class="force-label-P">P</div></div>
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងប្រៀបធៀបទិន្នន័យ -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 5px solid #007bff;">ចម្ងាយឡើង ($d$)<br><span id="liveDist">0.00 m</span></div>
+        <div class="data-box" style="border-top: 5px solid #28a745;">កម្ពស់បញ្ឈរ ($h$)<br><span id="liveHeight">0.00 m</span></div>
+        <div class="data-box" style="border-top: 5px solid #e65100;">ល្បឿនឡើង ($v$)<br><span id="liveVel">0.00 m/s</span></div>
+        <div class="data-box" style="border-top: 5px solid #d32f2f;">កម្មន្តនៃទម្ងន់ ($W$)<br><span id="liveWork">0.00 kJ</span></div>
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="controls">
+        <button class="btn-const" onclick="startSim('const')">▶ ឡើងដោយល្បឿនថេរ</button>
+        <button class="btn-acc" onclick="startSim('acc')">▶ ឡើងដោយមានសំទុះ (ស្ទុះ)</button>
+        <button id="resetBtn">🔄 ត្រឡប់ដើម</button>
+        <button id="solutionBtn">📖 បង្ហាញដំណោះស្រាយ</button>
+    </div>
+
+    <div class="status-bar" id="statusText">សូមជ្រើសរើសរបៀបនៃការឡើងជណ្តើរ...</div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div id="solutionBox" class="solution-box" style="display: none;">
+        <div class="note-box">
+            ⚠️ <strong>ចំណាំ៖ កំហុសវាយអត្ថបទ (Typo) ក្នុងសៀវភៅពុម្ព</strong><br>
+            ចម្លើយពិតប្រាកដដែលគណនាបានគឺ $\mathbf{-1.93 \text{ kJ}}$ ប៉ុន្តែនៅក្នុងសៀវភៅពុម្ពបានវាយខុសឆ្លាស់លេខ 9 និង 3 ទៅជា $\mathbf{-1.39 \text{ kJ}}$ ។ លោកគ្រូអាចផ្ទៀងផ្ទាត់ការគណនាខាងក្រោមបាន!
+        </div>
+        
+        <h3>ដំណោះស្រាយ</h3>
+        <p><strong>បម្រាប់៖</strong> $m = 65.0 \text{ kg}$, ប្រវែងឡើង $L = 3.50 \text{ m}$។ មុំធៀបនឹងជញ្ជាំងឈរ $\theta = 30.0^\circ$។ $g = 9.8 \text{ m/s}^2$។</p>
+        
+        <p><strong>ក. កំណត់កម្មន្តនៃទំនាញផែនដី ($W$) ៖</strong></p>
+        <ul>
+            <li>កម្លាំងទំនាញផែនដី (ទម្ងន់) មានទិសដៅឈរចុះក្រោមជានិច្ច ហេតុនេះកម្មន្តរបស់វាអាស្រ័យតែលើកម្ពស់បញ្ឈរដែលឡើងបានប៉ុណ្ណោះ។</li>
+            <li>កម្ពស់បញ្ឈរដែលជាងឡើងបាន៖ $h = L \times \cos(30^\circ) = 3.50 \times \frac{\sqrt{3}}{2} \approx 3.031 \text{ m}$</li>
+            <li>កម្មន្តនៃទម្ងន់ (ផ្ទុយទិសដៅបម្លាស់ទីឡើងលើ)៖ $W = -mgh$</li>
+            <li>$W = -65.0 \times 9.8 \times 3.031 = -1930.7 \text{ J} \approx$ <span class="highlight">-1.93 kJ</span></li>
+        </ul>
+
+        <p><strong>ខ. តើចម្លើយអាស្រ័យលើល្បឿនថេរ ឬសំទុះថេរដែរឬទេ?</strong></p>
+        <ul>
+            <li><span class="highlight">ចម្លើយគឺ "ទេ"។</span></li>
+            <li>កម្មន្តនៃកម្លាំងទំនាញផែនដី អាស្រ័យតែទៅលើ <strong>ម៉ាស ($m$)</strong> និង <strong>បម្រែបម្រួលកម្ពស់ ($h$)</strong> ប៉ុណ្ណោះ ព្រោះវាជាកម្លាំងរក្សា (Conservative Force)។ វាមិនខ្វល់ថាជាងឡើងយឺត លឿន ឬស្ទុះឡើយ ឱ្យតែឡើងដល់កម្ពស់ដដែល កម្មន្តនៃទម្ងន់គឺនៅដដែលជានិច្ច។</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // -----------------------------------------------------
+    // ១. រៀបចំ UI និងគូសជណ្តើរ + មុំដោយស្វ័យប្រវត្តិ
+    // -----------------------------------------------------
+    const m = 65.0; // kg
+    const g = 9.8; // m/s^2
+    const thetaDeg = 30.0;
+    const thetaRad = thetaDeg * Math.PI / 180;
+    const targetL = 3.50; // m
+
+    // Scale SVG
+    const scalePx = 70; // 1m = 70px
+    const wallX = 650;
+    const groundY = 380;
+    
+    // គណនាកូអរដោនេជណ្តើរ
+    const L_px = targetL * scalePx; 
+    const h_px = L_px * Math.cos(thetaRad); 
+    const dx_px = L_px * Math.sin(thetaRad); 
+    
+    const topX = wallX;
+    const topY = groundY - h_px; 
+    const botX = wallX - dx_px; 
+    const botY = groundY;
+
+    const ladderGroup = document.getElementById('ladderGroup');
+    
+    // គូសមុំ 30° ភ្ជាប់ពីកំពូលជណ្តើរ ឱ្យនៅក្រោមត្រឹមត្រូវ
+    const arcRadius = 70;
+    // ចំណុចចាប់ផ្តើម (លើជញ្ជាំង)
+    const arcStartX = topX;
+    const arcStartY = topY + arcRadius;
+    // ចំណុចបញ្ចប់ (លើជណ្តើរ)
+    const arcEndX = topX - arcRadius * Math.sin(thetaRad);
+    const arcEndY = topY + arcRadius * Math.cos(thetaRad);
+    
+    let arc = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    // Sweep-flag = 1 សម្រាប់គូសរង្វិលទិសទ្រនិចនាឡិកាក្នុង SVG
+    arc.setAttribute("d", `M ${arcStartX} ${arcStartY} A ${arcRadius} ${arcRadius} 0 0 1 ${arcEndX} ${arcEndY} L ${topX} ${topY} Z`);
+    arc.setAttribute("class", "angle-arc");
+    ladderGroup.appendChild(arc);
+    
+    // ដាក់អក្សរ 30° នៅចន្លោះមុំ
+    let angleText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    const textDist = 45; // ចម្ងាយពីកំពូលមកអក្សរ
+    const angleBisectRad = 15 * Math.PI / 180; // មុំពាក់កណ្តាល 15 ដឺក្រេ
+    const textX = topX - textDist * Math.sin(angleBisectRad) - 18; // ថយក្រោយបន្តិច
+    const textY = topY + textDist * Math.cos(angleBisectRad) + 5;
+    angleText.setAttribute("x", textX);
+    angleText.setAttribute("y", textY);
+    angleText.setAttribute("class", "measure-text");
+    angleText.textContent = "30°";
+    ladderGroup.appendChild(angleText);
+
+    // គូស Rail ជណ្តើរឆ្វេងស្តាំ
+    let rail1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    rail1.setAttribute("x1", botX - 10); rail1.setAttribute("y1", botY);
+    rail1.setAttribute("x2", topX - 10); rail1.setAttribute("y2", topY);
+    rail1.setAttribute("class", "ladder-rail");
+    ladderGroup.appendChild(rail1);
+    
+    let rail2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    rail2.setAttribute("x1", botX + 10); rail2.setAttribute("y1", botY);
+    rail2.setAttribute("x2", topX + 10); rail2.setAttribute("y2", topY);
+    rail2.setAttribute("class", "ladder-rail");
+    ladderGroup.appendChild(rail2);
+
+    // គូសកាំជណ្តើរ
+    for(let i=1; i<=10; i++) {
+        let p = i / 11;
+        let rx = botX + p*(topX - botX);
+        let ry = botY + p*(topY - botY);
+        let rung = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        rung.setAttribute("x1", rx - 10); rung.setAttribute("y1", ry);
+        rung.setAttribute("x2", rx + 10); rung.setAttribute("y2", ry);
+        rung.setAttribute("class", "ladder-rung");
+        ladderGroup.appendChild(rung);
+    }
+
+    // -----------------------------------------------------
+    // ២. ទិន្នន័យរូបវិទ្យា និង Animation
+    // -----------------------------------------------------
+    let animationFrameId;
+    let isRunning = false;
+    let currentMode = '';
+    let time = 0;
+    let dist = 0; // ចម្ងាយឡើងបាន (m)
+    let vel = 0; // ល្បឿន (m/s)
+    let lastTimeMs = 0;
+
+    const painterEl = document.getElementById('painter');
+    const distDisp = document.getElementById('liveDist');
+    const heightDisp = document.getElementById('liveHeight');
+    const velDisp = document.getElementById('liveVel');
+    const workDisp = document.getElementById('liveWork');
+    const statusText = document.getElementById('statusText');
+    const hLineTop = document.getElementById('hLineTop');
+    const hText = document.getElementById('hText');
+    const hLine = document.getElementById('hLine');
+
+    function updateUI() {
+        let h = dist * Math.cos(thetaRad);
+        let W = -m * g * h; // Joules
+        let W_kJ = W / 1000;
+
+        distDisp.innerText = dist.toFixed(2) + " m";
+        heightDisp.innerText = h.toFixed(2) + " m";
+        velDisp.innerText = vel.toFixed(2) + " m/s";
+        workDisp.innerText = W_kJ.toFixed(2) + " kJ";
+
+        // ទីតាំង Painter
+        let px = botX + (dist/targetL)*(topX - botX);
+        let py = botY + (dist/targetL)*(topY - botY);
+        painterEl.style.left = `${px}px`;
+        painterEl.style.top = `${py}px`;
+
+        // អាប់ដេតគំនូសវាស់កម្ពស់
+        hLineTop.setAttribute("y1", py);
+        hLineTop.setAttribute("y2", py);
+        hText.setAttribute("y", py + (groundY - py)/2);
+        hText.textContent = `h = ${h.toFixed(2)} m`;
+    }
+
+    function animate(timestamp) {
+        if (!lastTimeMs) lastTimeMs = timestamp;
+        let dt = (timestamp - lastTimeMs) / 1000;
+        if (dt > 0.1) dt = 0.1;
+        lastTimeMs = timestamp;
+
+        if (isRunning) {
+            time += dt;
+
+            if (currentMode === 'const') {
+                vel = 1.0;
+                dist += vel * dt;
+            } else if (currentMode === 'acc') {
+                let a = 0.5;
+                vel += a * dt;
+                dist += vel * dt;
+            }
+
+            if (dist >= targetL) {
+                dist = targetL;
+                isRunning = false;
+                vel = 0; // ដល់កំពូលឈប់
+                
+                statusText.innerHTML = `✅ ដល់គោលដៅ! ទោះឡើងរបៀបណា ក៏កម្មន្តនៅតែស្មើ <strong>-1.93 kJ</strong>។ (បញ្ជាក់ចម្លើយ ខ)`;
+                statusText.style.borderLeftColor = "#28a745";
+            }
+
+            updateUI();
+
+            if (isRunning) {
+                animationFrameId = requestAnimationFrame(animate);
+            }
+        }
+    }
+
+    window.startSim = function(mode) {
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        
+        currentMode = mode;
+        isRunning = true;
+        time = 0; dist = 0; vel = 0; lastTimeMs = 0;
+        
+        if (mode === 'const') {
+            statusText.innerHTML = `កំពុងឡើងដោយ <strong>ល្បឿនថេរ</strong>... សង្កេតមើលកម្មន្ត!`;
+            statusText.style.borderLeftColor = "#007bff";
+        } else {
+            statusText.innerHTML = `កំពុងឡើងដោយ <strong>ល្បឿនកើនឡើង (មានសំទុះ)</strong>... សង្កេតមើលកម្មន្ត!`;
+            statusText.style.borderLeftColor = "#e65100";
+        }
+        
+        updateUI();
+        animationFrameId = requestAnimationFrame(animate);
+    };
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        isRunning = false;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        time = 0; dist = 0; vel = 0;
+        updateUI();
+        statusText.innerText = "សូមជ្រើសរើសរបៀបនៃការឡើងជណ្តើរ...";
+        statusText.style.borderLeftColor = "#ccc";
+    });
+
+    document.getElementById('solutionBtn').addEventListener('click', () => {
+        const box = document.getElementById('solutionBox');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // ហៅអនុគមន៍ដើម្បីកំណត់ទីតាំងដើម
+    updateUI();
+</script>
+
+</body>
+</html>

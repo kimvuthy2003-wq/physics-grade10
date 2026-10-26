@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី១១៖ ម៉ាណូម៉ែត្ររ៉ឺស័រក្នុងទឹក</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; max-width: 500px; height: auto;
+            background: #e0f7fa; border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 12px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 15px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 8px;
+        }
+        
+        button {
+            background: #007bff; color: white; padding: 12px 24px; font-size: 18px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-family: inherit; transition: filter 0.3s; margin-bottom: 20px;
+        }
+        button:hover { filter: brightness(1.1); }
+        #btnToggleSolution { background: #17a2b8; }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-bottom: 20px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        
+        .note-box { 
+            background: #e8f5e9; border-left: 6px solid #28a745; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #1b5e20; 
+        }
+        
+        .math-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+
+        #liveP { color: #d32f2f; }
+        #liveF { color: #007bff; }
+        #liveX { color: #28a745; font-size: 26px;}
+        
+        .text-outline { text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>១១.</strong> រ៉ឺស័រក្នុងម៉ាណូម៉ែត្រមានថេរកម្រាញ $1250 \text{ N/m}$ និងពីស្តុងមានអង្កត់ផ្ចិត $1.20 \text{ cm}$។ គណនាជម្រៅទឹក កាលណាគេដាក់ម៉ាណូម៉ែត្រចូលទៅក្នុងទឹកទន្លេ ហើយធ្វើឱ្យពីស្តុងផ្លាស់ទីបាន $0.500 \text{ cm}$ បើគេមិនគិតសម្ពាធបរិយាកាស។ (យក $\rho = 1000 \text{ kg/m}^3, g = 9.80 \text{ m/s}^2$)
+    </div>
+
+    <button id="btnToggleSolution">📖 បង្ហាញ / លាក់ដំណោះស្រាយ</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ (លុបអក្សរខ្មែរចេញពី MathJax ដើម្បីកុំឱ្យដាច់អក្សរ) -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box">
+            💡 <strong>គន្លឹះ៖</strong> ក្នុងភាពលំនឹង កម្លាំងសង្កត់របស់ទឹកពីលើពីស្តុង ($F_p = P \cdot A$) ត្រូវមានទំហំស្មើគ្នានឹងកម្លាំងទប់របស់រ៉ឺស័ររុញឡើងលើ ($F_s = k \cdot x$)។
+        </div>
+        
+        <h3>ដំណោះស្រាយលំហាត់គំរូ</h3>
+        
+        <div id="mathContainer">
+            <p><strong>១. រូបមន្តគ្រឹះ៖</strong></p>
+            <div class="math-row">
+                <span>កម្លាំងសម្ពាធទឹក៖ </span>
+                <span>$F_p = P \cdot A = (\rho \cdot g \cdot h) \cdot \left(\frac{\pi d^2}{4}\right)$</span>
+            </div>
+            <div class="math-row">
+                <span>កម្លាំងរ៉ឺស័រ៖ </span>
+                <span>$F_s = k \cdot x$</span>
+            </div>
+
+            <p><strong>២. ទាញរកជម្រៅទឹក ($h$) ៖</strong></p>
+            <div class="math-row">
+                <span>$F_p = F_s \implies$</span>
+                <span>$\rho g h \frac{\pi d^2}{4} = k x$</span>
+            </div>
+            <div>$$ h = \frac{4 k x}{\rho g \pi d^2} $$</div>
+
+            <p><strong>៣. បម្រាប់ និង ជំនួសលេខ៖</strong></p>
+            <ul style="font-size: 16px;">
+                <li>k = <span id="solK">1250</span> N/m</li>
+                <li>x = <span id="solXcm">0.500</span> cm = <span id="solXm">0.0050</span> m </li>
+                <li>$d = 1.20 \text{ cm} = 0.012 \text{ m}$</li>
+                <li>$\rho = 1000 \text{ kg/m}^3, g = 9.80 \text{ m/s}^2$</li>
+            </ul>
+            <div id="mathLineResult">$$ h = \frac{4 \times 1250 \times 0.0050}{1000 \times 9.80 \times 3.1416 \times (0.012)^2} \approx 5.64 \text{ m} $$</div>
+        </div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D Cross-section SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#4fc3f7" stop-opacity="0.8"/>
+                    <stop offset="100%" stop-color="#0277bd" stop-opacity="0.9"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ផ្ទៃទឹក -->
+            <rect x="0" y="80" width="500" height="420" fill="url(#waterGrad)" />
+            <line x1="0" y1="80" x2="500" y2="80" stroke="#0288d1" stroke-width="3" />
+            <path d="M 50 80 Q 75 75 100 80 T 150 80 T 200 80 T 250 80 T 300 80 T 350 80 T 400 80 T 450 80" fill="none" stroke="#e1f5fe" stroke-width="2" opacity="0.6"/>
+
+            <!-- បន្ទាត់វាស់ជម្រៅ h -->
+            <g id="hMeasureGroup">
+                <line x1="380" y1="80" x2="420" y2="80" stroke="#d32f2f" stroke-width="2" />
+                <line id="hBotLine" x1="380" y1="200" x2="420" y2="200" stroke="#d32f2f" stroke-width="2" stroke-dasharray="5,5" />
+                <line id="hVertLine" x1="400" y1="80" x2="400" y2="200" stroke="#d32f2f" stroke-width="2" />
+                <polygon id="hArrTop" points="396,90 404,90 400,80" fill="#d32f2f" />
+                <polygon id="hArrBot" points="396,190 404,190 400,200" fill="#d32f2f" />
+                <text id="lblH" x="430" y="140" font-family="Arial" font-weight="bold" font-size="18" fill="#d32f2f" dominant-baseline="middle">h</text>
+            </g>
+
+            <!-- ម៉ាណូម៉ែត្រ (ធ្វើចលនាឡើងចុះតាម h) -->
+            <g id="manometerGroup" transform="translate(0, 0)">
+                <!-- ខ្សែយោង -->
+                <line x1="250" y1="-100" x2="250" y2="200" stroke="#555" stroke-width="3" />
+                
+                <!-- តួម៉ាណូម៉ែត្រ -->
+                <rect x="210" y="200" width="80" height="120" fill="#cfd8dc" stroke="#455a64" stroke-width="6" rx="4" />
+                <rect x="213" y="200" width="74" height="117" fill="#ffffff" stroke="none" rx="2" /> 
+                
+                <text x="280" y="270" font-family="Arial" font-weight="bold" font-size="14" fill="#9e9e9e" transform="rotate(-90 280 270)">សុញ្ញាកាស</text>
+
+                <!-- បន្ទាត់ព្រំដែនដើមរបស់ពីស្តុង (ពេល x=0) -->
+                <line x1="210" y1="200" x2="290" y2="200" stroke="#ff9800" stroke-width="2" stroke-dasharray="4,4" />
+
+                <!-- រ៉ឺស័រ -->
+                <path id="springPath" d="M 250 220 L 250 317" fill="none" stroke="#757575" stroke-width="4" stroke-linejoin="round" />
+
+                <!-- ពីស្តុង (ធ្វើចលនារួញតាម x) -->
+                <rect id="piston" x="213" y="200" width="74" height="20" fill="#78909c" stroke="#37474f" stroke-width="2" />
+                <text id="lblPiston" x="150" y="215" font-family="Arial" font-weight="bold" font-size="16" fill="#111" class="text-outline">ពីស្តុង</text>
+                <line id="linePiston" x1="185" y1="210" x2="210" y2="210" stroke="#111" stroke-width="2" />
+
+                <!-- ព្រួញ និងអក្សរតំណាងចម្ងាយ x (ចម្ងាយផ្លាស់ទីរបស់ពីស្តុង) -->
+                <g id="deltaXGroup" style="opacity: 0;">
+                    <line id="dxLine" x1="300" y1="200" x2="300" y2="220" stroke="#e65100" stroke-width="3" />
+                    <polygon id="dxArrow" points="295,220 305,220 300,228" fill="#e65100" />
+                    <text id="dxText" x="312" y="215" font-family="Arial" font-weight="bold" font-size="18" fill="#e65100" dominant-baseline="middle">x</text>
+                </g>
+
+                <!-- ព្រួញកម្លាំងទឹកសង្កត់ (F) -->
+                <line id="vecF" x1="250" y1="150" x2="250" y2="195" stroke="#d32f2f" stroke-width="4" />
+                <polygon id="headF" points="245,195 255,195 250,205" fill="#d32f2f" />
+                <text id="txtF" x="265" y="175" font-family="Arial" font-weight="bold" font-size="18" fill="#d32f2f" class="text-outline">F</text>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            ជម្រៅម៉ាណូម៉ែត្រក្នុងទឹក ($h$) គិតជា ម៉ែត្រ:<br>
+            <span id="valH" style="color: #d32f2f; font-size:22px;">5.64</span> m
+            <input type="range" id="sliderH" min="0.0" max="10.0" value="5.64" step="0.01">
+        </div>
+        <div class="slider-box">
+            ថេរកម្រាញរ៉ឺស័រ ($k$) គិតជា N/m:<br>
+            <span id="valK" style="color: #6f42c1; font-size:22px;">1250</span> N/m
+            <input type="range" id="sliderK" min="500" max="2000" value="1250" step="50">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Grid) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">សម្ពាធទឹកពីក្រៅ $P$<br><span id="liveP">55,272 Pa</span></div>
+        <div class="data-box" style="border-top: 4px solid #007bff;">កម្លាំងសង្កត់លើពីស្តុង $F_p$<br><span id="liveF">6.25 N</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">ចម្ងាយផ្លាស់ទី $x$<br><span id="liveX">0.500 cm</span></div>
+    </div>
+
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានប្រើសញ្ញា < ឬ > -->
+<script>
+    var sH = document.getElementById('sliderH');
+    var sK = document.getElementById('sliderK');
+    var vH = document.getElementById('valH');
+    var vK = document.getElementById('valK');
+
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    var manometerGroup = document.getElementById('manometerGroup');
+    var piston = document.getElementById('piston');
+    var springPath = document.getElementById('springPath');
+    var linePiston = document.getElementById('linePiston');
+    var lblPiston = document.getElementById('lblPiston');
+    
+    var vecF = document.getElementById('vecF');
+    var headF = document.getElementById('headF');
+    var txtF = document.getElementById('txtF');
+
+    var hBotLine = document.getElementById('hBotLine');
+    var hVertLine = document.getElementById('hVertLine');
+    var hArrTop = document.getElementById('hArrTop');
+    var hArrBot = document.getElementById('hArrBot');
+    var lblH = document.getElementById('lblH');
+
+    var deltaXGroup = document.getElementById('deltaXGroup');
+    var dxLine = document.getElementById('dxLine');
+    var dxArrow = document.getElementById('dxArrow');
+    var dxText = document.getElementById('dxText');
+
+    // អថេររូបវិទ្យា
+    var rho = 1000; 
+    var g = 9.80; 
+    var d_cm = 1.20; 
+    var d_m = d_cm / 100;
+    var A = Math.PI * Math.pow(d_m, 2) / 4; 
+
+    var waterTopY = 80;
+    var pxPerMeter = 30; 
+    
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    // អនុគមន៍គូសរ៉ឺស័រ
+    function generateSpringPath(cx, topY, botY, width) {
+        var h = botY - topY;
+        var step = h / 7;
+        return "M " + cx + " " + topY +
+               " L " + (cx + width) + " " + (topY + step*0.5) +
+               " L " + (cx - width) + " " + (topY + step*1.5) +
+               " L " + (cx + width) + " " + (topY + step*2.5) +
+               " L " + (cx - width) + " " + (topY + step*3.5) +
+               " L " + (cx + width) + " " + (topY + step*4.5) +
+               " L " + (cx - width) + " " + (topY + step*5.5) +
+               " L " + (cx + width) + " " + (topY + step*6.5) +
+               " L " + cx + " " + botY;
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var h_m = parseFloat(sH.value);
+        var k = parseFloat(sK.value);
+
+        vH.innerText = h_m.toFixed(2);
+        vK.innerText = k;
+
+        // ការគណនារូបវិទ្យា
+        var P = rho * g * h_m;
+        var F = P * A;
+        var x_m = F / k;
+        var x_cm = x_m * 100;
+
+        // បង្ហាញទិន្នន័យ
+        document.getElementById('liveP').innerText = Math.round(P).toLocaleString() + " Pa";
+        document.getElementById('liveF').innerText = F.toFixed(2) + " N";
+        document.getElementById('liveX').innerText = x_cm.toFixed(3) + " cm";
+
+        // ធ្វើចលនាក្រាហ្វិក 
+        var manoYOffset = h_m * pxPerMeter; 
+        manometerGroup.setAttribute("transform", "translate(0, " + manoYOffset + ")");
+
+        var absoluteManoTopY = 200 + manoYOffset;
+        hBotLine.setAttribute("y1", absoluteManoTopY);
+        hBotLine.setAttribute("y2", absoluteManoTopY);
+        hVertLine.setAttribute("y2", absoluteManoTopY);
+        hArrBot.setAttribute("points", "396," + (absoluteManoTopY - 10) + " 404," + (absoluteManoTopY - 10) + " 400," + absoluteManoTopY);
+        lblH.setAttribute("y", waterTopY + (absoluteManoTopY - waterTopY) / 2);
+
+        // ការរួញរបស់ពីស្តុង
+        var visualCompression = (x_cm / 0.5) * 20; 
+        var safeCompression = Math.min(visualCompression, 80); 
+        
+        var pistonBaseY = 200;
+        var pistonNewY = pistonBaseY + safeCompression;
+        
+        piston.setAttribute("y", pistonNewY);
+        lblPiston.setAttribute("y", pistonNewY + 15);
+        linePiston.setAttribute("y1", pistonNewY + 10);
+        linePiston.setAttribute("y2", pistonNewY + 10);
+
+        // បង្ហាញព្រួញ និងអក្សរ x 
+        if (safeCompression > 2) {
+            deltaXGroup.style.opacity = "1";
+            dxLine.setAttribute("y2", pistonNewY);
+            dxArrow.setAttribute("points", "295," + pistonNewY + " 305," + pistonNewY + " 300," + (pistonNewY + 8));
+            dxText.setAttribute("y", pistonBaseY + (safeCompression / 2));
+        } else {
+            deltaXGroup.style.opacity = "0";
+        }
+
+        // ព្រួញកម្លាំង F
+        vecF.setAttribute("y2", pistonNewY - 5);
+        headF.setAttribute("points", "245," + (pistonNewY - 5) + " 255," + (pistonNewY - 5) + " 250," + (pistonNewY + 5));
+        txtF.setAttribute("y", pistonNewY - 25);
+
+        // គូសរ៉ឺស័រថ្មី
+        var springTopY = pistonNewY + 20; 
+        var springBotY = 317; 
+        springPath.setAttribute("d", generateSpringPath(250, springTopY, springBotY, 20));
+
+        // Update Math Text DOM without breaking MathJax
+        document.getElementById('solK').textContent = k;
+        document.getElementById('solXcm').textContent = x_cm.toFixed(3);
+        document.getElementById('solXm').textContent = x_m.toFixed(4);
+
+        // Update MathJax Safely
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            var mathStr = "$$ h = \\frac{4 \\times " + k + " \\times " + x_m.toFixed(4) + "}{1000 \\times 9.80 \\times 3.1416 \\times (0.012)^2} \\approx " + h_m.toFixed(2) + " \\text{ m} $$";
+            document.getElementById('mathLineResult').textContent = mathStr;
+            
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    sH.addEventListener('input', updatePhysics);
+    sK.addEventListener('input', updatePhysics);
+
+    updatePhysics();
+</script>
+
+</body>
+</html>

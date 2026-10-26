@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ល្បឿន និង សំទុះ (មធ្យម vs ខណៈ)</title>
+    <style>
+        body {
+            font-family: 'Khmer OS Siemreap', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+            color: #334155;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 { color: #1e40af; margin-bottom: 5px; text-align: center; }
+        p.subtitle { color: #64748b; margin-bottom: 20px; text-align: center; font-size: 14px; }
+        
+        .layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            max-width: 1000px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .controls, .info-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .control-group {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 15px;
+        }
+        .control-group:last-child { margin-bottom: 0; }
+        .control-group h3 { margin: 0 0 10px 0; font-size: 15px; color: #0f172a; }
+        
+        label { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: 8px; cursor: pointer;}
+        input[type="range"] { width: 100%; margin: 10px 0; cursor: pointer; }
+        .range-label { font-size: 13px; font-weight: bold; color: #475569; display: flex; justify-content: space-between; }
+        
+        .info-card h3 { margin: 0 0 12px 0; font-size: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        .info-card.vel h3 { color: #1d4ed8; border-bottom-color: #bfdbfe; }
+        .info-card.acc h3 { color: #b45309; border-bottom-color: #fde68a; }
+        .calc-row { font-size: 14px; line-height: 1.6; margin-bottom: 10px; }
+        .calc-row span.val { font-weight: bold; font-size: 15px; }
+        .blue-text { color: #2563eb; }
+        .red-text { color: #dc2626; }
+        .detail-box { background: #fee2e2; padding: 8px; border-radius: 6px; margin-top: 5px; font-size: 13px; color: #991b1b; }
+
+        .graph-container {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        canvas {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            max-width: 100%;
+        }
+        .graph-title { font-weight: bold; color: #1e293b; margin-bottom: 10px; font-size: 16px; }
+        
+        .data-display {
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 6px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .bg-blue { background: #e0f2fe; }
+        .bg-yellow { background: #fef08a; }
+    </style>
+</head>
+<body>
+
+    <h2>វិភាគក្រាបចលនាស៊ីនេម៉ាទិច</h2>
+    <p class="subtitle">ស្វែងយល់ពីទំនាក់ទំនងរវាងបន្ទាត់កាត់រវាងពីរចំណុច (តម្លៃមធ្យម) និងបន្ទាត់ប៉ះ ត្រង់មួយចំណុច(តម្លៃខណៈ)</p>
+
+    <div class="layout">
+        <div class="left-column">
+            <div class="controls">
+                <!-- Average Controls -->
+                <div class="control-group">
+                    <h3>ការកំណត់តម្លៃមធ្យម (បន្ទាត់កាត់)</h3>
+                    <label><input type="checkbox" id="showAvgX" checked> បង្ហាញបន្ទាត់កាត់លើ x(t)</label>
+                    <label><input type="checkbox" id="showAvgV" checked> បង្ហាញបន្ទាត់កាត់លើ v(t)</label>
+                    <div class="range-label"><span>ចំណុច t₁:</span> <span id="valT1">1.0 s</span></div>
+                    <input type="range" id="t1" min="0" max="10" step="0.1" value="2">
+                    <div class="range-label"><span>ចំណុច t₂:</span> <span id="valT2">5.0 s</span></div>
+                    <input type="range" id="t2" min="0" max="10" step="0.1" value="8">
+                </div>
+
+                <!-- Instantaneous Controls -->
+                <div class="control-group" style="border-left-color: #ef4444;">
+                    <h3>ការកំណត់តម្លៃខណៈ (បន្ទាត់ប៉ះ)</h3>
+                    <label><input type="checkbox" id="showInstX" checked> បង្ហាញបន្ទាត់ប៉ះលើ x(t)</label>
+                    <label><input type="checkbox" id="showInstV" checked> បង្ហាញបន្ទាត់ប៉ះលើ v(t)</label>
+                    
+                    <div class="range-label" style="margin-top: 10px;"><span>ខណៈពេល t:</span> <span id="valT">5.0 s</span></div>
+                    <input type="range" id="tInst" min="0" max="10" step="0.1" value="5">
+                    
+                    <div class="range-label" style="margin-top: 10px; color: #b91c1c;">
+                        <span>គម្លាតពេលសងខាង Δt:</span> <span id="valDt">0.0 s</span>
+                    </div>
+                    <input type="range" id="dtInst" min="0" max="2" step="0.1" value="0">
+                    <div style="font-size: 11px; color: #64748b; line-height: 1.3; margin-top: 5px;">
+                        * បើ Δt = 0 បង្ហាញតម្លៃខណៈ (បន្ទាត់ប៉ះ) ជាក់ស្តែង។<br>
+                        * បើ Δt > 0 បង្ហាញការប្រមាណតម្លៃដោយយកចំណុចសងខាង។
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card vel">
+                <h3>📊 ព័ត៌មានល្បឿន</h3>
+                <div class="calc-row blue-text">
+                    <b>ល្បឿនមធ្យម (v_av):</b><br>
+                    = Δx / Δt <br>
+                    = <span class="val" id="textVav">0.00 m/s</span>
+                </div>
+                <div class="calc-row red-text">
+                    <b>ល្បឿនខណៈ (v) ត្រង់ t = <span id="lblTvel"></span>s:</b>
+                    <div id="instVelDetail"></div>
+                </div>
+            </div>
+
+            <div class="info-card acc">
+                <h3>📈 ព័ត៌មានសំទុះ</h3>
+                <div class="calc-row blue-text">
+                    <b>សំទុះមធ្យម (a_av):</b><br>
+                    = Δv / Δt <br>
+                    = <span class="val" id="textAav">0.00 m/s²</span>
+                </div>
+                <div class="calc-row red-text">
+                    <b>សំទុះខណៈ (a) ត្រង់ t = <span id="lblTacc"></span>s:</b>
+                    <div id="instAccDetail"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-column">
+            <div class="graph-container">
+                <div class="graph-title">ក្រាបទីតាំង x(t)</div>
+                <canvas id="canvasX" width="500" height="300"></canvas>
+                <div class="data-display bg-blue">
+                    <span class="blue-text">● ល្បឿនមធ្យម: <b id="lblVav">-- m/s</b></span><br>
+                    <span class="red-text">● ល្បឿនខណៈ (ឬប្រមាណ): <b id="lblVinst">-- m/s</b></span>
+                </div>
+            </div>
+
+            <div class="graph-container">
+                <div class="graph-title">ក្រាបល្បឿន v(t)</div>
+                <canvas id="canvasV" width="500" height="300"></canvas>
+                <div class="data-display bg-yellow">
+                    <span class="blue-text">● សំទុះមធ្យម: <b id="lblAav">-- m/s²</b></span><br>
+                    <span class="red-text">● សំទុះខណៈ (ឬប្រមាណ): <b id="lblAinst">-- m/s²</b></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Physics Functions
+        function x(t) { return 0.05 * Math.pow(t, 3) + 0.5 * t; }
+        function v(t) { return 0.15 * Math.pow(t, 2) + 0.5; }
+        function a(t) { return 0.3 * t; }
+
+        const canvasX = document.getElementById('canvasX');
+        const ctxX = canvasX.getContext('2d');
+        const canvasV = document.getElementById('canvasV');
+        const ctxV = canvasV.getContext('2d');
+
+        const inT1 = document.getElementById('t1');
+        const inT2 = document.getElementById('t2');
+        const inTInst = document.getElementById('tInst');
+        const inDtInst = document.getElementById('dtInst');
+        
+        const chkAvgX = document.getElementById('showAvgX');
+        const chkAvgV = document.getElementById('showAvgV');
+        const chkInstX = document.getElementById('showInstX');
+        const chkInstV = document.getElementById('showInstV');
+
+        [inT1, inT2, inTInst, inDtInst, chkAvgX, chkAvgV, chkInstX, chkInstV].forEach(el => {
+            el.addEventListener('input', updateAll);
+        });
+
+        // Graph Settings
+        const w = 500; const h = 300;
+        const pX = 50; const pY = 30;
+        const gW = w - pX - 20; const gH = h - pY - 20;
+        
+        const maxT = 10;
+        const maxX = 55; 
+        const maxV = 16; 
+
+        function mapX(t) { return pX + (t / maxT) * gW; }
+        function mapY_X(val) { return h - pY - (val / maxX) * gH; }
+        function mapY_V(val) { return h - pY - (val / maxV) * gH; }
+
+        function drawAxes(ctx, yLabel, maxVal, mapYFunc, stepY) {
+            ctx.clearRect(0, 0, w, h);
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(pX, 10); ctx.lineTo(pX, h - pY); // Y axis
+            ctx.lineTo(w - 10, h - pY); // X axis
+            ctx.stroke();
+
+            ctx.fillStyle = '#64748b';
+            ctx.font = '12px Arial';
+            ctx.fillText('t (s)', w - 30, h - 10);
+            ctx.fillText(yLabel, 15, 20);
+            
+            ctx.textAlign = 'center';
+            for(let i=0; i<=maxT; i+=2) {
+                let px = mapX(i);
+                ctx.beginPath(); ctx.moveTo(px, h - pY); ctx.lineTo(px, h - pY + 5); ctx.stroke();
+                ctx.fillText(i, px, h - pY + 18);
+            }
+
+            ctx.textAlign = 'right';
+            for(let i=0; i<=maxVal; i+=stepY) {
+                let py = mapYFunc(i);
+                ctx.beginPath(); ctx.moveTo(pX - 4, py); ctx.lineTo(pX, py); ctx.stroke();
+                ctx.fillText(i, pX - 8, py + 4);
+            }
+            ctx.textAlign = 'left';
+        }
+
+        function drawCurve(ctx, func, mapYFunc) {
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(mapX(0), mapYFunc(func(0)));
+            for(let t=0.1; t<=maxT; t+=0.1) {
+                ctx.lineTo(mapX(t), mapYFunc(func(t)));
+            }
+            ctx.stroke();
+        }
+
+        function drawValueLabel(ctx, val, x, y, color, offsetY = 0) {
+            let text = val.toFixed(1);
+            ctx.font = 'bold 11px Arial';
+            ctx.textAlign = 'right';
+            let width = ctx.measureText(text).width;
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(x - width - 4, y - 7 + offsetY, width + 6, 14);
+            
+            ctx.fillStyle = color;
+            ctx.fillText(text, x - 2, y + 4 + offsetY);
+            ctx.textAlign = 'left';
+        }
+
+        function drawSecant(ctx, t1, t2, func, mapYFunc, color) {
+            let y1 = func(t1); let y2 = func(t2);
+            let px1 = mapX(t1); let py1 = mapYFunc(y1);
+            let px2 = mapX(t2); let py2 = mapYFunc(y2);
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([5, 5]);
+            
+            let slope = (py2 - py1) / (px2 - px1);
+            let extX1 = pX; let extY1 = py1 - slope * (px1 - pX);
+            let extX2 = w-20; let extY2 = py1 + slope * (extX2 - px1);
+            
+            ctx.beginPath(); ctx.moveTo(extX1, extY1); ctx.lineTo(extX2, extY2); ctx.stroke();
+            
+            ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+            ctx.beginPath(); ctx.moveTo(px1, py1); ctx.lineTo(pX, py1); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(px2, py2); ctx.lineTo(pX, py2); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(px1, py1); ctx.lineTo(px1, h - pY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(px2, py2); ctx.lineTo(px2, h - pY); ctx.stroke();
+            ctx.setLineDash([]);
+
+            drawValueLabel(ctx, y1, pX, py1, color, -8);
+            drawValueLabel(ctx, y2, pX, py2, color, -8);
+
+            ctx.fillStyle = color;
+            ctx.beginPath(); ctx.arc(px1, py1, 4, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(px2, py2, 4, 0, Math.PI*2); ctx.fill();
+        }
+
+        function drawInstantaneous(ctx, t, dtSlider, func, derivFunc, mapYFunc, color) {
+            let y = func(t);
+            let px = mapX(t); let py = mapYFunc(y);
+
+            if (dtSlider === 0) {
+                // Exact Tangent
+                let physSlope = derivFunc(t);
+                let dtLine = 1.5; 
+                let x1 = t - dtLine; let y1 = y - physSlope * dtLine;
+                let x2 = t + dtLine; let y2 = y + physSlope * dtLine;
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([]);
+                ctx.beginPath(); ctx.moveTo(mapX(x1), mapYFunc(y1)); ctx.lineTo(mapX(x2), mapYFunc(y2)); ctx.stroke();
+
+                ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+                ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(pX, py); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, h - pY); ctx.stroke();
+                ctx.setLineDash([]);
+
+                drawValueLabel(ctx, y, pX, py, color, 8);
+                ctx.fillStyle = color;
+                ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI*2); ctx.fill();
+            } else {
+                // Approximation Secant (Limit concept)
+                let tA = Math.max(0, t - dtSlider);
+                let tB = Math.min(maxT, t + dtSlider);
+                let yA = func(tA); let yB = func(tB);
+                let pxA = mapX(tA); let pyA = mapYFunc(yA);
+                let pxB = mapX(tB); let pyB = mapYFunc(yB);
+
+                let slope = (pyB - pyA) / (pxB - pxA);
+                let extX1 = pX; let extY1 = pyA - slope * (pxA - pX);
+                let extX2 = w-20; let extY2 = pyA + slope * (extX2 - pxA);
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([]);
+                ctx.beginPath(); ctx.moveTo(extX1, extY1); ctx.lineTo(extX2, extY2); ctx.stroke();
+
+                ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+                ctx.beginPath(); ctx.moveTo(pxA, pyA); ctx.lineTo(pX, pyA); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(pxB, pyB); ctx.lineTo(pX, pyB); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(pxA, pyA); ctx.lineTo(pxA, h - pY); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(pxB, pyB); ctx.lineTo(pxB, h - pY); ctx.stroke();
+                ctx.setLineDash([]);
+
+                drawValueLabel(ctx, yA, pX, pyA, color, -8);
+                drawValueLabel(ctx, yB, pX, pyB, color, 8);
+
+                ctx.fillStyle = color;
+                ctx.beginPath(); ctx.arc(pxA, pyA, 4, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(pxB, pyB, 4, 0, Math.PI*2); ctx.fill();
+                
+                // Show center target point in black
+                ctx.fillStyle = '#0f172a';
+                ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fill();
+            }
+        }
+
+        function updateAll() {
+            let t1 = parseFloat(inT1.value);
+            let t2 = parseFloat(inT2.value);
+            let tI = parseFloat(inTInst.value);
+            let dtI = parseFloat(inDtInst.value);
+
+            if(t1 >= t2) { t2 = t1 + 0.1; inT2.value = t2; }
+
+            document.getElementById('valT1').innerText = t1.toFixed(1) + ' s';
+            document.getElementById('valT2').innerText = t2.toFixed(1) + ' s';
+            document.getElementById('valT').innerText = tI.toFixed(1) + ' s';
+            document.getElementById('valDt').innerText = dtI.toFixed(1) + ' s';
+
+            // Calc Average
+            let v_av = (x(t2) - x(t1)) / (t2 - t1);
+            let a_av = (v(t2) - v(t1)) / (t2 - t1);
+
+            // Calc Instantaneous / Approx
+            let v_inst, a_inst;
+            let tA = Math.max(0, tI - dtI);
+            let tB = Math.min(maxT, tI + dtI);
+            
+            if (dtI === 0) {
+                v_inst = v(tI);
+                a_inst = a(tI);
+            } else {
+                v_inst = (x(tB) - x(tA)) / (tB - tA);
+                a_inst = (v(tB) - v(tA)) / (tB - tA);
+            }
+
+            // Update Graph X
+            drawAxes(ctxX, 'x (m)', maxX, mapY_X, 10);
+            drawCurve(ctxX, x, mapY_X);
+            if(chkAvgX.checked) drawSecant(ctxX, t1, t2, x, mapY_X, '#3b82f6');
+            if(chkInstX.checked) drawInstantaneous(ctxX, tI, dtI, x, v, mapY_X, '#ef4444');
+
+            // Update Graph V
+            drawAxes(ctxV, 'v (m/s)', maxV, mapY_V, 5);
+            drawCurve(ctxV, v, mapY_V);
+            if(chkAvgV.checked) drawSecant(ctxV, t1, t2, v, mapY_V, '#3b82f6');
+            if(chkInstV.checked) drawInstantaneous(ctxV, tI, dtI, v, a, mapY_V, '#ef4444');
+
+            // Update Displays
+            document.getElementById('lblVav').innerText = v_av.toFixed(2) + ' m/s';
+            document.getElementById('lblVinst').innerText = v_inst.toFixed(2) + ' m/s';
+            document.getElementById('lblAav').innerText = a_av.toFixed(2) + ' m/s²';
+            document.getElementById('lblAinst').innerText = a_inst.toFixed(2) + ' m/s²';
+            
+            document.getElementById('textVav').innerText = v_av.toFixed(2) + ' m/s';
+            document.getElementById('textAav').innerText = a_av.toFixed(2) + ' m/s²';
+            
+            document.getElementById('lblTvel').innerText = tI.toFixed(1);
+            document.getElementById('lblTacc').innerText = tI.toFixed(1);
+
+            // Detailed Info Cards for Limits
+            if (dtI === 0) {
+                document.getElementById('instVelDetail').innerHTML = `
+                    = dx / dt <br>
+                    = <span class="val">${v_inst.toFixed(2)} m/s</span>
+                `;
+                document.getElementById('instAccDetail').innerHTML = `
+                    = dv / dt <br>
+                    = <span class="val">${a_inst.toFixed(2)} m/s²</span>
+                `;
+            } else {
+                document.getElementById('instVelDetail').innerHTML = `
+                    <div class="detail-box">
+                        t₁=${tA.toFixed(1)}s, x₁=${x(tA).toFixed(2)}m<br>
+                        t₂=${tB.toFixed(1)}s, x₂=${x(tB).toFixed(2)}m<br>
+                        v ≈ Δx/Δt = <span class="val">${v_inst.toFixed(2)} m/s</span>
+                    </div>
+                `;
+                document.getElementById('instAccDetail').innerHTML = `
+                    <div class="detail-box">
+                        t₁=${tA.toFixed(1)}s, v₁=${v(tA).toFixed(2)}m/s<br>
+                        t₂=${tB.toFixed(1)}s, v₂=${v(tB).toFixed(2)}m/s<br>
+                        a ≈ Δv/Δt = <span class="val">${a_inst.toFixed(2)} m/s²</span>
+                    </div>
+                `;
+            }
+        }
+
+        updateAll();
+    </script>
+</body>
+</html>

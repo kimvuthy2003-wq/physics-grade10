@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់គំរូ - ល្បឿនមធ្យម និងវ៉ិចទ័រល្បឿនមធ្យម</title>
+    
+    <!-- បញ្ចូល MathJax សម្រាប់សរសេររូបមន្តរូបវិទ្យា -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9;
+            padding: 20px;
+            color: #111;
+            text-align: center;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        /* ប្រធានលំហាត់ */
+        .problem-statement {
+            background: #fff3cd;
+            color: #664d03;
+            padding: 18px 25px;
+            border-radius: 8px;
+            border-left: 6px solid #ffc107;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 19px;
+            font-weight: bold;
+            line-height: 1.7;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        /* ផ្ទាំងបម្រាប់ */
+        .info-panel {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            border-left: 6px solid #28a745;
+            font-size: 18px;
+        }
+        .info-panel strong { color: #d32f2f; font-size: 20px; }
+        
+        /* ផ្ទាំង Simulator */
+        .sim-area {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            background: #e9ecef;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            margin: 0 auto;
+        }
+        
+        /* ផ្លូវថ្នល់ */
+        .road {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            height: 80px;
+            background: #5a6268;
+            border-top: 5px solid #2e7d32; /* ស្មៅ */
+            border-bottom: 5px solid #2e7d32;
+        }
+        .road-line {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            height: 4px;
+            background: repeating-linear-gradient(90deg, #fff 0, #fff 20px, transparent 20px, transparent 40px);
+            transform: translateY(-50%);
+        }
+        
+        /* បន្ទាត់រង្វាស់ (Ruler) - Scale: 10km = 700px (1km = 70px), Offset = 50px */
+        .ruler {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40px;
+            background: #343a40;
+        }
+        .tick {
+            position: absolute;
+            bottom: 40px;
+            width: 3px;
+            background: #343a40;
+            z-index: 2;
+        }
+        .tick-0 { left: 50px; height: 15px; background: #fff; }
+        .tick-6 { left: 470px; height: 25px; background: #d32f2f; } /* 50 + 6*70 = 470px */
+        .tick-10 { left: 750px; height: 25px; background: #ffc107; } /* 50 + 10*70 = 750px */
+        
+        .ruler-text {
+            position: absolute;
+            bottom: 10px;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+        .ruler-text-0 { left: 50px; }
+        .ruler-text-6 { left: 470px; color: #ff9999; }
+        .ruler-text-10 { left: 750px; color: #ffc107; }
+
+        /* រថយន្ត */
+        .car-container {
+            position: absolute;
+            bottom: 75px; 
+            /* កែតម្រូវទីតាំង៖ គំនូសនៅ 50px ចំណែកឡានទំហំ 80px ដូច្នេះដាក់ left: 10px (50-40) ទើបចំកណ្តាល */
+            left: 10px; 
+            width: 80px;
+            height: 50px;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
+        }
+        .car-emoji {
+            font-size: 45px;
+            /* Default ប្រឈមមុខទៅស្តាំ (កើត) */
+            transform: scaleX(-1); 
+        }
+        
+        /* ទិន្នន័យ Live Data */
+        .live-data {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .live-data-bottom {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .data-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; 
+            font-size: 28px; 
+            display: inline-block;
+            margin-top: 8px;
+        }
+        
+        #liveTime { color: #212529; }
+        #liveDist { color: #0056b3; } 
+        #liveDisp { color: #d32f2f; } 
+        #liveAvgSpeed { color: #0056b3; } 
+        #liveAvgVel { color: #d32f2f; }
+
+        /* ប៊ូតុង */
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        button {
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            transition: 0.2s;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        #startBtn { background: #28a745; }
+        #startBtn:hover { background: #218838; }
+        #resetBtn { background: #6c757d; }
+        #resetBtn:hover { background: #5a6268; }
+        #solutionBtn { background: #17a2b8; }
+        #solutionBtn:hover { background: #138496; }
+
+        .status {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: 900;
+            color: #dc3545;
+            min-height: 30px;
+        }
+
+        /* ដំណោះស្រាយ */
+        .solution-box {
+            background: #e2e8f0;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: left;
+            margin-top: 25px;
+            border-left: 6px solid #4a5568;
+            font-size: 18px;
+            line-height: 1.8;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 {
+            margin-top: 0;
+            color: #2d3748;
+            border-bottom: 2px solid #cbd5e0;
+            padding-bottom: 10px;
+            font-size: 22px;
+        }
+        .solution-box ul { padding-left: 30px; margin-top: 5px; }
+        .solution-box strong { color: #000; }
+        .highlight-blue { color: #0056b3; font-weight: bold; }
+        .highlight-red { color: #d32f2f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- ប្រធានលំហាត់ -->
+    <div class="problem-statement">
+        <strong>លំហាត់គំរូ៖</strong> រថយន្តមួយធ្វើចលនាលើផ្លូវត្រង់ទៅទិសខាងកើតបានចម្ងាយ 10.0 km ។ បន្ទាប់មករថយន្តនោះធ្វើចលនាត្រឡប់ក្រោយនៅលើផ្លូវដដែលបានចម្ងាយ 4.0 km ។ ឧបមាថា រថយន្តចរអស់រយៈពេល $t = 0.40 \text{ h}$ ។ គណនាល្បឿនមធ្យម និងវ៉ិចទ័រល្បឿនមធ្យម ។
+    </div>
+    
+    <!-- បម្រាប់ -->
+    <div class="info-panel">
+        <div>ចម្ងាយទៅកើត ($\Delta x_1$) = <strong>10.0 km</strong></div>
+        <div>ចម្ងាយត្រឡប់មកលិច ($\Delta x_2$) = <strong>- 4.0 km</strong></div>
+        <div>រយៈពេលសរុប ($t$) = <strong>0.40 h</strong></div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator -->
+    <div class="sim-area">
+        <div class="road">
+            <div class="road-line"></div>
+        </div>
+        
+        <div class="ruler">
+            <!-- 0 km -->
+            <div class="tick tick-0"></div>
+            <div class="ruler-text ruler-text-0">0 km (ចំណុចចាប់ផ្តើម)</div>
+            
+            <!-- 6.0 km (ទីតាំងចុងក្រោយ) -->
+            <div class="tick tick-6"></div>
+            <div class="ruler-text ruler-text-6">6.0 km (ទីតាំងចុងក្រោយ)</div>
+            
+            <!-- 10.0 km (ចំណុចបត់ត្រឡប់) -->
+            <div class="tick tick-10"></div>
+            <div class="ruler-text ruler-text-10">10.0 km (ចំណុចបត់)</div>
+        </div>
+        
+        <div class="car-container" id="car">
+            <div class="car-emoji" id="carEmoji">🚙</div>
+        </div>
+    </div>
+
+    <!-- ប្រអប់តម្លៃលេខ Live -->
+    <div class="live-data">
+        <div class="data-box">ពេលវេលា (t)<br><span id="liveTime">0.00</span> h</div>
+        <div class="data-box" style="border-top: 5px solid #0056b3;">ចម្ងាយចរសរុប (d)<br><span id="liveDist">0.0</span> km</div>
+        <div class="data-box" style="border-top: 5px solid #d32f2f;">បម្លាស់ទី ($\Delta x$)<br><span id="liveDisp">0.0</span> km</div>
+    </div>
+    <div class="live-data-bottom">
+        <div class="data-box" style="border-top: 5px solid #0056b3;">ល្បឿនមធ្យម ($V_{avg} = \frac{d}{t}$)<br><span id="liveAvgSpeed">0.0</span> km/h</div>
+        <!-- ប្រើ MathJax សម្រាប់វ៉ិចទ័រ -->
+        <div class="data-box" style="border-top: 5px solid #d32f2f;">វ៉ិចទ័រល្បឿនមធ្យម ($\vec{V}_{avg} = \frac{\Delta \vec{x}}{t}$)<br><span id="liveAvgVel">0.0</span> km/h</div>
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="controls">
+        <button id="startBtn">▶ ចាប់ផ្តើម</button>
+        <button id="resetBtn">🔄 ត្រឡប់ដើម</button>
+        <button id="solutionBtn">📖 បង្ហាញដំណោះស្រាយ</button>
+    </div>
+    
+    <div class="status" id="statusText">រង់ចាំចាប់ផ្តើម...</div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div id="solutionBox" class="solution-box" style="display: none;">
+        <h3>ដំណោះស្រាយ</h3>
+        
+        <p><strong>១. គណនាល្បឿនមធ្យម (Average Speed)៖</strong></p>
+        <p>ល្បឿនមធ្យមអាស្រ័យនឹង <span class="highlight-blue">ចម្ងាយចរសរុប ($d$)</span>៖</p>
+        <ul>
+            <li>ចម្ងាយចរសរុប៖ <strong>$d = d_1 + d_2$</strong> = $10.0 \text{ km} + 4.0 \text{ km}$ = <span class="highlight-blue">14.0 km</span></li>
+            <li>ល្បឿនមធ្យម៖ <strong>$V_{avg} = \frac{d}{t}$</strong> = $\frac{14.0 \text{ km}}{0.40 \text{ h}}$ = <strong>35.0 km/h</strong></li>
+        </ul>
+        
+        <p><strong>២. គណនាវ៉ិចទ័រល្បឿនមធ្យម (Average Velocity)៖</strong></p>
+        <p>វ៉ិចទ័រល្បឿនមធ្យមអាស្រ័យនឹង <span class="highlight-red">បម្លាស់ទីសរុប ($\Delta x$)</span> ធៀបនឹងចំណុចគល់៖</p>
+        <ul>
+            <li>បម្លាស់ទីសរុប៖ <strong>$\Delta x = x_f - x_i$</strong> </li>
+            <li>ដោយវាទៅកើត 10 km រួចត្រឡប់មកលិចវិញ 4 km ៖ <strong>$\Delta x$</strong> = $10.0 - 4.0$ = <span class="highlight-red">+ 6.0 km</span> (ទិសខាងកើត)</li>
+            <li>វ៉ិចទ័រល្បឿនមធ្យម៖ <strong>$\vec{V}_{avg} = \frac{\Delta x}{t}$</strong> = $\frac{6.0 \text{ km}}{0.40 \text{ h}}$ = <strong>15.0 km/h</strong> (ទិសខាងកើត)</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const totalSimTime = 0.40; 
+    const dist1 = 10.0; 
+    const dist2 = 4.0;  
+    const totalDist = dist1 + dist2; 
+    const virtualSpeed = totalDist / totalSimTime; 
+    
+    // Scale UI
+    const scalePx = 70; 
+    const offsetX = 50;
+    
+    const animationDurationMs = 4000; 
+
+    let isRunning = false;
+    let animationFrame;
+    let startTimeMs = 0;
+
+    const carEl = document.getElementById('car');
+    const carEmoji = document.getElementById('carEmoji');
+    const timeEl = document.getElementById('liveTime');
+    const distEl = document.getElementById('liveDist');
+    const dispEl = document.getElementById('liveDisp');
+    const avgSpeedEl = document.getElementById('liveAvgSpeed');
+    const avgVelEl = document.getElementById('liveAvgVel');
+    
+    const statusText = document.getElementById('statusText');
+    const startBtn = document.getElementById('startBtn');
+    const solutionBtn = document.getElementById('solutionBtn');
+    const solutionBox = document.getElementById('solutionBox');
+
+    function updateUI(t, d, disp) {
+        timeEl.innerText = t.toFixed(2);
+        distEl.innerText = d.toFixed(1);
+        dispEl.innerText = disp.toFixed(1);
+        
+        if (t > 0) {
+            avgSpeedEl.innerText = (d / t).toFixed(1);
+            avgVelEl.innerText = (disp / t).toFixed(1);
+        } else {
+            avgSpeedEl.innerText = "0.0";
+            avgVelEl.innerText = "0.0";
+        }
+        
+        carEl.style.transform = `translateX(${disp * scalePx}px)`;
+    }
+
+    function animate(timestamp) {
+        if (!startTimeMs) startTimeMs = timestamp;
+        let elapsedMs = timestamp - startTimeMs;
+        let progress = elapsedMs / animationDurationMs; 
+        
+        if (progress > 1) progress = 1;
+
+        let currentSimTime = progress * totalSimTime;
+        let currentDist = currentSimTime * virtualSpeed; 
+        let currentDisp = 0;
+        
+        if (currentDist <= dist1) {
+            currentDisp = currentDist;
+            carEmoji.style.transform = "scaleX(-1)"; 
+            statusText.innerText = "រថយន្តកំពុងធ្វើចលនាទៅទិសខាងកើត...";
+            statusText.style.color = "#0056b3";
+        } else {
+            currentDisp = dist1 - (currentDist - dist1);
+            carEmoji.style.transform = "scaleX(1)"; 
+            statusText.innerText = "រថយន្តកំពុងបត់ត្រឡប់ក្រោយ...";
+            statusText.style.color = "#d32f2f";
+        }
+
+        updateUI(currentSimTime, currentDist, currentDisp);
+
+        if (progress < 1 && isRunning) {
+            animationFrame = requestAnimationFrame(animate);
+        } else if (progress >= 1) {
+            isRunning = false;
+            statusText.innerText = `✅ បញ្ចប់! ល្បឿនមធ្យម = 35.0 km/h | វ៉ិចទ័រល្បឿន = 15.0 km/h`;
+            statusText.style.color = "#28a745";
+            startBtn.disabled = false;
+            startBtn.style.opacity = "1";
+        }
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+        if (!isRunning) {
+            isRunning = true;
+            startTimeMs = 0; 
+            startBtn.disabled = true;
+            startBtn.style.opacity = "0.5";
+            animationFrame = requestAnimationFrame(animate);
+        }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        isRunning = false;
+        cancelAnimationFrame(animationFrame);
+        startTimeMs = 0;
+        
+        carEmoji.style.transform = "scaleX(-1)"; 
+        updateUI(0, 0, 0);
+        
+        startBtn.disabled = false;
+        startBtn.style.opacity = "1";
+        statusText.innerText = "រង់ចាំចាប់ផ្តើម...";
+        statusText.style.color = "#dc3545";
+    });
+
+    solutionBtn.addEventListener('click', () => {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+            solutionBtn.innerHTML = '📖 លាក់ដំណោះស្រាយ';
+        } else {
+            solutionBox.style.display = 'none';
+            solutionBtn.innerHTML = '📖 បង្ហាញដំណោះស្រាយ';
+        }
+    });
+
+    updateUI(0, 0, 0);
+</script>
+
+</body>
+</html>

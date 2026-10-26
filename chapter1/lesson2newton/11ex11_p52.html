@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Simulator: អាកសែលេរ៉ូម៉ែត្រងាយក្នុងរថយន្ត</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Siemreap&display=swap');
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Khmer OS Siemreap', sans-serif;
+            background-color: #eef2f5; color: #2c3e50;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .header {
+            background-color: #34495e; color: white;
+            width: 100%; padding: 15px; text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h2 { margin: 0; font-size: 1.5em; }
+
+        .problem-statement {
+            background-color: #ffffff; padding: 20px;
+            border-radius: 10px; border-left: 5px solid #3498db;
+            width: 100%; max-width: 900px;
+            margin: 20px auto 10px auto; font-size: 1.05em; line-height: 1.6;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .problem-statement h3 {
+            margin-top: 0; color: #2980b9; margin-bottom: 10px;
+            border-bottom: 1px solid #ecf0f1; padding-bottom: 5px;
+        }
+        .math-var { font-family: 'Times New Roman', Times, serif; font-style: italic; font-weight: bold; color: #d35400; }
+
+        .main-container {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 20px; padding: 10px 20px;
+            width: 100%; max-width: 900px;
+        }
+
+        .sim-section {
+            background: white; padding: 15px; border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; align-items: center;
+            width: 100%;
+        }
+
+        canvas {
+            background-color: #e0f7fa; /* ពណ៌ផ្ទៃមេឃ */
+            border: 2px solid #bdc3c7; border-radius: 8px;
+            width: 100%; max-width: 800px; height: auto;
+        }
+
+        .controls-section {
+            background: white; padding: 20px; border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%; display: flex; flex-wrap: wrap; gap: 20px;
+            justify-content: space-between;
+        }
+
+        .control-group {
+            background: #f8f9fa; padding: 15px; border-radius: 8px;
+            border-left: 4px solid #3498db; flex: 1; min-width: 300px;
+        }
+        .control-group label {
+            font-weight: bold; display: block; margin-bottom: 10px; color: #2980b9;
+        }
+
+        .slider-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px;}
+        input[type="range"] { flex-grow: 1; cursor: pointer; height: 8px; }
+
+        .action-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-action {
+            flex: 1; padding: 12px 10px; border: none; border-radius: 5px;
+            font-family: inherit; font-size: 1em; font-weight: bold;
+            color: white; cursor: pointer; transition: 0.2s;
+        }
+        .btn-const-vel { background-color: #f39c12; }
+        .btn-const-vel:hover { background-color: #e67e22; }
+        .btn-stop { background-color: #c0392b; }
+        .btn-stop:hover { background-color: #e74c3c; }
+
+        .data-display { font-size: 1.1em; margin-top: 5px; }
+        .data-display span { font-weight: bold; color: #e74c3c; font-size: 1.3em; }
+
+        .toggle-forces {
+            display: flex; align-items: center; gap: 10px;
+            cursor: pointer; font-weight: bold; margin-top: 15px;
+            background: #ecf0f1; padding: 10px; border-radius: 5px;
+        }
+
+        .btn-solution {
+            background-color: #27ae60; color: white; border: none;
+            padding: 12px; font-family: inherit; font-size: 1.1em;
+            font-weight: bold; border-radius: 5px; cursor: pointer;
+            transition: 0.3s; width: 100%; margin-top: 10px;
+        }
+        .btn-solution:hover { background-color: #2ecc71; }
+
+        .solution-panel {
+            display: none; background: #fff; padding: 20px;
+            border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%; max-width: 900px; margin-bottom: 30px;
+            border-top: 5px solid #27ae60; line-height: 1.6;
+        }
+        .solution-panel.active { display: block; }
+        
+        .solution-panel h3 { color: #27ae60; margin-top: 0; border-bottom: 1px dashed #ccc; padding-bottom: 10px;}
+        .math-box { background: #fdfbf7; padding: 15px; border-left: 3px solid #f39c12; margin: 10px 0; font-size: 1.05em; overflow-x: auto;}
+        .math-formula { font-family: 'Times New Roman', Times, serif; font-size: 1.2em; font-style: italic; color: #d35400;}
+
+        .frac { display: inline-flex; flex-direction: column; vertical-align: middle; margin: 0 5px; text-align: center; font-size: 0.9em;}
+        .frac span.num { border-bottom: 1px solid #000; padding: 0 2px; }
+        .frac span.den { padding: 0 2px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>កម្មវិធីក្លែងធ្វើ៖ អាកសែលេរ៉ូម៉ែត្រងាយក្នុងរថយន្ត</h2>
+    </div>
+
+    <!-- ផ្នែកប្រធានលំហាត់ -->
+    <div class="problem-statement">
+        <h3>ប្រធានលំហាត់ទី១១៖</h3>
+        <p>គេបង្កើតអាកសែលេរ៉ូម៉ែត្រងាយមួយ ដោយចងវត្ថុតូចមួយដែលមានម៉ាស <span class="math-var">m</span> ទៅនឹងខ្សែប្រវែង <span class="math-var">L</span> រួចភ្ជាប់ទៅនឹងពិតាននៃដំបូលរថយន្ត។ កាលណារថយន្តស្ទុះ ប្រព័ន្ធវត្ថុ-ខ្សែបង្កើតបានមុំ <span class="math-var">θ</span> ថេរ ជាមួយនឹងខ្សែឈរ។</p>
+        <p><b>ក.</b> សន្មតថា ម៉ាសខ្សែអាចចោលបានធៀបនឹងម៉ាស <span class="math-var">m</span>។ ចូរទាញរកកន្សោមសំទុះរថយន្ត ជាអនុគមន៍នៃ <span class="math-var">θ</span> និងបង្ហាញថា វាមិនអាស្រ័យនឹងម៉ាស <span class="math-var">m</span> និងប្រវែង <span class="math-var">L</span>។</p>
+        <p><b>ខ.</b> កំណត់សំទុះរថយន្ត កាលណា <span class="math-var">θ</span> = 30.0°។</p>
+    </div>
+
+    <div class="main-container">
+        
+        <div class="sim-section">
+            <!-- ផ្ទាំង Canvas -->
+            <canvas id="simCanvas" width="800" height="400"></canvas>
+            <p style="font-size: 0.95em; color: #7f8c8d; margin-top: 10px; text-align: center;">
+                *សាកល្បងចុចប៊ូតុងខាងក្រោម ឬទាញទម្លាក់ Slider ដើម្បីមើលពីបម្រែបម្រួលរបស់ប៉េងប៉ោល។
+            </p>
+        </div>
+
+        <div class="controls-section">
+            <div class="control-group">
+                <label>១. គ្រប់គ្រងចលនារថយន្ត (មុំស្ទុះ θ) ៖</label>
+                
+                <div class="slider-container">
+                    <span style="font-weight:bold;">0°</span>
+                    <input type="range" id="angleSlider" min="0" max="60" step="1" value="0">
+                    <span style="font-weight:bold;">60°</span>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn-action btn-const-vel" id="btnConstVel">🚗 ល្បឿនថេរ (a = 0)</button>
+                    <button class="btn-action btn-stop" id="btnStop">🛑 បញ្ឈប់រថយន្ត</button>
+                </div>
+
+                <label class="toggle-forces">
+                    <input type="checkbox" id="forceToggle" checked> បង្ហាញវ៉ិចទ័រកម្លាំង (T, P និង ma)
+                </label>
+            </div>
+
+            <div class="control-group" style="border-left-color: #e74c3c;">
+                <label>២. លទ្ធផលគណនាសំទុះ (a) ៖</label>
+                <div class="data-display">
+                    មុំប៉េងប៉ោល θ = <span id="angleVal" style="color:#2980b9;">0</span>°
+                </div>
+                <div class="data-display" style="margin-top: 15px;">
+                    a = g × tan(θ) = <span id="accelVal">0.00</span> m/s²
+                </div>
+                <div style="font-size: 0.9em; color: #95a5a6; margin-top: 5px;">*ប្រើតម្លៃទំនាញដី g = 9.8 m/s²</div>
+                
+                <button class="btn-solution" onclick="toggleSolution()">📝 មើលដំណោះស្រាយលំហាត់</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ផ្នែកដំណោះស្រាយ -->
+    <div class="solution-panel" id="solutionPanel">
+        <h3>ដំណោះស្រាយលំហាត់ទី១១</h3>
+        
+        <b>ក. ទាញរកកន្សោមសំទុះរថយន្ត (a) ជាអនុគមន៍នៃ θ</b>
+        <div class="math-box">
+            <p>ប្រព័ន្ធវត្ថុរងអំពើនៃកម្លាំងពីរគឺ៖ ទម្ងន់ <span class="math-formula">P&#8407;</span> និង កម្លាំងតំណឹងខ្សែ <span class="math-formula">T&#8407;</span>។</p>
+            <p>តាមច្បាប់ទី២ញូតុន៖ <span class="math-formula">P&#8407; + T&#8407; = ma&#8407;</span></p>
+            <p>បំបែកចំណោលលើអ័ក្សកូអរដោនេ៖</p>
+            <ul>
+                <li>តាមអ័ក្សឈរ (y) គ្មានចលនា៖ <span class="math-formula">T &cdot; cos(θ) - P = 0 &rArr; T &cdot; cos(θ) = mg</span></li>
+                <li>តាមអ័ក្សដេក (x) រថយន្តស្ទុះ៖ <span class="math-formula">T &cdot; sin(θ) = ma</span></li>
+            </ul>
+            <p>ចែកសមីការ (x) និង (y) ៖</p>
+            <p>
+                <span class="math-formula">
+                    <span class="frac"><span class="num">T &cdot; sin(θ)</span><span class="den">T &cdot; cos(θ)</span></span> = 
+                    <span class="frac"><span class="num">ma</span><span class="den">mg</span></span>
+                </span>
+                &rArr; tan(θ) = <span class="frac"><span class="num">a</span><span class="den">g</span></span>
+            </p>
+            <p style="color: #27ae60; font-weight: bold; font-size: 1.2em;">&rArr; a = g &cdot; tan(θ)</p>
+            <p><b>សន្និដ្ឋាន៖</b> សំទុះ <span class="math-formula">a</span> មិនអាស្រ័យនឹងម៉ាស <span class="math-formula">m</span> និងប្រវែងខ្សែ <span class="math-formula">L</span> ទេ។</p>
+        </div>
+
+        <b>ខ. កំណត់សំទុះរថយន្ត កាលណា θ = 30.0°</b>
+        <div class="math-box">
+            <p>តាមរូបមន្ត៖ <span class="math-formula">a = g &cdot; tan(θ)</span></p>
+            <p>ដោយ <span class="math-formula">g = 9.8 m/s&sup2;</span> និង <span class="math-formula">θ = 30&deg;</span></p>
+            <p>&rArr; <span class="math-formula">a = 9.8 &times; tan(30&deg;) = 9.8 &times; 0.577</span></p>
+            <p style="color: #c0392b; font-weight: bold; font-size: 1.2em;">&rArr; a &approx; 5.66 m/s&sup2;</p>
+        </div>
+    </div>
+
+    <!-- JavaScript - សរសេររចនាសម្ព័ន្ធសុវត្ថិភាពខ្ពស់ ដើម្បីកុំឱ្យគាំង (Crash) លើទូរសព្ទ -->
+    <script>
+        // អនុគមន៍បង្ហាញដំណោះស្រាយ (ដាក់នៅក្រៅដើម្បីងាយស្រួលហៅពីប៊ូតុង)
+        window.toggleSolution = function() {
+            const panel = document.getElementById('solutionPanel');
+            const btn = document.querySelector('.btn-solution');
+            if (panel && btn) {
+                panel.classList.toggle('active');
+                if (panel.classList.contains('active')) {
+                    btn.innerHTML = 'ចុចដើម្បីបិទដំណោះស្រាយ ឡើងវិញ';
+                    btn.style.backgroundColor = '#e74c3c';
+                    panel.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    btn.innerHTML = '📝 មើលដំណោះស្រាយលំហាត់';
+                    btn.style.backgroundColor = '#27ae60';
+                }
+            }
+        };
+
+        // រង់ចាំរហូតដល់កូដ HTML លោតចេញអស់សិន ទើបដំណើរការ Canvas
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const canvas = document.getElementById('simCanvas');
+            if (!canvas) return; // ការពារ Error ប្រសិនបើរក Canvas មិនឃើញ
+            
+            const ctx = canvas.getContext('2d');
+            const angleSlider = document.getElementById('angleSlider');
+            const forceToggle = document.getElementById('forceToggle');
+            const angleVal = document.getElementById('angleVal');
+            const accelVal = document.getElementById('accelVal');
+            const btnConstVel = document.getElementById('btnConstVel');
+            const btnStop = document.getElementById('btnStop');
+
+            // អថេររូបវិទ្យា
+            const g = 9.8;
+            const L = 120; // ប្រវែងខ្សែប៉ោល
+            const roofX = 400; // កណ្តាលពិតានរថយន្ត (អ័ក្ស X)
+            const roofY = 80;  // កណ្តាលពិតានរថយន្ត (អ័ក្ស Y)
+            
+            let roadOffset = 0; 
+            let wheelAngle = 0; 
+            let isConstantVelocity = false;
+            let currentVisualSpeed = 0;
+
+            // មុខងារគូរព្រួញ
+            function drawArrow(fromx, fromy, tox, toy, color, text, textOffsetX, textOffsetY, size = 10) {
+                const dx = tox - fromx;
+                const dy = toy - fromy;
+                const angle = Math.atan2(dy, dx);
+                
+                ctx.beginPath();
+                ctx.moveTo(fromx, fromy);
+                ctx.lineTo(tox, toy);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(tox, toy);
+                ctx.lineTo(tox - size * Math.cos(angle - Math.PI / 6), toy - size * Math.sin(angle - Math.PI / 6));
+                ctx.lineTo(tox - size * Math.cos(angle + Math.PI / 6), toy - size * Math.sin(angle + Math.PI / 6));
+                ctx.lineTo(tox, toy);
+                ctx.fillStyle = color;
+                ctx.fill();
+
+                if (text) {
+                    ctx.fillStyle = color;
+                    ctx.font = "bold 16px Arial";
+                    ctx.fillText(text, tox + textOffsetX, toy + textOffsetY);
+                }
+            }
+
+            // មុខងារគូរកង់រថយន្ត
+            function drawWheel(x, y, radius, rotation) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(rotation);
+                
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#2d3436';
+                ctx.fill();
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = '#636e72';
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 0.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#b2bec3';
+                ctx.fill();
+                
+                for (let i = 0; i < 5; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(-radius*0.8, 0);
+                    ctx.lineTo(radius*0.8, 0);
+                    ctx.strokeStyle = '#dfe6e9';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    ctx.rotate(Math.PI / 5);
+                }
+                ctx.restore();
+            }
+
+            // ការកំណត់ប៊ូតុង
+            if(btnConstVel) {
+                btnConstVel.addEventListener('click', () => {
+                    angleSlider.value = 0;
+                    isConstantVelocity = true;
+                    currentVisualSpeed = 8;
+                });
+            }
+
+            if(btnStop) {
+                btnStop.addEventListener('click', () => {
+                    angleSlider.value = 0;
+                    isConstantVelocity = false;
+                    currentVisualSpeed = 0;
+                });
+            }
+
+            if(angleSlider) {
+                angleSlider.addEventListener('input', () => {
+                    if (parseFloat(angleSlider.value) > 0) {
+                        isConstantVelocity = false;
+                    }
+                });
+            }
+
+            // ដំណើរការគំនូរជីវចល
+            function animate() {
+                const angleDeg = angleSlider ? parseFloat(angleSlider.value) || 0 : 0;
+                const angleRad = angleDeg * Math.PI / 180;
+                const showForce = forceToggle ? forceToggle.checked : true;
+                
+                const a = g * Math.tan(angleRad);
+                
+                if (angleVal) angleVal.innerText = angleDeg;
+                if (accelVal) accelVal.innerText = a.toFixed(2);
+
+                if (angleDeg > 0) {
+                    currentVisualSpeed = 4 + (a * 1.5); 
+                } else if (!isConstantVelocity) {
+                    currentVisualSpeed = 0;
+                }
+                
+                roadOffset -= currentVisualSpeed;
+                if (roadOffset <= -100) roadOffset = 0;
+                wheelAngle += currentVisualSpeed * 0.05;
+
+                // លុបផ្ទាំងចាស់
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // ១. គូរថ្នល់
+                const roadY = 350;
+                ctx.beginPath();
+                ctx.moveTo(0, roadY);
+                ctx.lineTo(canvas.width, roadY);
+                ctx.strokeStyle = '#7f8c8d';
+                ctx.lineWidth = 6;
+                ctx.stroke();
+                
+                ctx.beginPath();
+                for(let x = roadOffset; x < canvas.width + 100; x += 100) {
+                    ctx.moveTo(x, roadY);
+                    ctx.lineTo(x + 50, roadY);
+                }
+                ctx.strokeStyle = '#f1c40f';
+                ctx.lineWidth = 6;
+                ctx.stroke();
+
+                // ២. គូររថយន្ត
+                ctx.fillStyle = '#ecf0f1';
+                ctx.beginPath();
+                ctx.moveTo(150, 310);  // ក្រោយក្រោម
+                ctx.lineTo(150, 60);   // ក្រោយលើ
+                ctx.lineTo(600, 60);   // មុខលើ
+                ctx.lineTo(700, 180);  // កញ្ចក់មុខ
+                ctx.lineTo(700, 310);  // មុខក្រោម
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.strokeStyle = '#34495e';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                
+                // កញ្ចក់រថយន្ត (ថ្លា)
+                ctx.fillStyle = 'rgba(129, 236, 236, 0.4)';
+                ctx.beginPath();
+                ctx.moveTo(200, 80);
+                ctx.lineTo(550, 80);
+                ctx.lineTo(630, 180);
+                ctx.lineTo(630, 250);
+                ctx.lineTo(200, 250);
+                ctx.closePath();
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#2c3e50';
+                ctx.stroke();
+
+                // កង់រថយន្ត
+                drawWheel(250, 310, 40, wheelAngle); 
+                drawWheel(600, 310, 40, wheelAngle); 
+
+                // ៣. គូរប៉េងប៉ោល
+                ctx.beginPath();
+                ctx.moveTo(roofX, roofY);
+                ctx.lineTo(roofX, roofY + L + 40);
+                ctx.strokeStyle = '#7f8c8d';
+                ctx.setLineDash([5, 5]);
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                const bobX = roofX - L * Math.sin(angleRad);
+                const bobY = roofY + L * Math.cos(angleRad);
+
+                if (angleDeg > 0) {
+                    ctx.beginPath();
+                    ctx.arc(roofX, roofY, 50, Math.PI/2, Math.PI/2 + angleRad);
+                    ctx.strokeStyle = '#e67e22';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    ctx.fillStyle = '#e67e22';
+                    ctx.font = "italic bold 16px Arial";
+                    ctx.fillText("θ", roofX - 30 * Math.sin(angleRad/2) - 15, roofY + 30 * Math.cos(angleRad/2) + 20);
+                }
+
+                ctx.beginPath();
+                ctx.moveTo(roofX, roofY);
+                ctx.lineTo(bobX, bobY);
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(bobX, bobY, 20, 0, Math.PI * 2);
+                ctx.fillStyle = '#3498db';
+                ctx.fill();
+                ctx.strokeStyle = '#2980b9';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                ctx.fillStyle = 'white';
+                ctx.font = "bold 16px Arial";
+                ctx.fillText("m", bobX - 7, bobY + 5);
+
+                // ៤. គូរវ៉ិចទ័រកម្លាំង
+                if (showForce) {
+                    drawArrow(bobX, bobY, bobX, bobY + 70, '#e74c3c', 'P', 10, -5, 10);
+                    const tx = bobX + 70 * Math.sin(angleRad);
+                    const ty = bobY - 70 * Math.cos(angleRad);
+                    drawArrow(bobX, bobY, tx, ty, '#27ae60', 'T', -20, -10, 10);
+
+                    if (angleDeg > 0) {
+                        drawArrow(bobX, bobY, bobX + 70 * Math.sin(angleRad), bobY, '#8e44ad', 'ma', 5, -8, 10);
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(bobX, bobY + 70);
+                        ctx.lineTo(tx, bobY + 70); 
+                        ctx.moveTo(tx, ty);
+                        ctx.lineTo(tx, bobY); 
+                        ctx.lineTo(bobX, bobY); 
+                        ctx.strokeStyle = '#bdc3c7';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([4, 4]);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                }
+
+                // ៥. ព្រួញចលនារថយន្តខាងក្រៅ
+                if (angleDeg > 0) {
+                    drawArrow(710, 80, 780, 80, '#d35400', 'a', -15, -10, 12);
+                } else if (isConstantVelocity) {
+                    drawArrow(710, 80, 780, 80, '#27ae60', 'v ថេរ', -25, -10, 12);
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            // ចាប់ផ្តើមភ្លាមៗ
+            animate();
+        });
+    </script>
+</body>
+</html>

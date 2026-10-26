@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D ពិសោធន៍: ការរកកម្ដៅម៉ាសលោហៈ</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS Styles -->
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .math-font { font-family: 'Lora', serif; }
+
+        /* Solution Toggle Transition */
+        .solution-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out;
+            opacity: 0;
+        }
+        .solution-content.open {
+            max-height: 1000px;
+            opacity: 1;
+        }
+
+        /* 2D Apparatus Styling */
+        .apparatus-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 30px;
+        }
+
+        .beaker {
+            width: 180px;
+            height: 220px;
+            border: 4px solid #94a3b8; /* slate-400 */
+            border-top: none;
+            border-radius: 0 0 16px 16px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.7) 100%);
+            position: relative;
+            box-shadow: inset 0 -4px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+            overflow: hidden;
+        }
+        
+        .water {
+            background: linear-gradient(180deg, #38bdf8, #0284c7);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 65%;
+            opacity: 0.85;
+            z-index: 1;
+        }
+
+        /* Metal Block */
+        .metal-block {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ea580c, #9a3412); /* orange-600 to 800 */
+            border: 2px solid #7c2d12;
+            border-radius: 4px;
+            top: 10px; /* Start position (above beaker) */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            transition: top 0.6s cubic-bezier(0.5, 0, 0.75, 0); /* Drop animation */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-family: 'Lora', serif;
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .metal-block.dropped {
+            top: 240px; /* End position (inside water) */
+        }
+
+        /* Heat Arrows */
+        .heat-wave {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 15;
+            color: #ef4444; /* red-500 */
+        }
+        
+        .sim-active .heat-wave {
+            animation: radiate 1.5s infinite ease-out;
+        }
+
+        .heat-wave:nth-child(1) { --tx: -40px; --ty: -30px; animation-delay: 0s; }
+        .heat-wave:nth-child(2) { --tx: 40px; --ty: -30px; animation-delay: 0.3s; }
+        .heat-wave:nth-child(3) { --tx: -40px; --ty: 10px; animation-delay: 0.6s; }
+        .heat-wave:nth-child(4) { --tx: 40px; --ty: 10px; animation-delay: 0.9s; }
+
+        @keyframes radiate {
+            0% { transform: scale(0.5) translate(0, 0); opacity: 0; }
+            20% { opacity: 0.9; }
+            100% { transform: scale(1.5) translate(var(--tx), var(--ty)); opacity: 0; }
+        }
+
+        /* Thermometer Badges */
+        .temp-badges-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .temp-badge {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #cbd5e1;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            padding: 8px 16px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 100px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center min-h-screen">
+
+    <div class="max-w-6xl w-full">
+        
+        <!-- Header & Problem Statement -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+            <div class="p-6 md:p-8 text-slate-800 leading-relaxed text-lg space-y-4">
+                <p class="font-medium leading-9">
+                    <span class="text-indigo-600 font-bold math-font mr-2">11.</span> 
+                    គេគ្រោងពិសោធន៍វាស់កម្ដៅម៉ាសរបស់ដុំលោហៈក្តៅមួយដោយដាក់យ៉ាងរហ័សទៅក្នុងទឹកត្រជាក់នៃកាឡូរីម៉ែត្រមួយ បន្ទាប់កូរ និងវាស់សីតុណ្ហភាពស្រេចនៃទឹកនោះ។ គេមិនគិតម៉ាសកាឡូរីទេ និងសន្មតថាថាមពលកម្ដៅទាំងអស់ត្រូវបានស្រូបដោយទឹក។ គេឱ្យម៉ាសទឹកត្រជាក់ <span class="math-font font-semibold">m<sub>1</sub></span>, កម្ដៅម៉ាសទឹក <span class="math-font font-semibold">c<sub>1</sub></span>, សីតុណ្ហភាពដើមនៃទឹក <span class="math-font font-semibold">t<sub>1</sub></span> និងម៉ាសដុំលោហៈ(ក្តៅ) <span class="math-font font-semibold">m<sub>2</sub></span>, កម្ដៅម៉ាសលោហៈ <span class="math-font font-semibold">c<sub>2</sub></span>, សីតុណ្ហភាពលោហៈ <span class="math-font font-semibold">t<sub>2</sub></span>, សីតុណ្ហភាពស្រេចនៃទឹក-ដុំលោហៈ <span class="math-font font-semibold">t<sub>f</sub></span> ។
+                </p>
+                <p class="text-base text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-100 inline-block leading-8">
+                    គេឱ្យ <span class="math-font font-bold">m<sub>1</sub> = 100 g</span>, <span class="math-font font-bold">c<sub>1</sub> = 4186 J/kg&cdot;&deg;C</span>, <span class="math-font font-bold text-sky-600">t<sub>1</sub> = 22.0&deg;C</span>, <span class="math-font font-bold">m<sub>2</sub> = 58.9 g</span>, <span class="math-font font-bold text-orange-600">t<sub>2</sub> = 100&deg;C</span> និង <span class="math-font font-bold text-green-600">t<sub>f</sub> = 25.0&deg;C</span> ។ <br>
+                    គណនាកម្ដៅម៉ាសលោហៈ <span class="math-font font-bold">c<sub>2</sub></span> ។ 
+                    <span class="ml-4 font-bold text-indigo-700">ច. <span class="math-font">c<sub>2</sub> = 284 J/kg&cdot;&deg;C</span></span>
+                </p>
+            </div>
+
+            <!-- Solution Toggle Button -->
+            <div class="px-6 md:px-8 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+                <button id="btnToggleSol" class="text-slate-700 hover:text-indigo-700 px-5 py-2.5 rounded-lg bg-white border border-slate-300 hover:bg-indigo-50 transition font-medium flex items-center gap-2 shadow-sm">
+                    <span id="solBtnText">បង្ហាញដំណោះស្រាយ</span>
+                    <svg id="solIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+            <!-- Solution Content -->
+            <div id="solutionDiv" class="solution-content border-t border-slate-200 bg-white">
+                <div class="p-6 md:p-8 text-slate-800 text-lg space-y-6 bg-slate-50/50">
+                    <h3 class="font-bold text-xl text-indigo-800 border-b border-indigo-100 pb-2">ដំណោះស្រាយ៖ គណនាកម្ដៅម៉ាសលោហៈ (c<sub>2</sub>)</h3>
+                    
+                    <div class="math-font space-y-4 text-slate-700 md:pl-4">
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-2 text-base">
+                            <p class="font-['Kantumruy_Pro'] font-bold text-slate-800 mb-2">បម្រាប់ត្រូវប្ដូរខ្នាត៖</p>
+                            <p>&bull; m<sub>1</sub> = 100 g = 0.1 kg</p>
+                            <p>&bull; m<sub>2</sub> = 58.9 g = 0.0589 kg</p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl border border-indigo-200 shadow-sm mt-4 text-base lg:text-lg">
+                            <p class="font-['Kantumruy_Pro'] font-bold text-indigo-800 mb-4">តាមច្បាប់រក្សាថាមពលកម្ដៅ (បរិមាណកម្ដៅស្រូប = បរិមាណកម្ដៅបញ្ចេញ)៖</p>
+                            <div class="space-y-4 ml-2 md:ml-6 font-bold">
+                                <p class="text-sky-700">Q<sub>ស្រូបដោយទឹក</sub> = Q<sub>បញ្ចេញដោយលោហៈ</sub></p>
+                                <p>m<sub>1</sub> &times; c<sub>1</sub> &times; (t<sub>f</sub> - t<sub>1</sub>) = m<sub>2</sub> &times; c<sub>2</sub> &times; (t<sub>2</sub> - t<sub>f</sub>)</p>
+                                <p class="font-normal">ជំនួសលេខ៖</p>
+                                <p>0.1 &times; 4186 &times; (25 - 22) = 0.0589 &times; c<sub>2</sub> &times; (100 - 25)</p>
+                                <p>418.6 &times; 3 = 0.0589 &times; c<sub>2</sub> &times; 75</p>
+                                <p>1255.8 = 4.4175 &times; c<sub>2</sub></p>
+                                <p>c<sub>2</sub> = <span class="inline-block align-middle text-center"><span class="border-b border-slate-700 block px-2">1255.8</span><span>4.4175</span></span></p>
+                            </div>
+                            
+                            <div class="flex justify-center mt-6">
+                                <p class="font-bold text-xl md:text-2xl text-red-600 border-2 border-red-200 px-8 py-3 bg-red-50 rounded-xl shadow-sm">
+                                    c<sub>2</sub> &approx; 284 J/kg&cdot;&deg;C
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                <h2 class="text-lg font-bold text-slate-800 uppercase tracking-wider">កម្មវិធីពិសោធន៍ 2D</h2>
+            </div>
+            
+            <div class="flex flex-col md:flex-row w-full">
+                
+                <!-- Left Column: Experimental Setup -->
+                <div class="w-full md:w-5/12 p-6 border-b md:border-b-0 md:border-r border-slate-200 flex flex-col items-center justify-center bg-slate-50/50">
+                    
+                    <div class="apparatus-container" id="apparatus">
+                        
+                        <!-- Floating Temp Badges -->
+                        <div class="temp-badges-container w-full max-w-[320px]">
+                            <!-- Water Badge -->
+                            <div class="temp-badge border-blue-200">
+                                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">ទឹក (Water)</p>
+                                <p class="text-2xl font-bold text-blue-600 math-font"><span id="lblWaterTemp">22.0</span>&deg;C</p>
+                            </div>
+                            <!-- Metal Badge -->
+                            <div class="temp-badge border-orange-200">
+                                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">លោហៈ (Metal)</p>
+                                <p class="text-2xl font-bold text-orange-600 math-font"><span id="lblMetalTemp">100.0</span>&deg;C</p>
+                            </div>
+                        </div>
+
+                        <!-- Metal Block (outside initially) -->
+                        <div class="metal-block" id="metalBlock">m<sub>2</sub></div>
+
+                        <!-- 2D Beaker -->
+                        <div class="beaker">
+                            <div class="water"></div>
+                            
+                            <!-- Heat Arrows (center of beaker where block lands) -->
+                            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-4">
+                                <svg class="heat-wave w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 14s2-3 4-3 4 3 4 3 2-3 4-3 4 3 4 3"/></svg>
+                                <svg class="heat-wave w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 14s2-3 4-3 4 3 4 3 2-3 4-3 4 3 4 3"/></svg>
+                                <svg class="heat-wave w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 14s2-3 4-3 4 3 4 3 2-3 4-3 4 3 4 3"/></svg>
+                                <svg class="heat-wave w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 14s2-3 4-3 4 3 4 3 2-3 4-3 4 3 4 3"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Chart.js Graph -->
+                <div class="w-full md:w-7/12 p-4 flex items-center justify-center min-h-[400px]">
+                    <div class="w-full h-full relative">
+                        <canvas id="tempChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="p-6 bg-white border-t border-slate-200 flex flex-wrap justify-center items-center gap-4">
+                <button id="btnStart" class="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-xl shadow-md hover:shadow-lg font-bold text-lg transition flex justify-center items-center gap-3 transform hover:-translate-y-0.5 min-w-[200px]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <span id="txtBtnStart">ចាប់ផ្ដើម (Replay)</span>
+                </button>
+                
+                <button id="btnReset" class="bg-white border-2 border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-800 px-6 py-3 rounded-xl shadow-sm hover:shadow font-bold text-lg transition flex justify-center items-center gap-2 transform hover:-translate-y-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    ត្រឡប់ដើម (Reset)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Solution Toggle Logic ---
+        const btnToggleSol = document.getElementById('btnToggleSol');
+        const solDiv = document.getElementById('solutionDiv');
+        const solIcon = document.getElementById('solIcon');
+        const solBtnText = document.getElementById('solBtnText');
+
+        btnToggleSol.addEventListener('click', () => {
+            solDiv.classList.toggle('open');
+            if (solDiv.classList.contains('open')) {
+                solIcon.classList.add('rotate-180');
+                solBtnText.textContent = 'លាក់ដំណោះស្រាយ';
+            } else {
+                solIcon.classList.remove('rotate-180');
+                solBtnText.textContent = 'បង្ហាញដំណោះស្រាយ';
+            }
+        });
+
+        // --- 2. Chart.js Setup ---
+        const ctx = document.getElementById('tempChart').getContext('2d');
+        
+        // Initial values based on problem statement
+        const waterTempStart = 22.0;
+        const metalTempStart = 100.0;
+        const finalTemp = 25.0;
+        const durationSec = 10;
+        
+        let tempChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: 'ទឹក (Water) °C',
+                        data: [{x: 0, y: waterTempStart}], 
+                        borderColor: '#2563eb', // blue-600
+                        backgroundColor: '#2563eb',
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        tension: 0.1,
+                        borderDash: [] // Solid line
+                    },
+                    {
+                        label: 'លោហៈ (Metal) °C',
+                        data: [{x: 0, y: metalTempStart}], 
+                        borderColor: '#ea580c', // orange-600
+                        backgroundColor: '#ea580c',
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        tension: 0.1,
+                        borderDash: [] // Solid line
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false, // Turn off default animations for progressive draw
+                scales: {
+                    x: {
+                        type: 'linear',
+                        title: { display: true, text: 'ពេលវេលា (s)', font: { family: 'Kantumruy Pro', size: 14 } },
+                        min: 0,
+                        max: 10,
+                        ticks: { stepSize: 1 }
+                    },
+                    y: {
+                        title: { display: true, text: 'សីតុណ្ហភាព (°C)', font: { family: 'Kantumruy Pro', size: 14 } },
+                        min: 0,
+                        max: 110,
+                        ticks: { stepSize: 10 }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { font: { family: 'Kantumruy Pro', size: 14 } } },
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+
+        // --- 3. Animation Logic ---
+        const btnStart = document.getElementById('btnStart');
+        const txtBtnStart = document.getElementById('txtBtnStart');
+        const btnReset = document.getElementById('btnReset');
+        
+        const apparatus = document.getElementById('apparatus');
+        const metalBlock = document.getElementById('metalBlock');
+        const lblWaterTemp = document.getElementById('lblWaterTemp');
+        const lblMetalTemp = document.getElementById('lblMetalTemp');
+
+        let animationFrameId;
+        let isAnimating = false;
+        let hasCompleted = false;
+        const totalDurationMs = 10000; // 10 seconds
+
+        function resetSimulation() {
+            cancelAnimationFrame(animationFrameId);
+            isAnimating = false;
+            hasCompleted = false;
+            
+            // Reset UI States
+            btnStart.classList.remove('opacity-75', 'cursor-not-allowed');
+            txtBtnStart.textContent = 'ចាប់ផ្ដើម (Replay)';
+            apparatus.classList.remove('sim-active');
+            
+            // Reset block position
+            metalBlock.classList.remove('dropped');
+            
+            // Reset Labels
+            lblWaterTemp.textContent = waterTempStart.toFixed(1);
+            lblMetalTemp.textContent = metalTempStart.toFixed(1);
+
+            // Reset Chart Data
+            tempChart.data.datasets[0].data = [{x: 0, y: waterTempStart}];
+            tempChart.data.datasets[1].data = [{x: 0, y: metalTempStart}];
+            tempChart.update();
+        }
+
+        btnReset.addEventListener('click', resetSimulation);
+
+        btnStart.addEventListener('click', () => {
+            if (isAnimating) return;
+            if (hasCompleted) resetSimulation();
+
+            isAnimating = true;
+            hasCompleted = false;
+            
+            btnStart.classList.add('opacity-75', 'cursor-not-allowed');
+            txtBtnStart.textContent = 'កំពុងដំណើរការ...';
+            
+            // 1. Drop the block via CSS
+            metalBlock.classList.add('dropped');
+            
+            // 2. Start the thermal equilibrium animation slightly after drop starts
+            setTimeout(() => {
+                apparatus.classList.add('sim-active'); // Turn on heat arrows
+                let startTime = null;
+
+                function updateFrame(currentTime) {
+                    if (!startTime) startTime = currentTime;
+                    const elapsed = currentTime - startTime;
+                    
+                    let progress = elapsed / totalDurationMs;
+                    if (progress > 1) progress = 1;
+                    
+                    let timeSec = progress * durationSec;
+                    
+                    // Interpolate Temps
+                    let curWaterTemp = waterTempStart + (finalTemp - waterTempStart) * progress;
+                    let curMetalTemp = metalTempStart + (finalTemp - metalTempStart) * progress;
+                    
+                    lblWaterTemp.textContent = curWaterTemp.toFixed(1);
+                    lblMetalTemp.textContent = curMetalTemp.toFixed(1);
+
+                    // Add point to chart
+                    tempChart.data.datasets[0].data.push({x: timeSec, y: curWaterTemp});
+                    tempChart.data.datasets[1].data.push({x: timeSec, y: curMetalTemp});
+                    tempChart.update();
+
+                    if (progress < 1) {
+                        animationFrameId = requestAnimationFrame(updateFrame);
+                    } else {
+                        // Animation complete
+                        isAnimating = false;
+                        hasCompleted = true;
+                        btnStart.classList.remove('opacity-75', 'cursor-not-allowed');
+                        txtBtnStart.textContent = 'ចាប់ផ្ដើម (Replay)';
+                        
+                        // Turn off heat arrows when equilibrium is reached
+                        apparatus.classList.remove('sim-active');
+                    }
+                }
+
+                // Start charting
+                animationFrameId = requestAnimationFrame(updateFrame);
+            }, 300); // 300ms delay to let the block visually drop into the water first
+        });
+    </script>
+</body>
+</html>

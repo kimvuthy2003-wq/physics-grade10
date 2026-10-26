@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>២.១ គោលការណ៍គ្រឹះអ៊ីដ្រូស្តាទិច និងការរកម៉ាសមាត</title>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center;
+            margin: 0;
+        }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; max-width: 500px; height: auto;
+            background: #e0f7fa; border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 16px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 20px; display: block; margin-top: 8px;
+        }
+        
+        #liveP1 { color: #d32f2f; }
+        #liveP2 { color: #007bff; }
+        #liveH { color: #28a745; }
+        #liveRho { color: #e65100; font-size: 26px;}
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        .solution-box ul { padding-left: 30px; margin-top: 5px; }
+        .highlight { font-weight: bold; color: #d32f2f; font-size: 19px; }
+        
+        .error-box { 
+            background: #ffebee; border-left: 6px solid #d32f2f; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #b71c1c; 
+        }
+
+        /* រចនាប័ទ្មសម្រាប់រូបមន្តប្រភាគ HTML សុទ្ធ */
+        .math-bold { font-family: 'Times New Roman', serif; font-size: 110%; font-weight: bold; }
+        .math-italic { font-family: 'Times New Roman', serif; font-style: italic; }
+        .frac { display: inline-block; vertical-align: middle; text-align: center; padding: 0 5px; }
+        .frac span { display: block; }
+        .frac .num { border-bottom: 2px solid #000; padding-bottom: 2px; }
+        .frac .den { padding-top: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ការរំលេចកំហុសក្នុងសៀវភៅ -->
+    <div class="error-box">
+        <strong>⚠️ ការកែតម្រូវកំហុសក្នុងសៀវភៅពុម្ព៖</strong><br>
+        នៅក្នុងលំហាត់គំរូនៃសៀវភៅពុម្ព មានកំហុសវាយអត្ថបទ (Typo) ត្រង់ចម្លើយចុងក្រោយ។ <br>
+        ការគណនាពិតប្រាកដគឺ៖ (106800 - 105000) &divide; (9.80 &times; 0.200) = 1800 &divide; 1.96 = <strong>918.36 kg/m&sup3;</strong>។<br>
+        សៀវភៅបានសរសេរខុសទៅជា <strong>9.18 kg/m&sup3;</strong> (បាត់មេគុណ 10&sup2;)។ លោកគ្រូអាចប្រើប្រាស់ Simulator នេះដើម្បីបង្ហាញលេខត្រឹមត្រូវដល់សិស្ស!
+    </div>
+
+    <div class="problem-statement">
+        <strong>២.១ គោលការណ៍គ្រឹះអ៊ីដ្រូស្តាទិច ៖</strong> គេដាក់ប្រអប់មួយមានកម្ពស់ <i>h</i> ក្នុងអង្គធាតុរាវមានម៉ាសមាត &rho;។ 
+        គេដឹងថាសម្ពាធផ្នែកខាងលើមានតម្លៃ P<sub>1</sub> និងផ្នែកខាងក្រោម P<sub>2</sub>។ តាមគោលការណ៍គ្រឹះនៃអ៊ីដ្រូស្តាទិច ផលសងសម្ពាធរវាងពីរចំណុចក្នុងអង្គធាតុរាវស្មើនឹង៖<br><br>
+        <div style="text-align: center; font-size: 22px;">
+            <span class="math-bold">P<sub>2</sub> - P<sub>1</sub> = &rho; &middot; g &middot; h</span>
+        </div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator SVG សុទ្ធ -->
+    <div class="sim-area">
+        <svg viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="liquidGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#81d4fa"/>
+                    <stop offset="100%" stop-color="#0277bd"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ធុង និង អង្គធាតុរាវ -->
+            <path d="M 100 100 L 100 450 Q 100 470 120 470 L 380 470 Q 400 470 400 450 L 400 100" fill="none" stroke="#546e7a" stroke-width="6" />
+            <path d="M 103 200 L 103 450 Q 103 467 120 467 L 380 467 Q 397 467 397 450 L 397 200 Z" fill="url(#liquidGrad)" />
+            <line x1="103" y1="200" x2="397" y2="200" stroke="#0288d1" stroke-width="3" />
+            
+            <!-- រលកទឹក -->
+            <path d="M 120 200 Q 140 190 160 200 T 200 200 T 240 200 T 280 200 T 320 200 T 360 200 T 380 200" fill="none" stroke="#0277bd" stroke-width="2" opacity="0.5"/>
+
+            <!-- ប្រអប់ (Block) នឹងផ្លាស់ប្តូរកម្ពស់ដោយ JavaScript -->
+            <rect id="blockObj" x="200" y="250" width="100" height="100" fill="#fff" stroke="#333" stroke-width="3" />
+            <text x="250" y="305" id="blockText" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#555">ប្រអប់</text>
+
+            <!-- ព្រួញសម្ពាធ P1 (ចុះក្រោម) -->
+            <line id="lineP1" x1="250" y1="180" x2="250" y2="240" stroke="#d32f2f" stroke-width="4" />
+            <polygon id="polyP1" points="240,240 260,240 250,250" fill="#d32f2f" />
+            <text id="lblP1" x="250" y="170" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="20" fill="#d32f2f">P_1</text>
+
+            <!-- ព្រួញសម្ពាធ P2 (ឡើងលើ) -->
+            <line id="lineP2" x1="250" y1="420" x2="250" y2="360" stroke="#007bff" stroke-width="4" />
+            <polygon id="polyP2" points="240,360 260,360 250,350" fill="#007bff" />
+            <text id="lblP2" x="250" y="440" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="20" fill="#007bff">P_2</text>
+
+            <!-- បន្ទាត់វាស់កម្ពស់ h -->
+            <line id="hDashTop" x1="310" y1="250" x2="380" y2="250" stroke="#28a745" stroke-width="2" stroke-dasharray="5,5" />
+            <line id="hDashBot" x1="310" y1="350" x2="380" y2="350" stroke="#28a745" stroke-width="2" stroke-dasharray="5,5" />
+            <line id="hLineVert" x1="360" y1="250" x2="360" y2="350" stroke="#28a745" stroke-width="3" />
+            <polygon id="hArrTop" points="355,260 365,260 360,250" fill="#28a745" />
+            <polygon id="hArrBot" points="355,340 365,340 360,350" fill="#28a745" />
+            <text id="hText" x="370" y="305" font-family="Arial" font-weight="bold" font-size="20" fill="#28a745" dominant-baseline="middle">h</text>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            សម្ពាធ P<sub>1</sub> (ខាងលើ):<br>
+            <input type="range" id="sliderP1" min="100.0" max="110.0" value="105.0" step="0.1">
+        </div>
+        <div class="slider-box">
+            សម្ពាធ P<sub>2</sub> (ខាងក្រោម):<br>
+            <input type="range" id="sliderP2" min="102.0" max="115.0" value="106.8" step="0.1">
+        </div>
+        <div class="slider-box">
+            កម្ពស់ប្រអប់ <i>h</i> (cm):<br>
+            <input type="range" id="sliderH" min="10.0" max="40.0" value="20.0" step="1.0">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Grid) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">P<sub>1</sub> (kPa)<br><span id="liveP1">105.0 kPa</span></div>
+        <div class="data-box" style="border-top: 4px solid #007bff;">P<sub>2</sub> (kPa)<br><span id="liveP2">106.8 kPa</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">កម្ពស់ (h)<br><span id="liveH">20.0 cm</span></div>
+        <div class="data-box" style="border-top: 4px solid #e65100;">ម៉ាសមាតវត្ថុរាវ (&rho;)<br><span id="liveRho">918 kg/m&sup3;</span></div>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box">
+        <h3>ដំណើរស្រាយលំហាត់គំរូ</h3>
+        <p><strong>បម្រាប់៖</strong> P<sub>1</sub> = <span id="solP1">105.0</span> kPa, P<sub>2</sub> = <span id="solP2">106.8</span> kPa, h = <span id="solH">20.0</span> cm = <span id="solHm">0.200</span> m, g = 9.80 m/s&sup2;</p>
+        
+        <p>តាមទំនាក់ទំនងសម្ពាធអាស្រ័យនឹងជម្រៅ៖</p>
+        <p style="text-align: center; font-size: 20px;"><strong>P<sub>2</sub> - P<sub>1</sub> = &rho; &middot; g &middot; h</strong></p>
+        
+        <p>ទាញរកម៉ាសមាត &rho; នៃអង្គធាតុរាវ៖</p>
+        <div style="text-align: center; font-size: 22px; margin: 15px 0;">
+            <span class="math-bold">&rho; = </span>
+            <div class="frac">
+                <span class="num math-bold">P<sub>2</sub> - P<sub>1</sub></span>
+                <span class="den math-bold">g &middot; h</span>
+            </div>
+            <span class="math-bold"> = </span>
+            <div class="frac">
+                <span class="num math-bold" id="solCalcTop">(106.8 - 105.0) &times; 10&sup3;</span>
+                <span class="den math-bold" id="solCalcBot">9.80 &times; 0.200</span>
+            </div>
+            <span class="math-bold"> = <span style="color: #e65100;" id="solResult">918</span> kg/m&sup3;</span>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript ត្រូវបានសរសេរដោយសុវត្ថិភាពបំផុត គ្មានសញ្ញា < ឬ > ដើម្បីការពារការ Error លើទូរស័ព្ទ -->
+<script>
+    var sliderP1 = document.getElementById('sliderP1');
+    var sliderP2 = document.getElementById('sliderP2');
+    var sliderH = document.getElementById('sliderH');
+
+    var liveP1 = document.getElementById('liveP1');
+    var liveP2 = document.getElementById('liveP2');
+    var liveH = document.getElementById('liveH');
+    var liveRho = document.getElementById('liveRho');
+
+    var blockObj = document.getElementById('blockObj');
+    var blockText = document.getElementById('blockText');
+    
+    var lineP1 = document.getElementById('lineP1');
+    var polyP1 = document.getElementById('polyP1');
+    var lblP1 = document.getElementById('lblP1');
+    
+    var lineP2 = document.getElementById('lineP2');
+    var polyP2 = document.getElementById('polyP2');
+    var lblP2 = document.getElementById('lblP2');
+
+    var hDashTop = document.getElementById('hDashTop');
+    var hDashBot = document.getElementById('hDashBot');
+    var hLineVert = document.getElementById('hLineVert');
+    var hArrTop = document.getElementById('hArrTop');
+    var hArrBot = document.getElementById('hArrBot');
+    var hText = document.getElementById('hText');
+
+    var solP1 = document.getElementById('solP1');
+    var solP2 = document.getElementById('solP2');
+    var solH = document.getElementById('solH');
+    var solHm = document.getElementById('solHm');
+    var solCalcTop = document.getElementById('solCalcTop');
+    var solCalcBot = document.getElementById('solCalcBot');
+    var solResult = document.getElementById('solResult');
+
+    function updateSimulation() {
+        var p1 = parseFloat(sliderP1.value);
+        var p2 = parseFloat(sliderP2.value);
+        var h_cm = parseFloat(sliderH.value);
+
+        // ការពារកុំឱ្យ P2 តូចជាង P1 ដោយមិនប្រើសញ្ញាតូចជាង (ប្រើ Math.max ជំនួស)
+        p2 = Math.max(p1 + 0.1, p2);
+        sliderP2.value = p2.toFixed(1);
+
+        // ការគណនារូបវិទ្យា
+        var deltaP_kPa = p2 - p1;
+        var deltaP_Pa = deltaP_kPa * 1000;
+        var h_m = h_cm / 100;
+        var g = 9.80;
+        
+        var rho = deltaP_Pa / (g * h_m);
+
+        // បង្ហាញទិន្នន័យ
+        liveP1.innerText = p1.toFixed(1) + " kPa";
+        liveP2.innerText = p2.toFixed(1) + " kPa";
+        liveH.innerText = h_cm.toFixed(1) + " cm";
+        liveRho.innerText = Math.round(rho).toLocaleString() + " kg/m\u00B3"; // \u00B3 គឺ ^3
+
+        // ធ្វើចលនារូបភាព (Animation)
+        var pxPerCm = 4; // 1cm = 4px
+        var rectH = h_cm * pxPerCm;
+        var rectY = 300 - (rectH / 2); // ដាក់ប្រអប់ឱ្យនៅកណ្តាល (center Y = 300)
+
+        // អាប់ដេតប្រអប់
+        blockObj.setAttribute("height", rectH);
+        blockObj.setAttribute("y", rectY);
+        blockText.setAttribute("y", 300 + 5);
+
+        // អាប់ដេតព្រួញ P1 (ខាងលើ)
+        lineP1.setAttribute("y2", rectY);
+        polyP1.setAttribute("points", "240," + rectY + " 260," + rectY + " 250," + (rectY+10));
+        lblP1.setAttribute("y", rectY - 70);
+        lineP1.setAttribute("y1", rectY - 60);
+
+        // អាប់ដេតព្រួញ P2 (ខាងក្រោម)
+        var bottomY = rectY + rectH;
+        lineP2.setAttribute("y2", bottomY);
+        polyP2.setAttribute("points", "240," + bottomY + " 260," + bottomY + " 250," + (bottomY-10));
+        lblP2.setAttribute("y", bottomY + 70);
+        lineP2.setAttribute("y1", bottomY + 60);
+
+        // អាប់ដេតខ្សែបន្ទាត់វាស់ h
+        hDashTop.setAttribute("y1", rectY); hDashTop.setAttribute("y2", rectY);
+        hDashBot.setAttribute("y1", bottomY); hDashBot.setAttribute("y2", bottomY);
+        hLineVert.setAttribute("y1", rectY); hLineVert.setAttribute("y2", bottomY);
+        
+        hArrTop.setAttribute("points", "355," + (rectY+10) + " 365," + (rectY+10) + " 360," + rectY);
+        hArrBot.setAttribute("points", "355," + (bottomY-10) + " 365," + (bottomY-10) + " 360," + bottomY);
+        hText.setAttribute("y", 300 + 5);
+
+        // អាប់ដេតលេខក្នុងប្រអប់ដំណោះស្រាយ
+        solP1.innerText = p1.toFixed(1);
+        solP2.innerText = p2.toFixed(1);
+        solH.innerText = h_cm.toFixed(1);
+        solHm.innerText = h_m.toFixed(3);
+        solCalcTop.innerText = "(" + p2.toFixed(1) + " - " + p1.toFixed(1) + ") \u00D7 10\u00B3";
+        solCalcBot.innerText = "9.80 \u00D7 " + h_m.toFixed(3);
+        solResult.innerText = Math.round(rho).toLocaleString();
+    }
+
+    // ចាប់យកព្រឹត្តិការណ៍ពេលអូស Slider
+    sliderP1.addEventListener('input', updateSimulation);
+    sliderP2.addEventListener('input', updateSimulation);
+    sliderH.addEventListener('input', updateSimulation);
+
+    // ហៅអនុគមន៍ពេលបើកដំបូង
+    updateSimulation();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ពិសោធន៍ទែម៉ូឌីណាមិច: ការដាំទឹក</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Typography & Globals */
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .math-font {
+            font-family: 'Lora', serif;
+        }
+
+        /* Solution Toggle */
+        .solution-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-in-out;
+            opacity: 0;
+        }
+        .solution-content.open {
+            max-height: 1000px;
+            opacity: 1;
+        }
+
+        /* Simulator Area */
+        .simulator-area {
+            position: relative;
+            height: 400px;
+            background: linear-gradient(to bottom, #ffffff, #f1f5f9);
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 40px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Overlay Stats */
+        .overlay-stats {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            z-index: 30;
+            font-size: 0.95rem;
+            min-width: 200px;
+        }
+
+        /* Beaker (Glass) */
+        .beaker {
+            position: relative;
+            width: 140px;
+            height: 160px;
+            border: 4px solid #94a3b8; /* slate-400 */
+            border-top: none;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: inset 0 -10px 20px rgba(255,255,255,0.8), 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        /* Beaker Lip */
+        .beaker::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -10px;
+            right: -10px;
+            height: 12px;
+            border: 4px solid #94a3b8;
+            border-radius: 6px;
+            background: transparent;
+        }
+
+        /* Water inside Beaker */
+        .water {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 65%; /* 0.3kg volume level */
+            background: linear-gradient(180deg, rgba(186,230,253,0.6) 0%, rgba(56,189,248,0.8) 100%);
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            transition: background 1s ease;
+            overflow: hidden;
+        }
+        .water.hot {
+            background: linear-gradient(180deg, rgba(186,230,253,0.7) 0%, rgba(125,211,252,0.9) 100%);
+        }
+
+        /* Bubbles */
+        .bubble {
+            position: absolute;
+            background: rgba(255,255,255,0.7);
+            border: 1px solid rgba(255,255,255,0.9);
+            border-radius: 50%;
+            bottom: -10px;
+            opacity: 0;
+        }
+        @keyframes rise {
+            0% { transform: translateY(0) scale(1); opacity: 0.8; }
+            50% { transform: translateY(-50px) translateX(3px) scale(1.2); opacity: 0.8; }
+            100% { transform: translateY(-100px) translateX(-3px) scale(1.5); opacity: 0; }
+        }
+
+        /* Hot Plate (Stove) */
+        .hot-plate {
+            width: 220px;
+            height: 25px;
+            background: #475569; /* slate-600 */
+            border-radius: 10px;
+            margin-top: 2px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: all 0.5s ease;
+            z-index: 5;
+        }
+        .hot-plate .coil {
+            position: absolute;
+            top: -4px;
+            left: 10%;
+            width: 80%;
+            height: 8px;
+            background: #334155;
+            border-radius: 4px;
+            transition: all 1s ease;
+        }
+        .hot-plate.heating .coil {
+            background: #ef4444; /* red-500 */
+            box-shadow: 0 -2px 15px rgba(239, 68, 68, 0.8);
+        }
+
+        /* Thermometer */
+        .thermometer {
+            position: absolute;
+            bottom: 10px;
+            left: 20px;
+            width: 14px;
+            height: 180px;
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            z-index: 15;
+            display: flex;
+            justify-content: center;
+        }
+        .thermometer-bulb {
+            position: absolute;
+            bottom: -8px;
+            width: 22px;
+            height: 22px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            left: -6px;
+            z-index: 16;
+        }
+        .thermometer-liquid {
+            position: absolute;
+            bottom: 8px;
+            width: 6px;
+            height: 16.6%; /* Starts at 20C (mapped 0-120) */
+            background: #ef4444;
+            border-radius: 4px;
+            transition: height 0.1s linear;
+            z-index: 15;
+        }
+        
+        /* Steam */
+        .steam-area {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 60px;
+            pointer-events: none;
+            z-index: 20;
+        }
+        .steam {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            filter: blur(4px);
+            opacity: 0;
+        }
+        @keyframes evaporate {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { opacity: 0.6; }
+            100% { transform: translateY(-80px) scale(2.5) translateX(var(--tx)); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center min-h-screen">
+
+    <div class="max-w-6xl w-full">
+        
+        <!-- Problem Statement Header -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+            <div class="p-6 md:p-8">
+                <div class="flex items-center gap-3 mb-4 border-b border-slate-100 pb-4">
+                    <div class="bg-blue-100 p-2 rounded-lg text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" /></svg>
+                    </div>
+                    <h1 class="text-xl md:text-2xl font-bold text-slate-800">លំហាត់ទែម៉ូឌីណាមិច (ការដាំទឹក)</h1>
+                </div>
+
+                <div class="text-slate-800 leading-relaxed text-lg mb-4 space-y-3">
+                    <p>
+                        <span class="math-font font-bold">១.</span> គេចង់ដាំទឹក <span class="math-font text-blue-700 font-semibold">0.80 kg</span> នៅសីតុណ្ហភាព <span class="math-font text-red-600 font-semibold">25°C</span> ឱ្យពុះ ។ តើគេត្រូវការថាមពលកម្ដៅប៉ុន្មាន? គេឱ្យកម្ដៅម៉ាសទឹក <span class="math-font font-semibold">c = 4186 J/kg·°C</span> ។
+                    </p>
+                </div>
+            </div>
+
+            <!-- Solution Toggle Button -->
+            <div class="px-6 md:px-8 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+                <button id="btnToggleSol" class="text-slate-700 hover:text-blue-700 px-4 py-2 rounded-lg bg-white border border-slate-300 hover:bg-blue-50 transition font-medium flex items-center gap-2 shadow-sm">
+                    <span id="solBtnText">បង្ហាញដំណោះស្រាយ</span>
+                    <svg id="solIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+            <!-- Hidden Solution Details -->
+            <div id="solutionDiv" class="solution-content border-t border-slate-200 bg-white">
+                <div class="p-6 md:p-8 text-slate-800 text-lg space-y-5">
+                    <h3 class="font-bold text-xl text-blue-800 border-b border-blue-100 pb-2">ដំណោះស្រាយ៖</h3>
+                    
+                    <div>
+                        <p class="font-bold text-slate-700 mb-2">គណនាថាមពលកម្ដៅដែលត្រូវការ៖</p>
+                        <p class="ml-4 text-slate-600">តាមរូបមន្ត៖ <span class="math-font italic font-medium text-slate-800">Q = mc(T<sub>2</sub> - T<sub>1</sub>)</span></p>
+                        <ul class="list-disc ml-10 text-slate-600 my-1">
+                            <li>ដោយ <span class="math-font">m = 0.80 kg</span></li>
+                            <li><span class="math-font">c = 4186 J/kg·°C</span></li>
+                            <li><span class="math-font">T<sub>1</sub> = 25°C, T<sub>2</sub> = 100°C</span> (ទឹកពុះ)</li>
+                        </ul>
+                        <p class="ml-4">ជំនួសលេខ៖ <span class="math-font text-blue-700">Q = 0.80 × 4186 × (100 - 25)</span></p>
+                        <p class="ml-4 font-bold text-blue-800 mt-1"><span class="math-font">Q = 251,160 J</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulator Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6 flex flex-col">
+            
+            <!-- Controls Header -->
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                    ផ្ទាំងពិសោធន៍ (Simulation)
+                </h2>
+                <button id="btnReset" class="text-slate-600 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-lg font-medium transition shadow-sm">
+                    កំណត់ឡើងវិញ
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-6">
+                
+                <!-- Left Column: Visual Apparatus -->
+                <div class="simulator-area">
+                    <h3 class="absolute top-4 right-4 font-bold text-slate-400 opacity-60 z-0 text-sm border-b border-slate-200 pb-1">ការរៀបចំពិសោធន៍</h3>
+                    
+                    <!-- Stats Panel -->
+                    <div class="overlay-stats text-slate-700 space-y-2">
+                        <div class="flex justify-between border-b pb-1">
+                            <span>សីតុណ្ហភាពទឹក៖</span>
+                            <span id="uiTemp" class="math-font font-bold text-red-600">25.0 °C</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>កម្ដៅស្រូប (Q)៖</span>
+                            <span id="uiEnergy" class="math-font font-bold text-amber-600">0 J</span>
+                        </div>
+                    </div>
+
+                    <!-- Beaker & Stove -->
+                    <div class="relative flex flex-col items-center">
+                        <div class="steam-area" id="steamArea"></div>
+                        
+                        <div class="beaker">
+                            <!-- Thermometer -->
+                            <div class="thermometer">
+                                <div class="thermometer-liquid" id="thermoLiquid"></div>
+                                <div class="thermometer-bulb"></div>
+                            </div>
+                            
+                            <!-- Water -->
+                            <div class="water" id="waterLevel">
+                                <div id="bubbleContainer" class="absolute inset-0 overflow-hidden w-full h-full pointer-events-none"></div>
+                            </div>
+                        </div>
+
+                        <!-- Hot Plate -->
+                        <div class="hot-plate" id="hotPlate">
+                            <div class="coil"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Graph -->
+                <div class="h-[400px] border border-slate-200 rounded-xl bg-white p-4 shadow-sm relative flex flex-col">
+                    <h3 class="text-center font-bold text-slate-700 mb-2">ក្រាហ្វកម្ដៅ (Heating Graph)</h3>
+                    <div class="flex-grow relative w-full h-full">
+                        <canvas id="heatingChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Centered Start Button -->
+            <div class="flex justify-center mt-2">
+                <button id="btnStart" class="bg-red-600 hover:bg-red-700 text-white px-10 py-3 rounded-xl shadow-md font-semibold text-lg transition transform hover:scale-105 active:scale-95 flex items-center gap-2 tracking-wide">
+                    ចាប់ផ្ដើមពិសោធន៍
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Solution Toggle Logic ---
+        const btnToggleSol = document.getElementById('btnToggleSol');
+        const solDiv = document.getElementById('solutionDiv');
+        const solIcon = document.getElementById('solIcon');
+        const solBtnText = document.getElementById('solBtnText');
+
+        btnToggleSol.addEventListener('click', () => {
+            solDiv.classList.toggle('open');
+            if (solDiv.classList.contains('open')) {
+                solIcon.classList.add('rotate-180');
+                solBtnText.textContent = 'លាក់ដំណោះស្រាយ';
+            } else {
+                solIcon.classList.remove('rotate-180');
+                solBtnText.textContent = 'បង្ហាញដំណោះស្រាយ';
+            }
+        });
+
+        // --- 2. Chart.js Initialization ---
+        const ctx = document.getElementById('heatingChart').getContext('2d');
+        const heatingChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], // Heat (J)
+                datasets: [{
+                    label: 'សីតុណ្ហភាពទឹក (°C)',
+                    data: [],
+                    borderColor: '#ef4444', // red-500
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    fill: true,
+                    tension: 0.1 // Straight lines
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false, // Disable default chart animations for manual control
+                scales: {
+                    x: {
+                        type: 'linear',
+                        min: 0,
+                        max: 260000,
+                        title: { display: true, text: 'ថាមពលកម្ដៅ Q (J)', font: { family: 'Kantumruy Pro', size: 14 } },
+                        grid: { color: '#f1f5f9' },
+                        ticks: { font: { family: 'Lora' }, stepSize: 50000 }
+                    },
+                    y: {
+                        min: 0,
+                        max: 120,
+                        title: { display: true, text: 'សីតុណ្ហភាព T (°C)', font: { family: 'Kantumruy Pro', size: 14 } },
+                        grid: { color: '#e2e8f0' },
+                        ticks: { font: { family: 'Lora' }, stepSize: 20 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // --- 3. Physics Simulation Engine ---
+        // Constants from the problem
+        const MASS = 0.80; // kg
+        const SPECIFIC_HEAT = 4186; // J/kg°C
+        const INITIAL_TEMP = 25; // °C
+        const TARGET_TEMP = 100; // °C
+        const TARGET_HEAT = MASS * SPECIFIC_HEAT * (TARGET_TEMP - INITIAL_TEMP); // 251,160 J
+        
+        // Simulation speed: 4 seconds total
+        const REALTIME_DURATION_MS = 4000;
+        const INTERVAL_MS = 40; // 25 fps
+        const TOTAL_STEPS = REALTIME_DURATION_MS / INTERVAL_MS;
+        const HEAT_PER_TICK = TARGET_HEAT / TOTAL_STEPS;
+
+        // UI Elements
+        const els = {
+            btnStart: document.getElementById('btnStart'),
+            btnReset: document.getElementById('btnReset'),
+            uiTemp: document.getElementById('uiTemp'),
+            uiEnergy: document.getElementById('uiEnergy'),
+            thermoLiquid: document.getElementById('thermoLiquid'),
+            hotPlate: document.getElementById('hotPlate'),
+            waterLevel: document.getElementById('waterLevel'),
+            bubbleContainer: document.getElementById('bubbleContainer'),
+            steamArea: document.getElementById('steamArea')
+        };
+
+        let simInterval = null;
+        let effectInterval = null;
+        let currentHeat = 0; // Joules
+
+        // Helper: Map temperature (0-120) to percentage height (0-100%) for thermometer
+        function updateThermometer(temp) {
+            let percentage = (temp / 120) * 100;
+            if(percentage > 100) percentage = 100;
+            els.thermoLiquid.style.height = `${percentage}%`;
+        }
+
+        // Helper: Boiling Visual Effects
+        function spawnBubble() {
+            const b = document.createElement('div');
+            b.className = 'bubble';
+            const size = Math.random() * 8 + 4;
+            b.style.width = `${size}px`;
+            b.style.height = `${size}px`;
+            b.style.left = `${Math.random() * 80 + 10}%`;
+            b.style.animation = `rise ${Math.random() * 0.5 + 0.5}s ease-in forwards`;
+            els.bubbleContainer.appendChild(b);
+            setTimeout(() => { if (els.bubbleContainer.contains(b)) b.remove(); }, 1000);
+        }
+
+        function spawnSteam() {
+            const s = document.createElement('div');
+            s.className = 'steam';
+            const size = Math.random() * 30 + 20;
+            s.style.width = `${size}px`;
+            s.style.height = `${size}px`;
+            s.style.left = `${Math.random() * 80 + 10}%`;
+            s.style.setProperty('--tx', `${Math.random() * 60 - 30}px`);
+            s.style.animation = `evaporate ${Math.random() * 1 + 1}s ease-in forwards`;
+            els.steamArea.appendChild(s);
+            setTimeout(() => { if (els.steamArea.contains(s)) s.remove(); }, 2000);
+        }
+
+        function resetSim() {
+            clearInterval(simInterval);
+            clearInterval(effectInterval);
+            
+            currentHeat = 0;
+            
+            // Reset UI text
+            els.uiTemp.textContent = `${INITIAL_TEMP.toFixed(1)} °C`;
+            els.uiEnergy.textContent = `0 J`;
+            
+            // Reset Visuals
+            updateThermometer(INITIAL_TEMP);
+            els.hotPlate.classList.remove('heating');
+            els.waterLevel.classList.remove('hot');
+            els.bubbleContainer.innerHTML = '';
+            els.steamArea.innerHTML = '';
+            
+            // Reset Chart
+            heatingChart.data.labels = [0];
+            heatingChart.data.datasets[0].data = [INITIAL_TEMP];
+            heatingChart.update();
+
+            // Reset Buttons
+            els.btnStart.disabled = false;
+            els.btnStart.classList.remove('opacity-50', 'cursor-not-allowed');
+            els.btnStart.innerHTML = `ចាប់ផ្ដើមពិសោធន៍`;
+        }
+
+        function startSim() {
+            resetSim(); // clear any previous state
+            
+            els.btnStart.disabled = true;
+            els.btnStart.classList.add('opacity-50', 'cursor-not-allowed');
+            els.btnStart.innerHTML = `កំពុងដាំទឹក...`;
+            
+            els.hotPlate.classList.add('heating');
+
+            simInterval = setInterval(() => {
+                currentHeat += HEAT_PER_TICK;
+                if(currentHeat > TARGET_HEAT) currentHeat = TARGET_HEAT;
+
+                // Physics calculations
+                // T = Ti + (Q / mc)
+                let currentTemp = INITIAL_TEMP + (currentHeat / (MASS * SPECIFIC_HEAT));
+
+                // Update UI Overlays
+                els.uiEnergy.textContent = `${Math.floor(currentHeat).toLocaleString()} J`;
+                els.uiTemp.textContent = `${currentTemp.toFixed(1)} °C`;
+
+                // Update Thermometer
+                updateThermometer(currentTemp);
+
+                // Update Chart
+                heatingChart.data.labels.push(currentHeat);
+                heatingChart.data.datasets[0].data.push(currentTemp);
+                heatingChart.update();
+
+                // Boiling Effects (when nearing 100)
+                if (currentTemp >= 99 && !effectInterval) {
+                    els.waterLevel.classList.add('hot');
+                    effectInterval = setInterval(() => {
+                        spawnBubble(); spawnBubble(); spawnBubble();
+                        spawnSteam();
+                    }, 100);
+                }
+
+                // End condition
+                if (currentHeat >= TARGET_HEAT) {
+                    clearInterval(simInterval);
+                    els.uiTemp.textContent = `${TARGET_TEMP.toFixed(1)} °C`;
+                    els.uiEnergy.textContent = `${TARGET_HEAT.toLocaleString()} J`;
+                    els.btnStart.innerHTML = `បញ្ចប់ការពិសោធន៍`;
+                    
+                    // Stop heating (turn off stove) after 2 seconds but keep boiling visual briefly
+                    setTimeout(() => {
+                        els.hotPlate.classList.remove('heating');
+                    }, 1000);
+                    
+                    setTimeout(() => {
+                        clearInterval(effectInterval); // Stop bubbles/steam
+                        els.btnStart.disabled = false;
+                        els.btnStart.classList.remove('opacity-50', 'cursor-not-allowed');
+                        els.btnStart.innerHTML = `សាកល្បងម្ដងទៀត`;
+                    }, 3000);
+                }
+            }, INTERVAL_MS);
+        }
+
+        // --- 4. Event Listeners ---
+        els.btnStart.addEventListener('click', () => {
+            if (currentHeat >= TARGET_HEAT) {
+                resetSim();
+                startSim();
+            } else {
+                startSim();
+            }
+        });
+        
+        els.btnReset.addEventListener('click', resetSim);
+
+        // Initial setup
+        resetSim();
+
+    </script>
+</body>
+</html>

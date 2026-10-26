@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>មេរៀនទី២ច្បាប់ចលនារបស់ញូតុន - ម៉ាស៊ីនអាត់វ៉ូត</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Three.js & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- MathJax -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Kantumruy Pro', sans-serif;
+        }
+        body {
+            overflow: hidden;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        #canvas-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+        
+        /* UI Overlay Container */
+        .ui-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            padding: 15px;
+            pointer-events: none; /* អនុញ្ញាតឱ្យអូស 3D ឆ្លងកាត់ចន្លោះប្រហោង */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .ui-top-row {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        .ui-bottom-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 15px;
+        }
+
+        /* General Panel Styles */
+        .panel {
+            pointer-events: auto; /* អាចចុចលើផ្ទាំងបញ្ជាបាន */
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid #475569;
+            border-radius: 14px;
+            padding: 15px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+            transition: all 0.3s ease;
+        }
+        
+        .ui-panel { width: 300px; }
+        .problem-panel { width: 340px; background: rgba(30, 41, 59, 0.95); }
+        .data-panel { width: 280px; }
+
+        h2 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+            color: #38bdf8;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 8px;
+        }
+        
+        .toggle-icon {
+            cursor: pointer;
+            font-size: 12px;
+            color: #cbd5e1;
+            background: #334155;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: 0.2s;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .toggle-icon:hover {
+            background: #475569;
+            color: #fff;
+        }
+        
+        /* Collapsed State */
+        .collapsed .panel-body {
+            display: none;
+        }
+        .collapsed h2 {
+            margin-bottom: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .collapsed.panel {
+            padding: 10px 15px;
+        }
+
+        /* Panel Body Content */
+        .problem-panel .panel-body {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* Inner Elements */
+        .control-group { margin-bottom: 12px; }
+        label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #e2e8f0;
+        }
+        input[type=range] {
+            width: 100%;
+            height: 6px;
+            accent-color: #38bdf8;
+            cursor: pointer;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            color: white;
+        }
+        .btn-start { background: #10b981; }
+        .btn-start:hover { background: #059669; }
+        .btn-reset { background: #ef4444; }
+        .btn-reset:hover { background: #dc2626; }
+        
+        .problem-text {
+            font-size: 13px;
+            line-height: 1.7;
+            color: #e2e8f0;
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        .btn-solution {
+            width: 100%;
+            background: #3b82f6;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        .btn-solution:hover { background: #2563eb; }
+        .solution-content {
+            display: none;
+            font-size: 13px;
+            color: #f8fafc;
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            line-height: 1.8;
+            margin-top: 10px;
+        }
+        
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            margin-bottom: 10px;
+            color: #cbd5e1;
+        }
+        .data-val {
+            font-weight: bold;
+            color: #38bdf8;
+            font-family: monospace;
+            font-size: 15px;
+            background: #0f172a;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+        }
+        .instructions {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            z-index: 5;
+            pointer-events: none;
+        }
+        
+        /* Mobile View Adjustments */
+        @media (max-width: 900px) {
+            .ui-overlay {
+                padding: 10px;
+            }
+            .ui-bottom-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .ui-panel, .problem-panel, .data-panel {
+                width: 100%;
+            }
+            .instructions {
+                display: none; /* លាក់ការណែនាំលើទូរសព្ទដើម្បីកុំឱ្យបាំង */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+    <div class="instructions">🖱️ ចុចទាញ ឬបង្វិល Mouse ដើម្បីមើលទិដ្ឋភាព 3D</div>
+
+    <!-- UI Layer -->
+    <div class="ui-overlay">
+        
+        <!-- Top Row (Parameters) -->
+        <div class="ui-top-row">
+            <div class="panel ui-panel" id="panel-params">
+                <h2>
+                    <span>⚙️ ប៉ារ៉ាម៉ែត្រម៉ាស៊ីន</span>
+                    <span class="toggle-icon" onclick="togglePanel('panel-params')" title="លាក់/បង្ហាញ">➖ លាក់</span>
+                </h2>
+                <div class="panel-body">
+                    <div class="control-group">
+                        <label>
+                            <span>ម៉ាសវត្ថុ A (m<sub>A</sub>):</span>
+                            <span id="mA-val" style="color:#ff2a5f; font-weight:bold;">2.0 kg</span>
+                        </label>
+                        <input type="range" id="mA" min="0.5" max="10" value="2.0" step="0.1">
+                    </div>
+
+                    <div class="control-group">
+                        <label>
+                            <span>ម៉ាសវត្ថុ B (m<sub>B</sub>):</span>
+                            <span id="mB-val" style="color:#00d2ff; font-weight:bold;">4.0 kg</span>
+                        </label>
+                        <input type="range" id="mB" min="0.5" max="10" value="4.0" step="0.1">
+                    </div>
+
+                    <div class="control-group">
+                        <label>
+                            <span>សំទុះទាញនាំ (g):</span>
+                            <span id="g-val" style="color:#facc15; font-weight:bold;">9.8 m/s²</span>
+                        </label>
+                        <input type="range" id="g" min="1" max="20" value="9.8" step="0.1">
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn-start" id="btn-toggle">▶️ ចាប់ផ្តើម</button>
+                        <button class="btn-reset" id="btn-reset">🔄 Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row (Problem & Data) -->
+        <div class="ui-bottom-row">
+            <!-- Problem Panel -->
+            <div class="panel problem-panel" id="panel-problem">
+                <h2>
+                    <span>📝 លំហាត់គំរូទី២</span>
+                    <span class="toggle-icon" onclick="togglePanel('panel-problem')" title="លាក់/បង្ហាញ">➖ លាក់</span>
+                </h2>
+                <div class="panel-body">
+                    <div class="problem-text">
+                        កាលណាវត្ថុពីរមានម៉ាសមិនស្មើគ្នាចងភ្ជាប់តាមរយៈខ្សែដែលឆ្លងកាត់រ៉ក។ កកិតរវាងរ៉កនិងខ្សែ រ៉កនិងអ័ក្សហើយម៉ាសខ្សែនិងម៉ាសរ៉កអាចចោលបាន។ ប្រព័ន្ធដែលបានរៀបរាប់នេះហៅថា <strong>ម៉ាស៊ីនអាត់វ៉ូត</strong>។ កំណត់សំទុះវត្ថុទាំងពីរនិងតំណឹងខ្សែ។
+                    </div>
+                    
+                    <button class="btn-solution" id="btn-solution">📖 បង្ហាញដំណោះស្រាយ</button>
+                    
+                    <div class="solution-content" id="solution-content">
+                        <p>១. <strong>គណនាសំទុះរបស់វត្ថុ (a)៖</strong><br>
+                           តាមច្បាប់ទី២ញូតុន $\Sigma \vec{F} = m\vec{a}$ <br>
+                           ដោយសារ $m_B > m_A$ នាំឲ្យ $m_B$ ចុះ និង $m_A$ ឡើង:<br>
+                           $$a = \frac{m_B - m_A}{m_A + m_B} \cdot g$$
+                        </p>
+                        <p style="margin-top: 10px;">២. <strong>គណនាតំណឹងខ្សែ (T)៖</strong><br>
+                           ដោយជំនួស $a$ ចូលក្នុងសមីការទម្លាក់ចំណោល យើងបាន:<br>
+                           $$T = \frac{2 m_A m_B}{m_A + m_B} \cdot g$$
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Panel -->
+            <div class="panel data-panel" id="panel-data">
+                <h2>
+                    <span>📊 លទ្ធផលរូបវិទ្យា</span>
+                    <span class="toggle-icon" onclick="togglePanel('panel-data')" title="លាក់/បង្ហាញ">➖ លាក់</span>
+                </h2>
+                <div class="panel-body">
+                    <div class="data-row">
+                        <span>សំទុះប្រព័ន្ធ (a):</span>
+                        <span class="data-val" id="disp-a">0.00 m/s²</span>
+                    </div>
+                    <div class="data-row">
+                        <span>តង់ស្យុងខ្សែ (T):</span>
+                        <span class="data-val" id="disp-T">0.00 N</span>
+                    </div>
+                    <div class="data-row">
+                        <span>ល្បឿនបច្ចុប្បន្ន (v):</span>
+                        <span class="data-val" id="disp-v">0.00 m/s</span>
+                    </div>
+                    <div class="data-row">
+                        <span>ទិសដៅចលនា:</span>
+                        <span class="data-val" id="disp-dir" style="font-size:12px;">ឈប់ស្ងៀម</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Toggle Panel Logic ---
+        function togglePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            const icon = panel.querySelector('.toggle-icon');
+            
+            if (panel.classList.contains('collapsed')) {
+                panel.classList.remove('collapsed');
+                icon.innerText = '➖ លាក់';
+                icon.style.background = '#334155';
+            } else {
+                panel.classList.add('collapsed');
+                icon.innerText = '➕ បង្ហាញ';
+                icon.style.background = '#10b981'; // ពណ៌បៃតងពេលលាក់
+            }
+        }
+
+        // --- Show/Hide Solution Logic ---
+        const btnSolution = document.getElementById('btn-solution');
+        const solutionContent = document.getElementById('solution-content');
+
+        btnSolution.addEventListener('click', () => {
+            if (solutionContent.style.display === 'none' || solutionContent.style.display === '') {
+                solutionContent.style.display = 'block';
+                btnSolution.innerText = '📖 លាក់ដំណោះស្រាយ';
+                btnSolution.style.background = '#64748b';
+                
+                // អូសចុះក្រោមដោយស្វ័យប្រវត្តិ
+                setTimeout(() => {
+                    const panelBody = document.querySelector('#panel-problem .panel-body');
+                    panelBody.scrollTop = panelBody.scrollHeight;
+                }, 100);
+            } else {
+                solutionContent.style.display = 'none';
+                btnSolution.innerText = '📖 បង្ហាញដំណោះស្រាយ';
+                btnSolution.style.background = '#3b82f6';
+            }
+        });
+
+        // --- Physics & Simulation Variables ---
+        let mA = 2.0, mB = 4.0, g = 9.8;
+        let posA = 5.0, posB = 5.0; 
+        let velocity = 0;
+        let acceleration = 0;
+        let tension = 0;
+        let isRunning = false;
+        let lastTime = null;
+
+        const PULLEY_Y = 12.0;       
+        const PULLEY_RADIUS = 1.5;   
+        const INITIAL_SUM_Y = 10.0;  
+
+        // --- Three.js Scene Setup ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1e293b); 
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 7, 26); // ដកថយកាមេរ៉ាបន្តិចដើម្បីមើលឃើញទូលាយ
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.target.set(0, 6, 0); 
+        controls.maxPolarAngle = Math.PI / 2 + 0.05;
+        controls.enablePan = true;
+        controls.update();
+
+        // --- Studio Lighting ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x334155, 0.6);
+        hemiLight.position.set(0, 20, 0);
+        scene.add(hemiLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.3);
+        dirLight.position.set(8, 18, 10);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        scene.add(dirLight);
+
+        // --- Environment & Models ---
+        const gridHelper = new THREE.GridHelper(30, 30, 0x38bdf8, 0x334155);
+        gridHelper.position.y = 0;
+        scene.add(gridHelper);
+
+        const floorGeo = new THREE.PlaneGeometry(30, 30);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.6, metalness: 0.2 });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        // Stand Structure
+        const standMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.2 });
+        const baseStand = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 12.8, 32), standMat);
+        baseStand.position.set(0, 6.4, -1.0);
+        baseStand.castShadow = true;
+        scene.add(baseStand);
+
+        const armStand = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 2.0), standMat);
+        armStand.position.set(0, 12.5, -0.2);
+        armStand.castShadow = true;
+        scene.add(armStand);
+
+        // Pulley Object
+        const pulleyGroup = new THREE.Group();
+        const pulleyGeo = new THREE.CylinderGeometry(PULLEY_RADIUS, PULLEY_RADIUS, 0.4, 48);
+        const pulleyMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.7, roughness: 0.2 });
+        const pulley = new THREE.Mesh(pulleyGeo, pulleyMat);
+        pulley.rotation.x = Math.PI / 2;
+        pulley.castShadow = true;
+        pulleyGroup.add(pulley);
+
+        const axleGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.6, 16);
+        const axleMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.1 });
+        const axle = new THREE.Mesh(axleGeo, axleMat);
+        axle.rotation.x = Math.PI / 2;
+        pulleyGroup.add(axle);
+
+        pulleyGroup.position.set(0, PULLEY_Y, 0.5);
+        scene.add(pulleyGroup);
+
+        // --- Vibrant Masses ---
+        const matA = new THREE.MeshStandardMaterial({ color: 0xff2a5f, roughness: 0.3, metalness: 0.1 });
+        const meshA = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), matA);
+        meshA.castShadow = true;
+        meshA.position.set(-PULLEY_RADIUS, posA, 0.5);
+        scene.add(meshA);
+
+        const matB = new THREE.MeshStandardMaterial({ color: 0x00d2ff, roughness: 0.3, metalness: 0.1 });
+        const meshB = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), matB);
+        meshB.castShadow = true;
+        meshB.position.set(PULLEY_RADIUS, posB, 0.5);
+        scene.add(meshB);
+
+        // Rope Line
+        const stringMat = new THREE.LineBasicMaterial({ color: 0xf8fafc, linewidth: 3 });
+        const stringGeo = new THREE.BufferGeometry();
+        const stringLine = new THREE.Line(stringGeo, stringMat);
+        scene.add(stringLine);
+
+        function updateRope() {
+            const points = [
+                new THREE.Vector3(-PULLEY_RADIUS, posA + getHalfHeight(mA), 0.5),
+                new THREE.Vector3(-PULLEY_RADIUS, PULLEY_Y, 0.5),
+                new THREE.Vector3(PULLEY_RADIUS, PULLEY_Y, 0.5),
+                new THREE.Vector3(PULLEY_RADIUS, posB + getHalfHeight(mB), 0.5)
+            ];
+            stringGeo.setFromPoints(points);
+        }
+
+        function getHalfHeight(mass) {
+            const scale = Math.pow(mass, 1/3) * 0.75;
+            return (1.2 * scale) / 2;
+        }
+
+        function updateMeshScales() {
+            const scaleA = Math.pow(mA, 1/3) * 0.75;
+            meshA.scale.set(scaleA, scaleA, scaleA);
+
+            const scaleB = Math.pow(mB, 1/3) * 0.75;
+            meshB.scale.set(scaleB, scaleB, scaleB);
+            
+            clampPositions();
+        }
+
+        // --- Precise Collision & Stopping Logic ---
+        function clampPositions() {
+            const halfA = getHalfHeight(mA);
+            const halfB = getHalfHeight(mB);
+
+            const maxAllowedA = PULLEY_Y - PULLEY_RADIUS - halfA;
+            const maxAllowedB = PULLEY_Y - PULLEY_RADIUS - halfB;
+
+            const minAllowedA = halfA;
+            const minAllowedB = halfB;
+
+            let hitLimit = false;
+
+            if (posA >= maxAllowedA) {
+                posA = maxAllowedA;
+                posB = INITIAL_SUM_Y - posA;
+                hitLimit = true;
+            } else if (posB <= minAllowedB) {
+                posB = minAllowedB;
+                posA = INITIAL_SUM_Y - posB;
+                hitLimit = true;
+            }
+
+            if (posB >= maxAllowedB) {
+                posB = maxAllowedB;
+                posA = INITIAL_SUM_Y - posB;
+                hitLimit = true;
+            } else if (posA <= minAllowedA) {
+                posA = minAllowedA;
+                posB = INITIAL_SUM_Y - posA;
+                hitLimit = true;
+            }
+
+            meshA.position.y = posA;
+            meshB.position.y = posB;
+            updateRope();
+
+            return hitLimit;
+        }
+
+        // --- Physics Calculations ---
+        function calculatePhysics() {
+            acceleration = ((mB - mA) / (mA + mB)) * g;
+            tension = (2 * mA * mB / (mA + mB)) * g;
+
+            document.getElementById('disp-a').innerText = Math.abs(acceleration).toFixed(2) + " m/s²";
+            document.getElementById('disp-T').innerText = tension.toFixed(2) + " N";
+
+            const dirText = acceleration > 0.01 ? "B ចុះ / A ឡើង" : (acceleration < -0.01 ? "A ចុះ / B ឡើង" : "លំនឹង (ស្ងៀម)");
+            document.getElementById('disp-dir').innerText = dirText;
+        }
+
+        // --- Controls ---
+        const sliderA = document.getElementById('mA');
+        const sliderB = document.getElementById('mB');
+        const sliderG = document.getElementById('g');
+        const btnToggle = document.getElementById('btn-toggle');
+        const btnReset = document.getElementById('btn-reset');
+
+        sliderA.addEventListener('input', (e) => {
+            mA = parseFloat(e.target.value);
+            document.getElementById('mA-val').innerText = mA.toFixed(1) + " kg";
+            updateMeshScales();
+            calculatePhysics();
+        });
+
+        sliderB.addEventListener('input', (e) => {
+            mB = parseFloat(e.target.value);
+            document.getElementById('mB-val').innerText = mB.toFixed(1) + " kg";
+            updateMeshScales();
+            calculatePhysics();
+        });
+
+        sliderG.addEventListener('input', (e) => {
+            g = parseFloat(e.target.value);
+            document.getElementById('g-val').innerText = g.toFixed(1) + " m/s²";
+            calculatePhysics();
+        });
+
+        btnToggle.addEventListener('click', () => {
+            if (clampPositions() && !isRunning) return; 
+            isRunning = !isRunning;
+            btnToggle.innerText = isRunning ? "⏸️ ផ្អាក" : "▶️ ចាប់ផ្តើម";
+            btnToggle.style.background = isRunning ? "#f59e0b" : "#10b981";
+            lastTime = performance.now();
+        });
+
+        btnReset.addEventListener('click', resetSimulation);
+
+        function resetSimulation() {
+            isRunning = false;
+            btnToggle.innerText = "▶️ ចាប់ផ្តើម";
+            btnToggle.style.background = "#10b981";
+            posA = 5.0;
+            posB = 5.0;
+            velocity = 0;
+            document.getElementById('disp-v').innerText = "0.00 m/s";
+            updateMeshScales();
+            calculatePhysics();
+        }
+
+        // --- Main Render Loop ---
+        function animate(now) {
+            requestAnimationFrame(animate);
+
+            if (isRunning && lastTime) {
+                const dt = Math.min((now - lastTime) / 1000, 0.04);
+
+                velocity += acceleration * dt;
+                posB -= velocity * dt;
+                posA += velocity * dt;
+
+                if (clampPositions()) {
+                    velocity = 0;
+                    isRunning = false;
+                    btnToggle.innerText = "▶️ ចាប់ផ្តើម";
+                    btnToggle.style.background = "#10b981";
+                }
+
+                pulleyGroup.rotation.z += (velocity / PULLEY_RADIUS) * dt;
+                document.getElementById('disp-v').innerText = Math.abs(velocity).toFixed(2) + " m/s";
+            }
+
+            lastTime = now;
+            renderer.render(scene, camera);
+        }
+
+        // Initialize
+        updateMeshScales();
+        calculatePhysics();
+        resetSimulation();
+        animate();
+
+        // Responsive Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី៧៖ ផលបូកវ៉ិចទ័រ (Vector Addition)</title>
+    
+    <!-- បញ្ចូលបណ្ណាល័យ MathJax សម្រាប់បង្ហាញរូបមន្តគណិតវិទ្យា -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Khmer+OS+Battambang:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 920px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #2563eb;
+            color: white;
+            padding: 16px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .problem-statement {
+            font-size: 1.15rem;
+            line-height: 2.0;
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding: 18px 22px;
+            background-color: #f8fafc;
+            border-left: 5px solid #2563eb;
+            border-radius: 6px;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        .status-banner {
+            font-size: 1.15rem;
+            font-weight: bold;
+            padding: 12px 18px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            border: 1.5px solid #94a3b8;
+            border-radius: 8px;
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+            max-width: 700px;
+            background-color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .slider-row label {
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: #1e3a8a;
+            width: 250px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .val-display {
+            width: 145px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.15rem;
+            color: #1d4ed8;
+            background-color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        button.action-btn {
+            font-family: 'Khmer OS Battambang', sans-serif;
+            padding: 11px 22px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .btn-reset { background-color: #64748b; }
+        .btn-reset:hover { background-color: #475569; }
+        
+        .btn-solution { background-color: #2563eb; }
+        .btn-solution:hover { background-color: #1d4ed8; }
+
+        .solution-box {
+            display: none;
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 20px;
+            color: #1e3a8a;
+            line-height: 1.9;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>លំហាត់ទី៧៖ ផលបូកវ៉ិចទ័រ និងមុំទិសដៅ</h1>
+    </div>
+    
+    <div class="content">
+        <!-- ប្រធានលំហាត់នៅផ្នែកខាងលើ -->
+        <div class="problem-statement">
+            <strong>៧.</strong> គេឱ្យ $a = 3.0\text{ cm}$, $b = 4.0\text{ cm}$ និង $(\vec{a} \perp \vec{b}) = 90^\circ$ ដែល $\vec{a}$ ស្ថិតនៅលើអ័ក្សដេក និង $\vec{b}$លើអ័ក្សឈរ ។<br>
+            ក. សង់វ៉ិចទ័ររផ្គួប និងរកតម្លៃរបស់វា ។<br>
+            ខ. កំណត់មុំពីរទៀតដែលមិនមែនជាមុំកែង ។
+        </div>
+
+        <div id="statusBanner" class="status-banner">
+            លទ្ធផល៖ តម្លៃវ៉ិចទ័រផ្គួប R = 5.0 cm និងមុំទិសដៅ θ = 53.13°
+        </div>
+
+        <!-- ផ្នែកពិសោធន៍ (Simulator) -->
+        <div class="canvas-container">
+            <canvas id="simCanvas" width="780" height="420"></canvas>
+            
+            <div class="controls">
+                <div class="slider-row">
+                    <label>ប្រវែងវ៉ិចទ័រ $\vec{a}$ ($a$) :</label>
+                    <input type="range" id="sliderA" min="1.0" max="8.0" value="3.0" step="0.5" oninput="updateSimulation()">
+                    <div class="val-display" id="valA">3.0 cm</div>
+                </div>
+                <div class="slider-row">
+                    <label>ប្រវែងវ៉ិចទ័រតំណាង $\vec{b}$ ($b$) :</label>
+                    <input type="range" id="sliderB" min="1.0" max="8.0" value="4.0" step="0.5" oninput="updateSimulation()">
+                    <div class="val-display" id="valB">4.0 cm</div>
+                </div>
+                
+                <div class="slider-row" style="margin-top: 6px; padding-top: 12px; border-top: 2px dashed #cbd5e1;">
+                    <label style="color: #059669;">តម្លៃផលបូក ($R = \sqrt{a^2 + b^2}$) :</label>
+                    <div class="val-display" id="valR" style="color: #059669; border-color: #059669;">5.0 cm</div>
+                </div>
+                <div class="slider-row">
+                    <label style="color: #dc2626;">មុំរវាង $\vec{R}$ និង $\vec{a}$ ($\theta$) :</label>
+                    <div class="val-display" id="valTheta" style="color: #dc2626; border-color: #dc2626;">53.13°</div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="action-btn btn-reset" onclick="resetToProblem()">🔄 កំណត់ដូចប្រធានដើម (3 cm, 4 cm)</button>
+                <button class="action-btn btn-solution" id="btnToggleSol" onclick="toggleSolution()">📖 បង្ហាញដំណោះស្រាយ</button>
+            </div>
+        </div>
+
+        <!-- ប្រអប់ដំណោះស្រាយ -->
+        <div class="solution-box" id="solutionBox">
+            <h2 style="margin-top:0; border-bottom:2px solid #93c5fd; padding-bottom:8px; color: #1d4ed8;">ដំណោះស្រាយលំហាត់ទី៧</h2>
+            <div id="solutionContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let aVal = 3.0; // cm
+    let bVal = 4.0; // cm
+
+    function resetToProblem() {
+        document.getElementById('sliderA').value = 3.0;
+        document.getElementById('sliderB').value = 4.0;
+        updateSimulation();
+    }
+
+    function toggleSolution() {
+        const box = document.getElementById('solutionBox');
+        const btn = document.getElementById('btnToggleSol');
+        if (box.style.display === 'block') {
+            box.style.display = 'none';
+            btn.innerText = "📖 បង្ហាញដំណោះស្រាយ";
+        } else {
+            box.style.display = 'block';
+            btn.innerText = "🙈 លាក់ដំណោះស្រាយ";
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([document.getElementById('solutionContent')]);
+            }
+        }
+    }
+
+    function updateSimulation() {
+        aVal = parseFloat(document.getElementById('sliderA').value);
+        bVal = parseFloat(document.getElementById('sliderB').value);
+
+        let rVal = Math.sqrt(aVal * aVal + bVal * bVal);
+        let thetaRad = Math.atan2(bVal, aVal);
+        let thetaDeg = thetaRad * 180 / Math.PI;
+
+        document.getElementById('valA').innerText = aVal.toFixed(1) + " cm";
+        document.getElementById('valB').innerText = bVal.toFixed(1) + " cm";
+        document.getElementById('valR').innerText = rVal.toFixed(2) + " cm";
+        document.getElementById('valTheta').innerText = thetaDeg.toFixed(2) + "°";
+
+        document.getElementById('statusBanner').innerText = `លទ្ធផល៖ តម្លៃវ៉ិចទ័រផលបូក R = ${rVal.toFixed(2)} cm និងមុំទិសដៅ θ = ${thetaDeg.toFixed(2)}°`;
+
+        let mathHTML = `
+            <p><strong>បម្រាប់៖</strong></p>
+            <ul>
+                <li>ប្រវែងវ៉ិចទ័រ $\\vec{a}$៖ $a = ${aVal.toFixed(1)}\\text{ cm}$ (ស្ថិតនៅលើអ័ក្សដេក)</li>
+                <li>ប្រវែងវ៉ិចទ័រ $\\vec{b}$៖ $b = ${bVal.toFixed(1)}\\text{ cm}$ (ស្ថិតនៅលើអ័ក្សឈរ)</li>
+                <li>មុំរវាងវ៉ិចទ័រទាំងពីរ៖ $(\\vec{a} \\perp \\vec{b}) = 90^\\circ$</li>
+            </ul>
+            <p><strong>ក. សង់វ៉ិចទ័រផ្គួប និងរកតម្លៃរបស់វា ($R$) ៖</strong><br>
+            តាមទ្រឹស្តីបទពីតាករ ចំពោះវ៉ិចទ័រកែងគ្នា៖
+            $$ R = \\sqrt{a^2 + b^2} $$
+            ជំនួសលេខ៖
+            $$ R = \\sqrt{(${aVal.toFixed(1)})^2 + (${bVal.toFixed(1)})^2} = \\sqrt{${(aVal*aVal).toFixed(2)} + ${(bVal*bVal).toFixed(2)}} = \\sqrt{${(rVal*rVal).toFixed(2)}} \\approx \\mathbf{${rVal.toFixed(2)}\\text{ cm}} $$
+            </p>
+            <p><strong>ខ. កំណត់មុំរវាងវ៉ិចទ័រផ្គួប និងវ៉ិចទ័រ $\\vec{a}$ ($\\theta$) ៖</strong><br>
+            $$ \\tan\\theta = \\frac{b}{a} = \\frac{${bVal.toFixed(1)}}{${aVal.toFixed(1)}} \\approx ${(bVal/aVal).toFixed(4)} $$
+            $$ \\theta = \\arctan\\left(${(bVal/aVal).toFixed(4)}\\right) \\approx \\mathbf{${thetaDeg.toFixed(2)}^\\circ} $$
+            </p>
+        `;
+
+        const solContainer = document.getElementById('solutionContent');
+        solContainer.innerHTML = mathHTML;
+
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([solContainer]);
+        }
+    }
+
+    function drawArrow(x1, y1, x2, y2, color, lineWidth = 3.5, headlen = 12) {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = lineWidth;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        let angle = Math.atan2(y2 - y1, x2 - x1);
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 7), y2 - headlen * Math.sin(angle - Math.PI / 7));
+        ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 7), y2 - headlen * Math.sin(angle + Math.PI / 7));
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function drawClearText(text, x, y, font, fillColor, align = 'center', strokeColor = 'rgba(255,255,255,0.92)') {
+        ctx.save();
+        ctx.font = font;
+        ctx.textAlign = align;
+        ctx.textBaseline = 'middle';
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = strokeColor;
+        ctx.lineJoin = 'round';
+        ctx.strokeText(text, x, y);
+        ctx.fillStyle = fillColor;
+        ctx.fillText(text, x, y);
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const originX = 140;
+        const originY = 320;
+        const scalePxPerCm = 35; // 1 cm = 35 pixels
+
+        // ១. គូសអ័ក្សកូអរដោនេ X និង Y
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2;
+        drawArrow(originX - 30, originY, originX + 450, originY, '#334155', 2, 10); // អ័ក្ស X
+        drawArrow(originX, originY + 40, originX, originY - 300, '#334155', 2, 10); // អ័ក្ស Y
+
+        drawClearText('X', originX + 460, originY, 'bold 18px Arial', '#334155');
+        drawClearText('Y', originX, originY - 315, 'bold 18px Arial', '#334155');
+        drawClearText('O(0,0)', originX - 22, originY + 22, 'bold 15px Arial', '#1e293b');
+
+        // ក្រឡាចត្រង្គជំនួយ (Grid lines)
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
+        for (let cm = 1; cm <= 10; cm++) {
+            let px = cm * scalePxPerCm;
+            if (originX + px < canvas.width - 40) {
+                ctx.beginPath(); ctx.moveTo(originX + px, originY - 280); ctx.lineTo(originX + px, originY); ctx.stroke();
+                drawClearText(cm.toString(), originX + px, originY + 15, '12px Arial', '#64748b');
+            }
+            if (originY - px > 30) {
+                ctx.beginPath(); ctx.moveTo(originX, originY - px); ctx.lineTo(originX + 380, originY - px); ctx.stroke();
+                drawClearText(cm.toString(), originX - 18, originY - px, '12px Arial', '#64748b');
+            }
+        }
+
+        // ២. គណនាកូអរដោនេវ៉ិចទ័រ
+        const aPx = aVal * scalePxPerCm;
+        const bPx = bVal * scalePxPerCm;
+
+        const tipA = { x: originX + aPx, y: originY };
+        const tipB = { x: originX, y: originY - bPx };
+        const tipR = { x: originX + aPx, y: originY - bPx };
+
+        // ៣. គូសបន្ទាត់ប៉ារ៉ាឡែលដាច់ៗ (Parallel dashed lines)
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(tipA.x, tipA.y); ctx.lineTo(tipR.x, tipR.y);
+        ctx.moveTo(tipB.x, tipB.y); ctx.lineTo(tipR.x, tipR.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // ៤. គូសវ៉ិចទ័រ a, b និងវ៉ិចទ័រផលបូក R
+        drawArrow(originX, originY, tipA.x, tipA.y, '#2563eb', 4.5, 14); // វ៉ិចទ័រ a
+        drawArrow(originX, originY, tipB.x, tipB.y, '#059669', 4.5, 14); // វ៉ិចទ័រ b
+        drawArrow(originX, originY, tipR.x, tipR.y, '#dc2626', 5.0, 16); // វ៉ិចទ័រផលបូក R
+
+        // ស្លាកឈ្មោះវ៉ិចទ័រ
+        drawClearText('𝑎⃗', originX + aPx / 2, originY + 22, 'bold 22px Arial', '#2563eb');
+        drawClearText('𝑏⃗', originX - 22, originY - bPx / 2, 'bold 22px Arial', '#059669');
+        drawClearText('𝑅⃗ = 𝑎⃗ + 𝑏⃗', tipR.x + 55, tipR.y - 18, 'bold 22px Arial', '#dc2626');
+
+        // ៥. គូសធ្នូមុំ θ
+        let thetaRad = Math.atan2(bVal, aVal);
+        ctx.strokeStyle = '#dc2626';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(originX, originY, 55, 0, -thetaRad, true);
+        ctx.stroke();
+
+        let midTheta = thetaRad / 2;
+        drawClearText(`θ = ${(thetaRad * 180 / Math.PI).toFixed(1)}°`, originX + 78 * Math.cos(midTheta), originY - 78 * Math.sin(midTheta), 'bold 20px Arial', '#dc2626');
+
+        requestAnimationFrame(render);
+    }
+
+    updateSimulation();
+    render();
+</script>
+</body>
+</html>

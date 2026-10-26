@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ពិសោធន៍ទែម៉ូឌីណាមិច: កម្ដៅរំលាយដែក</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .math-font {
+            font-family: 'Lora', serif;
+        }
+
+        /* Solution Toggle Transition */
+        .solution-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out;
+            opacity: 0;
+        }
+        .solution-content.open {
+            max-height: 1000px;
+            opacity: 1;
+        }
+
+        .simulator-area {
+            position: relative;
+            height: 400px;
+            background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 40px;
+            overflow: hidden;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* Crucible (Container for Iron) */
+        .crucible-wrapper {
+            position: relative;
+            display: flex;
+            flex-col;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .crucible {
+            width: 180px;
+            height: 150px;
+            background: #334155; /* slate-700 */
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            border: 4px solid #1e293b;
+            border-top: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 -15px 30px rgba(0,0,0,0.6), 0 10px 15px -3px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+        .crucible-lip {
+            width: 196px;
+            height: 20px;
+            background: #475569;
+            border: 4px solid #1e293b;
+            border-radius: 10px;
+            margin-bottom: -4px;
+            z-index: 11;
+        }
+
+        /* Solid Iron Blocks */
+        .solid-iron {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 90px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-content: flex-end;
+            gap: 4px;
+            z-index: 12;
+            transition: opacity 0.5s ease;
+        }
+        .iron-block {
+            width: 40px;
+            height: 35px;
+            background: #64748b;
+            border: 2px solid #475569;
+            border-radius: 4px;
+            box-shadow: inset 2px 2px 5px rgba(255,255,255,0.2);
+        }
+
+        /* Molten Iron */
+        .molten-iron {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 0%; /* Animates to ~70% */
+            background: linear-gradient(0deg, #ea580c, #fbbf24);
+            box-shadow: 0 0 20px rgba(234, 88, 12, 0.8) inset;
+            border-bottom-left-radius: 26px;
+            border-bottom-right-radius: 26px;
+            z-index: 11;
+            transition: height 0.1s linear;
+            opacity: 0.9;
+        }
+        
+        .molten-glow {
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: 0;
+            background: radial-gradient(circle, rgba(251, 146, 60, 0.4) 0%, rgba(251, 146, 60, 0) 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+            z-index: 15;
+        }
+        .crucible.melting .molten-glow {
+            opacity: 1;
+        }
+
+        /* Furnace / Fire setup */
+        .furnace-base {
+            width: 220px;
+            height: 30px;
+            background: #1e293b;
+            border-radius: 8px;
+            margin-top: 15px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .fire-container {
+            position: absolute;
+            bottom: 30px; /* Right on top of the furnace */
+            width: 160px;
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 10px;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .fire-container.active {
+            opacity: 1;
+        }
+
+        .flame {
+            width: 25px;
+            height: 40px;
+            background: linear-gradient(to top, #ef4444 0%, #f97316 50%, #fef08a 100%);
+            border-radius: 50% 50% 20% 20%;
+            filter: blur(2px);
+            transform-origin: bottom center;
+        }
+        
+        .fire-container.active .flame {
+            animation: flicker 0.4s infinite alternate ease-in-out;
+        }
+        .fire-container.active .flame:nth-child(2) { animation-delay: 0.1s; height: 55px; }
+        .fire-container.active .flame:nth-child(3) { animation-delay: 0.2s; height: 50px; }
+        .fire-container.active .flame:nth-child(4) { animation-delay: 0.3s; height: 60px; }
+        .fire-container.active .flame:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes flicker {
+            0% { transform: scaleY(1) scaleX(1); opacity: 0.8; }
+            100% { transform: scaleY(1.3) scaleX(0.9); opacity: 1; }
+        }
+
+        /* Stats Overlay */
+        .stats-box {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            z-index: 20;
+            font-size: 0.95rem;
+            min-width: 200px;
+        }
+        
+        /* Chart wrapper */
+        .chart-container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center min-h-screen">
+
+    <div class="max-w-6xl w-full">
+        
+        <!-- Header & Problem Statement -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+            <div class="p-6 md:p-8">
+                <div class="text-slate-800 leading-relaxed text-lg space-y-4">
+                    <p class="font-medium text-xl leading-9">
+                        <span class="math-font font-bold mr-2 text-indigo-700">៤.</span> 
+                        គណនាថាមពលកម្ដៅចាំបាច់ដើម្បីរំលាយដែក <span class="math-font font-semibold text-blue-700">100 kg</span> នៅសីតុណ្ហភាពរលាយរបស់វា ។ គេឲ្យកម្ដៅឡាតង់រលាយរបស់ដែក <span class="math-font font-semibold text-orange-600">276 kJ/kg</span> ។
+                    </p>
+                </div>
+            </div>
+
+            <!-- Solution Toggle Button -->
+            <div class="px-6 md:px-8 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+                <button id="btnToggleSol" class="text-slate-700 hover:text-indigo-700 px-5 py-2.5 rounded-lg bg-white border border-slate-300 hover:bg-indigo-50 transition font-medium flex items-center gap-2 shadow-sm">
+                    <span id="solBtnText">បង្ហាញដំណោះស្រាយ</span>
+                    <svg id="solIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+            <!-- Solution Content -->
+            <div id="solutionDiv" class="solution-content border-t border-slate-200 bg-white">
+                <div class="p-6 md:p-8 text-slate-800 text-lg space-y-6">
+                    <h3 class="font-bold text-xl text-indigo-800 border-b border-indigo-100 pb-2 mb-4">ចម្លើយ៖</h3>
+                    
+                    <div class="pl-4 border-l-4 border-indigo-300 space-y-4">
+                        <p class="font-semibold text-slate-700">គណនាថាមពលកម្ដៅចាំបាច់ដើម្បីរំលាយដែក (Q)</p>
+                        
+                        <div class="math-font space-y-2 text-slate-700 text-lg">
+                            <p>តាមរូបមន្តរលាយ៖ <span class="font-bold text-xl text-blue-700">Q = mL</span></p>
+                            
+                            <div class="bg-slate-50 p-4 rounded-lg inline-block border border-slate-100 my-2">
+                                <p class="mb-1 text-sm font-sans text-slate-500">បម្រាប់៖</p>
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li>ម៉ាសដែក <span class="font-bold">m = 100 kg</span></li>
+                                    <li>កម្ដៅឡាតង់រលាយ <span class="font-bold">L = 276 kJ/kg = 276 &times; 10<sup>3</sup> J/kg</span></li>
+                                </ul>
+                            </div>
+                            
+                            <p class="mt-4">ជំនួសលេខ៖</p>
+                            <p class="ml-4 font-bold">
+                                Q = 100 &times; (276 &times; 10<sup>3</sup>)
+                            </p>
+                            <p class="ml-4 font-bold text-indigo-700">
+                                Q = 27.6 &times; 10<sup>6</sup> J
+                            </p>
+                        </div>
+                        
+                        <p class="text-slate-800 font-semibold mt-4">
+                            ដូចនេះ ថាមពលកម្ដៅចាំបាច់គឺ <span class="math-font font-bold text-indigo-700">Q = 27.6 &times; 10<sup>6</sup> J</span> (ឬស្មើនឹង <span class="math-font font-bold text-indigo-700">27.6 MJ</span>)។
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulator Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-6">
+                
+                <!-- Left Pane: Experimental Setup -->
+                <div class="simulator-area">
+                    <h3 class="absolute top-4 right-4 font-bold text-slate-400 opacity-60 z-0 text-sm border-b border-slate-200 pb-1">ការរៀបចំពិសោធន៍</h3>
+                    
+                    <!-- Stats Overlay -->
+                    <div class="stats-box text-slate-700 space-y-2">
+                        <div class="flex justify-between border-b pb-1">
+                            <span>ម៉ាសដែក (m)៖</span>
+                            <span class="math-font font-bold text-indigo-600">100 kg</span>
+                        </div>
+                        <div class="flex justify-between border-b pb-1">
+                            <span>សីតុណ្ហភាព (T)៖</span>
+                            <span id="uiTemp" class="math-font font-bold text-red-600">1538 °C</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>ថាមពលកម្ដៅ (Q)៖</span>
+                            <span id="uiHeat" class="math-font font-bold text-orange-500">0.0 MJ</span>
+                        </div>
+                    </div>
+
+                    <!-- Furnace Setup -->
+                    <div class="relative flex flex-col items-center">
+                        
+                        <div class="crucible-wrapper">
+                            <div class="crucible-lip"></div>
+                            <div class="crucible" id="crucible">
+                                <!-- Molten Iron -->
+                                <div class="molten-glow"></div>
+                                <div class="molten-iron" id="moltenPhase"></div>
+
+                                <!-- Solid Iron -->
+                                <div class="solid-iron" id="solidPhase">
+                                    <div class="iron-block"></div><div class="iron-block"></div><div class="iron-block"></div>
+                                    <div class="iron-block"></div><div class="iron-block"></div><div class="iron-block"></div>
+                                    <div class="iron-block"></div><div class="iron-block"></div><div class="iron-block"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fire -->
+                        <div class="fire-container" id="fire">
+                            <div class="flame"></div>
+                            <div class="flame"></div>
+                            <div class="flame"></div>
+                            <div class="flame"></div>
+                            <div class="flame"></div>
+                        </div>
+
+                        <!-- Furnace Base -->
+                        <div class="furnace-base"></div>
+                    </div>
+                </div>
+
+                <!-- Right Pane: Graph -->
+                <div class="h-[400px] border border-slate-200 rounded-xl bg-white p-4 shadow-sm relative flex flex-col">
+                    <h3 class="text-center font-bold text-slate-700 mb-2">ក្រាហ្វសីតុណ្ហភាពធៀបនឹងថាមពលកម្ដៅ</h3>
+                    <div class="chart-container">
+                        <canvas id="meltChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Controls -->
+            <div class="flex justify-center gap-4 mt-2">
+                <button id="btnStart" class="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-3 rounded-xl shadow-md font-semibold text-lg transition transform hover:scale-105 active:scale-95 flex items-center gap-2 tracking-wide">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
+                    ចាប់ផ្ដើមពិសោធន៍
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- UI Interactions: Solution Toggle ---
+        const btnToggleSol = document.getElementById('btnToggleSol');
+        const solDiv = document.getElementById('solutionDiv');
+        const solIcon = document.getElementById('solIcon');
+        const solBtnText = document.getElementById('solBtnText');
+
+        btnToggleSol.addEventListener('click', () => {
+            solDiv.classList.toggle('open');
+            if (solDiv.classList.contains('open')) {
+                solIcon.classList.add('rotate-180');
+                solBtnText.textContent = 'លាក់ដំណោះស្រាយ';
+            } else {
+                solIcon.classList.remove('rotate-180');
+                solBtnText.textContent = 'បង្ហាញដំណោះស្រាយ';
+            }
+        });
+
+        // --- Chart.js Configuration ---
+        const MELTING_POINT = 1538; // Iron melting temp °C
+        const MAX_HEAT = 27.6;      // Total heat needed in MJ
+
+        const ctxChart = document.getElementById('meltChart').getContext('2d');
+        const meltChart = new Chart(ctxChart, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: 'ដំណើរការរលាយ (Q = mL)',
+                        data: [{x: 0, y: MELTING_POINT}],
+                        borderColor: '#ea580c', // Orange line
+                        backgroundColor: '#ea580c',
+                        borderWidth: 4,
+                        showLine: true,
+                        pointRadius: 0,
+                    },
+                    {
+                        label: 'ចំណុចបច្ចុប្បន្ន',
+                        data: [{x: 0, y: MELTING_POINT}],
+                        backgroundColor: '#ef4444', // Red dot
+                        borderColor: '#ffffff',
+                        borderWidth: 2,
+                        pointRadius: 7,
+                        pointHoverRadius: 9
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false, // Managed manually
+                scales: {
+                    x: {
+                        type: 'linear',
+                        min: 0,
+                        max: 30, // Slightly more than 27.6 for padding
+                        title: { display: true, text: 'ថាមពលកម្ដៅ Q (MJ)', font: { family: 'Kantumruy Pro', size: 14 } },
+                        grid: { color: '#f1f5f9' },
+                        ticks: { font: { family: 'Lora' }, stepSize: 5 }
+                    },
+                    y: {
+                        min: 0,
+                        max: 2000,
+                        title: { display: true, text: 'សីតុណ្ហភាព T (°C)', font: { family: 'Kantumruy Pro', size: 14 } },
+                        grid: { color: '#e2e8f0' },
+                        ticks: { font: { family: 'Lora' }, stepSize: 500 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `Q: ${context.parsed.x.toFixed(1)} MJ, T: ${context.parsed.y} °C`
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- Physics & Animation Engine ---
+        const els = {
+            btnStart: document.getElementById('btnStart'),
+            uiHeat: document.getElementById('uiHeat'),
+            solidPhase: document.getElementById('solidPhase'),
+            moltenPhase: document.getElementById('moltenPhase'),
+            crucible: document.getElementById('crucible'),
+            fire: document.getElementById('fire')
+        };
+
+        const TOTAL_SIM_TIME_MS = 4000; // 4 seconds animation
+        
+        let animationFrameId = null;
+        let startTime = null;
+        let isRunning = false;
+
+        function updateVisuals(heatMJ) {
+            // Update Text
+            els.uiHeat.textContent = `${heatMJ.toFixed(1)} MJ`;
+            
+            // Progress percentage (0 to 1)
+            let progress = heatMJ / MAX_HEAT;
+            
+            // Fade out solid blocks
+            els.solidPhase.style.opacity = Math.max(0, 1 - (progress * 1.5)); // Fades out a bit faster
+            
+            // Rise molten iron (Max height ~75%)
+            els.moltenPhase.style.height = `${progress * 75}%`;
+
+            if (progress > 0.1) {
+                els.crucible.classList.add('melting');
+            } else {
+                els.crucible.classList.remove('melting');
+            }
+        }
+
+        // Animation Loop
+        function animateStep(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+            
+            // Calculate current heat based on elapsed time
+            let currentHeat = (elapsed / TOTAL_SIM_TIME_MS) * MAX_HEAT;
+            
+            if (currentHeat > MAX_HEAT) {
+                currentHeat = MAX_HEAT;
+                isRunning = false;
+            }
+
+            // Update Chart
+            meltChart.data.datasets[0].data = [
+                {x: 0, y: MELTING_POINT},
+                {x: currentHeat, y: MELTING_POINT}
+            ];
+            meltChart.data.datasets[1].data = [{x: currentHeat, y: MELTING_POINT}];
+            meltChart.update();
+
+            // Update DOM visuals
+            updateVisuals(currentHeat);
+
+            if (isRunning) {
+                animationFrameId = requestAnimationFrame(animateStep);
+            } else {
+                // Simulation Finished
+                els.fire.classList.remove('active');
+                
+                setTimeout(() => {
+                    els.btnStart.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg> សាកល្បងម្ដងទៀត`;
+                    els.btnStart.disabled = false;
+                    els.btnStart.classList.remove('opacity-50', 'cursor-not-allowed');
+                }, 500);
+            }
+        }
+
+        function resetSimulation() {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            isRunning = false;
+            startTime = null;
+
+            // Reset Chart
+            meltChart.data.datasets[0].data = [{x: 0, y: MELTING_POINT}];
+            meltChart.data.datasets[1].data = [{x: 0, y: MELTING_POINT}];
+            meltChart.update();
+
+            // Reset Visuals
+            els.fire.classList.remove('active');
+            updateVisuals(0);
+
+            els.btnStart.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg> ចាប់ផ្ដើមពិសោធន៍`;
+            els.btnStart.disabled = false;
+            els.btnStart.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function startSimulation() {
+            resetSimulation();
+            isRunning = true;
+            els.fire.classList.add('active'); // Turn on fire
+            
+            els.btnStart.disabled = true;
+            els.btnStart.classList.add('opacity-50', 'cursor-not-allowed');
+            els.btnStart.innerHTML = `កំពុងដំណើរការ...`;
+            
+            animationFrameId = requestAnimationFrame(animateStep);
+        }
+
+        // --- Event Listeners ---
+        els.btnStart.addEventListener('click', startSimulation);
+
+        // Initialization
+        resetSimulation();
+    </script>
+</body>
+</html>

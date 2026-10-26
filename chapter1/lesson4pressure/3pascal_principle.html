@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>៣. គោលការណ៍ប៉ាស្កាល់ (ឃ្នាស់អ៊ីដ្រូលីក)</title>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center;
+            margin: 0;
+        }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; max-width: 600px; height: auto;
+            background: #e0f7fa; border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 16px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 20px; display: block; margin-top: 8px;
+        }
+        
+        #liveF1 { color: #d32f2f; }
+        #liveP { color: #28a745; }
+        #liveRatio { color: #555; }
+        #liveF2 { color: #007bff; font-size: 24px;}
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        .solution-box ul { padding-left: 30px; margin-top: 5px; }
+        .highlight { font-weight: bold; color: #d32f2f; font-size: 19px; }
+        
+        .principle-box { 
+            background: #e8f5e9; border-left: 6px solid #28a745; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #1b5e20; 
+            font-style: italic; font-weight: bold;
+        }
+
+        /* រចនាប័ទ្មសម្រាប់រូបមន្តប្រភាគ HTML សុទ្ធ (ជំនួស MathJax) */
+        .math-bold { font-family: 'Times New Roman', serif; font-size: 110%; font-weight: bold; }
+        .math-italic { font-family: 'Times New Roman', serif; font-style: italic; }
+        .frac { display: inline-block; vertical-align: middle; text-align: center; padding: 0 5px; }
+        .frac span { display: block; }
+        .frac .num { border-bottom: 2px solid #000; padding-bottom: 2px; }
+        .frac .den { padding-top: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>៣. គោលការណ៍ប៉ាស្កាល់ ៖</strong><br>
+        <div class="principle-box">
+            "កាលណាសម្ពាធខាងក្រៅត្រូវបានបញ្ជូនទៅក្នុងអង្គធាតុរាវដែលបិទជិត អង្គធាតុរាវបញ្ជូនសម្ពាធនោះទៅគ្រប់ទិសទីដោយបរិមាណស្មើៗគ្នា។"
+        </div>
+        គោលការណ៍ប៉ាស្កាល់ ត្រូវបានយកមកអនុវត្តក្នុង <strong>ឃ្នាស់អ៊ីដ្រូលីក</strong>។ ប្រសិនបើគេផ្តល់កម្លាំង F<sub>1</sub> សង្កត់ទៅលើពីស្តុងតូច វាធ្វើឱ្យមានកំណើនសម្ពាធក្នុងពីស្តុងធំបរិមាណ &Delta;P ដូចគ្នា។ កម្លាំងដែលមានអំពើលើពីស្តុងធំគឺ៖<br><br>
+        <div style="text-align: center; font-size: 22px;">
+            <span class="math-bold">F<sub>2</sub> = F<sub>1</sub> &times; </span>
+            <div class="frac">
+                <span class="num math-bold">A<sub>2</sub></span>
+                <span class="den math-bold">A<sub>1</sub></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator SVG សុទ្ធ -->
+    <div class="sim-area">
+        <svg viewBox="0 0 500 400" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="liquidGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#4fc3f7"/>
+                    <stop offset="100%" stop-color="#0277bd"/>
+                </linearGradient>
+            </defs>
+
+            <!-- អង្គធាតុរាវក្នុងបំពង់ U -->
+            <rect id="liqL" x="102" y="250" width="76" height="100" fill="url(#liquidGrad)" />
+            <rect id="liqR" x="262" y="250" width="176" height="100" fill="url(#liquidGrad)" />
+            <rect x="102" y="348" width="336" height="40" fill="url(#liquidGrad)" />
+            
+            <!-- ជញ្ជាំងបំពង់ខាងក្រៅ និងក្នុង -->
+            <path d="M 100 100 L 100 390 L 440 390 L 440 100" fill="none" stroke="#546e7a" stroke-width="4" />
+            <path d="M 180 100 L 180 350 L 260 350 L 260 100" fill="none" stroke="#546e7a" stroke-width="4" />
+
+            <!-- ពីស្តុង A1 (តូច) -->
+            <rect id="pistonL" x="102" y="240" width="76" height="10" fill="#757575" stroke="#333" stroke-width="2" />
+            <text id="lblA1" x="140" y="280" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#fff">A₁</text>
+
+            <!-- ពីស្តុង A2 (ធំ) -->
+            <rect id="pistonR" x="262" y="240" width="176" height="10" fill="#757575" stroke="#333" stroke-width="2" />
+            <text id="lblA2" x="350" y="280" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#fff">A₂</text>
+
+            <!-- រថយន្តលើពីស្តុងធំ -->
+            <text id="carEmoji" x="350" y="235" font-size="50" text-anchor="middle">🚗</text>
+
+            <!-- ទម្ងន់សង្កត់លើពីស្តុងតូច -->
+            <rect id="weightBox" x="120" y="200" width="40" height="40" fill="#f44336" stroke="#b71c1c" stroke-width="2" />
+            <text id="weightTxt" x="140" y="225" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#fff">សង្កត់</text>
+
+            <!-- ព្រួញកម្លាំង F1 (ចុះក្រោម) -->
+            <line id="arrF1Line" x1="140" y1="120" x2="140" y2="190" stroke="#d32f2f" stroke-width="4" />
+            <polygon id="arrF1Head" points="135,190 145,190 140,200" fill="#d32f2f" />
+            <text id="txtF1" x="120" y="160" font-family="Arial" font-weight="bold" font-size="18" fill="#d32f2f">F₁</text>
+
+            <!-- ព្រួញកម្លាំង F2 (ឡើងលើ) -->
+            <line id="arrF2Line" x1="350" y1="180" x2="350" y2="100" stroke="#007bff" stroke-width="6" />
+            <polygon id="arrF2Head" points="342,100 358,100 350,90" fill="#007bff" />
+            <text id="txtF2" x="375" y="140" font-family="Arial" font-weight="bold" font-size="22" fill="#007bff">F₂</text>
+
+            <!-- បន្ទាត់តម្រុយ Y ដើម -->
+            <line x1="80" y1="250" x2="460" y2="250" stroke="#aaa" stroke-width="2" stroke-dasharray="5,5" />
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            កម្លាំងសង្កត់ F<sub>1</sub> (N):<br>
+            <input type="range" id="sliderF1" min="0" max="1000" value="0" step="10">
+        </div>
+        <div class="slider-box">
+            ផ្ទៃមុខកាត់ A<sub>1</sub> (m&sup2;):<br>
+            <input type="range" id="sliderA1" min="0.1" max="1.0" value="0.2" step="0.1">
+        </div>
+        <div class="slider-box">
+            ផ្ទៃមុខកាត់ A<sub>2</sub> (m&sup2;):<br>
+            <input type="range" id="sliderA2" min="2.0" max="20.0" value="10.0" step="1.0">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Grid) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">កម្លាំង F<sub>1</sub><br><span id="liveF1">0 N</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">សម្ពាធបន្សាយ &Delta;P<br><span id="liveP">0 Pa</span></div>
+        <div class="data-box" style="border-top: 4px solid #555;">មេគុណចំណេញកម្លាំង<br><span id="liveRatio">50 ដង</span></div>
+        <div class="data-box" style="border-top: 4px solid #007bff;">កម្លាំងលើកឡាន F<sub>2</sub><br><span id="liveF2">0 N</span></div>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box">
+        <h3>ការគណនាបង្ហាញផ្ទាល់</h3>
+        <p><strong>បម្រាប់៖</strong> F<sub>1</sub> = <span id="solF1">0</span> N, A<sub>1</sub> = <span id="solA1">0.2</span> m&sup2;, A<sub>2</sub> = <span id="solA2">10.0</span> m&sup2;</p>
+        
+        <p><strong>១. គណនាសម្ពាធបញ្ជូន (&Delta;P) ៖</strong></p>
+        <div style="text-align: left; font-size: 18px; margin-left: 20px;">
+            <span class="math-bold">&Delta;P = </span>
+            <div class="frac">
+                <span class="num math-bold">F<sub>1</sub></span>
+                <span class="den math-bold">A<sub>1</sub></span>
+            </div>
+            <span class="math-bold"> = </span>
+            <div class="frac">
+                <span class="num math-bold" id="solCalcP1">0</span>
+                <span class="den math-bold" id="solCalcA1">0.2</span>
+            </div>
+            <span class="math-bold"> = <span style="color: #28a745;" id="solResultP">0</span> Pa</span>
+        </div>
+
+        <p><strong>២. គណនាកម្លាំងទប់ដែលបានបង្កើត (F<sub>2</sub>) ៖</strong></p>
+        <div style="text-align: left; font-size: 18px; margin-left: 20px;">
+            <span class="math-bold">F<sub>2</sub> = &Delta;P &times; A<sub>2</sub></span><br><br>
+            <span class="math-bold">F<sub>2</sub> = <span id="solCalcP2">0</span> &times; <span id="solCalcA2">10.0</span> = <span style="color: #007bff;" id="solResultF2">0</span> N</span>
+        </div>
+        
+        <p><em>* សន្និដ្ឋាន៖</em> ដោយសារ A<sub>2</sub> ធំជាង A<sub>1</sub> ចំនួន <span id="solRatio" class="highlight">50</span> ដង នោះកម្លាំង F<sub>2</sub> ក៏មានទំហំធំជាង F<sub>1</sub> ចំនួន <span id="solRatio2" class="highlight">50</span> ដងដែរ! នេះហើយជាអត្ថប្រយោជន៍នៃឃ្នាស់អ៊ីដ្រូលីក ដែលជួយឱ្យយើងប្រើកម្លាំងតូច តែអាចលើកវត្ថុធ្ងន់ៗបាន។</p>
+    </div>
+</div>
+
+<!-- កូដ JavaScript សុវត្ថិភាព គ្មានប្រើសញ្ញា < ឬ > -->
+<script>
+    var sliderF1 = document.getElementById('sliderF1');
+    var sliderA1 = document.getElementById('sliderA1');
+    var sliderA2 = document.getElementById('sliderA2');
+
+    var liveF1 = document.getElementById('liveF1');
+    var liveP = document.getElementById('liveP');
+    var liveRatio = document.getElementById('liveRatio');
+    var liveF2 = document.getElementById('liveF2');
+
+    var liqL = document.getElementById('liqL');
+    var pistonL = document.getElementById('pistonL');
+    var weightBox = document.getElementById('weightBox');
+    var weightTxt = document.getElementById('weightTxt');
+    var lblA1 = document.getElementById('lblA1');
+
+    var liqR = document.getElementById('liqR');
+    var pistonR = document.getElementById('pistonR');
+    var carEmoji = document.getElementById('carEmoji');
+    var lblA2 = document.getElementById('lblA2');
+
+    var arrF1Line = document.getElementById('arrF1Line');
+    var arrF1Head = document.getElementById('arrF1Head');
+    
+    var arrF2Line = document.getElementById('arrF2Line');
+    var arrF2Head = document.getElementById('arrF2Head');
+
+    var solF1 = document.getElementById('solF1');
+    var solA1 = document.getElementById('solA1');
+    var solA2 = document.getElementById('solA2');
+    var solCalcP1 = document.getElementById('solCalcP1');
+    var solCalcA1 = document.getElementById('solCalcA1');
+    var solResultP = document.getElementById('solResultP');
+    var solCalcP2 = document.getElementById('solCalcP2');
+    var solCalcA2 = document.getElementById('solCalcA2');
+    var solResultF2 = document.getElementById('solResultF2');
+    var solRatio = document.getElementById('solRatio');
+    var solRatio2 = document.getElementById('solRatio2');
+
+    function updateSimulation() {
+        var f1 = parseFloat(sliderF1.value);
+        var a1 = parseFloat(sliderA1.value);
+        var a2 = parseFloat(sliderA2.value);
+
+        // ការគណនារូបវិទ្យា
+        var p = f1 / a1;
+        var f2 = p * a2;
+        var ratio = a2 / a1;
+
+        // បង្ហាញទិន្នន័យ (រាប់បញ្ចូលក្បៀសដើម្បីងាយអានលេខធំៗ)
+        liveF1.innerText = f1.toLocaleString() + " N";
+        liveP.innerText = p.toLocaleString() + " Pa";
+        liveRatio.innerText = ratio.toFixed(1) + " ដង";
+        liveF2.innerText = f2.toLocaleString() + " N";
+
+        // ធ្វើចលនារូបភាពបញ្ឈរ (Animation Y-Axis)
+        // ឧបមាថា F1=1000N ចុះបាន 60px
+        var dropL = (f1 / 1000) * 60;
+        // រក្សាមាតអង្គធាតុរាវឱ្យថេរ V = A1*dropL = A2*riseR => riseR = dropL * (A1/A2)
+        var riseR = dropL * (a1 / a2);
+
+        var yL = 250 + dropL;
+        var yR = 250 - riseR;
+
+        // អាប់ដេតខាងឆ្វេង (តូច)
+        liqL.setAttribute("y", yL);
+        liqL.setAttribute("height", 350 - yL);
+        pistonL.setAttribute("y", yL - 10);
+        weightBox.setAttribute("y", yL - 50);
+        weightTxt.setAttribute("y", yL - 25);
+        lblA1.setAttribute("y", yL + 30);
+
+        // គូសព្រួញ F1 ឱ្យលូតវែងតាមកម្លាំង
+        var arr1Y1 = yL - 60 - (f1 / 1000) * 60;
+        arrF1Line.setAttribute("y2", yL - 60);
+        arrF1Line.setAttribute("y1", arr1Y1);
+        arrF1Head.setAttribute("points", "135," + (yL-60) + " 145," + (yL-60) + " 140," + (yL-50));
+
+        // អាប់ដេតខាងស្តាំ (ធំ)
+        liqR.setAttribute("y", yR);
+        liqR.setAttribute("height", 350 - yR);
+        pistonR.setAttribute("y", yR - 10);
+        carEmoji.setAttribute("y", yR - 15);
+        lblA2.setAttribute("y", yR + 30);
+
+        // គូសព្រួញ F2 ឱ្យលូតវែងលឿនជាង (សមាមាត្រទៅនឹង F2)
+        var f2Scale = (f2 / 100000) * 80; // Scale សម្រាប់បង្ហាញព្រួញឱ្យស្អាត
+        var arr2Y1 = yR - 70 - f2Scale;
+        arrF2Line.setAttribute("y1", yR - 70);
+        arrF2Line.setAttribute("y2", arr2Y1);
+        arrF2Head.setAttribute("points", "342," + arr2Y1 + " 358," + arr2Y1 + " 350," + (arr2Y1-10));
+
+        // អាប់ដេតលេខក្នុងប្រអប់ដំណោះស្រាយ
+        solF1.innerText = f1.toLocaleString();
+        solA1.innerText = a1.toFixed(1);
+        solA2.innerText = a2.toFixed(1);
+        solCalcP1.innerText = f1.toLocaleString();
+        solCalcA1.innerText = a1.toFixed(1);
+        solResultP.innerText = p.toLocaleString();
+        solCalcP2.innerText = p.toLocaleString();
+        solCalcA2.innerText = a2.toFixed(1);
+        solResultF2.innerText = f2.toLocaleString();
+        solRatio.innerText = ratio.toFixed(1);
+        solRatio2.innerText = ratio.toFixed(1);
+    }
+
+    // ចាប់យកព្រឹត្តិការណ៍ពេលអូស Slider
+    sliderF1.addEventListener('input', updateSimulation);
+    sliderA1.addEventListener('input', updateSimulation);
+    sliderA2.addEventListener('input', updateSimulation);
+
+    // ហៅអនុគមន៍ពេលបើកដំបូង
+    updateSimulation();
+</script>
+
+</body>
+</html>

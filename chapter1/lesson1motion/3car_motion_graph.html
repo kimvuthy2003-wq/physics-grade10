@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ចំណោទចលនារថយន្ត និងក្រាបទីតាំង-ពេលវេលា</title>
+    <style>
+        body {
+            font-family: 'Khmer OS Siemreap', Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+        }
+        h2 { color: #1e3a8a; margin-bottom: 10px; text-align: center; }
+        .problem-statement {
+            background: white;
+            padding: 15px 20px;
+            border-left: 5px solid #3b82f6;
+            border-radius: 8px;
+            max-width: 900px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            max-width: 1000px;
+            width: 100%;
+        }
+        .sim-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        canvas {
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            max-width: 100%;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-family: 'Khmer OS Siemreap', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+            transition: 0.2s;
+        }
+        button:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+            color: #64748b;
+        }
+        .btn-start { background-color: #10b981; }
+        .btn-start:not(:disabled):hover { background-color: #059669; }
+        
+        .btn-pause { background-color: #f59e0b; }
+        .btn-pause:not(:disabled):hover { background-color: #d97706; }
+
+        .btn-reset { background-color: #ef4444; }
+        .btn-reset:not(:disabled):hover { background-color: #dc2626; }
+        
+        .metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 15px;
+        }
+        .metric-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 140px;
+        }
+        .metric-title { font-size: 14px; color: #64748b; font-weight: bold; }
+        .metric-value { font-size: 22px; color: #0f172a; font-weight: bold; margin-top: 5px; }
+        .highlight-speed { color: #d97706; }
+        .highlight-velocity { color: #2563eb; }
+    </style>
+</head>
+<body>
+
+    <h2>ចលនារថយន្ត និងក្រាបបង្ហាញទីតាំង-ពេលវេលា</h2>
+    
+    <div class="problem-statement">
+        <b>ប្រធានលំហាត់៖</b> រថយន្តមួយធ្វើចលនាលើផ្លូវត្រង់ទៅទិសខាងកើតបានចម្ងាយ <b>10.0 km</b>។ បន្ទាប់មកនៅពេលបន្ទាប់ ធ្វើចលនាត្រឡប់ក្រោយនៅលើផ្លូវដដែលបានចម្ងាយ <b>4.0 km</b>។ ឧបមាថារថយន្តធ្វើចលនាអស់រយៈពេល <b>t = 0.40 h</b>។
+    </div>
+
+    <div class="container">
+        <div class="sim-panel">
+            <div class="controls">
+                <button class="btn-start" id="btnStart">ចាប់ផ្តើមចលនា</button>
+                <button class="btn-pause" id="btnPause" disabled>ផ្អាកចលនា</button>
+                <button class="btn-reset" id="btnReset">កំណត់ឡើងវិញ</button>
+            </div>
+            
+            <canvas id="roadCanvas" width="800" height="120"></canvas>
+            <canvas id="graphCanvas" width="800" height="350"></canvas>
+
+            <div class="metrics">
+                <div class="metric-box">
+                    <div class="metric-title">រយៈពេល (t)</div>
+                    <div class="metric-value" id="valTime">0.00 h</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title">ចម្ងាយចរ (d)</div>
+                    <div class="metric-value" id="valDist">0.0 km</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title">បម្លាស់ទី (Δx)</div>
+                    <div class="metric-value" id="valDisp">0.0 km</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title">ល្បឿនមធ្យម (v)</div>
+                    <div class="metric-value highlight-speed" id="valSpeed">0 km/h</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title">វ៉ិចទ័រល្បឿនមធ្យម (v_av)</div>
+                    <div class="metric-value highlight-velocity" id="valVelocity">0 km/h</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const totalSimTime = 4000; 
+        const realTotalTime = 0.40; 
+        const distEast = 10.0; 
+        const distWest = 4.0; 
+        const totalDistance = distEast + distWest; 
+        
+        let isPlaying = false;
+        let isPaused = false;
+        let startTime = 0;
+        let elapsed = 0;
+        let reqAnimFrame;
+
+        const roadCanvas = document.getElementById('roadCanvas');
+        const roadCtx = roadCanvas.getContext('2d');
+        const graphCanvas = document.getElementById('graphCanvas');
+        const graphCtx = graphCanvas.getContext('2d');
+
+        const btnStart = document.getElementById('btnStart');
+        const btnPause = document.getElementById('btnPause');
+        const btnReset = document.getElementById('btnReset');
+
+        const elTime = document.getElementById('valTime');
+        const elDist = document.getElementById('valDist');
+        const elDisp = document.getElementById('valDisp');
+        const elSpeed = document.getElementById('valSpeed');
+        const elVelocity = document.getElementById('valVelocity');
+
+        function getCarState(elapsedMs) {
+            let progress = Math.min(elapsedMs / totalSimTime, 1);
+            let currentRealTime = progress * realTotalTime;
+            let currentDistance = progress * totalDistance;
+            let currentDisplacement = 0;
+
+            if (currentDistance <= distEast) {
+                currentDisplacement = currentDistance;
+            } else {
+                currentDisplacement = distEast - (currentDistance - distEast);
+            }
+
+            return {
+                t: currentRealTime,
+                d: currentDistance,
+                x: currentDisplacement,
+                isFinished: progress === 1
+            };
+        }
+
+        function drawRoad(state) {
+            roadCtx.clearRect(0, 0, roadCanvas.width, roadCanvas.height);
+            
+            const originX = 100;
+            const pxPerKm = 60; 
+            
+            roadCtx.strokeStyle = '#94a3b8';
+            roadCtx.lineWidth = 2;
+            roadCtx.beginPath();
+            roadCtx.moveTo(originX - 50, 80);
+            roadCtx.lineTo(originX + 11 * pxPerKm, 80);
+            roadCtx.stroke();
+            
+            roadCtx.fillStyle = '#64748b';
+            roadCtx.font = '12px Arial';
+            roadCtx.textAlign = 'center';
+            for(let i=0; i<=11; i+=2) {
+                let x = originX + i * pxPerKm;
+                roadCtx.beginPath(); roadCtx.moveTo(x, 75); roadCtx.lineTo(x, 85); roadCtx.stroke();
+                roadCtx.fillText(i, x, 100);
+            }
+            roadCtx.fillText("x (km)", originX + 11.5 * pxPerKm, 85);
+
+            roadCtx.fillStyle = '#ef4444';
+            roadCtx.fillText("O", originX, 60);
+
+            let carX = originX + state.x * pxPerKm;
+            roadCtx.fillStyle = '#3b82f6';
+            roadCtx.fillRect(carX - 15, 60, 30, 15);
+            roadCtx.fillStyle = '#000';
+            roadCtx.beginPath(); roadCtx.arc(carX - 10, 75, 4, 0, Math.PI*2); roadCtx.fill();
+            roadCtx.beginPath(); roadCtx.arc(carX + 10, 75, 4, 0, Math.PI*2); roadCtx.fill();
+
+            if(state.x > 0) {
+                roadCtx.strokeStyle = '#2563eb';
+                roadCtx.lineWidth = 3;
+                roadCtx.beginPath();
+                roadCtx.moveTo(originX, 40);
+                roadCtx.lineTo(carX, 40);
+                roadCtx.stroke();
+                roadCtx.beginPath();
+                roadCtx.moveTo(carX, 40);
+                roadCtx.lineTo(carX - 8, 35);
+                roadCtx.lineTo(carX - 8, 45);
+                roadCtx.fill();
+            }
+        }
+
+        function drawGraph(state) {
+            graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+            
+            const pX = 80; 
+            const pY = 40; 
+            const gW = graphCanvas.width - pX - 40;
+            const gH = graphCanvas.height - pY - 40;
+            
+            const pxPerTime = gW / 0.45; 
+            const pxPerKm = gH / 12;     
+            
+            function getCanvasPos(t, x) {
+                return {
+                    cx: pX + t * pxPerTime,
+                    cy: graphCanvas.height - pY - (x * pxPerKm)
+                };
+            }
+
+            graphCtx.strokeStyle = '#e2e8f0';
+            graphCtx.lineWidth = 1;
+            for(let i=0; i<=12; i+=2) {
+                let pos = getCanvasPos(0, i);
+                graphCtx.beginPath(); graphCtx.moveTo(pX, pos.cy); graphCtx.lineTo(pX+gW, pos.cy); graphCtx.stroke();
+                graphCtx.fillStyle = '#64748b'; graphCtx.textAlign = 'right';
+                graphCtx.fillText(i, pX - 10, pos.cy + 4);
+            }
+            for(let i=0; i<=0.4; i+=0.1) {
+                let pos = getCanvasPos(i, 0);
+                graphCtx.beginPath(); graphCtx.moveTo(pos.cx, graphCanvas.height - pY); graphCtx.lineTo(pos.cx, graphCanvas.height - pY - gH); graphCtx.stroke();
+                graphCtx.fillStyle = '#64748b'; graphCtx.textAlign = 'center';
+                graphCtx.fillText(i.toFixed(2), pos.cx, graphCanvas.height - pY + 20);
+            }
+
+            graphCtx.strokeStyle = '#0f172a';
+            graphCtx.lineWidth = 2;
+            graphCtx.beginPath();
+            graphCtx.moveTo(pX, graphCanvas.height - pY);
+            graphCtx.lineTo(pX + gW + 20, graphCanvas.height - pY); 
+            graphCtx.moveTo(pX, graphCanvas.height - pY);
+            graphCtx.lineTo(pX, graphCanvas.height - pY - gH - 20); 
+            graphCtx.stroke();
+            graphCtx.fillStyle = '#0f172a';
+            graphCtx.fillText("t (h)", pX + gW + 15, graphCanvas.height - pY + 20);
+            graphCtx.fillText("x (km)", pX - 25, graphCanvas.height - pY - gH - 20);
+
+            let tSwitch = realTotalTime * (distEast / totalDistance); 
+            
+            graphCtx.strokeStyle = '#d97706'; 
+            graphCtx.lineWidth = 3;
+            graphCtx.beginPath();
+            
+            let p0 = getCanvasPos(0, 0);
+            graphCtx.moveTo(p0.cx, p0.cy);
+            
+            if (state.t > 0) {
+                if (state.t <= tSwitch) {
+                    let pCur = getCanvasPos(state.t, state.x);
+                    graphCtx.lineTo(pCur.cx, pCur.cy);
+                } else {
+                    let pPeak = getCanvasPos(tSwitch, distEast);
+                    graphCtx.lineTo(pPeak.cx, pPeak.cy);
+                    let pCur = getCanvasPos(state.t, state.x);
+                    graphCtx.lineTo(pCur.cx, pCur.cy);
+                }
+            }
+            graphCtx.stroke();
+
+            if (state.isFinished) {
+                let pEnd = getCanvasPos(0.40, 6.0);
+                
+                graphCtx.strokeStyle = '#2563eb';
+                graphCtx.lineWidth = 2;
+                graphCtx.setLineDash([8, 8]);
+                graphCtx.beginPath();
+                graphCtx.moveTo(p0.cx, p0.cy);
+                graphCtx.lineTo(pEnd.cx, pEnd.cy);
+                graphCtx.stroke();
+                graphCtx.setLineDash([]);
+
+                graphCtx.fillStyle = '#ef4444';
+                graphCtx.beginPath(); graphCtx.arc(p0.cx, p0.cy, 5, 0, Math.PI*2); graphCtx.fill();
+                graphCtx.beginPath(); graphCtx.arc(pEnd.cx, pEnd.cy, 5, 0, Math.PI*2); graphCtx.fill();
+                
+                graphCtx.font = "bold 14px 'Khmer OS Siemreap'";
+                graphCtx.fillText("M (t=0)", p0.cx - 20, p0.cy - 10);
+                graphCtx.fillText("N (t=0.4, x=6.0)", pEnd.cx, pEnd.cy - 10);
+
+                graphCtx.strokeStyle = '#94a3b8';
+                graphCtx.lineWidth = 1;
+                graphCtx.setLineDash([4, 4]);
+                graphCtx.beginPath();
+                graphCtx.moveTo(p0.cx, pEnd.cy);
+                graphCtx.lineTo(pEnd.cx, pEnd.cy); 
+                graphCtx.lineTo(pEnd.cx, p0.cy); 
+                graphCtx.stroke();
+                graphCtx.setLineDash([]);
+                
+                graphCtx.fillStyle = '#0f172a';
+                graphCtx.fillText("Δt = 0.4 h", p0.cx + (pEnd.cx - p0.cx)/2, pEnd.cy + 15);
+                graphCtx.textAlign = 'left';
+                graphCtx.fillText("Δx = 6.0 km", pEnd.cx + 10, p0.cy - (p0.cy - pEnd.cy)/2);
+            }
+            
+            let pCur = getCanvasPos(state.t, state.x);
+            graphCtx.fillStyle = '#0f172a';
+            graphCtx.beginPath(); graphCtx.arc(pCur.cx, pCur.cy, 6, 0, Math.PI*2); graphCtx.fill();
+        }
+
+        function updateDisplay(state) {
+            elTime.innerText = state.t.toFixed(2) + " h";
+            elDist.innerText = state.d.toFixed(1) + " km";
+            elDisp.innerText = state.x.toFixed(1) + " km";
+            
+            if(state.t > 0) {
+                let speed = state.d / state.t;
+                let vel = state.x / state.t;
+                elSpeed.innerText = speed.toFixed(1) + " km/h";
+                elVelocity.innerText = vel.toFixed(1) + " km/h";
+            } else {
+                elSpeed.innerText = "0 km/h";
+                elVelocity.innerText = "0 km/h";
+            }
+        }
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            elapsed = timestamp - startTime;
+            
+            let state = getCarState(elapsed);
+            drawRoad(state);
+            drawGraph(state);
+            updateDisplay(state);
+
+            if (!state.isFinished && isPlaying) {
+                reqAnimFrame = requestAnimationFrame(animate);
+            } else if (state.isFinished) {
+                isPlaying = false;
+                btnStart.disabled = false;
+                btnStart.innerText = "ចាក់ឡើងវិញ";
+                btnPause.disabled = true;
+            }
+        }
+
+        btnStart.addEventListener('click', function() {
+            if(isPlaying) return;
+            
+            if(elapsed >= totalSimTime) {
+                elapsed = 0;
+                startTime = 0;
+            } else if (elapsed > 0) {
+                startTime = performance.now() - elapsed;
+            }
+            
+            isPlaying = true;
+            isPaused = false;
+            
+            btnStart.disabled = true;
+            btnStart.innerText = "កំពុងដំណើរការ...";
+            btnPause.disabled = false;
+            
+            reqAnimFrame = requestAnimationFrame(animate);
+        });
+
+        btnPause.addEventListener('click', function() {
+            if(!isPlaying) return;
+            
+            isPlaying = false;
+            isPaused = true;
+            cancelAnimationFrame(reqAnimFrame);
+            
+            btnStart.disabled = false;
+            btnStart.innerText = "បន្តចលនា";
+            btnPause.disabled = true;
+        });
+
+        btnReset.addEventListener('click', function() {
+            isPlaying = false;
+            isPaused = false;
+            cancelAnimationFrame(reqAnimFrame);
+            
+            elapsed = 0;
+            startTime = 0;
+            
+            btnStart.disabled = false;
+            btnStart.innerText = "ចាប់ផ្តើមចលនា";
+            btnPause.disabled = true;
+            
+            let initState = getCarState(0);
+            drawRoad(initState);
+            drawGraph(initState);
+            updateDisplay(initState);
+        });
+
+        let initState = getCarState(0);
+        drawRoad(initState);
+        drawGraph(initState);
+
+    </script>
+</body>
+</html>

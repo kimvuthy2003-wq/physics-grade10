@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ១៤ - កម្មន្ត និងការដុតរំលាយជាតិខ្លាញ់</title>
+    
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        /* ប្រធានលំហាត់ */
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 18px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        /* ផ្ទាំងបម្រាប់ */
+        .info-panel {
+            background: #fff; padding: 15px; border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;
+            display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px;
+            border-left: 6px solid #28a745; font-size: 16px;
+        }
+        .info-panel strong { color: #d32f2f; font-size: 18px; }
+
+        /* ផ្ទាំង Simulator */
+        .sim-area {
+            position: relative; width: 100%; height: 380px;
+            background: #e0f7fa; border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); margin: 0 auto 20px;
+        }
+
+        /* ជណ្តើរ (Stairs) */
+        .stairs-container {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+        }
+        .stair-path {
+            fill: #9e9e9e; stroke: #616161; stroke-width: 2; stroke-linejoin: round;
+        }
+        
+        .measure-line { stroke: #d32f2f; stroke-width: 2; stroke-dasharray: 4,4; }
+        .measure-text { fill: #d32f2f; font-weight: bold; font-size: 18px; }
+
+        /* តួអង្គសិស្ស */
+        .student {
+            position: absolute; bottom: 10px; left: 0px; width: 40px; height: 40px;
+            font-size: 35px; display: flex; align-items: center; justify-content: center;
+            z-index: 3;
+            /* បានលុប transition ចេញ ដើម្បីឱ្យចលនារត់លឿន (Fast Forward) រលូនល្អ និងមិនរអាក់រអួល */
+        }
+
+        /* ផ្ទាំងទិន្នន័យ (Grid) */
+        .dashboard {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;
+        }
+        
+        .stats-box {
+            background: white; padding: 20px; border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: left;
+        }
+        .stats-header {
+            font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 3px solid #ccc; padding-bottom: 8px;
+        }
+        .header-l { color: #007bff; border-bottom-color: #007bff; }
+        .header-r { color: #e65100; border-bottom-color: #e65100; }
+
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 16px; border-bottom: 1px dashed #eee; padding-bottom: 5px;}
+        .stat-value { font-weight: bold; font-size: 20px; }
+        .val-blue { color: #007bff; }
+        .val-red { color: #d32f2f; }
+        .val-orange { color: #e65100; }
+        
+        /* របារជាតិខ្លាញ់ (Fat Bar) */
+        .fat-bar-container {
+            width: 100%; height: 28px; background: #e0e0e0; border-radius: 14px;
+            overflow: hidden; margin-top: 15px; border: 2px solid #bdbdbd; position: relative;
+        }
+        .fat-bar-fill {
+            height: 100%; width: 0%; background: linear-gradient(90deg, #ffb74d, #f57c00);
+            transition: width 0.1s;
+        }
+        .fat-bar-text {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #000; font-size: 15px;
+        }
+
+        /* ប៊ូតុងបញ្ជា */
+        .controls {
+            margin-top: 20px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; align-items: center;
+        }
+        button {
+            padding: 12px 25px; font-size: 17px; font-weight: bold;
+            font-family: inherit; cursor: pointer; border: none;
+            border-radius: 6px; color: white; transition: 0.2s; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        .btn-play { background: #28a745; } .btn-play:hover { background: #218838; }
+        .btn-fast { background: #d32f2f; } .btn-fast:hover { background: #b71c1c; }
+        .btn-pause { background: #ffc107; color: black; } .btn-pause:hover { background: #e0a800; }
+        #resetBtn { background: #6c757d; } #resetBtn:hover { background: #5a6268; }
+        #solutionBtn { background: #17a2b8; } #solutionBtn:hover { background: #138496; }
+
+        .status-bar {
+            margin-top: 20px; font-size: 18px; font-weight: bold;
+            background: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #333; border-left: 6px solid #ccc;
+        }
+
+        /* ដំណោះស្រាយ */
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        .solution-box ul { padding-left: 30px; margin-top: 5px; }
+        .highlight { font-weight: bold; color: #d32f2f; font-size: 19px; }
+        .conclusion-box { background: #ffebee; border-left: 5px solid #d32f2f; padding: 15px; margin-top: 15px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>លំហាត់ទី ១៤ ៖</strong> $1 \text{ Calorie}$ ក្នុងអាហារស្មើនឹងមួយគីឡូកាឡូរីត្រូវបានកំណត់ថា $1 \text{ kcal} = 4190 \text{ J}$។ មេតាបូលីសនៃខ្លាញ់ $1 \text{ g}$ អាចបញ្ចេញ $9.00 \text{ kcal}$។ សិស្សរូបវិទ្យាម្នាក់សាកល្បងសម្រកទម្ងន់ដោយធ្វើលំហាត់ប្រាណ។ គាត់ធ្វើគម្រោងរត់ចុះឡើងតាមជណ្តើរនៃស្តាតឱ្យលឿននិងច្រើនដង។ សន្មតថាគាត់រត់ឡើង $80$ កាំក្នុងរយៈពេល $65.0 \text{ s}$ និងកាំនីមួយៗកម្ពស់ $0.150 \text{ m}$។ ដើម្បីងាយ គេចោលថាមពលដែលគាត់ចុះមកក្រោមវិញព្រោះវាមានតម្លៃតូច។ សន្មតទិន្នផលនៃសាច់ដុំគឺ $20.0\%$។ សន្មតសិស្សមានម៉ាស $75.0 \text{ kg}$។
+        <br><strong>ក.</strong> តើគាត់ត្រូវរត់ប៉ុន្មានដង តាមជណ្តើរដើម្បីបញ្ចុះខ្លាញ់ $1.00 \text{ kg}$?
+        <br><strong>ខ.</strong> កំណត់អានុភាពបានការមធ្យមគិតជា វ៉ាត់ (W) និង សេះ (hp) កាលណាគាត់រត់ឡើង។
+        <br><strong>គ.</strong> តើសកម្មភាពនេះជាវិធីល្អឬទេ?
+    </div>
+
+    <div class="info-panel">
+        <div>ថាមពលក្នុងខ្លាញ់ $1 \text{g}$ = $9.00 \text{ kcal} \approx$ <strong>37,710 J</strong></div>
+        <div>ទិន្នផលរាងកាយ ($\eta$) = <strong>20.0 %</strong></div>
+        <div>កម្ពស់សរុប១ជើង ($h$) = $80 \times 0.150 =$ <strong>12.0 m</strong></div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator -->
+    <div class="sim-area">
+        <div class="stairs-container">
+            <svg width="100%" height="100%" viewBox="0 0 1000 380" preserveAspectRatio="none">
+                <!-- ជណ្តើរគូរដោយ JavaScript -->
+                <polygon id="stairPolygon" class="stair-path" points="" />
+                
+                <!-- គំនូសកម្ពស់ h = 12m (បានកែតម្រូវឱ្យខិតមកឆ្វេងដើម្បីមើលឃើញច្បាស់) -->
+                <line class="measure-line" x1="880" y1="360" x2="880" y2="60" />
+                <line class="measure-line" x1="860" y1="60" x2="900" y2="60" />
+                <line class="measure-line" x1="860" y1="360" x2="900" y2="360" />
+                <text x="890" y="215" class="measure-text">h = 12.0 m</text>
+            </svg>
+        </div>
+        
+        <div class="student" id="student">🏃</div>
+    </div>
+
+    <!-- ផ្ទាំងប្រៀបធៀបទិន្នន័យ -->
+    <div class="dashboard">
+        <!-- ទិន្នន័យមេកានិច -->
+        <div class="stats-box">
+            <div class="stats-header header-l">⚙️ ទិន្នន័យមេកានិច (១ ជើង)</div>
+            <div class="stat-row">
+                <span>ចំនួនជើងរត់បាន (n):</span>
+                <span class="stat-value val-blue"><span id="liveTrips">0</span> ដង</span>
+            </div>
+            <div class="stat-row">
+                <span>រយៈពេលប្រើប្រាស់សរុប:</span>
+                <span class="stat-value"><span id="liveTime">0</span> នាទី</span>
+            </div>
+            <div class="stat-row" style="border-top: 2px solid #ccc; padding-top:10px;">
+                <span>កម្មន្តបានការ ($W = mgh$):</span>
+                <span class="stat-value"><span id="liveWork">8820</span> J/ជើង</span>
+            </div>
+            <div class="stat-row">
+                <span>អានុភាពបានការ ($P = W/t$):</span>
+                <span class="stat-value val-blue">136 W (0.182 hp)</span>
+            </div>
+        </div>
+
+        <!-- ទិន្នន័យរាងកាយ -->
+        <div class="stats-box">
+            <div class="stats-header header-r">🔥 ការដុតរំលាយ (ខ្លាញ់)</div>
+            <div class="stat-row">
+                <span>ថាមពលត្រូវការ ($E = W/\eta$):</span>
+                <span class="stat-value val-red">44,100 J/ជើង</span>
+            </div>
+            <div class="stat-row">
+                <span>ថាមពលដុតសរុប:</span>
+                <span class="stat-value val-red"><span id="liveEnergy">0</span> J</span>
+            </div>
+            
+            <div style="margin-top: 20px; font-weight: bold; color: #e65100;">គោលដៅសម្រកខ្លាញ់ ១ គីឡូក្រាម (1000g)៖</div>
+            <div class="fat-bar-container">
+                <div class="fat-bar-fill" id="fatBar"></div>
+                <div class="fat-bar-text"><span id="liveFat">0.0</span> g / 1000.0 g</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="controls">
+        <button class="btn-play" id="playBtn">▶ រត់ល្បឿនធម្មតា</button>
+        <button class="btn-fast" id="fastBtn">⏩ បង្កើនល្បឿនរត់ (Fast Forward)</button>
+        <button class="btn-pause" id="pauseBtn">⏸ ផ្អាក</button>
+        <button id="resetBtn">🔄 ត្រឡប់ដើម</button>
+        <button id="solutionBtn">📖 បង្ហាញដំណោះស្រាយ</button>
+    </div>
+
+    <div class="status-bar" id="statusText">រង់ចាំចាប់ផ្តើម...</div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div id="solutionBox" class="solution-box" style="display: none;">
+        <h3>ដំណោះស្រាយ</h3>
+        <p><strong>បម្រាប់៖</strong> $m = 75.0 \text{ kg}$, កម្ពស់ ១ ជើង $h = 80 \times 0.150 = 12.0 \text{ m}$។ រយៈពេល $t = 65.0 \text{ s}$។ ទិន្នផល $\eta = 0.20$។ ខ្លាញ់ $1 \text{ g} = 9.00 \text{ kcal} = 9 \times 4190 = 37,710 \text{ J}$។</p>
+        
+        <p><strong>ក. ចំនួនដងដែលត្រូវរត់ដើម្បីស្រកខ្លាញ់ 1.00 kg (1000 g)៖</strong></p>
+        <ul>
+            <li>កម្មន្តបានការក្នុង ១ ជើង៖ $W = mgh = 75.0 \times 9.8 \times 12.0 = 8820 \text{ J}$</li>
+            <li>ថាមពលសរុបដែលរាងកាយត្រូវបញ្ចេញក្នុង ១ ជើង៖ $E_{\text{trip}} = \frac{W}{\eta} = \frac{8820}{0.20} = 44,100 \text{ J}$</li>
+            <li>ថាមពលមានក្នុងខ្លាញ់ 1 kg ៖ $E_{\text{fat}} = 1000 \times 37,710 = 37,710,000 \text{ J}$</li>
+            <li>ចំនួនជើងដែលត្រូវរត់៖ $n = \frac{E_{\text{fat}}}{E_{\text{trip}}} = \frac{37,710,000}{44,100} \approx$ <span class="highlight">855 ដង</span></li>
+        </ul>
+
+        <p><strong>ខ. កំណត់អានុភាពបានការមធ្យម៖</strong></p>
+        <ul>
+            <li>គិតជា វ៉ាត់ (W) ៖ $P = \frac{W}{t} = \frac{8820}{65.0} \approx 135.69 \text{ W} \approx$ <span class="highlight">136 W</span></li>
+            <li>គិតជា សេះ (hp) ៖ $P = \frac{135.69}{746} \approx$ <span class="highlight">0.182 hp</span></li>
+        </ul>
+
+        <div class="conclusion-box">
+            <strong>គ. តើសកម្មភាពនេះជាវិធីល្អឬទេ?</strong><br>
+            <strong>ចម្លើយ៖</strong> វាមិនមែនជាវិធីល្អទេ។ ការរត់ឡើងជណ្តើរ ៨៥៥ ដង ត្រូវចំណាយពេល $855 \times 65.0 \text{ s} = 55,575 \text{ s}$ (ស្មើនឹងប្រហែល <strong>១៥.៤ ម៉ោង</strong> នៃការរត់បន្តបន្ទាប់គ្នាគ្មានឈប់)។ នេះជារឿងដែលសឹងតែមិនអាចទៅរួចសម្រាប់មនុស្សធម្មតា ហើយអាចបណ្តាលឱ្យគ្រោះថ្នាក់ដល់សុខភាព។ ការសម្រកទម្ងន់ត្រឹមត្រូវគឺត្រូវរួមបញ្ចូលការតមអាហារផងដែរ។
+        </div>
+    </div>
+</div>
+
+<script>
+    // -----------------------------------------------------
+    // ១. បង្កើតកាំជណ្តើរ (៤០ កាំតំណាង)
+    // -----------------------------------------------------
+    const stairPolygon = document.getElementById('stairPolygon');
+    // បានទាញ endX មកត្រឹម 820 ដើម្បីទុកចន្លោះឱ្យបន្ទាត់រង្វាស់កម្ពស់
+    const startX = 60, endX = 820;   
+    const startY = 360, endY = 60;   
+    const numSteps = 40;             
+    
+    let stepW = (endX - startX) / numSteps;
+    let stepH = (startY - endY) / numSteps;
+    
+    let points = `0,380 0,360 ${startX},360 `; 
+    for(let i=0; i<numSteps; i++) {
+        points += `${startX + i*stepW},${startY - (i+1)*stepH} `;
+        points += `${startX + (i+1)*stepW},${startY - (i+1)*stepH} `;
+    }
+    points += `1000,${endY} 1000,380`;
+    stairPolygon.setAttribute('points', points);
+
+    // -----------------------------------------------------
+    // ២. ទិន្នន័យរូបវិទ្យា និង Animation
+    // -----------------------------------------------------
+    const W_per_trip = 8820; 
+    const E_per_trip = 44100; 
+    const fat_j_per_g = 37710; 
+    const total_fat_goal = 1000; 
+    const target_trips = 37710000 / 44100; // ~855.1
+
+    let currentTrips = 0;   // ទិន្នន័យពិតប្រាកដ
+    let visualProgress = 0; // ទិន្នន័យសម្រាប់តែបង្ហាញចលនាឱ្យរលូន
+    let timeSeconds = 0;
+    
+    let isRunning = false;
+    let animationFrameId;
+    let lastTimeMs = 0;
+    let speedMultiplier = 1; 
+
+    const studentEl = document.getElementById('student');
+    const tripsDisp = document.getElementById('liveTrips');
+    const timeDisp = document.getElementById('liveTime');
+    const energyDisp = document.getElementById('liveEnergy');
+    const fatDisp = document.getElementById('liveFat');
+    const fatBar = document.getElementById('fatBar');
+    const statusText = document.getElementById('statusText');
+    const solutionBtn = document.getElementById('solutionBtn');
+    const solutionBox = document.getElementById('solutionBox');
+
+    function updateUI() {
+        // អាប់ដេតលេខទិន្នន័យ
+        let currentEnergy = currentTrips * E_per_trip;
+        let currentFat = currentEnergy / fat_j_per_g;
+        
+        tripsDisp.innerText = Math.floor(currentTrips);
+        timeDisp.innerText = (timeSeconds / 60).toFixed(1); 
+        energyDisp.innerText = Math.round(currentEnergy).toLocaleString();
+        fatDisp.innerText = currentFat.toFixed(1);
+        
+        let percent = (currentFat / total_fat_goal) * 100;
+        if(percent > 100) percent = 100;
+        fatBar.style.width = `${percent}%`;
+
+        // អាប់ដេតចលនាមនុស្សដោយផ្អែកលើ visualProgress ជំនួស currentTrips 
+        let posX, posY, scaleX;
+        
+        if (visualProgress < 0.8) {
+            // រត់ឡើង (80% នៃពេល)
+            let p = visualProgress / 0.8; 
+            posX = startX - 20 + p * (endX - startX); 
+            posY = p * (startY - endY); 
+            scaleX = -1; // បែរមុខទៅស្តាំ
+        } else {
+            // រត់ចុះ (20% នៃពេល)
+            let p = (visualProgress - 0.8) / 0.2; 
+            posX = (endX - 20) - p * (endX - startX);
+            posY = (startY - endY) - p * (startY - endY);
+            scaleX = 1; // បែរមុខទៅឆ្វេង
+        }
+
+        studentEl.style.transform = `translate(${posX}px, -${posY}px) scaleX(${scaleX})`;
+    }
+
+    function animate(timestamp) {
+        if (!lastTimeMs) lastTimeMs = timestamp;
+        let dt = (timestamp - lastTimeMs) / 1000;
+        if (dt > 0.1) dt = 0.1;
+        lastTimeMs = timestamp;
+
+        if (isRunning) {
+            // ល្បឿន Simulation: ល្បឿនធម្មតា 1 ជើងស៊ីពេល 2.5 វិនាទី (0.4 ជើង/s)
+            let tripsPerSecondSim = 0.4; 
+            let tripsToAdd = tripsPerSecondSim * speedMultiplier * dt;
+            
+            // កើនទិន្នន័យពិតប្រាកដ
+            currentTrips += tripsToAdd;
+            timeSeconds += (tripsToAdd * 65.0);
+
+            // -----------------------------------------------------------------
+            // ជួសជុលបញ្ហាជាប់គាំង (Aliasing Effect) ដោយបំបែក visualProgress 
+            // -----------------------------------------------------------------
+            if (speedMultiplier > 1) {
+                // នៅពេលចុច Fast Forward យើងកំណត់ឱ្យរូបភាពរត់ត្រឹម ២ ជើងក្នុងមួយវិនាទី
+                // ដើម្បីកុំឱ្យវាលោតញាប់ពេកទាល់តែភ្នែកមើលមិនទាន់
+                visualProgress = (visualProgress + 2 * dt) % 1;
+            } else {
+                // ល្បឿនធម្មតា ប្រើប្រាស់លេខពិតប្រាកដ
+                visualProgress = currentTrips % 1;
+            }
+
+            if (currentTrips >= target_trips) {
+                currentTrips = target_trips;
+                visualProgress = 0; // ពេលចប់ ត្រឡប់មកឈរនៅគល់ជណ្តើរ
+                isRunning = false;
+                statusText.innerHTML = `✅ អបអរសាទរ! សម្រកបាន ១ គីឡូក្រាមហើយ! ប៉ុន្តែត្រូវចំណាយពេលរហូតដល់ <strong>${(timeSeconds/3600).toFixed(1)} ម៉ោង</strong> ទើបសម្រេច!`;
+                statusText.style.borderLeftColor = "#e65100";
+            }
+
+            updateUI();
+
+            if (isRunning) {
+                animationFrameId = requestAnimationFrame(animate);
+            }
+        }
+    }
+
+    document.getElementById('playBtn').addEventListener('click', () => {
+        if (!isRunning && currentTrips < target_trips) {
+            isRunning = true;
+            speedMultiplier = 1; 
+            lastTimeMs = performance.now();
+            statusText.innerText = "កំពុងរត់ឡើងជណ្តើរ... សង្កេតមើលរបារជាតិខ្លាញ់តើវាឡើងយឺតប៉ុណ្ណា!";
+            statusText.style.borderLeftColor = "#28a745";
+            animationFrameId = requestAnimationFrame(animate);
+        }
+    });
+
+    document.getElementById('fastBtn').addEventListener('click', () => {
+        if (!isRunning && currentTrips < target_trips) {
+            isRunning = true;
+        }
+        speedMultiplier = 200; // កំណត់ល្បឿនគណនាឱ្យឡើងដល់ x200 ដើម្បីឆាប់ចប់
+        lastTimeMs = performance.now();
+        statusText.innerText = "⏩ កំពុងគណនាក្នុងល្បឿន x200 ដង! (Fast Forward)";
+        statusText.style.borderLeftColor = "#d32f2f";
+        if(isRunning) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = requestAnimationFrame(animate);
+        }
+    });
+
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+        isRunning = false;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        statusText.innerText = "⏸ បានផ្អាកសកម្មភាព។";
+        statusText.style.borderLeftColor = "#ffc107";
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        isRunning = false;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        currentTrips = 0;
+        visualProgress = 0;
+        timeSeconds = 0;
+        updateUI();
+        statusText.innerText = "រង់ចាំចាប់ផ្តើម...";
+        statusText.style.borderLeftColor = "#ccc";
+    });
+
+    solutionBtn.addEventListener('click', () => {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+            solutionBtn.innerHTML = '📖 លាក់ដំណោះស្រាយ';
+        } else {
+            solutionBox.style.display = 'none';
+            solutionBtn.innerHTML = '📖 បង្ហាញដំណោះស្រាយ';
+        }
+    });
+
+    // ហៅអនុគមន៍ដើម្បីកំណត់ទីតាំងដើមពេល Load
+    updateUI();
+</script>
+
+</body>
+</html>

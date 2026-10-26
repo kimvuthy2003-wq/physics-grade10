@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ៥ទំព័រ១២១</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .math-font { font-family: 'Lora', serif; }
+
+        /* Transitions for solution box */
+        .solution-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out;
+            opacity: 0;
+        }
+        .solution-content.open {
+            max-height: 800px;
+            opacity: 1;
+        }
+
+        /* Copper Pot Styles */
+        .copper-pot {
+            border: 8px solid #b45309; /* amber-700 */
+            border-top: none;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            background: linear-gradient(to bottom, #fffbeb, #fef3c7);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            width: 160px;
+            height: 160px;
+        }
+
+        /* Water inside pot (Pre-filled) */
+        .water-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(59, 130, 246, 0.85); /* blue-500 */
+            height: 70%;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.3);
+        }
+
+        /* Heat Transfer Arrows Base Style */
+        .heat-arrow {
+            position: absolute;
+            opacity: 0;
+            color: rgba(239, 68, 68, 0.9); /* red-500 */
+            z-index: 10;
+        }
+
+        /* Arrow Animations */
+        .animate-arrow-left { animation: moveLeft 1.2s infinite ease-out; }
+        .animate-arrow-right { animation: moveRight 1.2s infinite ease-out; }
+        .animate-arrow-down { animation: moveDown 1.2s infinite ease-out; }
+
+        @keyframes moveLeft {
+            0% { transform: translateX(15px); opacity: 0; }
+            40% { opacity: 1; }
+            100% { transform: translateX(-15px); opacity: 0; }
+        }
+        @keyframes moveRight {
+            0% { transform: translateX(-15px); opacity: 0; }
+            40% { opacity: 1; }
+            100% { transform: translateX(15px); opacity: 0; }
+        }
+        @keyframes moveDown {
+            0% { transform: translateY(-15px); opacity: 0; }
+            40% { opacity: 1; }
+            100% { transform: translateY(15px); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center min-h-screen">
+
+    <div class="max-w-6xl w-full">
+        
+        <!-- Header & Problem Statement -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+            <div class="p-6 md:p-8">
+                <div class="text-slate-800 leading-relaxed text-lg lg:text-xl space-y-4">
+                    <p class="font-medium leading-9">
+                        <span class="text-indigo-600 font-bold math-font mr-2">5.</span> 
+                        ផើងមួយធ្វើពីទង់ដែងមានម៉ាស <span class="math-font font-semibold text-amber-700">50.0 g</span> នៅសីតុណ្ហភាព <span class="math-font font-semibold text-amber-700">10°C</span> ។ គេចាក់ទឹក <span class="math-font font-semibold text-blue-600">19.0 g</span> នៅសីតុណ្ហភាព <span class="math-font font-semibold text-blue-600">50.0°C</span> ចូលផើងនេះ គេបានសីតុណ្ហភាពសម្រេច <span class="math-font font-semibold text-emerald-600">42.0°C</span> ។ គណនាកម្ដៅម៉ាសនៃទង់ដែង ។
+                    </p>
+                </div>
+            </div>
+
+            <!-- Solution Toggle Button -->
+            <div class="px-6 md:px-8 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+                <button id="btnToggleSol" class="text-slate-700 hover:text-indigo-700 px-5 py-2.5 rounded-lg bg-white border border-slate-300 hover:bg-indigo-50 transition font-medium flex items-center gap-2 shadow-sm">
+                    <span id="solBtnText">បង្ហាញដំណោះស្រាយ</span>
+                    <svg id="solIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+            <!-- Solution Content -->
+            <div id="solutionDiv" class="solution-content border-t border-slate-200 bg-white">
+                <div class="p-6 md:p-8 text-slate-800 text-lg space-y-5 bg-slate-50/50">
+                    <h3 class="font-bold text-xl text-indigo-800 border-b border-indigo-100 pb-2 mb-4">ចម្លើយ៖ គណនាកម្ដៅម៉ាសនៃទង់ដែង c<sub class="text-sm">1</sub></h3>
+                    
+                    <div class="math-font space-y-4 text-slate-700 text-lg md:pl-4">
+                        <p class="font-bold font-['Kantumruy_Pro'] text-slate-800">តាមច្បាប់រក្សាថាមពលកម្ដៅ (កម្ដៅបោះបង់ = កម្ដៅស្រូប):</p>
+                        <p class="text-xl font-bold text-indigo-900 bg-indigo-50 inline-block px-4 py-2 rounded-lg border border-indigo-100">Q<sub class="text-sm">lost</sub> = Q<sub class="text-sm">gained</sub></p>
+                        
+                        <div class="pl-4 border-l-4 border-slate-300 space-y-3 mt-4">
+                            <p>m<sub class="text-sm">2</sub> &times; c<sub class="text-sm">w</sub> &times; (T<sub class="text-sm">i2</sub> - T<sub class="text-sm">f</sub>) = m<sub class="text-sm">1</sub> &times; c<sub class="text-sm">1</sub> &times; (T<sub class="text-sm">f</sub> - T<sub class="text-sm">i1</sub>)</p>
+                            <p>0.019 &times; 4186 &times; (50.0 - 42.0) = 0.050 &times; c<sub class="text-sm">1</sub> &times; (42.0 - 10.0)</p>
+                            <p>636.272 = 1.6 &times; c<sub class="text-sm">1</sub></p>
+                            <p class="font-bold text-2xl text-emerald-600 mt-4 border-2 border-emerald-200 inline-block px-4 py-2 bg-white rounded-lg shadow-sm">
+                                c<sub class="text-sm">1</sub> = 397.67 J/kg&cdot;&deg;C
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                    កម្មវិធីពិសោធន៍
+                </h2>
+            </div>
+            
+            <div class="flex flex-col md:flex-row w-full">
+                
+                <!-- Left Column: Experimental Setup -->
+                <div class="w-full md:w-1/2 p-8 border-b md:border-b-0 md:border-r border-slate-200 flex flex-col items-center justify-center relative min-h-[350px] bg-slate-50/30">
+                    
+                    <!-- Temp Labels -->
+                    <div class="absolute top-4 left-4 bg-blue-50 border border-blue-200 px-3 py-2 rounded-lg shadow-sm">
+                        <p class="text-sm font-bold text-blue-800">សីតុណ្ហភាពទឹក (Water)</p>
+                        <p class="text-2xl font-bold text-blue-600 math-font"><span id="lblTempW">50.0</span> &deg;C</p>
+                    </div>
+                    
+                    <div class="absolute top-4 right-4 bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg shadow-sm text-right">
+                        <p class="text-sm font-bold text-amber-900">សីតុណ្ហភាពផើងទង់ដែង</p>
+                        <p class="text-2xl font-bold text-amber-700 math-font"><span id="lblTempC">10.0</span> &deg;C</p>
+                    </div>
+
+                    <!-- 2D Drawing Setup -->
+                    <div class="relative flex justify-center items-center mt-12 w-full h-48">
+                        
+                        <!-- Wrapper for Pot and Label -->
+                        <div class="relative">
+                            
+                            <!-- Copper Pot -->
+                            <div class="copper-pot flex flex-col justify-end">
+                                <!-- Water inside the pot -->
+                                <div class="water-fill relative">
+                                    
+                                    <!-- Heat Flow Arrows (Hidden by default) -->
+                                    <div id="arrow-left" class="heat-arrow" style="top: 40%; left: 5px;">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                                    </div>
+                                    <div id="arrow-right" class="heat-arrow" style="top: 40%; right: 5px;">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                    </div>
+                                    <div id="arrow-down" class="heat-arrow" style="bottom: 5px; left: 50%; transform: translateX(-50%);">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- "Cu" text label outside the pot -->
+                            <div class="absolute text-red-600 font-bold math-font" style="top: 30%; right: -35px; font-size: 1.75rem;">
+                                Cu
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Right Column: Chart.js Graph -->
+                <div class="w-full md:w-1/2 p-4 flex items-center justify-center min-h-[350px]">
+                    <div class="w-full h-full relative" style="min-height: 300px;">
+                        <canvas id="tempChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="p-6 bg-white border-t border-slate-200 flex justify-center">
+                <button id="btnStart" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-xl shadow-md hover:shadow-lg font-bold text-lg transition flex justify-center items-center gap-3 transform hover:-translate-y-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span id="txtBtnStart">ចាប់ផ្ដើមពិសោធន៍</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Logic and Simulation Scripts -->
+    <script>
+        // 1. Solution Toggle Logic
+        const btnToggleSol = document.getElementById('btnToggleSol');
+        const solDiv = document.getElementById('solutionDiv');
+        const solIcon = document.getElementById('solIcon');
+        const solBtnText = document.getElementById('solBtnText');
+
+        btnToggleSol.addEventListener('click', () => {
+            solDiv.classList.toggle('open');
+            if (solDiv.classList.contains('open')) {
+                solIcon.classList.add('rotate-180');
+                solBtnText.textContent = 'លាក់ដំណោះស្រាយ';
+            } else {
+                solIcon.classList.remove('rotate-180');
+                solBtnText.textContent = 'បង្ហាញដំណោះស្រាយ';
+            }
+        });
+
+        // 2. Chart.js Setup
+        const ctx = document.getElementById('tempChart').getContext('2d');
+        let tempChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [0], // Time in seconds
+                datasets: [
+                    {
+                        label: 'សីតុណ្ហភាពទឹក (°C)',
+                        data: [50],
+                        borderColor: '#3b82f6', // blue-500
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'សីតុណ្ហភាពទង់ដែង (°C)',
+                        data: [10],
+                        borderColor: '#b45309', // amber-700
+                        backgroundColor: 'rgba(180, 83, 9, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false, // Turn off default chart animation to control it manually
+                scales: {
+                    x: {
+                        title: { display: true, text: 'ពេលវេលា (s)', font: { family: 'Kantumruy Pro', size: 14 } },
+                        min: 0,
+                        max: 4 // Max duration 4 seconds
+                    },
+                    y: {
+                        title: { display: true, text: 'សីតុណ្ហភាព (°C)', font: { family: 'Kantumruy Pro', size: 14 } },
+                        min: 0,
+                        max: 60
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: { font: { family: 'Kantumruy Pro', size: 14 } }
+                    },
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+
+        // 3. Animation and Simulation Logic
+        const btnStart = document.getElementById('btnStart');
+        const txtBtnStart = document.getElementById('txtBtnStart');
+        
+        const arrowLeft = document.getElementById('arrow-left');
+        const arrowRight = document.getElementById('arrow-right');
+        const arrowDown = document.getElementById('arrow-down');
+        
+        const lblTempW = document.getElementById('lblTempW');
+        const lblTempC = document.getElementById('lblTempC');
+
+        let animationFrameId;
+        let isAnimating = false;
+
+        // Easing function: easeOutCubic
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+
+        function resetSimulation() {
+            cancelAnimationFrame(animationFrameId);
+            
+            // Stop arrow animations
+            arrowLeft.classList.remove('animate-arrow-left');
+            arrowRight.classList.remove('animate-arrow-right');
+            arrowDown.classList.remove('animate-arrow-down');
+            
+            // Reset labels
+            lblTempW.textContent = '50.0';
+            lblTempC.textContent = '10.0';
+
+            // Reset Chart Data
+            tempChart.data.labels = [0];
+            tempChart.data.datasets[0].data = [50];
+            tempChart.data.datasets[1].data = [10];
+            tempChart.update();
+        }
+
+        btnStart.addEventListener('click', () => {
+            if (isAnimating) return;
+            
+            resetSimulation();
+            isAnimating = true;
+            btnStart.classList.add('opacity-75', 'cursor-not-allowed');
+            txtBtnStart.textContent = 'កំពុងដំណើរការ...';
+
+            // Start Heat Arrows animation
+            arrowLeft.classList.add('animate-arrow-left');
+            arrowRight.classList.add('animate-arrow-right');
+            arrowDown.classList.add('animate-arrow-down');
+
+            // Start JS Animation Loop for Temp and Chart
+            const duration = 4000; // 4 seconds total
+            const startTime = performance.now();
+
+            const initWaterTemp = 50.0;
+            const initCopperTemp = 10.0;
+            const finalTemp = 42.0;
+
+            function updateFrame(currentTime) {
+                const elapsed = currentTime - startTime;
+                let progress = Math.min(elapsed / duration, 1);
+                
+                // Use ease function to simulate realistic heat exchange curve
+                const easeProgress = easeOutCubic(progress);
+
+                // Calculate current temps
+                const curWaterTemp = initWaterTemp - ((initWaterTemp - finalTemp) * easeProgress);
+                const curCopperTemp = initCopperTemp + ((finalTemp - initCopperTemp) * easeProgress);
+
+                // Update Labels
+                lblTempW.textContent = curWaterTemp.toFixed(1);
+                lblTempC.textContent = curCopperTemp.toFixed(1);
+
+                // Update Chart (Add data point every ~50ms)
+                const timeSec = (elapsed / 1000).toFixed(2);
+                const lastLabel = tempChart.data.labels[tempChart.data.labels.length - 1];
+                
+                if (timeSec - lastLabel >= 0.05 || progress === 1) {
+                    tempChart.data.labels.push(timeSec);
+                    tempChart.data.datasets[0].data.push(curWaterTemp);
+                    tempChart.data.datasets[1].data.push(curCopperTemp);
+                    tempChart.update();
+                }
+
+                if (progress < 1) {
+                    animationFrameId = requestAnimationFrame(updateFrame);
+                } else {
+                    // Animation complete
+                    isAnimating = false;
+                    btnStart.classList.remove('opacity-75', 'cursor-not-allowed');
+                    txtBtnStart.textContent = 'ចាក់ឡើងវិញ (Replay)';
+                    
+                    // Stop heat arrows when thermal equilibrium is reached
+                    arrowLeft.classList.remove('animate-arrow-left');
+                    arrowRight.classList.remove('animate-arrow-right');
+                    arrowDown.classList.remove('animate-arrow-down');
+                }
+            }
+
+            animationFrameId = requestAnimationFrame(updateFrame);
+        });
+
+    </script>
+</body>
+</html>

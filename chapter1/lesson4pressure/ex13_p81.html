@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី១៣៖ លក្ខខណ្ឌអណ្តែតនៃផ្ទិលអាលុយមីញ៉ូម</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; max-width: 500px; height: auto;
+            background: #e0f7fa; border: 2px solid #0277bd;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        @media (min-width: 600px) {
+            .controls-grid { grid-template-columns: 1fr 1fr 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        button {
+            background: #17a2b8; color: white; padding: 12px 24px; font-size: 18px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s; width: 100%; margin-bottom: 20px;
+        }
+        button:hover { filter: brightness(1.1); }
+        #btnSetValues { background: #28a745; margin-top: 10px;}
+
+        .dashboard {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 12px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 14px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 20px; display: block; margin-top: 8px; font-family: Arial, sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        
+        .note-box { 
+            background: #e8f5e9; border-left: 6px solid #28a745; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #1b5e20; 
+        }
+
+        .text-outline { text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>១៣.</strong> គេសន្មតថាផ្ទិលទឹកមួយធ្វើពីអាលុយមីញ៉ូមមានម៉ាស 120 g បាតរាងជាស៊ីឡាំង មានអង្កត់ផ្ចិត 17.0 cm និងកម្ពស់ 7.00 cm ។ បើគេដាក់វាចូលទៅក្នុងទឹក តើវាអណ្តែតលើទឹកឬទេ? ចូរពន្យល់។ គេឱ្យម៉ាសមាឌទឹក $\rho = 10^3 \text{ kg/m}^3$ ។
+    </div>
+
+    <button id="btnToggleSolution">📖 បង្ហាញ / លាក់ដំណោះស្រាយ</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box" id="theoryNote">
+            💡 <strong>គោលការណ៍៖</strong> ដើម្បីដឹងថាអណ្តែត ឬលិច យើងត្រូវរកម៉ាសមាឌរួម (Apparent Density, $\rho'$) នៃផ្ទិល រួចប្រៀបធៀបជាមួយម៉ាសមាឌទឹក ($\rho$)។
+        </div>
+
+        <h3>ដំណោះស្រាយលំហាត់គំរូ</h3>
+        
+        <div id="mathContainer">
+            <p><strong>១. គណនាមាឌសរុបនៃផ្ទិលរាងស៊ីឡាំង ($V$) ៖</strong></p>
+            <ul style="font-size: 16px; font-family: Arial, sans-serif;">
+                <li>d = 17.0 cm = 0.17 m  $\implies r = 0.085 \text{ m}$</li>
+                <li>h = 7.00 cm = 0.070 m</li>
+                <li>m = 120 g = 0.120 kg</li>
+            </ul>
+            <div id="mathLine1">$$ V = \pi \cdot r^2 \cdot h = 3.1416 \times (0.085)^2 \times 0.070 \approx 0.001589 \text{ m}^3 $$</div>
+
+            <p><strong>២. គណនាម៉ាសមាឌរួមរបស់ផ្ទិល ($\rho'$) ៖</strong></p>
+            <div id="mathLine2">$$ \rho' = \frac{m}{V} = \frac{0.120}{0.001589} \approx 75.5 \text{ kg/m}^3 $$</div>
+            
+            <p><strong>៣. សន្និដ្ឋាន ៖</strong></p>
+            <div id="mathLine3" style="color: #28a745; font-weight: bold; text-align: center; margin-top: 15px;">
+                $$ \rho' = 75.5 \text{ kg/m}^3 \quad \text{តូចជាង} \quad \rho = 1000 \text{ kg/m}^3 $$
+                ហេតុនេះ ផ្ទិលទឹកអណ្តែតលើទឹក!
+            </div>
+        </div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 500 450" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#4fc3f7" stop-opacity="0.7"/>
+                    <stop offset="100%" stop-color="#0277bd" stop-opacity="0.9"/>
+                </linearGradient>
+                <linearGradient id="alumGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#b0bec5"/>
+                    <stop offset="50%" stop-color="#eceff1"/>
+                    <stop offset="100%" stop-color="#90a4ae"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ផ្ទៃទឹក -->
+            <rect x="0" y="200" width="500" height="250" fill="url(#waterGrad)" />
+            <line x1="0" y1="200" x2="500" y2="200" stroke="#0288d1" stroke-width="2" />
+            <path d="M 0 200 Q 25 195 50 200 T 100 200 T 150 200 T 200 200 T 250 200 T 300 200 T 350 200 T 400 200 T 450 200 T 500 200" fill="none" stroke="#e1f5fe" stroke-width="2" opacity="0.6"/>
+
+            <!-- ផ្ទិលអាលុយមីញ៉ូម (Group ផ្លាស់ទីឡើងចុះ) -->
+            <g id="bowlGroup" transform="translate(250, 200)">
+                <!-- គូសរាងផ្ទិល (U-shape cross section) -->
+                <!-- នឹង Update width/height តាម JS -->
+                <path id="bowlShape" d="M -85 -70 L -85 0 L 85 0 L 85 -70 L 75 -70 L 75 -10 L -75 -10 L -75 -70 Z" fill="url(#alumGrad)" stroke="#546e7a" stroke-width="2"/>
+                
+                <text id="lblM" x="0" y="-30" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#111" class="text-outline">m</text>
+
+                <!-- វិមាត្រ d និង h -->
+                <line id="lineD" x1="-85" y1="-85" x2="85" y2="-85" stroke="#6f42c1" stroke-width="2" stroke-dasharray="4,4"/>
+                <polygon id="arrD1" points="-85,-85 -75,-89 -75,-81" fill="#6f42c1"/>
+                <polygon id="arrD2" points="85,-85 75,-89 75,-81" fill="#6f42c1"/>
+                <text id="txtD" x="0" y="-95" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#6f42c1" class="text-outline">d</text>
+
+                <line id="lineH" x1="100" y1="-70" x2="100" y2="0" stroke="#d32f2f" stroke-width="2" stroke-dasharray="4,4"/>
+                <polygon id="arrH1" points="100,-70 96,-60 104,-60" fill="#d32f2f"/>
+                <polygon id="arrH2" points="100,0 96,-10 104,-10" fill="#d32f2f"/>
+                <text id="txtH" x="110" y="-30" font-family="Arial" font-weight="bold" font-size="14" fill="#d32f2f" class="text-outline">h</text>
+            </g>
+
+            <!-- បន្ទាត់វាស់ជម្រៅលិច hw -->
+            <g id="hwGroup" style="opacity: 1;">
+                <line id="hwLine" x1="130" y1="200" x2="130" y2="205" stroke="#007bff" stroke-width="2"/>
+                <polygon id="hwArr" points="130,205 126,195 134,195" fill="#007bff"/>
+                <text id="txtHw" x="100" y="205" font-family="Arial" font-weight="bold" font-size="14" fill="#007bff" dominant-baseline="middle">h_w</text>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            ម៉ាសផ្ទិល $m$ (គិតជា g):<br>
+            <span id="valM" style="color: #111; font-size:22px; font-family: Arial;">120</span> g
+            <input type="range" id="sliderM" min="50" max="2000" value="120" step="10">
+        </div>
+        <div class="slider-box">
+            អង្កត់ផ្ចិតបាត $d$ (គិតជា cm):<br>
+            <span id="valD" style="color: #6f42c1; font-size:22px; font-family: Arial;">17.0</span> cm
+            <input type="range" id="sliderD" min="10.0" max="30.0" value="17.0" step="0.5">
+        </div>
+        <div class="slider-box">
+            កម្ពស់ផ្ទិល $h$ (គិតជា cm):<br>
+            <span id="valH" style="color: #d32f2f; font-size:22px; font-family: Arial;">7.00</span> cm
+            <input type="range" id="sliderH" min="5.0" max="20.0" value="7.0" step="0.5">
+        </div>
+    </div>
+    <button id="btnSetValues">🎯 កំណត់តម្លៃដើមតាមលំហាត់ (120g, 17cm, 7cm)</button>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Grid) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #6f42c1;">ម៉ាសមាឌផ្ទិល $\rho'$<br><span id="liveRho">75.5 kg/m³</span></div>
+        <div class="data-box" style="border-top: 4px solid #007bff;">ជម្រៅលិចទឹក $h_w$<br><span id="liveHw">0.53 cm</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">ស្ថានភាព<br><span id="liveStatus" style="font-family: 'Siemreap', sans-serif; color: #28a745;">អណ្តែត</span></div>
+    </div>
+
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > -->
+<script>
+    var sM = document.getElementById('sliderM');
+    var sD = document.getElementById('sliderD');
+    var sH = document.getElementById('sliderH');
+
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+    var btnSetValues = document.getElementById('btnSetValues');
+
+    var bowlGroup = document.getElementById('bowlGroup');
+    var bowlShape = document.getElementById('bowlShape');
+    
+    var lineD = document.getElementById('lineD');
+    var arrD1 = document.getElementById('arrD1');
+    var arrD2 = document.getElementById('arrD2');
+    var txtD = document.getElementById('txtD');
+    
+    var lineH = document.getElementById('lineH');
+    var arrH1 = document.getElementById('arrH1');
+    var arrH2 = document.getElementById('arrH2');
+    var txtH = document.getElementById('txtH');
+
+    var hwGroup = document.getElementById('hwGroup');
+    var hwLine = document.getElementById('hwLine');
+    var hwArr = document.getElementById('hwArr');
+    var txtHw = document.getElementById('txtHw');
+
+    var rho_water = 1000; // kg/m^3
+    var waterSurfaceY = 200;
+    var tankBottomY = 440;
+    
+    // Scale លើអេក្រង់: 1cm = 6px
+    var pxPerCm = 6; 
+
+    var targetBowlY = 200; 
+    var currentBowlY = 200;
+    var isAnimating = false;
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    btnSetValues.addEventListener('click', function() {
+        sM.value = 120;
+        sD.value = 17.0;
+        sH.value = 7.0;
+        updatePhysics();
+    });
+
+    function loopAnimation() {
+        var diff = targetBowlY - currentBowlY;
+        if (diff.toFixed(1) !== "0.0" && diff.toFixed(1) !== "-0.0") {
+            currentBowlY += diff * 0.15; 
+            drawGraphics();
+            requestAnimationFrame(loopAnimation);
+        } else {
+            currentBowlY = targetBowlY;
+            drawGraphics();
+            isAnimating = false;
+        }
+    }
+
+    function drawGraphics() {
+        var d_cm = parseFloat(sD.value);
+        var h_cm = parseFloat(sH.value);
+        
+        var w_px = d_cm * pxPerCm;
+        var h_px = h_cm * pxPerCm;
+        var half_w = w_px / 2;
+
+        // គូសរាងផ្ទិល (U-shape)
+        var thickness = 6; // កម្រាស់ជញ្ជាំងផ្ទិល 6px
+        var pathData = "M " + (-half_w) + " " + (-h_px) + 
+                       " L " + (-half_w) + " 0" + 
+                       " L " + half_w + " 0" + 
+                       " L " + half_w + " " + (-h_px) + 
+                       " L " + (half_w - thickness) + " " + (-h_px) + 
+                       " L " + (half_w - thickness) + " " + (-thickness) + 
+                       " L " + (-half_w + thickness) + " " + (-thickness) + 
+                       " L " + (-half_w + thickness) + " " + (-h_px) + " Z";
+        bowlShape.setAttribute("d", pathData);
+
+        // ផ្លាស់ទី Group
+        bowlGroup.setAttribute("transform", "translate(250, " + currentBowlY + ")");
+
+        // អាប់ដេតវិមាត្រ D
+        lineD.setAttribute("x1", -half_w); lineD.setAttribute("x2", half_w);
+        lineD.setAttribute("y1", -h_px - 15); lineD.setAttribute("y2", -h_px - 15);
+        arrD1.setAttribute("points", (-half_w)+","+(-h_px-15) + " " + (-half_w+10)+","+(-h_px-19) + " " + (-half_w+10)+","+(-h_px-11));
+        arrD2.setAttribute("points", (half_w)+","+(-h_px-15) + " " + (half_w-10)+","+(-h_px-19) + " " + (half_w-10)+","+(-h_px-11));
+        txtD.setAttribute("y", -h_px - 25);
+
+        // អាប់ដេតវិមាត្រ H
+        var hX = half_w + 15;
+        lineH.setAttribute("x1", hX); lineH.setAttribute("x2", hX);
+        lineH.setAttribute("y1", -h_px); lineH.setAttribute("y2", 0);
+        arrH1.setAttribute("points", hX+","+(-h_px) + " " + (hX-4)+","+(-h_px+10) + " " + (hX+4)+","+(-h_px+10));
+        arrH2.setAttribute("points", hX+",0 " + (hX-4)+",-10 " + (hX+4)+",-10");
+        txtH.setAttribute("x", hX + 10);
+        txtH.setAttribute("y", -h_px/2 + 5);
+
+        // អាប់ដេត hw (ជម្រៅលិច)
+        var hw_px = currentBowlY - waterSurfaceY;
+        if (hw_px > 2 && currentBowlY !== tankBottomY) {
+            hwGroup.style.opacity = "1";
+            hwLine.setAttribute("y2", currentBowlY);
+            hwArr.setAttribute("points", "130," + currentBowlY + " 126," + (currentBowlY-10) + " 134," + (currentBowlY-10));
+            txtHw.setAttribute("y", waterSurfaceY + (hw_px/2));
+        } else {
+            hwGroup.style.opacity = "0";
+        }
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var m_g = parseFloat(sM.value);
+        var d_cm = parseFloat(sD.value);
+        var h_cm = parseFloat(sH.value);
+
+        document.getElementById('valM').innerText = m_g;
+        document.getElementById('valD').innerText = d_cm.toFixed(1);
+        document.getElementById('valH').innerText = h_cm.toFixed(2);
+
+        var m_kg = m_g / 1000;
+        var d_m = d_cm / 100;
+        var h_m = h_cm / 100;
+        var r_m = d_m / 2;
+
+        var vol_m3 = 3.1416 * Math.pow(r_m, 2) * h_m;
+        var rho_prime = m_kg / vol_m3;
+
+        // លក្ខខណ្ឌអណ្តែត: rho_prime <= rho_water
+        var isFloating = (Math.max(rho_prime, rho_water) === rho_water);
+        
+        var statusTxt = "";
+        var hw_cm = 0;
+
+        if (isFloating === true) {
+            // អណ្តែត: F_b = W => rho_w * V_sub = m => V_sub = m / rho_w
+            var v_sub_m3 = m_kg / rho_water;
+            var hw_m = v_sub_m3 / (3.1416 * Math.pow(r_m, 2));
+            hw_cm = hw_m * 100;
+            
+            targetBowlY = waterSurfaceY + (hw_cm * pxPerCm);
+            statusTxt = "អណ្តែត";
+            document.getElementById('liveStatus').style.color = "#28a745";
+            document.getElementById('theoryNote').innerHTML = "💡 <strong>ការវិភាគ៖</strong> ម៉ាសមាឌរួម ($\\rho'$) តូចជាងឬស្មើម៉ាសមាឌទឹក ($\\rho = 1000 \\text{ kg/m}^3$) ដូច្នេះវា <strong>អណ្តែត</strong> ។";
+            document.getElementById('theoryNote').style.borderLeftColor = "#28a745";
+        } else {
+            // លិច
+            targetBowlY = tankBottomY;
+            statusTxt = "លិចដល់បាត";
+            hw_cm = h_cm; // លិចកប់ទាំងអស់
+            document.getElementById('liveStatus').style.color = "#d32f2f";
+            document.getElementById('theoryNote').innerHTML = "💡 <strong>ការវិភាគ៖</strong> ម៉ាសមាឌរួម ($\\rho'$) ធំជាងម៉ាសមាឌទឹក ($\\rho = 1000 \\text{ kg/m}^3$) ដូច្នេះវា <strong>លិចដល់បាត</strong> ។";
+            document.getElementById('theoryNote').style.borderLeftColor = "#d32f2f";
+        }
+
+        document.getElementById('liveRho').innerText = rho_prime.toFixed(1) + " kg/m³";
+        document.getElementById('liveHw').innerText = hw_cm.toFixed(2) + " cm";
+        document.getElementById('liveStatus').innerText = statusTxt;
+
+        if (isAnimating === false) {
+            isAnimating = true;
+            loopAnimation();
+        }
+
+        // Update MathJax Safely
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            document.getElementById('mathLine1').innerHTML = "$$ V = \\pi \\cdot r^2 \\cdot h = 3.1416 \\times (" + r_m.toFixed(3) + ")^2 \\times " + h_m.toFixed(3) + " \\approx " + vol_m3.toFixed(6) + " \\text{ m}^3 $$";
+            document.getElementById('mathLine2').innerHTML = "$$ \\rho' = \\frac{m}{V} = \\frac{" + m_kg.toFixed(3) + "}{" + vol_m3.toFixed(6) + "} \\approx " + rho_prime.toFixed(1) + " \\text{ kg/m}^3 $$";
+            
+            var logicStr = "";
+            if (isFloating === true) {
+                logicStr = "$$ \\rho' = " + rho_prime.toFixed(1) + " \\text{ kg/m}^3 \\quad \\text{តូចជាង} \\quad \\rho = 1000 \\text{ kg/m}^3 $$ ហេតុនេះ ផ្ទិលទឹកអណ្តែតលើទឹក!";
+                document.getElementById('mathLine3').style.color = "#28a745";
+            } else {
+                logicStr = "$$ \\rho' = " + rho_prime.toFixed(1) + " \\text{ kg/m}^3 \\quad \\text{ធំជាង} \\quad \\rho = 1000 \\text{ kg/m}^3 $$ ហេតុនេះ ផ្ទិលទឹកលិចដល់បាត!";
+                document.getElementById('mathLine3').style.color = "#d32f2f";
+            }
+            document.getElementById('mathLine3').innerHTML = logicStr;
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    sM.addEventListener('input', updatePhysics);
+    sD.addEventListener('input', updatePhysics);
+    sH.addEventListener('input', updatePhysics);
+
+    updatePhysics();
+</script>
+
+</body>
+</html>

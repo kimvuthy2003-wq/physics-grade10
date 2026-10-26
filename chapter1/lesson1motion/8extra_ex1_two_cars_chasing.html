@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់បន្ថែម</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 900px;
+            width: 100%;
+        }
+        .problem-statement {
+            background: #e8f8f5;
+            padding: 15px 20px;
+            border-left: 5px solid #1abc9c;
+            border-radius: 5px;
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            text-align: justify;
+        }
+        canvas {
+            background-color: #e8f4f8;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            display: block;
+            margin: 0 auto 20px auto;
+            width: 100%;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        button {
+            font-family: 'Battambang', sans-serif;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            color: white;
+        }
+        #startBtn { background-color: #2ecc71; }
+        #startBtn:hover { background-color: #27ae60; }
+        #pauseBtn { background-color: #f39c12; }
+        #pauseBtn:hover { background-color: #d68910; }
+        #resetBtn { background-color: #e74c3c; }
+        #resetBtn:hover { background-color: #c0392b; }
+        
+        .dashboard {
+            display: flex;
+            justify-content: space-around;
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .data-box {
+            text-align: center;
+            font-size: 16px;
+        }
+        .data-box span {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2980b9;
+        }
+        .car-a-text { color: #2980b9; font-weight: bold;}
+        .car-b-text { color: #c0392b; font-weight: bold;}
+        .theory {
+            background: #fff3cd;
+            padding: 15px 20px;
+            border-left: 5px solid #ffc107;
+            border-radius: 4px;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>លំហាត់រថយន្តពីរដេញគ្នាតើនឺងជួបគ្នានៅត្រង់ណា</h2>
+        
+        <!-- ប្រធានលំហាត់ -->
+        <div class="problem-statement">
+            <strong>ប្រធានលំហាត់៖</strong><br>
+            រថយន្តពីរដូចគ្នាចាប់ផ្តើមចេញដំណើរពីចំណុច A និង B ចម្ងាយពីគ្នា 400m និងផ្លាស់ទីតាមទិស AB លើផ្លូវត្រង់ដោយឆ្លងកាត់ A និង B ។ រថយន្ត A ធ្វើចលនាសុះស្មើដោយសំទុះ 0.025m/s<sup>2</sup> ។ រថយន្ត B ធ្វើចលនាសុះស្មើដោយសំទុះ 0.02m/s<sup>2</sup> ។ យក A ជាគល់តម្រុយ ជាខណៈពេលចាប់ផ្តើម និងទិសដៅវិជ្ជមានពី A→B ។<br><br>
+            ក. សរសេរសមីការចលនា និងសមីការល្បឿនរបស់រថយន្តនីមួយៗ ។<br>
+            ខ. កំណត់ទីតាំង និងរយៈពេល ពេលដែលរថយន្តទាំងពីរជួបគ្នា ។<br>
+            គ. គណនាល្បឿនរបស់រថយន្តនីមួយៗពេលជួបគ្នា ។
+        </div>
+        
+        <canvas id="simCanvas" width="800" height="200"></canvas>
+        
+        <div class="dashboard">
+            <div class="data-box">
+                នាឡិកា (<i>t</i>): <br><span id="timeDisplay">0.0</span> s
+            </div>
+            <div class="data-box">
+                <span class="car-a-text">រថយន្ត A</span><br>
+                ទីតាំង (<i>x</i>): <span id="posA">0.0</span> m<br>
+                ល្បឿន (<i>v</i>): <span id="velA">0.00</span> m/s
+            </div>
+            <div class="data-box">
+                <span class="car-b-text">រថយន្ត B</span><br>
+                ទីតាំង (<i>x</i>): <span id="posB">400.0</span> m<br>
+                ល្បឿន (<i>v</i>): <span id="velB">0.00</span> m/s
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="startBtn">ចាប់ផ្តើម (Play)</button>
+            <button id="pauseBtn">ផ្អាក (Pause)</button>
+            <button id="resetBtn">ត្រឡប់ដើម (Reset)</button>
+        </div>
+
+        <!-- ការពន្យល់ទ្រឹស្តី (កែសម្រួលគណិតវិទ្យារួចរាល់) -->
+        <div class="theory">
+            <strong>សេចក្តីពន្យល់ពីទ្រឹស្តីក្នុងលំហាត់៖</strong><br>
+            - រថយន្ត A ចេញពី <i>x</i> = 0 ជាមួយសំទុះ <i>a</i> = 0.025 m/s<sup>2</sup>។ សមីការ: <i>x<sub>A</sub></i> = &frac12;(0.025)<i>t</i><sup>2</sup><br>
+            - រថយន្ត B ចេញពី <i>x</i> = 400 ជាមួយសំទុះ <i>a</i> = 0.02 m/s<sup>2</sup>។ សមីការ: <i>x<sub>B</sub></i> = 400 + &frac12;(0.02)<i>t</i><sup>2</sup><br>
+            - <strong>ពេលជួបគ្នា:</strong> គឺនៅពេល <i>x<sub>A</sub></i> = <i>x<sub>B</sub></i>។ តាមការគណនា ពួកវានឹងជួបគ្នានៅវិនាទីទី <strong>400s</strong> ត្រង់ចម្ងាយ <strong>2000m</strong> ពីចំណុច A។<br>
+            <span style="color: #d35400;"><i>(ចំណាំ៖ នៅក្នុង Simulator នេះ ពេលវេលាត្រូវបានបង្កើនល្បឿន 50 ដង ដើម្បីកុំឲ្យរង់ចាំយូរ)</i></span>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // UI Elements
+        const timeDisplay = document.getElementById('timeDisplay');
+        const posADisplay = document.getElementById('posA');
+        const velADisplay = document.getElementById('velA');
+        const posBDisplay = document.getElementById('posB');
+        const velBDisplay = document.getElementById('velB');
+        
+        // Physics Variables
+        const a_A = 0.025; // m/s^2
+        const a_B = 0.02;  // m/s^2
+        const x0_B = 400;  // m
+        
+        let t = 0; // seconds
+        let isRunning = false;
+        let animationId;
+        let lastTimestamp = 0;
+        
+        // Simulation speed (real seconds * this multiplier = sim seconds)
+        const timeMultiplier = 50; 
+        
+        // Scale settings for Canvas (Max distance to show is 2200m)
+        const maxDist = 2200;
+        const padding = 50;
+        const usableWidth = canvas.width - (padding * 2);
+        
+        function mapX(x_meters) {
+            return padding + (x_meters / maxDist) * usableWidth;
+        }
+
+        function drawCar(x, y, color, label) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x - 15, y - 10, 30, 20); // Car body
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x - 10, y - 12, 6, 4); // Top wheel
+            ctx.fillRect(x + 4, y - 12, 6, 4);  // Top wheel
+            ctx.fillRect(x - 10, y + 8, 6, 4);  // Bottom wheel
+            ctx.fillRect(x + 4, y + 8, 6, 4);   // Bottom wheel
+            
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, x, y);
+        }
+
+        function drawScene() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw Road
+            ctx.beginPath();
+            ctx.moveTo(padding, 100);
+            ctx.lineTo(canvas.width - padding, 100);
+            ctx.strokeStyle = '#7f8c8d';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            
+            // Draw Markers
+            const markers = [0, 400, 1000, 2000];
+            ctx.fillStyle = '#7f8c8d';
+            ctx.font = '12px Battambang';
+            ctx.textAlign = 'center';
+            
+            markers.forEach(mark => {
+                let px = mapX(mark);
+                ctx.beginPath();
+                ctx.moveTo(px, 90);
+                ctx.lineTo(px, 110);
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillText(mark + 'm', px, 125);
+            });
+            
+            ctx.fillText('ចំណុច A', mapX(0), 75);
+            ctx.fillText('ចំណុច B', mapX(400), 75);
+            ctx.fillStyle = '#d35400';
+            ctx.fillText('ចំណុចជួបគ្នា', mapX(2000), 75);
+
+            // Calculate current positions
+            let x_A = 0.5 * a_A * t * t;
+            let x_B = x0_B + (0.5 * a_B * t * t);
+            
+            // Draw Cars
+            drawCar(mapX(x_A), 90, '#2980b9', 'A'); // Blue car
+            drawCar(mapX(x_B), 110, '#c0392b', 'B'); // Red car
+            
+            // Meeting animation effect
+            if (t >= 400) {
+                ctx.fillStyle = 'rgba(241, 196, 15, 0.5)';
+                ctx.beginPath();
+                ctx.arc(mapX(2000), 100, 30, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#d35400';
+                ctx.font = 'bold 20px Battambang';
+                ctx.fillText('រថយន្តទាំងពីរជួបគ្នា!', canvas.width/2, 40);
+            }
+        }
+
+        function updateDataDisplay(x_A, x_B) {
+            let v_A = a_A * t;
+            let v_B = a_B * t;
+            
+            timeDisplay.innerHTML = t.toFixed(1);
+            posADisplay.innerHTML = x_A.toFixed(1);
+            velADisplay.innerHTML = v_A.toFixed(2);
+            posBDisplay.innerHTML = x_B.toFixed(1);
+            velBDisplay.innerHTML = v_B.toFixed(2);
+        }
+
+        function animate(timestamp) {
+            if (!isRunning) return;
+            
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const dt = (timestamp - lastTimestamp) / 1000; 
+            lastTimestamp = timestamp;
+            
+            t += dt * timeMultiplier;
+            
+            let x_A = 0.5 * a_A * t * t;
+            let x_B = x0_B + (0.5 * a_B * t * t);
+            
+            // Check meeting point
+            if (t >= 400) {
+                t = 400; 
+                x_A = 2000;
+                x_B = 2000;
+                isRunning = false;
+                document.getElementById('startBtn').innerText = 'ចប់';
+                document.getElementById('startBtn').disabled = true;
+            }
+            
+            updateDataDisplay(x_A, x_B);
+            drawScene();
+            
+            if (isRunning) {
+                animationId = requestAnimationFrame(animate);
+            }
+        }
+
+        // Button Listeners
+        document.getElementById('startBtn').addEventListener('click', () => {
+            if (!isRunning && t < 400) {
+                isRunning = true;
+                lastTimestamp = 0; 
+                animationId = requestAnimationFrame(animate);
+            }
+        });
+
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            isRunning = false;
+            cancelAnimationFrame(animationId);
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            isRunning = false;
+            cancelAnimationFrame(animationId);
+            t = 0;
+            document.getElementById('startBtn').innerText = 'ចាប់ផ្តើម (Play)';
+            document.getElementById('startBtn').disabled = false;
+            updateDataDisplay(0, x0_B);
+            drawScene();
+        });
+
+        // Initial Draw
+        updateDataDisplay(0, x0_B);
+        drawScene();
+
+    </script>
+</body>
+</html>

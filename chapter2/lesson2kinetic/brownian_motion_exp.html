@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab ពិសោធន៍៖ ចលនាម៉ូលេគុល (Brownian Motion)</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា (បើមាន) -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f0f2f5; padding: 20px; color: #111; line-height: 1.6; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .lesson-content {
+            background: #ffffff; padding: 25px; border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 20px; text-align: left;
+            border-top: 5px solid #1976d2;
+        }
+        .lesson-content h2 { margin-top: 0; color: #1565c0; font-size: 24px; border-bottom: 2px solid #e3f2fd; padding-bottom: 10px; }
+        .lesson-content h3 { color: #0d47a1; font-size: 18px; margin-top: 20px; margin-bottom: 10px; }
+        .lesson-content ul, .lesson-content ol { margin-top: 5px; padding-left: 25px; }
+
+        .lab-layout {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .lab-layout { grid-template-columns: 1fr; }
+        }
+
+        .sim-area {
+            background: #263238; padding: 20px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        /* ទិដ្ឋភាពមីក្រទស្សន៍ */
+        .microscope-container {
+            width: 320px; height: 320px; border-radius: 50%;
+            background: #fff9c4; border: 15px solid #111;
+            position: relative; overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.6), 0 0 0 5px #455a64;
+        }
+        
+        svg {
+            width: 100%; height: 100%; display: block;
+            transition: filter 0.3s ease;
+        }
+
+        .controls-panel {
+            background: #ffffff; padding: 20px; border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-left: 5px solid #ff9800;
+        }
+        
+        .slider-box {
+            background: #f8f9fa; padding: 15px; border-radius: 8px;
+            border: 1px solid #dee2e6; font-weight: bold; text-align: left; font-size: 16px;
+            margin-bottom: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 15px; cursor: pointer; }
+        
+        .btn-focus {
+            background: #0288d1; color: white; padding: 12px 20px; font-size: 16px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; width: 100%;
+            font-family: inherit; transition: background 0.3s; margin-top: 10px;
+        }
+        .btn-focus:hover { background: #0277bd; }
+
+        .conclusion-box {
+            background: #e8f5e9; padding: 20px; border-radius: 8px;
+            border-left: 6px solid #2e7d32; margin-top: 20px;
+            font-size: 17px;
+        }
+        .conclusion-box h3 { margin-top: 0; color: #1b5e20; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- មាតិកាមេរៀន (ដកស្រង់ពីសៀវភៅ) -->
+    <div class="lesson-content">
+        <h2>🔬 ការពិសោធចលនាម៉ូលេគុល</h2>
+        
+        <h3>I. វត្ថុបំណង</h3>
+        <ul>
+            <li>បង្ហាញច្បាស់ថា ម៉ូលេគុលនៃអង្គធាតុរាវមានចលនាឥតឈប់ឈរ ។</li>
+        </ul>
+
+        <h3>II. ការកំណត់បញ្ហា</h3>
+        <ul>
+            <li>តើមានភស្តុតាងអ្វីដើម្បីបង្ហាញថា ម៉ូលេគុលទឹកមានចលនាឥតឈប់ឈរ?</li>
+        </ul>
+
+        <h3>III. សម្មតិកម្ម</h3>
+        <ul>
+            <li>ភាគល្អិតទឹកដោះគោដែលអង្កេតឃើញមានចលនាគ្មានសណ្ដាប់ធ្នាប់និងឥតឈប់ឈរ ។</li>
+        </ul>
+
+        <h3>IV. តេស្តសម្មតិកម្ម (ប្លង់ពិសោធន៍)</h3>
+        <ul>
+            <li><strong>សម្ភារៈពិសោធន៍៖</strong> មីក្រទស្សន៍ បន្ទះឡាម ឡាមកែវ (Cover glass) ទឹកដោះគោឆៅមួយកំប៉ុងឬមួយកញ្ចប់ ទឹកមួយពែង ។</li>
+            <li><strong>ដំណើរការពិសោធន៍៖</strong>
+                <ol>
+                    <li>យកបំពង់បឺតជញ្ជក់ក្នុងកំប៉ុងទឹកដោះគោឆៅនីវែលយ៉ាងណាឱ្យបានជាប់ទឹកដោះគោមួយដំណក់រួចយកទៅដាក់ឱ្យបានស្ដើងលើបន្ទះកែវឡាម ។</li>
+                    <li>យកទឹកមួយតំណក់មកដាក់លាយនឹងទឹកដោះគោឆៅដែលមាននៅលើបន្ទះកែវស្រាប់ ។</li>
+                    <li>យកបន្ទះឡាមកែវគ្របពីលើល្បាយទឹកដោះគោ និងទឹករួចយកទៅពិនិត្យនឹងមីក្រទស្សន៍ ។</li>
+                    <li>កែតម្រូវមីក្រទស្សន៍យ៉ាងណាឱ្យមើលឃើញម៉ូលេគុលនៃល្បាយបានច្បាស់ ។</li>
+                </ol>
+            </li>
+        </ul>
+    </div>
+
+    <!-- តំបន់ Simulator -->
+    <div class="lab-layout">
+        <!-- ផ្ទាំងមើលមីក្រទស្សន៍ -->
+        <div class="sim-area">
+            <h3 style="color: #fff; margin-top: 0; margin-bottom: 15px;">ទិដ្ឋភាពក្នុងមីក្រទស្សន៍ (Microscope View)</h3>
+            <div class="microscope-container">
+                <!-- SVG Canvas សម្រាប់ភាគល្អិត -->
+                <svg id="microscopeSVG" viewBox="0 0 300 300" style="filter: blur(4px);">
+                    <!-- ភាគល្អិតនឹងត្រូវបានបង្កើតដោយ JavaScript -->
+                    <g id="particleGroup"></g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- ផ្ទាំងបញ្ជាពិសោធន៍ -->
+        <div class="controls-panel">
+            <h3 style="margin-top: 0; color: #ff9800; border-bottom: 2px solid #ffe0b2; padding-bottom: 10px;">ផ្ទាំងបញ្ជា (Controls)</h3>
+            
+            <button class="btn-focus" id="btnFocus">🔍 កែតម្រូវហ្វូគុសមីក្រទស្សន៍ (Focus)</button>
+            <div id="focusStatus" style="text-align: center; margin-top: 8px; font-size: 14px; color: #d32f2f; font-weight: bold;">
+                ស្ថានភាព៖ ព្រិល (សូមកែតម្រូវ)
+            </div>
+
+            <div class="slider-box" style="margin-top: 20px;">
+                សីតុណ្ហភាពបរិយាកាស (កម្ដៅធ្វើឱ្យចលនាលឿនជាងមុន)៖<br>
+                <span id="valTemp" style="color: #d32f2f; font-size:22px;">25 °C</span>
+                <input type="range" id="sliderTemp" min="0" max="100" value="25" step="1">
+            </div>
+            
+            <div class="slider-box">
+                ទំហំភាគល្អិតទឹកដោះគោ (ចំណុចខ្មៅៗ)៖<br>
+                <span id="valSize" style="color: #0288d1; font-size:22px;">មធ្យម</span>
+                <input type="range" id="sliderSize" min="2" max="8" value="4" step="1">
+            </div>
+        </div>
+    </div>
+
+    <!-- សេចក្តីសន្និដ្ឋាន -->
+    <div class="conclusion-box">
+        <h3>V. លទ្ធផល និង VI. សន្និដ្ឋាន</h3>
+        <p>តាមរយៈមីក្រទស្សន៍ យើងសង្កេតឃើញមានចំណុចខ្មៅៗតូចៗដែលមានចលនាញ័រៗនិងរំកិលផាត់ ហើយផ្លាស់ទីឥតសណ្ដាប់ធ្នាប់ ។</p>
+        <p>យើងសន្និដ្ឋានថា ជាម៉ូលេគុលនៃល្បាយ ។ លទ្ធផលដែលយើងទទួលបាននេះជាភស្តុតាងនៃចលនារបស់ម៉ូលេគុល ។ <em>(ភាគល្អិតដែលយើងឃើញផ្ទាល់ភ្នែកគឺ ភាគល្អិតខ្លាញ់ក្នុងទឹកដោះគោ ដែលរងការបុកទង្គិចពីម៉ូលេគុលទឹកដែលនៅជុំវិញវា)</em>។</p>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > ក្នុងតក្កវិជ្ជា -->
+<script>
+    var sTemp = document.getElementById('sliderTemp');
+    var sSize = document.getElementById('sliderSize');
+    var btnFocus = document.getElementById('btnFocus');
+    
+    var microscopeSVG = document.getElementById('microscopeSVG');
+    var particleGroup = document.getElementById('particleGroup');
+    var focusStatus = document.getElementById('focusStatus');
+
+    var isFocused = false;
+    var currentTemp = 25;
+    var particleRadius = 4;
+    
+    // បង្កើតភាគល្អិត (Fat globules of milk)
+    var numParticles = 60;
+    var particles = [];
+    var svgSize = 300; // ទំហំ viewBox
+    
+    var i = 0;
+    while(i !== numParticles) {
+        var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        c.setAttribute("r", particleRadius);
+        // ប្រើពណ៌ខ្មៅ/ប្រផេះចាស់ ដូចការសង្កេតក្នុងមីក្រទស្សន៍
+        c.setAttribute("fill", "rgba(20, 20, 20, 0.8)");
+        particleGroup.appendChild(c);
+
+        particles.push({
+            el: c,
+            x: Math.random() * svgSize,
+            y: Math.random() * svgSize,
+            vx: 0,
+            vy: 0,
+            massScale: Math.random() * 0.5 + 0.8 // ម៉ាសខុសៗគ្នាបន្តិចបន្តួច
+        });
+        i++;
+    }
+
+    // មុខងារកែ Focus មីក្រទស្សន៍
+    btnFocus.addEventListener('click', function() {
+        if (isFocused === false) {
+            isFocused = true;
+            microscopeSVG.style.filter = "blur(0px)";
+            btnFocus.innerText = "🔍 ធ្វើឱ្យព្រិលវិញ (Unfocus)";
+            btnFocus.style.background = "#d84315";
+            focusStatus.innerText = "ស្ថានភាព៖ ច្បាស់ល្អ";
+            focusStatus.style.color = "#28a745";
+        } else {
+            isFocused = false;
+            microscopeSVG.style.filter = "blur(4px)";
+            btnFocus.innerText = "🔍 កែតម្រូវហ្វូគុសមីក្រទស្សន៍ (Focus)";
+            btnFocus.style.background = "#0288d1";
+            focusStatus.innerText = "ស្ថានភាព៖ ព្រិល (សូមកែតម្រូវ)";
+            focusStatus.style.color = "#d32f2f";
+        }
+    });
+
+    // មុខងារអាប់ដេត UI Text
+    function updateUI() {
+        currentTemp = parseFloat(sTemp.value);
+        particleRadius = parseFloat(sSize.value);
+        
+        document.getElementById('valTemp').innerText = currentTemp + " °C";
+        
+        var sizeLabel = "មធ្យម";
+        var isSmall = (Math.max(particleRadius, 3) === 3); // radius <= 3
+        var isLarge = (Math.max(particleRadius, 6) === particleRadius); // radius >= 6
+        
+        if (isSmall === true) sizeLabel = "តូច (ញ័រញឹក)";
+        else if (isLarge === true) sizeLabel = "ធំ (ញ័រយឺត)";
+        
+        document.getElementById('valSize').innerText = sizeLabel;
+
+        // អាប់ដេតទំហំភាគល្អិត
+        var k = 0;
+        while(k !== numParticles) {
+            // ភាគល្អិតខ្លះធំ ខ្លះតូចបន្តិចបន្តួច
+            var currentR = particleRadius * particles[k].massScale;
+            particles[k].el.setAttribute("r", currentR);
+            k++;
+        }
+    }
+
+    sTemp.addEventListener('input', updateUI);
+    sSize.addEventListener('input', updateUI);
+
+    // Animation Loop (Brownian Motion)
+    function animateBrownian() {
+        // កម្លាំងញ័រប្រែប្រួលតាមសីតុណ្ហភាព (Temp 0 ដល់ 100 -> Force 0.5 ដល់ 3.0)
+        var jitterForce = 0.5 + (currentTemp / 100) * 2.5;
+        
+        var j = 0;
+        while(j !== numParticles) {
+            var pt = particles[j];
+            
+            // ភាគល្អិតធំ (ម៉ាសធំ) ញ័រយឺតជាង ភាគល្អិតតូចញ័រលឿនជាង
+            var effectScale = (1 / particleRadius) * (1 / pt.massScale);
+
+            // បន្ថែមចលនាចៃដន្យ (Random Walk / Jitter)
+            pt.vx += (Math.random() - 0.5) * jitterForce * effectScale;
+            pt.vy += (Math.random() - 0.5) * jitterForce * effectScale;
+            
+            // កម្លាំងទប់ទឹក (Friction/Viscosity) ដើម្បីកុំឱ្យហោះលឿនពេក
+            pt.vx *= 0.90;
+            pt.vy *= 0.90;
+            
+            pt.x += pt.vx;
+            pt.y += pt.vy;
+
+            // ពិនិត្យការប៉ះទង្គិចជញ្ជាំង (Boundary Check) ដោយសុវត្ថិភាពមិនប្រើសញ្ញា
+            var isLeft = (Math.min(pt.x, 0) === pt.x); // pt.x <= 0
+            if (isLeft === true) { pt.x = 0; pt.vx = Math.abs(pt.vx); }
+            
+            var isRight = (Math.max(pt.x, svgSize) === pt.x); // pt.x >= svgSize
+            if (isRight === true) { pt.x = svgSize; pt.vx = -Math.abs(pt.vx); }
+            
+            var isTop = (Math.min(pt.y, 0) === pt.y); // pt.y <= 0
+            if (isTop === true) { pt.y = 0; pt.vy = Math.abs(pt.vy); }
+            
+            var isBottom = (Math.max(pt.y, svgSize) === pt.y); // pt.y >= svgSize
+            if (isBottom === true) { pt.y = svgSize; pt.vy = -Math.abs(pt.vy); }
+
+            // អាប់ដេតទីតាំងក្នុង SVG
+            pt.el.setAttribute("cx", pt.x);
+            pt.el.setAttribute("cy", pt.y);
+
+            j++;
+        }
+        
+        requestAnimationFrame(animateBrownian);
+    }
+
+    // ចាប់ផ្តើម
+    updateUI();
+    animateBrownian();
+</script>
+
+</body>
+</html>

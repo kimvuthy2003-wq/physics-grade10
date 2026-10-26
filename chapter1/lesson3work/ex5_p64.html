@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ៥ទំព័រ៦៤ </title>
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9;
+            padding: 20px;
+            color: #111;
+            text-align: center;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .problem-statement {
+            background: #fff3cd;
+            color: #664d03;
+            padding: 18px 25px;
+            border-radius: 8px;
+            border-left: 6px solid #ffc107;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 19px;
+            font-weight: bold;
+            line-height: 1.7;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .info-panel {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            border-left: 6px solid #28a745;
+            font-size: 18px;
+        }
+        .info-panel strong { color: #d32f2f; font-size: 20px; }
+        
+        .sim-area {
+            position: relative;
+            width: 100%;
+            height: 260px;
+            background: #e9ecef;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .floor {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 50px;
+            background: #5a6268;
+            border-top: 4px solid #343a40;
+        }
+        
+        .tick {
+            position: absolute;
+            bottom: 50px;
+            width: 2px;
+            height: 12px;
+            background: #adb5bd;
+            z-index: 1;
+        }
+        .tick-target {
+            height: 25px;
+            background: #ffc107;
+            width: 3px;
+        }
+        
+        .ruler-text {
+            position: absolute;
+            bottom: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            transform: translateX(-50%);
+        }
+        .ruler-target {
+            color: #ffc107;
+            font-size: 18px;
+        }
+
+        .object {
+            position: absolute;
+            bottom: 50px;
+            left: 20px;
+            width: 80px;
+            height: 80px;
+            background: #fd7e14;
+            border: 2px solid #b33c00;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            z-index: 2;
+        }
+        
+        .force-arrow {
+            position: absolute;
+            top: 35px;
+            left: 85px;
+            width: 90px;
+            height: 12px;
+            background: #dc3545;
+            display: flex;
+            align-items: center;
+        }
+        .force-arrow::after {
+            content: '';
+            position: absolute;
+            right: -18px;
+            border-left: 18px solid #dc3545;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+        }
+        .force-label {
+            position: absolute;
+            top: -28px;
+            left: 25px;
+            color: #dc3545;
+            font-weight: 900;
+            font-size: 18px;
+            white-space: nowrap;
+        }
+        
+        .live-data {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .data-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; 
+            font-size: 28px; 
+            display: inline-block;
+            margin-top: 8px;
+        }
+        
+        #liveTime { color: #212529; }
+        #liveVel { color: #0056b3; }
+        #liveDist { color: #111; }
+        #liveWork { color: #0f6674; }
+        #livePower { color: #c9510c; }
+
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            transition: 0.2s;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        #startBtn { background: #28a745; }
+        #startBtn:hover { background: #218838; }
+        #resetBtn { background: #6c757d; }
+        #resetBtn:hover { background: #5a6268; }
+        #solutionBtn { background: #17a2b8; }
+        #solutionBtn:hover { background: #138496; }
+        
+        .status {
+            margin-top: 20px;
+            font-size: 22px;
+            font-weight: 900;
+            color: #dc3545;
+        }
+
+        .solution-box {
+            background: #e2e8f0;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: left;
+            margin-top: 25px;
+            border-left: 6px solid #4a5568;
+            font-size: 18px;
+            line-height: 1.8;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 {
+            margin-top: 0;
+            color: #2d3748;
+            border-bottom: 2px solid #cbd5e0;
+            padding-bottom: 10px;
+            font-size: 22px;
+        }
+        .solution-box ul { padding-left: 30px; }
+        .solution-box strong { color: #000; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="problem-statement">
+        <strong>ប្រធានលំហាត់ទី៥៖</strong> កម្លាំង 5.0 N មានអំពើលើអង្គធាតុមួយមានម៉ាស 25 kg ដែលដំបូងនៅស្ងៀម និងបន្ទាប់មកវាផ្លាស់ទី ។ គណនា៖<br>
+        <strong>ក.</strong> កម្មន្តនៃកម្លាំងដែលមានអំពើលើអង្គធាតុនោះក្នុងរយៈពេល 3.0 s ។<br>
+        <strong>ខ.</strong> អានុភាពខណៈដែលរយៈពេលស្មើនឹង 3.0 s ។
+    </div>
+    
+    <div class="info-panel">
+        <div>កម្លាំងទាញ (F) = <strong>5.0 N</strong></div>
+        <div>ម៉ាស (m) = <strong>25 kg</strong></div>
+        <div>សន្ទុះ (a = F/m) = <strong>0.2 m/s²</strong></div>
+        <div>រយៈពេល (t) = <strong>3.0 s</strong></div>
+    </div>
+
+    <div class="sim-area">
+        <div class="floor">
+            <div class="ruler-text" style="left: 20px;">0 m</div>
+            
+            <div class="tick" style="left: 220px;"></div>
+            <div class="ruler-text" style="left: 220px;">0.5 m</div>
+            
+            <div class="tick tick-target" style="left: 380px;"></div>
+            <div class="ruler-text ruler-target" style="left: 380px;">0.9 m (គោលដៅ)</div>
+            
+            <div class="tick" style="left: 620px;"></div>
+            <div class="ruler-text" style="left: 620px;">1.5 m</div>
+        </div>
+        
+        <div class="object" id="box">
+            25 kg
+            <div class="force-arrow" id="forceArrow">
+                <div class="force-label">F = 5 N</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="live-data">
+        <div class="data-box">ពេលវេលា (t)<br><span id="liveTime">0.00</span> s</div>
+        <div class="data-box">ល្បឿនខណៈ (v)<br><span id="liveVel">0.00</span> m/s</div>
+        <!-- កែតម្រូវពី s ទៅ x រួចរាល់ -->
+        <div class="data-box">ចម្ងាយចរ (x)<br><span id="liveDist">0.00</span> m</div>
+        <div class="data-box" style="border-top: 5px solid #17a2b8;">កម្មន្ត (W)<br><span id="liveWork">0.00</span> J</div>
+        <div class="data-box" style="border-top: 5px solid #ffc107;">អានុភាពខណៈ (P)<br><span id="livePower">0.00</span> W</div>
+    </div>
+
+    <div class="controls">
+        <button id="startBtn">▶ ចាប់ផ្តើម</button>
+        <button id="resetBtn">🔄 ត្រឡប់ដើម</button>
+        <button id="solutionBtn">📖 បង្ហាញដំណោះស្រាយ</button>
+    </div>
+    
+    <div class="status" id="statusText">រង់ចាំចាប់ផ្តើម...</div>
+
+    <div id="solutionBox" class="solution-box" style="display: none;">
+        <h3>ដំណោះស្រាយ</h3>
+        <p><strong>បម្រាប់៖</strong> F = 5.0 N, m = 25 kg, v<sub>0</sub> = 0 m/s, t = 3.0 s</p>
+        
+        <p><strong>១. រកសន្ទុះ និងចម្ងាយចរក្នុងរយៈពេល 3.0 s៖</strong></p>
+        <ul>
+            <li>តាមច្បាប់ទី២ញូតុន៖ <strong>a = F / m</strong> = 5.0 / 25 = <strong>0.2 m/s²</strong></li>
+            <!-- កែតម្រូវពី s ទៅ x រួចរាល់ -->
+            <li>ចម្ងាយចរត្រង់ស្ទុះស្មើ៖ <strong>x = &frac12; at²</strong> = 0.5 &times; 0.2 &times; (3.0)² = <strong>0.9 m</strong></li>
+        </ul>
+        
+        <p><strong>ក. គណនាកម្មន្ត (W) ក្នុងរយៈពេល 3.0 s៖</strong></p>
+        <ul>
+            <!-- កែតម្រូវពី s ទៅ x រួចរាល់ -->
+            <li>តាមរូបមន្ត៖ <strong>W = F &times; x</strong></li>
+            <li>នាំឱ្យ៖ W = 5.0 &times; 0.9 = <strong>4.5 J</strong></li>
+        </ul>
+        
+        <p><strong>ខ. គណនាអានុភាពខណៈ (P) នៅខណៈ t = 3.0 s៖</strong></p>
+        <ul>
+            <li>រកល្បឿនខណៈនៅ t = 3.0 s៖ <strong>v = a &times; t</strong> = 0.2 &times; 3.0 = <strong>0.6 m/s</strong></li>
+            <li>អានុភាពខណៈ៖ <strong>P = F &times; v</strong> = 5.0 &times; 0.6 = <strong>3.0 W</strong></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const F = 5.0; 
+    const m = 25.0; 
+    const a = F / m; 
+    const targetTime = 3.0; 
+
+    let time = 0;
+    let isRunning = false;
+    let animationFrame;
+    let lastTimestamp = 0;
+    
+    const scalePx = 400; 
+
+    const boxEl = document.getElementById('box');
+    const timeEl = document.getElementById('liveTime');
+    const velEl = document.getElementById('liveVel');
+    const distEl = document.getElementById('liveDist');
+    const workEl = document.getElementById('liveWork');
+    const powerEl = document.getElementById('livePower');
+    const statusText = document.getElementById('statusText');
+    const startBtn = document.getElementById('startBtn');
+    
+    const solutionBtn = document.getElementById('solutionBtn');
+    const solutionBox = document.getElementById('solutionBox');
+
+    function updatePhysics() {
+        let v = a * time;
+        let d = 0.5 * a * (time * time);
+        let W = F * d;
+        let P = F * v;
+
+        timeEl.innerText = time.toFixed(2);
+        velEl.innerText = v.toFixed(2);
+        distEl.innerText = d.toFixed(2);
+        workEl.innerText = W.toFixed(2);
+        powerEl.innerText = P.toFixed(2);
+
+        boxEl.style.transform = `translateX(${d * scalePx}px)`;
+    }
+
+    function animate(timestamp) {
+        if (!lastTimestamp) lastTimestamp = timestamp;
+        let deltaTime = (timestamp - lastTimestamp) / 1000;
+        lastTimestamp = timestamp;
+
+        if (isRunning) {
+            time += deltaTime;
+
+            if (time >= targetTime) {
+                time = targetTime; 
+                isRunning = false;
+                statusText.innerText = ``;
+                statusText.style.color = "#28a745";
+                startBtn.disabled = false;
+                startBtn.style.opacity = "1";
+            }
+
+            updatePhysics();
+
+            if (isRunning) {
+                animationFrame = requestAnimationFrame(animate);
+            }
+        }
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+        if (!isRunning && time < targetTime) {
+            isRunning = true;
+            lastTimestamp = performance.now();
+            statusText.innerText = "កំពុងទាញអង្គធាតុ...";
+            statusText.style.color = "#dc3545";
+            startBtn.disabled = true;
+            startBtn.style.opacity = "0.5";
+            
+            animationFrame = requestAnimationFrame(animate);
+        }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        isRunning = false;
+        cancelAnimationFrame(animationFrame);
+        lastTimestamp = 0;
+        time = 0;
+        
+        startBtn.disabled = false;
+        startBtn.style.opacity = "1";
+        statusText.innerText = "រង់ចាំចាប់ផ្តើម...";
+        statusText.style.color = "#dc3545";
+        
+        updatePhysics();
+    });
+
+    solutionBtn.addEventListener('click', () => {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+            solutionBtn.innerHTML = '📖 លាក់ដំណោះស្រាយ';
+        } else {
+            solutionBox.style.display = 'none';
+            solutionBtn.innerHTML = '📖 បង្ហាញដំណោះស្រាយ';
+        }
+    });
+
+    updatePhysics();
+</script>
+
+</body>
+</html>

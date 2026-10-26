@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី៦៖ សាឡាង និងបន្ទុក (គោលការណ៍អាកស៊ីម៉ែត)</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 500px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .action-btn-container {
+            display: flex; gap: 10px; min-height: 50px; margin-bottom: 20px;
+        }
+        button {
+            background: #007bff; color: white; padding: 12px 24px; font-size: 18px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s; width: 100%;
+        }
+        button:hover { filter: brightness(1.1); }
+        #btnSetValues { background: #28a745; margin-bottom: 10px; }
+        #btnAction { background: #d32f2f; }
+        #btnToggleSolution { background: #17a2b8; margin-bottom: 20px; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        @media (max-width: 600px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 14px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 10px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 20px; }
+        
+        .note-box { 
+            background: #e8f5e9; border-left: 6px solid #28a745; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #1b5e20; 
+        }
+
+        .text-outline { text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; }
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ប្រធានលំហាត់ -->
+    <div class="problem-statement">
+        <strong>៦.</strong> សាឡាងមួយរាងប្រលេពីប៉ែតកែងមានបណ្តោយ $20 \text{ m}$ និងទទឹង $3 \text{ m}$ ។ កាលណាគេផ្ទុកបន្ទុកពេញ ទឹកឡើងមកនៅត្រឹម $50 \text{ cm}$ ពីគែមរបស់វា ។ កាលណាវាមិនផ្ទុកបន្ទុក ទឹកធ្លាក់ចុះមកនៅត្រឹម $1.10 \text{ m}$ ពីគែមរបស់វា ។ តើទម្ងន់បន្ទុកស្មើនឹងប៉ុន្មាន?
+    </div>
+
+    <button id="btnSetValues">🎯 កំណត់តម្លៃតាមលំហាត់ពិតប្រាកដ</button>
+    <div class="action-btn-container">
+        <button id="btnAction">📦 ផ្ទុកបន្ទុកចូលសាឡាង</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 900 450" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#4fc3f7" stop-opacity="0.8"/>
+                    <stop offset="100%" stop-color="#0277bd" stop-opacity="0.95"/>
+                </linearGradient>
+                <linearGradient id="bargeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#78909c"/>
+                    <stop offset="100%" stop-color="#37474f"/>
+                </linearGradient>
+                <linearGradient id="cargoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ffb74d"/>
+                    <stop offset="100%" stop-color="#ef6c00"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ផ្ទៃមេឃ និងទេសភាព -->
+            <rect x="0" y="0" width="900" height="450" fill="#e1f5fe"/>
+            
+            <!-- សាឡាង និងបន្ទុក (ចល័ត) -->
+            <!-- យើងឱ្យផ្ទៃទឹកនៅថេរ y=250 ហើយសាឡាងជាអ្នករំកិលចុះឡើង -->
+            <g id="bargeSystem" transform="translate(0, 0)">
+                
+                <!-- កុងតឺន័រ / បន្ទុក (លេចចេញពេលផ្ទុក) -->
+                <g id="cargoGroup" style="opacity: 0;">
+                    <rect x="250" y="20" width="100" height="80" fill="url(#cargoGrad)" stroke="#e65100" stroke-width="2"/>
+                    <rect x="360" y="20" width="100" height="80" fill="url(#cargoGrad)" stroke="#e65100" stroke-width="2"/>
+                    <rect x="470" y="20" width="100" height="80" fill="url(#cargoGrad)" stroke="#e65100" stroke-width="2"/>
+                    <rect x="580" y="20" width="100" height="80" fill="url(#cargoGrad)" stroke="#e65100" stroke-width="2"/>
+                    
+                    <rect x="300" y="-60" width="100" height="80" fill="url(#cargoGrad)" stroke="#e65100" stroke-width="2"/>
+                    <rect x="410" y="-60" width="100" height="80" fill="url(#cargoGrad)" stroke="#e65100" stroke-width="2"/>
+                    <rect x="520" y="-60" width="100" height="80" fill="url(#cargoGrad)" stroke="#e65100" stroke-width="2"/>
+                    
+                    <!-- វ៉ិចទ័រទម្ងន់បន្ទុក W_load -->
+                    <line x1="460" y1="-80" x2="460" y2="-10" stroke="#6f42c1" stroke-width="4"/>
+                    <polygon points="460,-10 455,-20 465,-20" fill="#6f42c1"/>
+                    <text x="470" y="-50" font-family="Arial" font-weight="bold" font-size="20" fill="#6f42c1" class="text-outline">W_{load}</text>
+                </g>
+
+                <!-- តួសាឡាង (កម្ពស់សន្មត 2m = 200px) -->
+                <!-- គែមលើនៅ y=100, បាតនៅ y=300 -->
+                <path d="M 150 100 L 770 100 L 730 300 L 190 300 Z" fill="url(#bargeGrad)" stroke="#263238" stroke-width="4"/>
+                <!-- បន្ទាត់គែមលើ -->
+                <line id="topEdge" x1="120" y1="100" x2="800" y2="100" stroke="#fbc02d" stroke-width="3" stroke-dasharray="8,4"/>
+            </g>
+
+            <!-- ផ្ទៃទឹក (ថេរត្រង់ y=250) -->
+            <path d="M 0 250 L 900 250 L 900 450 L 0 450 Z" fill="url(#waterGrad)" opacity="0.85"/>
+            <line x1="0" y1="250" x2="900" y2="250" stroke="#0288d1" stroke-width="3"/>
+            <!-- រលកទឹក -->
+            <path d="M 0 250 Q 50 245 100 250 T 200 250 T 300 250 T 400 250 T 500 250 T 600 250 T 700 250 T 800 250 T 900 250" fill="none" stroke="#e1f5fe" stroke-width="2" opacity="0.6"/>
+
+            <!-- គំនូសវាស់ចម្ងាយពីគែមដល់ទឹក (h) -->
+            <g id="measureGroup">
+                <!-- គំនូសយោងផ្ទៃទឹក -->
+                <line x1="100" y1="250" x2="160" y2="250" stroke="#0288d1" stroke-width="2" stroke-dasharray="4,2"/>
+                
+                <!-- ព្រួញ h -->
+                <line id="vecH" x1="130" y1="140" x2="130" y2="250" stroke="#d32f2f" stroke-width="3"/>
+                <!-- ក្បាលព្រួញលើ -->
+                <polygon id="headHTop" points="130,140 125,150 135,150" fill="#d32f2f"/>
+                <!-- ក្បាលព្រួញក្រោម -->
+                <polygon id="headHBot" points="130,250 125,240 135,240" fill="#d32f2f"/>
+                
+                <!-- អក្សរបង្ហាញតម្លៃ h -->
+                <rect id="bgH" x="55" y="180" width="70" height="25" fill="#fff" rx="4" opacity="0.8"/>
+                <text id="lblH" x="90" y="198" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#d32f2f">1.10 m</text>
+            </g>
+            
+            <!-- វ៉ិចទ័រកម្លាំងដំណោលអាកស៊ីម៉ែតបន្ថែម F_A ស្មើនឹងទម្ងន់បន្ទុក -->
+            <g id="vecFbGroup" style="opacity: 0;">
+                <line id="vecFb" x1="460" y1="380" x2="460" y2="310" stroke="#28a745" stroke-width="5"/>
+                <polygon points="460,310 453,325 467,325" fill="#28a745"/>
+                <text x="475" y="340" font-family="Arial" font-weight="bold" font-size="20" fill="#28a745" class="text-outline">\Delta F_A</text>
+            </g>
+
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            ចម្ងាយពីគែមពេល <span style="color:#d32f2f;">គ្មានបន្ទុក</span> $h_2$ (m):<br>
+            <span id="valH2" class="number-display" style="color: #d32f2f; font-size:24px;">1.10 m</span>
+            <input type="range" id="sliderH2" min="0.80" max="1.50" value="1.10" step="0.05">
+        </div>
+        <div class="slider-box">
+            ចម្ងាយពីគែមពេល <span style="color:#28a745;">មានបន្ទុក</span> $h_1$ (m):<br>
+            <span id="valH1" class="number-display" style="color: #28a745; font-size:24px;">0.50 m</span>
+            <input type="range" id="sliderH1" min="0.10" max="0.70" value="0.50" step="0.05">
+        </div>
+        <div class="slider-box">
+            បណ្តោយសាឡាង $L$ (m):<br>
+            <span id="valL" class="number-display" style="color: #1565c0; font-size:24px;">20 m</span>
+            <input type="range" id="sliderL" min="10" max="40" value="20" step="1">
+        </div>
+        <div class="slider-box">
+            ទទឹងសាឡាង $W$ (m):<br>
+            <span id="valW" class="number-display" style="color: #e65100; font-size:24px;">3 m</span>
+            <input type="range" id="sliderW" min="2" max="10" value="3" step="0.5">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">កម្ពស់ទឹកខុសគ្នា $\Delta h$<br><span id="liveDh" class="number-display">0.60 m</span></div>
+        <div class="data-box" style="border-top: 4px solid #0288d1;">មាឌទឹកលិចបន្ថែម $\Delta V$<br><span id="liveDv" class="number-display">36.0 m³</span></div>
+        <div class="data-box" style="border-top: 4px solid #6f42c1;">ទម្ងន់បន្ទុក $W_{load}$<br><span id="liveWload" class="number-display">352,800 N</span></div>
+    </div>
+
+    <button id="btnToggleSolution">📖 បង្ហាញ / លាក់ដំណោះស្រាយ</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box">
+            💡 <strong>គន្លឹះ៖</strong> តាមគោលការណ៍អាកស៊ីម៉ែត ទម្ងន់នៃបន្ទុកបន្ថែម គឺស្មើនឹងកម្លាំងដំណោលអាកស៊ីម៉ែតនៃមាឌទឹកដែលទើបនឹងត្រូវសាឡាងរុញចេញបន្ថែម ($\Delta V$)។
+        </div>
+
+        <h3>ដំណោះស្រាយលំហាត់គំរូ</h3>
+        
+        <div id="mathContainer">
+            <p><strong>១. រកកម្ពស់ទឹកដែលលិចបន្ថែម ($\Delta h$) ៖</strong></p>
+            <p>កម្ពស់លិចបន្ថែម ស្មើនឹងផលសងរវាងចម្ងាយគែមពេលគ្មានបន្ទុក និងពេលមានបន្ទុក៖</p>
+            <div id="mathLine1">$$ \Delta h = h_2 - h_1 = 1.10 - 0.50 = 0.60 \text{ m} $$</div>
+
+            <p><strong>២. រកមាឌទឹកដែលត្រូវរុញចេញបន្ថែម ($\Delta V$) ៖</strong></p>
+            <p>ដោយសារសាឡាងមានរាងប្រលេពីប៉ែតកែង៖</p>
+            <div id="mathLine2">$$ \Delta V = L \times W \times \Delta h = 20 \times 3 \times 0.60 = 36.0 \text{ m}^3 $$</div>
+            
+            <p><strong>៣. រកទម្ងន់បន្ទុក ($W_{load}$) ៖</strong></p>
+            <p>ទម្ងន់បន្ទុកស្មើនឹងទម្ងន់ទឹកដែលមាឌ $\Delta V$ រុញចេញ (យក $\rho_w = 1000 \text{ kg/m}^3, g = 9.80 \text{ m/s}^2$)៖</p>
+            <div id="mathLine3">$$ W_{load} = \Delta F_A = \rho_w \cdot \Delta V \cdot g $$</div>
+            <div id="mathLine4" style="color: #6f42c1; font-weight: bold; text-align: center; margin-top: 15px; font-size: 1.2em;">
+                $$ W_{load} = 1000 \times 36.0 \times 9.80 = 352800 \text{ N} $$
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > ក្នុងតក្កវិជ្ជា -->
+<script>
+    var sH2 = document.getElementById('sliderH2');
+    var sH1 = document.getElementById('sliderH1');
+    var sL = document.getElementById('sliderL');
+    var sW = document.getElementById('sliderW');
+
+    var btnSet = document.getElementById('btnSetValues');
+    var btnAction = document.getElementById('btnAction');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    var bargeSystem = document.getElementById('bargeSystem');
+    var cargoGroup = document.getElementById('cargoGroup');
+    var vecFbGroup = document.getElementById('vecFbGroup');
+    
+    var vecH = document.getElementById('vecH');
+    var headHTop = document.getElementById('headHTop');
+    var bgH = document.getElementById('bgH');
+    var lblH = document.getElementById('lblH');
+
+    var rho_water = 1000; // kg/m^3
+    var g = 9.80; // m/s^2
+
+    var targetProgress = 0; // 0 = គ្មានបន្ទុក, 1 = ផ្ទុកពេញ
+    var currentProgress = 0;
+    var isAnimating = false;
+
+    // មាត្រដ្ឋាន SVG: 1m = 100px
+    var pxPerMeter = 100;
+    var waterLevelY = 250; // ថេរ
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    btnSet.addEventListener('click', function() {
+        sH2.value = 1.10;
+        sH1.value = 0.50;
+        sL.value = 20;
+        sW.value = 3;
+        
+        // ធានាថា h2 ធំជាង h1 ជានិច្ច
+        var h1 = parseFloat(sH1.value);
+        var h2 = parseFloat(sH2.value);
+        var isValid = (Math.max(h2, h1) === h2 && h2 !== h1);
+        if (isValid === false) {
+            sH2.value = h1 + 0.1;
+        }
+
+        updatePhysics();
+    });
+
+    // ការពារការអូស Slider ឱ្យតម្លៃត្រួតគ្នា
+    sH2.addEventListener('input', function() {
+        var h1 = parseFloat(sH1.value);
+        var h2 = parseFloat(sH2.value);
+        var isValid = (Math.max(h2, h1) === h2 && h2 !== h1);
+        if (isValid === false) {
+            sH1.value = h2 - 0.05; // រុញ h1 ចុះ
+        }
+        updatePhysics();
+    });
+
+    sH1.addEventListener('input', function() {
+        var h1 = parseFloat(sH1.value);
+        var h2 = parseFloat(sH2.value);
+        var isValid = (Math.max(h2, h1) === h2 && h2 !== h1);
+        if (isValid === false) {
+            sH2.value = h1 + 0.05; // រុញ h2 ឡើង
+        }
+        updatePhysics();
+    });
+
+    function loopAnimation() {
+        var diff = targetProgress - currentProgress;
+        if (Math.abs(diff).toFixed(3) !== "0.000") {
+            currentProgress += diff * 0.06; 
+            drawGraphics();
+            requestAnimationFrame(loopAnimation);
+        } else {
+            currentProgress = targetProgress;
+            drawGraphics();
+            isAnimating = false;
+        }
+    }
+
+    btnAction.addEventListener('click', function() {
+        if (targetProgress === 0) {
+            targetProgress = 1; // ផ្ទុកពេញ
+            btnAction.innerText = "📤 យកបន្ទុកចេញពីសាឡាង";
+            btnAction.style.background = "#0288d1";
+        } else {
+            targetProgress = 0; // គ្មានបន្ទុក
+            btnAction.innerText = "📦 ផ្ទុកបន្ទុកចូលសាឡាង";
+            btnAction.style.background = "#d32f2f";
+        }
+        
+        if (isAnimating === false) {
+            isAnimating = true;
+            loopAnimation();
+        }
+    });
+
+    function drawGraphics() {
+        var h1 = parseFloat(sH1.value); // Loaded
+        var h2 = parseFloat(sH2.value); // Unloaded
+        var len = parseFloat(sL.value);
+        var wid = parseFloat(sW.value);
+        
+        var dh = h2 - h1;
+        var dv = len * wid * dh;
+        var w_load = rho_water * dv * g;
+
+        // ចម្ងាយ h បច្ចុប្បន្ន (ប្រែប្រួលពី h2 ទៅ h1)
+        var currentH = h2 - (currentProgress * dh);
+        
+        // គណនាទីតាំងសាឡាង
+        // គែមលើរបស់សាឡាងនៅក្នុង SVG (បច្ចុប្បន្ននៅ y=100) ត្រូវស្ថិតនៅកម្ពស់ currentH ពីលើទឹក (y=250)
+        // ដូច្នេះ គែមលើបច្ចុប្បន្ន = 250 - (currentH * 100)
+        var targetTopEdgeY = waterLevelY - (currentH * pxPerMeter);
+        // Translation Y = ទីតាំងគោលដៅ - ទីតាំងដើម(100)
+        var transY = targetTopEdgeY - 100;
+
+        bargeSystem.setAttribute("transform", "translate(0, " + transY + ")");
+
+        // អាប់ដេតគំនូស h
+        vecH.setAttribute("y1", targetTopEdgeY);
+        headHTop.setAttribute("points", "130," + targetTopEdgeY + " 125," + (targetTopEdgeY+10) + " 135," + (targetTopEdgeY+10));
+        
+        var midH = targetTopEdgeY + (waterLevelY - targetTopEdgeY) / 2;
+        bgH.setAttribute("y", midH - 12);
+        lblH.setAttribute("y", midH + 6);
+        lblH.textContent = currentH.toFixed(2) + " m";
+
+        // បង្ហាញបន្ទុក និងព្រួញអាកស៊ីម៉ែត
+        cargoGroup.style.opacity = currentProgress;
+        vecFbGroup.style.opacity = currentProgress;
+
+        // ធ្វើឱ្យទម្ងន់បន្ទុកក្នុង Dashboard រត់លេខតាម
+        var currentWload = currentProgress * w_load;
+        document.getElementById('liveWload').innerText = Math.round(currentWload).toLocaleString() + " N";
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var h1 = parseFloat(sH1.value);
+        var h2 = parseFloat(sH2.value);
+        var len = parseFloat(sL.value);
+        var wid = parseFloat(sW.value);
+
+        var dh = h2 - h1;
+        var dv = len * wid * dh;
+        var w_load = rho_water * dv * g;
+
+        document.getElementById('valH2').innerText = h2.toFixed(2) + " m";
+        document.getElementById('valH1').innerText = h1.toFixed(2) + " m";
+        document.getElementById('valL').innerText = len + " m";
+        document.getElementById('valW').innerText = wid.toFixed(1) + " m";
+
+        document.getElementById('liveDh').innerText = dh.toFixed(2) + " m";
+        document.getElementById('liveDv').innerText = dv.toFixed(1) + " m\u00B3";
+        // Wload Update នៅក្នុង drawGraphics ដើម្បីឱ្យមានចលនារត់លេខ
+        
+        drawGraphics();
+
+        // Update MathJax Safely
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            document.getElementById('mathLine1').innerHTML = "$$ \\Delta h = h_2 - h_1 = " + h2.toFixed(2) + " - " + h1.toFixed(2) + " = " + dh.toFixed(2) + " \\text{ m} $$";
+            document.getElementById('mathLine2').innerHTML = "$$ \\Delta V = L \\times W \\times \\Delta h = " + len + " \\times " + wid.toFixed(1) + " \\times " + dh.toFixed(2) + " = " + dv.toFixed(1) + " \\text{ m}^3 $$";
+            document.getElementById('mathLine4').innerHTML = "$$ W_{load} = 1000 \\times " + dv.toFixed(1) + " \\times 9.80 = " + Math.round(w_load) + " \\text{ N} $$";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    sH2.addEventListener('input', updatePhysics);
+    sH1.addEventListener('input', updatePhysics);
+    sL.addEventListener('input', updatePhysics);
+    sW.addEventListener('input', updatePhysics);
+
+    // Initial run
+    updatePhysics();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ៧ទំព័រ៦៥-ចលនារថយន្ត</title>
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9;
+            padding: 20px;
+            color: #111;
+            text-align: center;
+        }
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+        }
+        
+        /* ប្រធានលំហាត់ */
+        .problem-statement {
+            background: #fff3cd;
+            color: #664d03;
+            padding: 18px 25px;
+            border-radius: 8px;
+            border-left: 6px solid #ffc107;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 19px;
+            font-weight: bold;
+            line-height: 1.7;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        /* ផ្ទាំងបម្រាប់ */
+        .info-panel {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            border-left: 6px solid #28a745;
+            font-size: 18px;
+        }
+        .info-panel strong { color: #d32f2f; font-size: 20px; }
+        
+        /* ផ្ទាំង Simulator */
+        .sim-area {
+            position: relative;
+            width: 100%;
+            height: 260px;
+            background: #e9ecef;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            margin: 0 auto;
+        }
+        
+        .floor {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 50px;
+            background: #5a6268;
+            border-top: 4px solid #343a40;
+        }
+        
+        /* គំនូសរង្វាស់ (Ruler) - Scale: 1000m = 700px (1m = 0.7px), ទីតាំងដើម = 20px */
+        .tick {
+            position: absolute;
+            bottom: 50px;
+            width: 2px;
+            height: 12px;
+            background: #adb5bd;
+            z-index: 1;
+        }
+        .tick-target { height: 25px; background: #ffc107; width: 3px; }
+        .tick-10s { height: 20px; background: #dc3545; width: 3px; } /* ចំណាំពេល 10s */
+        
+        .ruler-text {
+            position: absolute;
+            bottom: 12px;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+        .ruler-target { color: #ffc107; font-size: 17px; }
+        .ruler-10s { color: #ff9999; font-size: 15px; }
+
+        /* រថយន្ត */
+        .car-container {
+            position: absolute;
+            bottom: 50px;
+            left: 20px;
+            width: 80px;
+            height: 60px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .car-emoji {
+            font-size: 50px;
+            transform: scaleX(-1); /* ងាកមុខទៅស្តាំ */
+        }
+        .mass-label {
+            position: absolute;
+            top: -15px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        /* ព្រួញកម្លាំង */
+        .force-arrow {
+            position: absolute;
+            top: 25px;
+            left: 70px;
+            width: 80px;
+            height: 10px;
+            background: #dc3545;
+            display: flex;
+            align-items: center;
+        }
+        .force-arrow::after {
+            content: '';
+            position: absolute;
+            right: -15px;
+            border-left: 15px solid #dc3545;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+        .force-label {
+            position: absolute;
+            top: -25px;
+            left: 15px;
+            color: #dc3545;
+            font-weight: 900;
+            font-size: 16px;
+        }
+        
+        /* ទិន្នន័យ Live Data */
+        .live-data {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .live-data-bottom {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .data-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; 
+            font-size: 26px; 
+            display: inline-block;
+            margin-top: 8px;
+        }
+        
+        #liveTime { color: #212529; }
+        #liveVel { color: #0056b3; }
+        #liveDist { color: #111; }
+        #liveKE { color: #0f6674; }
+        #livePower { color: #c9510c; }
+
+        /* ប៊ូតុង */
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        button {
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            transition: 0.2s;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        #startBtn { background: #28a745; }
+        #startBtn:hover { background: #218838; }
+        #resetBtn { background: #6c757d; }
+        #resetBtn:hover { background: #5a6268; }
+        #solutionBtn { background: #17a2b8; }
+        #solutionBtn:hover { background: #138496; }
+        
+        .speed-badge {
+            background: #6f42c1;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .status {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: 900;
+            color: #dc3545;
+            min-height: 30px;
+        }
+
+        /* ដំណោះស្រាយ */
+        .solution-box {
+            background: #e2e8f0;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: left;
+            margin-top: 25px;
+            border-left: 6px solid #4a5568;
+            font-size: 17px;
+            line-height: 1.8;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 {
+            margin-top: 0;
+            color: #2d3748;
+            border-bottom: 2px solid #cbd5e0;
+            padding-bottom: 10px;
+            font-size: 22px;
+        }
+        .solution-box ul { padding-left: 30px; }
+        .solution-box strong { color: #000; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- ប្រធានលំហាត់ -->
+    <div class="problem-statement">
+        <strong>ប្រធានលំហាត់ទី៧៖</strong> រថយន្តមួយមានម៉ាស m = 1000 kg ស្ថិតនៅស្ងៀម។ បន្ទាប់មករាផ្លាស់ទីក្រោមអំពើនៃកម្លាំងផ្គួប F ដែលមានទិសដៅស្របនឹងគន្លង និងផ្លាស់ទីបាន 1000 m ក្នុងរយៈពេល 32.0 s។<br>
+        <strong>ក.</strong> កំណត់សន្ទុះរថយន្ត?<br>
+        <strong>ខ.</strong> គណនាល្បឿនរថយន្តនៅខណៈដែលរថយន្តផ្លាស់ទីបាន 1000 m ?<br>
+        <strong>គ.</strong> គណនាថាមពលស៊ីនេទិចនៃរថយន្តនៅខណៈ t = 32.0 s និងកម្លាំងផ្គួបដែលមានអំពើលើរថយន្តនោះ ?<br>
+        <strong>ឃ.</strong> គណនាអានុភាពនៃកម្លាំង F នៅខណៈ t = 10.0 s ?
+    </div>
+    
+    <!-- បម្រាប់ -->
+    <div class="info-panel">
+        <div>ម៉ាស (m) = <strong>1000 kg</strong></div>
+        <div>ល្បឿនដើម (v<sub>0</sub>) = <strong>0 m/s</strong></div>
+        <div>ចម្ងាយ (x) = <strong>1000 m</strong></div>
+        <div>រយៈពេល (t) = <strong>32.0 s</strong></div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator -->
+    <div class="sim-area">
+        <div class="floor">
+            <!-- 0m -->
+            <div class="ruler-text" style="left: 20px;">0 m</div>
+            
+            <!-- 97.6m (ខណៈ t=10s សម្រាប់សំណួរ ឃ) | (97.6 * 0.7) + 20 = 88.3px -->
+            <div class="tick tick-10s" style="left: 88.3px;"></div>
+            <div class="ruler-text ruler-10s" style="left: 88.3px;">97.6 m (t=10s)</div>
+            
+            <!-- 500m | (500 * 0.7) + 20 = 370px -->
+            <div class="tick" style="left: 370px;"></div>
+            <div class="ruler-text" style="left: 370px;">500 m</div>
+            
+            <!-- 1000m (គោលដៅ) | (1000 * 0.7) + 20 = 720px -->
+            <div class="tick tick-target" style="left: 720px;"></div>
+            <div class="ruler-text ruler-target" style="left: 720px;">1000 m (គោលដៅ)</div>
+        </div>
+        
+        <div class="car-container" id="car">
+            <span class="mass-label">1000 kg</span>
+            <div class="car-emoji">🚙</div>
+            <div class="force-arrow" id="forceArrow">
+                <div class="force-label">F</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ប្រអប់តម្លៃលេខ Live -->
+    <div class="live-data">
+        <div class="data-box">ពេលវេលា (t)<br><span id="liveTime">0.00</span> s</div>
+        <div class="data-box">ល្បឿនខណៈ (v)<br><span id="liveVel">0.00</span> m/s</div>
+        <div class="data-box">ចម្ងាយចរ (x)<br><span id="liveDist">0.00</span> m</div>
+    </div>
+    <div class="live-data-bottom">
+        <div class="data-box" style="border-top: 5px solid #17a2b8;">ថាមពលស៊ីនេទិច (K)<br><span id="liveKE">0</span> J</div>
+        <div class="data-box" style="border-top: 5px solid #ffc107;">អានុភាព (P = F&times;v)<br><span id="livePower">0</span> W</div>
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="controls">
+        <button id="startBtn">▶ ចាប់ផ្តើម</button>
+        <button id="resetBtn">🔄 ត្រឡប់ដើម</button>
+        <button id="solutionBtn">📖 បង្ហាញដំណោះស្រាយ</button>
+      
+    </div>
+    
+    <div class="status" id="statusText">រង់ចាំចាប់ផ្តើម...</div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div id="solutionBox" class="solution-box" style="display: none;">
+        <h3>ដំណោះស្រាយ</h3>
+        <p><strong>បម្រាប់៖</strong> m = 1000 kg, v<sub>0</sub> = 0 m/s, x = 1000 m, t = 32.0 s</p>
+        
+        <p><strong>ក. កំណត់សន្ទុះរថយន្ត (a)៖</strong></p>
+        <ul>
+            <li>តាមរូបមន្តចម្ងាយចរ៖ <strong>x = &frac12; at²</strong></li>
+            <li>ទាញរកសន្ទុះ៖ <strong>a = 2x / t²</strong> = (2 &times; 1000) / (32.0)² = 2000 / 1024 &asymp; <strong>1.953 m/s²</strong></li>
+        </ul>
+        
+        <p><strong>ខ. គណនាល្បឿនរថយន្ត (v) ពេលរត់បាន 1000 m (នៅ t = 32.0 s)៖</strong></p>
+        <ul>
+            <li>តាមរូបមន្ត៖ <strong>v = at</strong> = 1.953125 &times; 32.0 = <strong>62.5 m/s</strong></li>
+        </ul>
+        
+        <p><strong>គ. គណនាថាមពលស៊ីនេទិច (K) និងកម្លាំង (F) នៅខណៈ t = 32.0 s៖</strong></p>
+        <ul>
+            <li>ថាមពលស៊ីនេទិច៖ <strong>K = &frac12; mv²</strong> = 0.5 &times; 1000 &times; (62.5)² &asymp; <strong>1,953,125 J</strong> (ឬ 1.95 &times; 10<sup>6</sup> J)</li>
+            <li>កម្លាំងផ្គួប៖ <strong>F = ma</strong> = 1000 &times; 1.953125 &asymp; <strong>1953 N</strong></li>
+        </ul>
+        
+        <p><strong>ឃ. គណនាអានុភាព (P) នៃកម្លាំង F នៅខណៈ t = 10.0 s៖</strong></p>
+        <ul>
+            <li>រកល្បឿននៅខណៈ t = 10.0 s ៖ <strong>v<sub>10</sub> = at</strong> = 1.953125 &times; 10.0 = 19.53 m/s</li>
+            <li>អានុភាពនៅខណៈនោះ ៖ <strong>P = F &times; v<sub>10</sub></strong> = 1953.125 &times; 19.53125 &asymp; <strong>38,147 W</strong> (ឬ 38.15 kW)</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // ទិន្នន័យរូបវិទ្យា (Physics Constants)
+    const m = 1000.0; // kg
+    const targetDist = 1000.0; // m
+    const targetTime = 32.0; // s
+    const a = (2 * targetDist) / (targetTime * targetTime); // 1.953125 m/s^2
+    const F = m * a; // 1953.125 N
+    
+    // Scale: 1000m = 700 pixels => 1m = 0.7 pixels
+    const scalePx = 0.7; 
+    
+    // Simulation ដើរលឿនជាងធម្មតា 4 ដង ដើម្បីកុំឱ្យយូរពេក
+    const timeScale = 4.0; 
+
+    let time = 0;
+    let isRunning = false;
+    let animationFrame;
+    let lastTimestamp = 0;
+    let flagged10s = false; // សម្រាប់លោតសារនៅវិនាទីទី 10
+
+    const carEl = document.getElementById('car');
+    const timeEl = document.getElementById('liveTime');
+    const velEl = document.getElementById('liveVel');
+    const distEl = document.getElementById('liveDist');
+    const keEl = document.getElementById('liveKE');
+    const powerEl = document.getElementById('livePower');
+    const statusText = document.getElementById('statusText');
+    const startBtn = document.getElementById('startBtn');
+    
+    const solutionBtn = document.getElementById('solutionBtn');
+    const solutionBox = document.getElementById('solutionBox');
+
+    function updatePhysics() {
+        let v = a * time;
+        let x = 0.5 * a * (time * time);
+        let K = 0.5 * m * (v * v);
+        let P = F * v;
+
+        // អាប់ដេត UI Text
+        timeEl.innerText = time.toFixed(2);
+        velEl.innerText = v.toFixed(2);
+        distEl.innerText = x.toFixed(2);
+        keEl.innerText = Math.round(K).toLocaleString();
+        powerEl.innerText = Math.round(P).toLocaleString();
+
+        // រំកិលរថយន្ត
+        carEl.style.transform = `translateX(${x * scalePx}px)`;
+    }
+
+    function animate(timestamp) {
+        if (!lastTimestamp) lastTimestamp = timestamp;
+        let deltaTime = (timestamp - lastTimestamp) / 1000;
+        lastTimestamp = timestamp;
+
+        if (isRunning) {
+            // គុណនឹងល្បឿន timeScale 4x
+            time += deltaTime * timeScale;
+
+            // ឆែកមើលខណៈ t = 10s (សម្រាប់សំណួរ ឃ)
+            if (time >= 10.0 && !flagged10s && time < 12.0) {
+                statusText.innerText = `⏳ ឆ្លងកាត់ t = 10s! ល្បឿន = 19.53 m/s | អានុភាព = 38,147 W`;
+                statusText.style.color = "#dc3545";
+                flagged10s = true;
+            }
+
+            if (time >= targetTime) {
+                time = targetTime; 
+                isRunning = false;
+                statusText.innerText = `✅ ដល់គោលដៅ 1000m (t=32s)! v = 62.5 m/s | K = 1,953,125 J`;
+                statusText.style.color = "#28a745";
+                startBtn.disabled = false;
+                startBtn.style.opacity = "1";
+            }
+
+            updatePhysics();
+
+            if (isRunning) {
+                animationFrame = requestAnimationFrame(animate);
+            }
+        }
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+        if (!isRunning && time < targetTime) {
+            isRunning = true;
+            lastTimestamp = performance.now();
+            statusText.innerText = "រថយន្តកំពុងរត់...";
+            statusText.style.color = "#0056b3";
+            startBtn.disabled = true;
+            startBtn.style.opacity = "0.5";
+            
+            animationFrame = requestAnimationFrame(animate);
+        }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        isRunning = false;
+        cancelAnimationFrame(animationFrame);
+        lastTimestamp = 0;
+        time = 0;
+        flagged10s = false;
+        
+        startBtn.disabled = false;
+        startBtn.style.opacity = "1";
+        statusText.innerText = "រង់ចាំចាប់ផ្តើម...";
+        statusText.style.color = "#dc3545";
+        
+        updatePhysics();
+    });
+
+    solutionBtn.addEventListener('click', () => {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+            solutionBtn.innerHTML = '📖 លាក់ដំណោះស្រាយ';
+        } else {
+            solutionBox.style.display = 'none';
+            solutionBtn.innerHTML = '📖 បង្ហាញដំណោះស្រាយ';
+        }
+    });
+
+    updatePhysics(); // Initialize view
+</script>
+
+</body>
+</html>

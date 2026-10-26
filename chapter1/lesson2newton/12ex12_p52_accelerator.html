@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី១២៖ អាកសែលេរ៉ូម៉ែត្រងាយ</title>
+    <!-- បញ្ចូលបណ្ណាល័យ MathJax ដោយមិនប្រើ polyfill ដែលត្រូវគេប្លុក -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Khmer OS Battambang', sans-serif; background-color: #1e272e; }
+        
+        #info { 
+            position: absolute; 
+            top: 15px; 
+            left: 15px; 
+            color: white; 
+            background: rgba(15, 15, 15, 0.92); 
+            padding: 18px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.7);
+            line-height: 1.6;
+            max-width: 520px;
+            font-size: 15px; 
+            border: 2px solid #00a8ff;
+            max-height: 75vh;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        #info h3 { margin-top: 0; color: #00a8ff; border-bottom: 1px solid #444; padding-bottom: 5px; font-size: 17px;}
+        .problem-text { color: #dcdde1; margin-bottom: 12px; border-left: 4px solid #00a8ff; padding-left: 10px; font-size: 14px;}
+        
+        #solution-panel {
+            display: none; 
+            background: rgba(255, 255, 255, 0.08);
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 12px;
+            font-size: 14px;
+            border-left: 4px solid #4cd137;
+        }
+        
+        .legend { display: flex; gap: 12px; margin-top: 8px; font-size: 13px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .color-box { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+
+        /* ការរៀបចំប៊ូតុងជាជួរដេកនៅបាតអេក្រង់ តាមសំណើ */
+        #controls { 
+            position: absolute; 
+            bottom: 20px; 
+            left: 0; 
+            width: 100%; /* លាតពេញប្រវែងអេក្រង់ */
+            display: flex;
+            justify-content: center; /* រុញប៊ូតុងឱ្យនៅកណ្តាល */
+            flex-wrap: wrap; /* បើអេក្រង់តូច អនុញ្ញាតឱ្យធ្លាក់ជួរដោយស្វ័យប្រវត្តិ */
+            gap: 12px;
+            z-index: 100;
+            pointer-events: none; /* អនុញ្ញាតឱ្យចុចម៉ៅស៍ทะลុចន្លោះប្រហោងទៅរូប 3D បាន */
+        }
+        
+        button { 
+            pointer-events: auto; /* អនុញ្ញាតឱ្យចុចលើប៊ូតុងបាន */
+            padding: 10px 18px; 
+            font-size: 14px; 
+            cursor: pointer; 
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+            white-space: nowrap; /* ការពារកុំឱ្យអក្សរក្នុងប៊ូតុងដាច់ធ្លាក់ចុះក្រោម */
+        }
+        
+        button:hover { filter: brightness(1.15); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.5); }
+        button:active { transform: translateY(1px); box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+        
+        .btn-state { background-color: #4cd137; }
+        .btn-force { background-color: #e1b12c; color: #111;}
+        .btn-view { background-color: #8c7ae6; }
+        #toggleSolBtn { background-color: #00a8ff; margin-top: 10px; width: 100%;}
+        
+        .live-data { color: #fbc531; font-weight: bold; }
+        
+        #info::-webkit-scrollbar { width: 6px; }
+        #info::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        #info::-webkit-scrollbar-thumb { background: #00a8ff; border-radius: 4px; }
+    </style>
+    <!-- បញ្ចូលបណ្ណាល័យ Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+    <div id="info">
+        <h3>លំហាត់ទី១២៖ អាកសែលេរ៉ូម៉ែត្រងាយ</h3>
+        <div class="problem-text">
+            ១២. អ្នកចងព្យួរស៊្វែរតូចមួយមានម៉ាស \(m\) និងខ្សែស្រាលមួយ ហើយអាចយោលដូចប៉ោលហៅថា "អាកសែលេរ៉ូម៉ែត្រងាយ"។ រួចអ្នកយកវាទៅព្យួរលើពិតានរថយន្តរបស់អ្នក។ កាលណារថយន្តនៅស្ងៀមខ្សែសន្ធឹងត្រង់ចុះក្រោម។ កំណត់មុំ \(\theta\) ដែលខ្សែបង្កើតបានធៀបនឹងអ័ក្សឈរ៖<br>
+            ក. កាលណារថយន្តស្ទុះដោយសំទុះថេរ \(a = 1.50 \text{ m/s}^2\)<br>
+            ខ. កាលណារថយន្តផ្លាស់ទីដោយវ៉ិចទ័រល្បឿនថេរ \(v = 60.0 \text{ km/h}\) ។
+        </div>
+        
+        <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 5px;">
+            <b>ទិន្នន័យជាក់ស្តែង (Live Data):</b><br>
+            ល្បឿនរថយន្ត (\(v\)): <span class="live-data" id="txt-vel">0.00 m/s</span><br>
+            សំទុះរថយន្ត (\(a\)): <span class="live-data" id="txt-acc">0.00 m/s²</span><br>
+            មុំប៉ោល (\(\theta\)): <span class="live-data" id="txt-angle" style="color: #4cd137;">0.0°</span>
+            
+            <div class="legend" id="forceLegend" style="display:none;">
+                <div class="legend-item"><span class="color-box" style="background:#e84118;"></span> ទម្ងន់ (\(\vec{P}\))</div>
+                <div class="legend-item"><span class="color-box" style="background:#fbc531;"></span> តំណឹងខ្សែ (\(\vec{T}\))</div>
+                <div class="legend-item"><span class="color-box" style="background:#9c88ff;"></span> កម្លាំងនិចលភាព (\(\vec{F}_{in}\))</div>
+            </div>
+        </div>
+
+        <button id="toggleSolBtn">បង្ហាញ / លាក់ ដំណោះស្រាយ</button>
+
+        <div id="solution-panel">
+            <b>ដំណោះស្រាយ៖</b><br>
+            <b>ក. ពេលរថយន្តស្ទុះដោយសំទុះថេរ \(a = 1.50 \text{ m/s}^2\)៖</b><br>
+            ក្នុងតម្រុយមិននិចល(រថយន្ត) ប៉ោលរងកម្លាំង ៣ គឺ ទម្ងន់ \(\vec{P}\), តំណឹងខ្សែ \(\vec{T}\), និងកម្លាំងនិចលភាព \(\vec{F}_{in} = -m\vec{a}\) ដែលធ្វើឱ្យវាមានលំនឹងត្រង់មុំ \(\theta\)។<br>
+            តាមរូប៖ \(\tan\theta = \frac{F_{in}}{P} = \frac{ma}{mg} = \frac{a}{g}\)<br>
+            \(\tan\theta = \frac{1.50}{9.80} \approx 0.153\)<br>
+            \(\Rightarrow \theta = \arctan(0.153) \approx\) <b>\(8.7^\circ\)</b><br><br>
+            
+            <b>ខ. ពេលរថយន្តមានល្បឿនថេរ \(v = 60.0 \text{ km/h}\)៖</b><br>
+            ល្បឿនថេរ នាំឱ្យសំទុះ \(a = 0\) ។<br>
+            ដូចនេះ \(\tan\theta = \frac{0}{g} = 0 \Rightarrow\) <b>\(\theta = 0^\circ\)</b> (ខ្សែនៅឈរត្រង់ចុះក្រោម)
+        </div>
+    </div>
+    
+    <div id="controls">
+        <button class="btn-state" id="btnRest">១. នៅស្ងៀម (v=0)</button>
+        <button class="btn-state" id="btnAccel" style="background-color: #e84118;">២. ស្ទុះ (a=1.5 m/s²)</button>
+        <button class="btn-state" id="btnConstV" style="background-color: #0097e6;">៣. ល្បឿនថេរ (v=60km/h)</button>
+        <button class="btn-force" id="forcesBtn">បង្ហាញកម្លាំង (Forces)</button>
+        <button class="btn-view" id="viewBtn">ទិដ្ឋភាព៖ 2D (មើលពីចំហៀង)</button>
+    </div>
+
+    <script>
+        const solBtn = document.getElementById('toggleSolBtn');
+        const solPanel = document.getElementById('solution-panel');
+        solBtn.addEventListener('click', () => {
+            solPanel.style.display = (solPanel.style.display === 'none' || solPanel.style.display === '') ? 'block' : 'none';
+        });
+
+        // --- 1. Scene & Camera Setup ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x7f8fa6);
+        scene.fog = new THREE.Fog(0x7f8fa6, 20, 100);
+
+        const aspect = window.innerWidth / window.innerHeight;
+        
+        // 3D Camera
+        const camera3D = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
+        camera3D.position.set(0, 5, 20);
+        
+        // 2D Camera
+        const viewSize = 15;
+        const camera2D = new THREE.OrthographicCamera(
+            -viewSize * aspect / 2, viewSize * aspect / 2, 
+            viewSize / 2, -viewSize / 2, 
+            0.1, 1000
+        );
+        camera2D.position.set(0, 3, 20);
+
+        let is2DMode = true; 
+        let activeCamera = camera2D;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera3D, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enabled = false;
+
+        // Lights
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        dirLight.position.set(10, 20, 10);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // --- 2. Build Objects ---
+        
+        // ផ្លូវ
+        const roadGeo = new THREE.PlaneGeometry(1000, 40);
+        const roadMat = new THREE.MeshStandardMaterial({ color: 0x353b48, roughness: 0.8 });
+        const road = new THREE.Mesh(roadGeo, roadMat);
+        road.rotation.x = -Math.PI / 2;
+        road.position.y = -2;
+        road.receiveShadow = true;
+        scene.add(road);
+
+        const gridHelper = new THREE.GridHelper(1000, 200, 0xbdc3c7, 0x7f8fa6);
+        gridHelper.position.y = -1.99;
+        scene.add(gridHelper);
+
+        // រថយន្ត
+        const carGroup = new THREE.Group();
+        scene.add(carGroup);
+
+        const carGeo = new THREE.BoxGeometry(8, 4, 4);
+        const carMat = new THREE.MeshStandardMaterial({ color: 0xdcdde1, transparent: true, opacity: 0.3, wireframe: false });
+        const carMesh = new THREE.Mesh(carGeo, carMat);
+        carMesh.position.y = 1;
+        carMesh.castShadow = true;
+        carGroup.add(carMesh);
+        
+        const carEdges = new THREE.LineSegments(new THREE.EdgesGeometry(carGeo), new THREE.LineBasicMaterial({ color: 0x2f3640, linewidth: 2 }));
+        carEdges.position.y = 1;
+        carGroup.add(carEdges);
+
+        // កង់រថយន្ត ៤គ្រាប់
+        const wheelGeo = new THREE.CylinderGeometry(1, 1, 0.6, 32);
+        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+        const rimGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.62, 6);
+        const rimMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
+        
+        const wheels = [];
+        
+        function createWheel(x, z) {
+            const wheelGroup = new THREE.Group();
+            const tire = new THREE.Mesh(wheelGeo, wheelMat);
+            tire.rotation.x = Math.PI / 2;
+            wheelGroup.add(tire);
+            
+            const rim = new THREE.Mesh(rimGeo, rimMat);
+            rim.rotation.x = Math.PI / 2;
+            wheelGroup.add(rim);
+            
+            wheelGroup.position.set(x, -1, z); 
+            return wheelGroup;
+        }
+
+        wheels.push(createWheel(2.5, 2.1));
+        wheels.push(createWheel(2.5, -2.1));
+        wheels.push(createWheel(-2.5, 2.1));
+        wheels.push(createWheel(-2.5, -2.1));
+        
+        wheels.forEach(w => carGroup.add(w));
+
+        // ប៉ោល
+        const pivotY = 3.0;
+        const pivotMesh = new THREE.Mesh(new THREE.SphereGeometry(0.15), new THREE.MeshBasicMaterial({color: 0x2f3640}));
+        pivotMesh.position.y = pivotY;
+        carGroup.add(pivotMesh);
+
+        const L = 3.5; 
+        const bobMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 32), new THREE.MeshStandardMaterial({color: 0xe84118}));
+        bobMesh.castShadow = true;
+        carGroup.add(bobMesh);
+
+        const stringMat = new THREE.LineBasicMaterial({ color: 0x111, linewidth: 2 });
+        const stringLine = new THREE.Line(new THREE.BufferGeometry(), stringMat);
+        carGroup.add(stringLine);
+
+        const arcMat = new THREE.LineBasicMaterial({ color: 0x4cd137, linewidth: 2 });
+        const arcLine = new THREE.Line(new THREE.BufferGeometry(), arcMat);
+        carGroup.add(arcLine);
+        
+        const dashMat = new THREE.LineDashedMaterial({ color: 0x2f3640, dashSize: 0.2, gapSize: 0.1 });
+        const vertLineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, pivotY, 0), new THREE.Vector3(0, pivotY - L, 0)]);
+        const vertLine = new THREE.Line(vertLineGeo, dashMat);
+        vertLine.computeLineDistances();
+        carGroup.add(vertLine);
+
+        // --- 3. កម្លាំង (Forces) ---
+        const forceGroup = new THREE.Group();
+        carGroup.add(forceGroup);
+        let showForces = false;
+        forceGroup.visible = showForces;
+
+        const fScale = 0.2;
+        
+        function setAlwaysOnTop(arrow) {
+            arrow.line.material.depthTest = false; arrow.line.renderOrder = 999;
+            arrow.cone.material.depthTest = false; arrow.cone.renderOrder = 999;
+        }
+
+        const arrowW = new THREE.ArrowHelper(new THREE.Vector3(0,-1,0), new THREE.Vector3(), 9.8 * fScale, 0xe84118, 0.6, 0.3);
+        const arrowT = new THREE.ArrowHelper(new THREE.Vector3(0,1,0), new THREE.Vector3(), 9.8 * fScale, 0xfbc531, 0.6, 0.3);
+        const arrowFin = new THREE.ArrowHelper(new THREE.Vector3(-1,0,0), new THREE.Vector3(), 0, 0x9c88ff, 0.6, 0.3);
+        
+        setAlwaysOnTop(arrowW); setAlwaysOnTop(arrowT); setAlwaysOnTop(arrowFin);
+        forceGroup.add(arrowW); forceGroup.add(arrowT); forceGroup.add(arrowFin);
+
+        // --- 4. Physics Engine ---
+        let a_car = 0;       
+        let v_car = 0;       
+        let x_car = 0;       
+        let theta = 0;       
+        let omega = 0;       
+        const g = 9.80;
+        const damping = 3.0; 
+        const clock = new THREE.Clock();
+
+        function updatePhysics(dt) {
+            v_car += a_car * dt;
+            x_car += v_car * dt;
+            
+            carGroup.position.x = x_car;
+
+            wheels.forEach(w => {
+                w.rotation.z -= v_car * dt; 
+            });
+
+            let alpha = (-g * Math.sin(theta) - a_car * Math.cos(theta)) / L - damping * omega;
+            omega += alpha * dt;
+            theta += omega * dt;
+
+            const bobX = L * Math.sin(theta);
+            const bobY = pivotY - L * Math.cos(theta);
+            bobMesh.position.set(bobX, bobY, 0);
+
+            stringLine.geometry.setFromPoints([new THREE.Vector3(0, pivotY, 0), bobMesh.position]);
+
+            updateArc(theta);
+
+            if(showForces) {
+                arrowW.position.copy(bobMesh.position);
+                arrowT.position.copy(bobMesh.position);
+                const dirT = new THREE.Vector3(-Math.sin(theta), Math.cos(theta), 0).normalize();
+                arrowT.setDirection(dirT);
+                
+                let tensionMag = Math.sqrt(g*g + a_car*a_car);
+                arrowT.setLength(tensionMag * fScale, 0.6, 0.3);
+
+                if (a_car > 0.01) {
+                    arrowFin.visible = true;
+                    arrowFin.position.copy(bobMesh.position);
+                    arrowFin.setLength(a_car * fScale * 2, 0.6, 0.3); 
+                } else {
+                    arrowFin.visible = false;
+                }
+            }
+
+            document.getElementById('txt-acc').innerText = a_car.toFixed(2) + " m/s²";
+            document.getElementById('txt-vel').innerText = v_car.toFixed(2) + " m/s (" + (v_car*3.6).toFixed(1) + " km/h)";
+            
+            let deg = (theta * 180 / Math.PI);
+            if (Math.abs(deg) < 0.1) deg = 0;
+            document.getElementById('txt-angle').innerText = Math.abs(deg).toFixed(1) + "°";
+
+            if (!is2DMode) {
+                controls.target.set(x_car, 2, 0);
+                camera3D.position.x = x_car; 
+                controls.update();
+            } else {
+                camera2D.position.x = x_car;
+                camera2D.lookAt(x_car, 3, 0);
+            }
+        }
+
+        function updateArc(th) {
+            if (Math.abs(th) < 0.05) {
+                arcLine.geometry.setFromPoints([]);
+                return;
+            }
+            const points = [];
+            const r = 1.5; 
+            const steps = 10;
+            for(let i=0; i<=steps; i++){
+                let t = (i/steps) * th;
+                points.push(new THREE.Vector3(r*Math.sin(t), pivotY - r*Math.cos(t), 0));
+            }
+            arcLine.geometry.setFromPoints(points);
+        }
+
+        // --- 5. Controls ---
+        document.getElementById('btnRest').addEventListener('click', () => { a_car = 0; v_car = 0; });
+        document.getElementById('btnAccel').addEventListener('click', () => { 
+            a_car = 1.50; 
+            if(v_car > 20) v_car = 0; 
+        });
+        document.getElementById('btnConstV').addEventListener('click', () => { a_car = 0; v_car = 16.67; });
+
+        const forcesBtn = document.getElementById('forcesBtn');
+        const legend = document.getElementById('forceLegend');
+        forcesBtn.addEventListener('click', () => {
+            showForces = !showForces;
+            forceGroup.visible = showForces;
+            legend.style.display = showForces ? 'flex' : 'none';
+            forcesBtn.innerText = showForces ? "លាក់កម្លាំង (Forces)" : "បង្ហាញកម្លាំង (Forces)";
+        });
+
+        const viewBtn = document.getElementById('viewBtn');
+        viewBtn.addEventListener('click', () => {
+            is2DMode = !is2DMode;
+            if (is2DMode) {
+                activeCamera = camera2D;
+                controls.enabled = false;
+                viewBtn.innerText = "ទិដ្ឋភាព៖ 2D (មើលពីចំហៀង)";
+                viewBtn.style.backgroundColor = "#8c7ae6";
+            } else {
+                activeCamera = camera3D;
+                controls.enabled = true;
+                viewBtn.innerText = "ទិដ្ឋភាព៖ 3D (អាចបង្វិលបាន)";
+                viewBtn.style.backgroundColor = "#e1b12c";
+            }
+        });
+
+        // --- 6. Main Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = Math.min(clock.getDelta(), 0.05); 
+            updatePhysics(dt);
+            renderer.render(scene, activeCamera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            const aspect = window.innerWidth / window.innerHeight;
+            camera3D.aspect = aspect; camera3D.updateProjectionMatrix();
+            camera2D.left = -viewSize * aspect / 2; camera2D.right = viewSize * aspect / 2;
+            camera2D.top = viewSize / 2; camera2D.bottom = -viewSize / 2;
+            camera2D.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

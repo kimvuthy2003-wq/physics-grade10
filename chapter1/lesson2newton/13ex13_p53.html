@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <title>មេរៀនទី២លំហាត់លេខ១៣</title>
+    <style>
+        body { font-family: 'Khmer OS Battambang', sans-serif; text-align: center; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
+        .problem-statement { background: #fff; padding: 20px 30px; margin: 0 auto 20px auto; max-width: 900px; border-left: 5px solid #007bff; border-radius: 5px; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.1); line-height: 1.8; font-size: 16px;}
+        
+        .container { display: flex; justify-content: center; gap: 20px; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
+        
+        .panel { padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; min-width: 350px;}
+        .control-group { margin: 15px 0; display: flex; align-items: center; justify-content: space-between; }
+        input[type=range] { width: 150px; }
+        span.val-display { font-weight: bold; color: #007bff; width: 80px; text-align: right; }
+        .auto-text { color: #d9534f; font-weight: bold; font-size: 15px; }
+
+        .result-box { margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 5px; border-left: 4px solid #28a745; }
+        .result-box h4 { margin: 0 0 10px 0; color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
+        .result-box p { margin: 8px 0; font-size: 15px; }
+        .bold-blue { color: #0275d8; font-weight: bold; }
+        .bold-green { color: #28a745; font-weight: bold; }
+
+        canvas { background-color: #ffffff; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-top: 10px;}
+    </style>
+</head>
+<body>
+
+    <h2>វ៉ិចទ័រកម្លាំងលើតំណឹងខ្សែ</h2>
+    
+    <div class="problem-statement">
+        ១៣. ចម្ងាយរវាងបង្គោលខ្សែទូរសព្ទគឺ 50.0 m ។ ពេលបក្សីមានម៉ាស <span id="text-m" style="color:red; font-weight:bold;">1.00</span> kg ទំលើខ្សែត្រង់<span id="text-pos" style="color:blue; font-weight:bold;">ពាក់កណ្តាល</span> ខ្សែយារធ្លាក់ចុះក្រោម <span id="text-h" style="color:#d9534f; font-weight:bold;">0.200</span> m ។<br>
+        ក. គូសដ្យាក្រាមនៃកម្លាំងលើបក្សី ។<br>
+        ខ. គណនាតំណឹងខ្សែដែលបក្សីទំលើ ។ គេមិនគិតម៉ាសរបស់ខ្សែ ។ <span style="font-size: 14px; color: #666;">(យក g = 9.8 m/s<sup>2</sup>)</span>
+    </div>
+    
+    <div class="container">
+        <div class="panel">
+            <h3 style="margin-top:0; color:#333; border-bottom: 1px solid #ccc; padding-bottom: 10px;">កំណត់ទិន្នន័យ </h3>
+            <div class="control-group">
+                <label>ម៉ាសបក្សី m (kg): </label>
+                <input type="range" id="mass" min="0.1" max="5.0" step="0.1" value="1.0" oninput="drawSimulation()">
+                <span class="val-display" id="mass-val">1.00 kg</span>
+            </div>
+            <div class="control-group">
+                <label>ទីតាំងបក្សី x (m): </label>
+                <input type="range" id="position" min="1" max="49" step="0.5" value="25" oninput="drawSimulation()">
+                <span class="val-display" id="pos-val">25.0 m</span>
+            </div>
+            <div class="control-group">
+                <label>ជម្រៅខ្សែយារ h: </label>
+                <span class="auto-text" id="sag-val">0.200 m</span>
+            </div>
+
+            <div class="result-box">
+                <h4>ចម្លើយ៖</h4>
+                <p><strong>ក. គូសដ្យាក្រាមនៃកម្លាំង៖</strong></p>
+                <p style="padding-left: 15px; color: #555; font-size: 14px;">(សូមមើលដ្យាក្រាមវ៉ិចទ័រនៅលើផ្ទាំងគំនូរខាងស្តាំ)</p>
+                
+                <p style="margin-top: 15px;"><strong>ខ. គណនាតំណឹងខ្សែ៖</strong></p>
+                <p style="padding-left: 15px;">• ទម្ងន់បក្សី P = m × g = <strong><span id="res-w">9.80</span> N</strong></p>
+                
+                <p class="bold-blue" style="padding-left: 15px;">• តំណឹងខ្សែឆ្វេង T<sub>1</sub> = <span id="res-t1">0.00</span> N</p>
+                <p style="padding-left: 30px; margin: 5px 0; font-size: 14px;">T<sub>1x</sub> = <span id="res-t1x">0.00</span> N | T<sub>1y</sub> = <span id="res-t1y">0.00</span> N</p>
+                
+                <p class="bold-green" style="padding-left: 15px; margin-top: 15px;">• តំណឹងខ្សែស្តាំ T<sub>2</sub> = <span id="res-t2">0.00</span> N</p>
+                <p style="padding-left: 30px; margin: 5px 0; font-size: 14px;">T<sub>2x</sub> = <span id="res-t2x">0.00</span> N | T<sub>2y</sub> = <span id="res-t2y">0.00</span> N</p>
+            </div>
+        </div>
+
+        <div>
+            <canvas id="simCanvas" width="750" height="480"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function drawArrow(fromX, fromY, toX, toY, color, label, labelOffsetX, labelOffsetY, isDashed = false) {
+            const headlen = 8;
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            
+            ctx.beginPath();
+            if(isDashed) {
+                ctx.setLineDash([4, 4]);
+                ctx.lineWidth = 2;
+            } else {
+                ctx.setLineDash([]);
+                ctx.lineWidth = 3;
+            }
+            
+            ctx.strokeStyle = color;
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            if(label) {
+                ctx.fillStyle = color;
+                // រៀបចំការបង្ហាញអក្សរដែលមានសន្ទស្សន៍ (ឧ. T1, T1x) អោយបានត្រឹមត្រូវដោយមិនជាន់គ្នា
+                if (label.startsWith("T1") || label.startsWith("T2")) {
+                    const baseChar = label.charAt(0); // អក្សរ T
+                    const subChar = label.charAt(1); // លេខ 1 ឬ 2
+                    const suffixChar = label.substring(2); // អក្សរ x ឬ y (បើមាន)
+
+                    ctx.font = isDashed ? "14px Arial" : "15px Arial bold";
+                    ctx.fillText(baseChar, toX + labelOffsetX, toY + labelOffsetY);
+                    const baseWidth = ctx.measureText(baseChar).width;
+
+                    ctx.font = isDashed ? "10px Arial" : "11px Arial bold";
+                    ctx.fillText(subChar, toX + labelOffsetX + baseWidth, toY + labelOffsetY + 5);
+                    const subWidth = ctx.measureText(subChar).width;
+
+                    if (suffixChar) {
+                        ctx.font = isDashed ? "14px Arial" : "15px Arial bold";
+                        ctx.fillText(suffixChar, toX + labelOffsetX + baseWidth + subWidth + 1, toY + labelOffsetY);
+                    }
+                } else {
+                    ctx.font = isDashed ? "14px Arial" : "15px Arial bold";
+                    ctx.fillText(label, toX + labelOffsetX, toY + labelOffsetY);
+                }
+            }
+        }
+
+        function drawSimulation() {
+            const m = parseFloat(document.getElementById('mass').value);
+            const x = parseFloat(document.getElementById('position').value);
+            const L = 50.0; 
+            const g = 9.8;
+
+            const h = 0.05 + m * 0.15; 
+
+            document.getElementById('mass-val').innerText = m.toFixed(2) + " kg";
+            document.getElementById('pos-val').innerText = x.toFixed(1) + " m";
+            document.getElementById('sag-val').innerText = h.toFixed(3) + " m";
+            
+            document.getElementById('text-m').innerText = m.toFixed(2);
+            document.getElementById('text-h').innerText = h.toFixed(3);
+            
+            if (x === 25.0) {
+                document.getElementById('text-pos').innerText = "ពាក់កណ្តាល";
+            } else {
+                document.getElementById('text-pos').innerText = "នៅចម្ងាយ " + x.toFixed(1) + " m ពីបង្គោល";
+            }
+
+            const weight = m * g;
+            const theta1 = Math.atan2(h, x); 
+            const theta2 = Math.atan2(h, L - x); 
+
+            const tension1 = (weight * Math.cos(theta2)) / Math.sin(theta1 + theta2);
+            const tension2 = (weight * Math.cos(theta1)) / Math.sin(theta1 + theta2);
+
+            const T1x = tension1 * Math.cos(theta1);
+            const T1y = tension1 * Math.sin(theta1);
+            const T2x = tension2 * Math.cos(theta2);
+            const T2y = tension2 * Math.sin(theta2);
+
+            document.getElementById('res-w').innerText = weight.toFixed(2);
+            document.getElementById('res-t1').innerText = tension1.toFixed(2);
+            document.getElementById('res-t1x').innerText = T1x.toFixed(2);
+            document.getElementById('res-t1y').innerText = T1y.toFixed(2);
+            document.getElementById('res-t2').innerText = tension2.toFixed(2);
+            document.getElementById('res-t2x').innerText = T2x.toFixed(2);
+            document.getElementById('res-t2y').innerText = T2y.toFixed(2);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const poleLeftX = 100;
+            const poleRightX = 650;
+            const poleYTop = 100;
+            
+            const birdX = poleLeftX + (x / L) * (poleRightX - poleLeftX);
+            const visualSag = 30 + (h * 90); 
+            const birdY = poleYTop + visualSag; 
+
+            ctx.fillStyle = "#d9534f";
+            ctx.font = "bold 20px 'Khmer OS Battambang', sans-serif";
+            ctx.fillText("ក. ដ្យាក្រាមកម្លាំង", 110, 40);
+
+            ctx.fillStyle = "#666";
+            ctx.fillRect(poleLeftX - 10, poleYTop, 20, 350);
+            ctx.fillRect(poleRightX - 10, poleYTop, 20, 350);
+            
+            ctx.fillStyle = "#333";
+            ctx.font = "14px Arial";
+            ctx.fillText("x = " + x.toFixed(1) + "m", birdX - 35, poleYTop - 15);
+            ctx.fillText("L - x = " + (L - x).toFixed(1) + "m", (birdX + poleRightX)/2 - 30, poleYTop - 15);
+
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = "#ccc";
+            ctx.moveTo(poleLeftX, poleYTop);
+            ctx.lineTo(poleRightX, poleYTop);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.beginPath();
+            ctx.strokeStyle = "#888";
+            ctx.lineWidth = 2;
+            ctx.moveTo(poleLeftX, poleYTop);
+            ctx.lineTo(birdX, birdY);
+            ctx.lineTo(poleRightX, poleYTop);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(birdX, birdY, 8, 0, 2 * Math.PI);
+            ctx.fillStyle = "#d9534f";
+            ctx.fill();
+
+            const drawAngle1 = Math.atan2(poleYTop - birdY, poleLeftX - birdX);
+            const drawAngle2 = Math.atan2(poleYTop - birdY, poleRightX - birdX);
+
+            const scaleV = 1.2;
+            const vLen1 = Math.min(180, Math.max(60, tension1 * scaleV));
+            const vLen2 = Math.min(180, Math.max(60, tension2 * scaleV));
+            const vLenW = Math.min(140, Math.max(50, weight * (scaleV + 2)));
+
+            drawArrow(birdX, birdY, birdX, birdY + vLenW, "#d9534f", "P", 10, 15);
+
+            const t1EndX = birdX + vLen1 * Math.cos(drawAngle1);
+            const t1EndY = birdY + vLen1 * Math.sin(drawAngle1);
+            drawArrow(birdX, birdY, t1EndX, birdY, "#5bc0de", "T1x", -30, -10, true);
+            drawArrow(t1EndX, birdY, t1EndX, t1EndY, "#5bc0de", "T1y", -35, 10, true);
+            drawArrow(birdX, birdY, t1EndX, t1EndY, "#0275d8", "T1", -25, -15);
+
+            const t2EndX = birdX + vLen2 * Math.cos(drawAngle2);
+            const t2EndY = birdY + vLen2 * Math.sin(drawAngle2);
+            drawArrow(birdX, birdY, t2EndX, birdY, "#28a745", "T2x", 10, -10, true);
+            drawArrow(t2EndX, birdY, t2EndX, t2EndY, "#28a745", "T2y", 15, 10, true);
+            drawArrow(birdX, birdY, t2EndX, t2EndY, "#218838", "T2", 15, -15);
+        }
+
+        drawSimulation();
+    </script>
+</body>
+</html>

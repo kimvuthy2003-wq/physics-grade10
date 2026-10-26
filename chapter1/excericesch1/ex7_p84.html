@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី៧៖ ឌីណាម៉ូម៉ែត្រ និងជញ្ជីង</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 650px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        button {
+            background: #007bff; color: white; padding: 12px 24px; font-size: 18px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s; width: 100%; margin-bottom: 10px;
+        }
+        button:hover { filter: brightness(1.1); }
+        #btnSetValues { background: #28a745; margin-bottom: 10px;}
+        #btnAction { background: #d32f2f; margin-bottom: 20px; }
+        #btnToggleSolution { background: #17a2b8; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 14px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        
+        .note-box { 
+            background: #e8f5e9; border-left: 6px solid #28a745; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #1b5e20; 
+        }
+
+        .text-outline { text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; }
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>៧.</strong> កែវក្រិតមួយមានម៉ាស $1.00 \text{ kg}$ ផ្ទុកប្រេង $2.00 \text{ kg}$ ហើយមានម៉ាសមាត $916 \text{ kg/m}^3$ ស្ថិតនៅលើជញ្ជីងមួយ។ ដុំដែក $2.00 \text{ kg}$ ដែលព្យួរនឹងឌីណាម៉ូម៉ែត្រត្រូវបានពន្លិចទាំងស្រុងក្នុងប្រេង។ តើជញ្ជីង និងឌីណាម៉ូម៉ែត្រចង្អុលតម្លៃលេខប៉ុន្មាន នៅពេលប្រព័ន្ធមានលំនឹង? គេឱ្យម៉ាសមាតដែកគឺ $7.86 \times 10^3 \text{ kg/m}^3$។
+    </div>
+
+    <button id="btnSetValues">🎯 កំណត់តម្លៃតាមលំហាត់ពិតប្រាកដ</button>
+    <button id="btnAction">👇 ទម្លាក់ដុំដែកចូលក្នុងប្រេង</button>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 700 750" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="oilGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#fff59d" stop-opacity="0.85"/>
+                    <stop offset="100%" stop-color="#fbc02d" stop-opacity="0.95"/>
+                </linearGradient>
+                <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#cfd8dc"/>
+                    <stop offset="50%" stop-color="#ffffff"/>
+                    <stop offset="100%" stop-color="#90a4ae"/>
+                </linearGradient>
+                <linearGradient id="ironGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#78909c"/>
+                    <stop offset="100%" stop-color="#37474f"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ជញ្ជីងខាងក្រោម (Scale) -->
+            <g transform="translate(200, 600)">
+                <!-- ជើងជញ្ជីង -->
+                <path d="M 20 60 L 10 90 L 290 90 L 280 60 Z" fill="#cfd8dc" stroke="#546e7a" stroke-width="3"/>
+                <!-- តួជញ្ជីង -->
+                <rect x="20" y="0" width="260" height="60" rx="8" fill="#eceff1" stroke="#455a64" stroke-width="4"/>
+                <!-- ថាសជញ្ជីង -->
+                <rect x="40" y="-15" width="220" height="15" rx="4" fill="url(#metalGrad)" stroke="#455a64" stroke-width="3"/>
+                
+                <!-- មុខនាឡិកាជញ្ជីង (Dial) -->
+                <circle cx="150" cy="30" r="22" fill="#fff" stroke="#333" stroke-width="2"/>
+                <line id="scaleNeedle" x1="150" y1="30" x2="150" y2="12" stroke="#d32f2f" stroke-width="2" transform="rotate(-45 150 30)"/>
+                <circle cx="150" cy="30" r="3" fill="#111"/>
+
+                <!-- តម្លៃឌីជីថលជញ្ជីង (បង្ហាញ N និង kg) -->
+                <rect x="70" y="65" width="160" height="30" rx="4" fill="#212121"/>
+                <text id="txtScaleN" x="150" y="86" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#00e676">29.4 N (3.00 kg)</text>
+            </g>
+
+            <!-- ប្រព័ន្ធកែវក្រិត និងប្រេង (Beaker & Oil) -->
+            <g transform="translate(200, 350)">
+                <!-- កែវក្រិត -->
+                <path d="M 60 0 L 60 230 A 15 15 0 0 0 75 245 L 225 245 A 15 15 0 0 0 240 230 L 240 0" fill="none" stroke="#b0bec5" stroke-width="6"/>
+                <!-- ផ្ទៃប្រេង (កម្ពស់ប្រែប្រួលបន្តិចពេលលិច) -->
+                <path id="oilBody" d="M 63 60 L 63 230 A 12 12 0 0 0 75 242 L 225 242 A 12 12 0 0 0 237 230 L 237 60 Z" fill="url(#oilGrad)"/>
+                <line id="oilTop" x1="63" y1="60" x2="237" y2="60" stroke="#fbc02d" stroke-width="3"/>
+                
+                <!-- ព្រួញប្រតិកម្ម Fb' រុញចុះក្រោមលើទឹក (លេចចេញពេលលិច) -->
+                <g id="vecFbReactionGroup" style="opacity: 0;">
+                    <line x1="100" y1="60" x2="100" y2="110" stroke="#e65100" stroke-width="4" stroke-dasharray="6,4"/>
+                    <polygon points="100,120 94,105 106,105" fill="#e65100"/>
+                    <text x="110" y="100" font-family="Arial" font-weight="bold" font-size="18" fill="#e65100" class="text-outline">F_b' (ប្រតិកម្ម)</text>
+                </g>
+            </g>
+
+            <!-- ជើងទម្រខាងលើ (Top Support) ថេរ -->
+            <line x1="250" y1="20" x2="450" y2="20" stroke="#37474f" stroke-width="12" stroke-linecap="round"/>
+
+            <!-- ប្រព័ន្ធឌីណាម៉ូម៉ែត្រ និងដុំដែក (ធ្វើចលនាចុះក្រោមរួមគ្នា) -->
+            <g id="measuringSystem" transform="translate(0, 0)">
+                <!-- ខ្សែយោងពីជើងទម្រមកឌីណាម៉ូម៉ែត្រ -->
+                <line id="topRope" x1="350" y1="20" x2="350" y2="60" stroke="#555" stroke-width="4"/>
+
+                <!-- ឌីណាម៉ូម៉ែត្រ (Dynamometer) រាងចតុកោណ -->
+                <g id="dynamometer">
+                    <rect x="320" y="60" width="60" height="140" fill="url(#metalGrad)" stroke="#455a64" stroke-width="4" rx="6"/>
+                    <rect x="335" y="70" width="30" height="120" fill="#fff" stroke="#ccc" stroke-width="1"/>
+                    
+                    <!-- គំនូសមាត្រដ្ឋាន -->
+                    <line x1="335" y1="80" x2="345" y2="80" stroke="#333" stroke-width="2"/>
+                    <line x1="335" y1="110" x2="345" y2="110" stroke="#333" stroke-width="2"/>
+                    <line x1="335" y1="140" x2="345" y2="140" stroke="#333" stroke-width="2"/>
+                    <line x1="335" y1="170" x2="345" y2="170" stroke="#333" stroke-width="2"/>
+
+                    <!-- ទ្រនិចពណ៌ក្រហម (រំកិលតាមទម្ងន់ព្រាង T) -->
+                    <line id="dynaNeedle" x1="335" y1="140" x2="365" y2="140" stroke="#d32f2f" stroke-width="4"/>
+
+                    <!-- តម្លៃឌីជីថលឌីណាម៉ូម៉ែត្រ -->
+                    <rect x="390" y="115" width="80" height="30" fill="#212121" rx="4"/>
+                    <text id="liveDynaVal" x="430" y="136" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#ff5252">19.6 N</text>
+                </g>
+
+                <!-- ខ្សែយោងពីឌីណាម៉ូម៉ែត្រទៅដុំដែក -->
+                <line x1="350" y1="200" x2="350" y2="280" stroke="#555" stroke-width="3"/>
+
+                <!-- ដុំដែក (Iron Block) -->
+                <g id="solidBlock" transform="translate(0, 0)">
+                    <rect id="objRect" x="310" y="280" width="80" height="60" fill="url(#ironGrad)" stroke="#263238" stroke-width="3" rx="4"/>
+                    <!-- កងភ្ជាប់ខ្សែ -->
+                    <path d="M 340 280 Q 350 260 360 280" fill="none" stroke="#546e7a" stroke-width="4"/> 
+                    
+                    <!-- វ៉ិចទ័រកម្លាំងទម្ងន់ដុំដែក W_i (ចុះក្រោម ពណ៌ស្វាយ) -->
+                    <line id="vecWi" x1="350" y1="310" x2="350" y2="400" stroke="#6f42c1" stroke-width="4"/>
+                    <polygon id="headWi" points="345,400 355,400 350,410" fill="#6f42c1"/>
+                    <text id="txtWi" x="360" y="405" font-family="Arial" font-weight="bold" font-size="20" fill="#6f42c1" class="text-outline">W_{Fe}</text>
+
+                    <!-- វ៉ិចទ័រកម្លាំងតំណឹងខ្សែ T (ឡើងលើ ពណ៌ក្រហម) -->
+                    <line id="vecT" x1="350" y1="280" x2="350" y2="190" stroke="#d32f2f" stroke-width="4"/>
+                    <polygon id="headT" points="345,190 355,190 350,180" fill="#d32f2f"/>
+                    <text id="txtT" x="320" y="200" font-family="Arial" font-weight="bold" font-size="20" fill="#d32f2f" class="text-outline">T</text>
+
+                    <!-- វ៉ិចទ័រកម្លាំងដំណោល Fb (ឡើងលើ ពណ៌បៃតង - លេចចេញពេលចូលប្រេង) -->
+                    <g id="vecFbGroup" style="opacity: 0;">
+                        <line id="vecFbLine" x1="380" y1="310" x2="380" y2="250" stroke="#28a745" stroke-width="5"/>
+                        <polygon id="vecFbHead" points="375,250 385,250 380,240" fill="#28a745"/>
+                        <text id="txtFbLabel" x="390" y="260" font-family="Arial" font-weight="bold" font-size="20" fill="#28a745" class="text-outline">F_b</text>
+                    </g>
+                </g>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជាតម្លៃ -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            ម៉ាសកែវក្រិត $m_b$ (kg):<br>
+            <span id="valMb" class="number-display" style="color: #546e7a; font-size:20px;">1.00 kg</span>
+            <input type="range" id="sliderMb" min="0.5" max="3.0" value="1.0" step="0.1">
+        </div>
+        <div class="slider-box">
+            ម៉ាសប្រេង $m_o$ (kg):<br>
+            <span id="valMo" class="number-display" style="color: #fbc02d; font-size:20px;">2.00 kg</span>
+            <input type="range" id="sliderMo" min="1.0" max="5.0" value="2.0" step="0.1">
+        </div>
+        <div class="slider-box">
+            ម៉ាសដុំដែក $m_i$ (kg):<br>
+            <span id="valMi" class="number-display" style="color: #6f42c1; font-size:20px;">2.00 kg</span>
+            <input type="range" id="sliderMi" min="0.5" max="5.0" value="2.0" step="0.1">
+        </div>
+        <div class="slider-box">
+            ម៉ាសមាតប្រេង $\rho_o$ (kg/m³):<br>
+            <span id="valRhoO" class="number-display" style="color: #e65100; font-size:20px;">916 kg/m³</span>
+            <input type="range" id="sliderRhoO" min="700" max="1500" value="916" step="1">
+        </div>
+        <div class="slider-box">
+            ម៉ាសមាតដែក $\rho_i$ (kg/m³):<br>
+            <span id="valRhoI" class="number-display" style="color: #37474f; font-size:20px;">7860 kg/m³</span>
+            <input type="range" id="sliderRhoI" min="3000" max="12000" value="7860" step="10">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">ឌីណាម៉ូម៉ែត្រចង្អុល $T$<br><span id="dashT" class="number-display">17.3 N</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">កម្លាំងដំណោល $F_b$<br><span id="dashFb" class="number-display">2.3 N</span></div>
+        <div class="data-box" style="border-top: 4px solid #007bff;">ជញ្ជីងចង្អុល $N$<br><span id="dashN" class="number-display">31.7 N (3.23 kg)</span></div>
+    </div>
+
+    <button id="btnToggleSolution">📖 បង្ហាញ / លាក់រូបមន្តដោះស្រាយ</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box" id="theoryNote">
+            💡 <strong>គោលការណ៍សកម្មភាព និងប្រតិកម្ម៖</strong> ពេលដែកលិចក្នុងប្រេង ប្រេងបានរុញដែកឡើងលើដោយកម្លាំងដំណោល $F_b$ ធ្វើឱ្យឌីណាម៉ូម៉ែត្រស្រាលជាងមុន។ ផ្ទុយមកវិញ ដែកក៏បានរុញប្រេងចុះក្រោមវិញដោយកម្លាំង $F_b$ ដូចគ្នា ធ្វើឱ្យជញ្ជីងបាតទ្របន្ទុកកើនឡើង។
+        </div>
+
+        <h3>ដំណោះស្រាយលំហាត់</h3>
+        
+        <div id="mathContainer">
+            <p><strong>១. រកតម្លៃដែលឌីណាម៉ូម៉ែត្រចង្អុល ($T$) ៖</strong></p>
+            <p>ឌីណាម៉ូម៉ែត្រចង្អុលទម្ងន់ព្រាងរបស់ដែក៖ $T = W_{Fe} - F_b$</p>
+            <ul>
+                <li>មាឌដែក៖ $V_i = \frac{m_i}{\rho_i}$</li>
+                <li>កម្លាំងដំណោល៖ $F_b = \rho_o \cdot V_i \cdot g = \rho_o \cdot \left(\frac{m_i}{\rho_i}\right) \cdot g$</li>
+            </ul>
+            <div id="mathLine1">$$ F_b = 916 \times \left(\frac{2.00}{7860}\right) \times 9.80 \approx 2.28 \text{ N} $$</div>
+            <div id="mathLine2" style="color: #d32f2f; font-weight: bold;">$$ T = (2.00 \times 9.80) - 2.28 = 19.6 - 2.28 = 17.32 \text{ N} \approx 17.3 \text{ N} $$</div>
+
+            <p><strong>២. រកតម្លៃដែលជញ្ជីងចង្អុល ($N$) ៖</strong></p>
+            <p>ជញ្ជីងទ្រទម្ងន់កែវ ទម្ងន់ប្រេង និងរងកម្លាំងប្រតិកម្មដែលដែករុញចុះក្រោម ($F_b$)៖</p>
+            <div id="mathLine3">$$ N = W_b + W_o + F_b = (m_b + m_o)g + F_b $$</div>
+            <div id="mathLine4" style="color: #007bff; font-weight: bold;">
+                $$ N = (1.00 + 2.00) \times 9.80 + 2.28 = 29.4 + 2.28 = 31.68 \text{ N} \approx 31.7 \text{ N} $$
+            </div>
+            <p>បើគិតជាគីឡូក្រាម ដែលជញ្ជីងបង្ហាញ៖</p>
+            <div id="mathLine5">$$ M_{\text{scale}} = \frac{N}{g} = \frac{31.68}{9.80} \approx 3.23 \text{ kg} $$</div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript សុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > -->
+<script>
+    var sMb = document.getElementById('sliderMb');
+    var sMo = document.getElementById('sliderMo');
+    var sMi = document.getElementById('sliderMi');
+    var sRhoO = document.getElementById('sliderRhoO');
+    var sRhoI = document.getElementById('sliderRhoI');
+
+    var btnAction = document.getElementById('btnAction');
+    var btnSet = document.getElementById('btnSetValues');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    var measuringSystem = document.getElementById('measuringSystem');
+    var topRope = document.getElementById('topRope');
+    var dynaNeedle = document.getElementById('dynaNeedle');
+    var liveDynaVal = document.getElementById('liveDynaVal');
+    
+    var scaleNeedle = document.getElementById('scaleNeedle');
+    var txtScaleN = document.getElementById('txtScaleN');
+
+    var oilBody = document.getElementById('oilBody');
+    var oilTop = document.getElementById('oilTop');
+    
+    var vecFbGroup = document.getElementById('vecFbGroup');
+    var vecFbReactionGroup = document.getElementById('vecFbReactionGroup');
+    
+    var vecWi = document.getElementById('vecWi');
+    var headWi = document.getElementById('headWi');
+    var vecT = document.getElementById('vecT');
+    var headT = document.getElementById('headT');
+
+    var g = 9.80; // m/s^2
+
+    var targetProgress = 0; // 0 = ក្នុងខ្យល់, 1 = ក្នុងប្រេង
+    var currentProgress = 0;
+    var isAnimating = false;
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    btnSet.addEventListener('click', function() {
+        sMb.value = 1.0;
+        sMo.value = 2.0;
+        sMi.value = 2.0;
+        sRhoO.value = 916;
+        sRhoI.value = 7860;
+        updatePhysics();
+    });
+
+    function loopAnimation() {
+        var diff = targetProgress - currentProgress;
+        if (Math.abs(diff).toFixed(3) !== "0.000") {
+            currentProgress += diff * 0.08;
+            drawGraphics();
+            requestAnimationFrame(loopAnimation);
+        } else {
+            currentProgress = targetProgress;
+            drawGraphics();
+            isAnimating = false;
+        }
+    }
+
+    btnAction.addEventListener('click', function() {
+        if (targetProgress === 0) {
+            targetProgress = 1; // ទម្លាក់ចូល
+            btnAction.innerText = "👆 ទាញដុំដែកឡើងគោកវិញ";
+            btnAction.style.background = "#28a745";
+        } else {
+            targetProgress = 0; // ឡើងគោកវិញ
+            btnAction.innerText = "👇 ទម្លាក់ដុំដែកចូលក្នុងប្រេង";
+            btnAction.style.background = "#d32f2f";
+        }
+
+        if (isAnimating === false) {
+            isAnimating = true;
+            loopAnimation();
+        }
+    });
+
+    function drawGraphics() {
+        var mb = parseFloat(sMb.value);
+        var mo = parseFloat(sMo.value);
+        var mi = parseFloat(sMi.value);
+        var rho_o = parseFloat(sRhoO.value);
+        var rho_i = parseFloat(sRhoI.value);
+
+        var w_iron = mi * g;
+        var vol_i = mi / rho_i;
+        var f_b_max = rho_o * vol_i * g;
+        var w_beaker_oil = (mb + mo) * g;
+
+        // ១. ចលនាទម្លាក់ចុះក្រោមនៃប្រព័ន្ធឌីណាម៉ូម៉ែត្រ (Drop = 210px)
+        var dropY = currentProgress * 210;
+        measuringSystem.setAttribute("transform", "translate(0, " + dropY + ")");
+        topRope.setAttribute("y2", 60 + dropY); // លូតខ្សែ
+
+        // ២. កម្រិតប្រេងកើនឡើងបន្តិចពេលលិច
+        var dh_vis = currentProgress * 15; // ឡើង 15px អតិបរមា
+        oilBody.setAttribute("d", "M 63 " + (60 - dh_vis) + " L 63 230 A 12 12 0 0 0 75 242 L 225 242 A 12 12 0 0 0 237 230 L 237 " + (60 - dh_vis) + " Z");
+        oilTop.setAttribute("y1", 60 - dh_vis);
+        oilTop.setAttribute("y2", 60 - dh_vis);
+
+        // ៣. អាប់ដេតតម្លៃកម្លាំងជាក់ស្តែង
+        var currentT = w_iron - (currentProgress * f_b_max);
+        var currentN = w_beaker_oil + (currentProgress * f_b_max);
+        var currentMscale = currentN / g;
+
+        liveDynaVal.textContent = currentT.toFixed(1) + " N";
+        txtScaleN.textContent = currentN.toFixed(1) + " N (" + currentMscale.toFixed(2) + " kg)";
+
+        // ៤. រំកិលទ្រនិចឌីណាម៉ូម៉ែត្រ (0N នៅ y=80, 50N នៅ y=170)
+        var dynaScaleMax = 50;
+        var dynaY = 80 + (currentT / dynaScaleMax) * 90;
+        dynaNeedle.setAttribute("y1", dynaY);
+        dynaNeedle.setAttribute("y2", dynaY);
+
+        // ៥. បង្វិលទ្រនិចជញ្ជីងបាត (Dial)
+        var scaleMax = 100;
+        var scaleAngle = -45 + (currentN / scaleMax) * 270;
+        scaleNeedle.setAttribute("transform", "rotate(" + scaleAngle + " 150 30)");
+
+        // ៦. វ៉ិចទ័រកម្លាំង W របស់ដែក
+        var lenW = (w_iron / 50) * 100 + 40;
+        var yEndW = 310 + lenW;
+        vecWi.setAttribute("y2", yEndW);
+        headWi.setAttribute("points", "345," + yEndW + " 355," + yEndW + " 350," + (yEndW + 10));
+        document.getElementById('txtWi').setAttribute("y", yEndW + 20);
+
+        // ៧. វ៉ិចទ័រកម្លាំង T របស់ដែក
+        var lenT = (currentT / 50) * 100 + 40;
+        var yEndT = 280 - lenT;
+        vecT.setAttribute("y2", yEndT);
+        headT.setAttribute("points", "345," + yEndT + " 355," + yEndT + " 350," + (yEndT - 10));
+        document.getElementById('txtT').setAttribute("y", yEndT - 20);
+
+        // ៨. បង្ហាញព្រួញកម្លាំងដំណោល Fb លើដែក
+        vecFbGroup.style.opacity = currentProgress;
+        var lenFb = (currentProgress * f_b_max / 5) * 60; // Scale ឱ្យឃើញច្បាស់
+        var safeLenFb = Math.max(lenFb, 15);
+        var yTopFb = 310 - safeLenFb;
+        document.getElementById('vecFbLine').setAttribute("y2", yTopFb);
+        document.getElementById('vecFbHead').setAttribute("points", "375," + yTopFb + " 385," + yTopFb + " 380," + (yTopFb - 10));
+        document.getElementById('txtFbLabel').setAttribute("y", yTopFb - 20);
+
+        // ៩. បង្ហាញព្រួញកម្លាំងប្រតិកម្ម Fb' លើទឹក
+        vecFbReactionGroup.style.opacity = currentProgress;
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var mb = parseFloat(sMb.value);
+        var mo = parseFloat(sMo.value);
+        var mi = parseFloat(sMi.value);
+        var rho_o = parseFloat(sRhoO.value);
+        var rho_i = parseFloat(sRhoI.value);
+
+        var w_iron = mi * g;
+        var vol_i = mi / rho_i;
+        var f_b = rho_o * vol_i * g;
+        var t_apparent = w_iron - f_b;
+        var n_scale = (mb + mo) * g + f_b;
+        var m_scale = n_scale / g;
+
+        document.getElementById('valMb').innerText = mb.toFixed(2) + " kg";
+        document.getElementById('valMo').innerText = mo.toFixed(2) + " kg";
+        document.getElementById('valMi').innerText = mi.toFixed(2) + " kg";
+        document.getElementById('valRhoO').innerText = rho_o + " kg/m\u00B3";
+        document.getElementById('valRhoI').innerText = rho_i + " kg/m\u00B3";
+
+        document.getElementById('dashT').innerText = t_apparent.toFixed(2) + " N";
+        document.getElementById('dashFb').innerText = f_b.toFixed(3) + " N";
+        document.getElementById('dashN').innerText = n_scale.toFixed(2) + " N (" + m_scale.toFixed(2) + " kg)";
+
+        drawGraphics();
+
+        // Update MathJax Safely
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            document.getElementById('mathLine1').innerHTML = "$$ F_b = " + rho_o + " \\times \\left(\\frac{" + mi.toFixed(2) + "}{" + rho_i + "}\\right) \\times 9.80 \\approx " + f_b.toFixed(3) + " \\text{ N} $$";
+            document.getElementById('mathLine2').innerHTML = "$$ T = (" + mi.toFixed(2) + " \\times 9.80) - " + f_b.toFixed(3) + " = " + w_iron.toFixed(2) + " - " + f_b.toFixed(3) + " \\approx " + t_apparent.toFixed(1) + " \\text{ N} $$";
+            document.getElementById('mathLine3').innerHTML = "$$ N = W_b + W_o + F_b = (" + mb.toFixed(2) + " + " + mo.toFixed(2) + ") \\times 9.80 + " + f_b.toFixed(3) + " $$";
+            document.getElementById('mathLine4').innerHTML = "$$ N = " + ((mb + mo) * 9.8).toFixed(2) + " + " + f_b.toFixed(3) + " = " + n_scale.toFixed(3) + " \\text{ N} \\approx " + n_scale.toFixed(1) + " \\text{ N} $$";
+            document.getElementById('mathLine5').innerHTML = "$$ M_{\\text{scale}} = \\frac{" + n_scale.toFixed(2) + "}{9.80} \\approx " + m_scale.toFixed(2) + " \\text{ kg} $$";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    sMb.addEventListener('input', updatePhysics);
+    sMo.addEventListener('input', updatePhysics);
+    sMi.addEventListener('input', updatePhysics);
+    sRhoO.addEventListener('input', updatePhysics);
+    sRhoI.addEventListener('input', updatePhysics);
+
+    // Initial run
+    updatePhysics();
+</script>
+
+</body>
+</html>

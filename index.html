@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>បញ្ជីមេរៀនរូបវិទ្យាថ្នាក់ទី១០</title>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container { max-width: 800px; width: 100%; }
+        .header-section {
+            text-align: center; margin-bottom: 30px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 30px 20px; border-radius: 15px; color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header-section h1 { margin: 0 0 10px 0; font-size: 28px; }
+        .header-section p { margin: 0 0 20px 0; font-size: 16px; opacity: 0.9; }
+        
+        .search-box { position: relative; max-width: 500px; margin: 0 auto; }
+        .search-box input {
+            width: 100%; padding: 12px 20px 12px 45px;
+            border: none; border-radius: 25px;
+            font-family: 'Battambang', sans-serif; font-size: 15px;
+            outline: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); box-sizing: border-box;
+        }
+        .search-icon {
+            position: absolute; left: 15px; top: 50%;
+            transform: translateY(-50%); color: #666; font-size: 16px;
+        }
+        
+        .chapter-card {
+            background: #fff; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px;
+            border: 1px solid #e1e4e8;
+        }
+        .card-header { padding: 15px 20px; color: #fff; display: flex; align-items: center; }
+        .header-ch1 { background-color: #007bff; }
+        .header-ch2 { background-color: #28a745; }
+        .header-ch3 { background-color: #fd7e14; }
+        .header-ch4 { background-color: #6f42c1; }
+        .card-header h2 { margin: 0; font-size: 18px; font-weight: 700; }
+        
+        .lesson-list { padding: 0; margin: 0; }
+        .lesson-item-container { border-bottom: 1px solid #f0f0f0; }
+        .lesson-item-container:last-child { border-bottom: none; }
+        
+        .lesson-item {
+            display: flex; align-items: center; padding: 15px 20px;
+            cursor: pointer; transition: background-color 0.2s;
+            background-color: #fff; text-decoration: none;
+        }
+        .lesson-item:hover { background-color: #f8f9fa; }
+        .number-badge {
+            width: 30px; height: 30px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; margin-right: 15px; flex-shrink: 0; font-weight: bold; color: #fff;
+        }
+        .badge-lesson { background-color: #6c757d; }
+        .badge-exercise { background-color: #dc3545; }
+        .lesson-title { font-size: 15px; flex-grow: 1; font-weight: bold; color: #444; }
+        .toggle-icon { font-size: 12px; color: #888; transition: transform 0.3s; }
+        .expanded .toggle-icon { transform: rotate(180deg); }
+
+        .sub-lesson-list {
+            display: none;
+            background-color: #fcfcfc;
+            padding: 5px 20px 15px 65px;
+            border-top: 1px dashed #eee;
+        }
+        .sub-lesson-item {
+            display: block; padding: 8px 0; color: #555;
+            text-decoration: none; font-size: 14px;
+            border-bottom: 1px dashed #e9e9e9; transition: color 0.2s, padding-left 0.2s;
+        }
+        .sub-lesson-item:last-child { border-bottom: none; }
+        .sub-lesson-item:hover { color: #007bff; padding-left: 5px; }
+        .sub-item-quiz { color: #e67e22; font-weight: bold; }
+
+        .no-results { text-align: center; padding: 20px; color: #666; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-section">
+        <h1>សូមស្វាគមន៍មកកាន់ការសិក្សា</h1>
+        <p>សូមជ្រើសរើសមេរៀនតាមជំពូកនីមួយៗខាងក្រោម។</p>
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="ស្វែងរកមេរៀន ឬលំហាត់..." onkeyup="searchLessons()">
+        </div>
+    </div>
+    
+    <div id="noResults" class="no-results">រកមិនឃើញទិន្នន័យដែលអ្នកស្វែងរកទេ...</div>
+
+    <!-- ជំពូកទី១ -->
+    <div class="chapter-card">
+        <div class="card-header header-ch1">
+            <h2>ជំពូកទី១៖ មេកានិច</h2>
+        </div>
+        <div class="lesson-list">
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-lesson">១</div>
+                    <div class="lesson-title">មេរៀនទី១ ចលនាត្រង់ស្មើ</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter1/lesson1motion/1vector.html" class="sub-lesson-item">១.វ៉ិចទ័រ</a>
+                    <a href="chapter1/lesson1motion/2distance_displacement.html" class="sub-lesson-item">២.លំហាត់គំរូគណនាចម្ងាយចរនិងបម្លាស់ទីរថយន្ត</a>
+                    <a href="chapter1/lesson1motion/3speed_velocity.html" class="sub-lesson-item">៣.២លំហាត់គំរូគណនាល្បឿននិងវ៉ិចទ័រល្បឿនមធ្យម</a>
+                    <a href="chapter1/lesson1motion/3car_motion_graph.html" class="sub-lesson-item">៣.៣លំហាត់គំរូគណនាល្បឿនមធ្យមក្នុងរយៈពេល0.4h</a>
+                    <a href="chapter1/lesson1motion/4velocity_acceleration_diagram.html" class="sub-lesson-item">៣.៤វិភាគក្រាបចលនាស៊ីនេម៉ាទិច</a>
+                    <a href="chapter1/lesson1motion/5example_car_motion_p29.html" class="sub-lesson-item">៥.លំហាត់ឧទាហរណ៍ចលនារថយន្តនិងក្រាបទំព័រ២៩</a>
+                    <a href="chapter1/lesson1motion/Q_and_A_Physics_Kinematics.html" class="sub-lesson-item">សំណួរចម្លើយលំហាត់លេខ១ដល់លេខ៦ ទំព័រ២៩</a>
+
+                    <a href="chapter1/lesson1motion/ex7_p34.html" class="sub-lesson-item">លំហាត់លេខ៧ទំព័រទី៣៤</a>
+                    <a href="chapter1/lesson1motion/6ex11_uniform_accelerated_motion.html" class="sub-lesson-item">លំហាត់លេខ១១ចលនាត្រង់ប្រែប្រួលស្មើ ទំព័រ៣៤</a>
+                    <a href="chapter1/lesson1motion/7ex12_two_balls_thrown_up.html" class="sub-lesson-item">លំហាត់លេខ១២គេចោលបាល់ពីរឡើងទៅលើ ជួបគ្នា ទំព័រ៣៤</a>
+                    <a href="chapter1/lesson1motion/8ex13_falling_object_graph.html" class="sub-lesson-item">លំហាត់លេខ១៣បង្ហាញទំនាក់ទំនង v និង t ទំព័រ៣៥</a>
+                    <a href="chapter1/lesson1motion/9ex14_police_chasing.html" class="sub-lesson-item">លំហាត់លេខ១៤ប៉ូលីសដេញចាប់អ្នកល្មើសច្បាប់ចរាចរ ទំព័រ៣៥</a>
+                    <a href="chapter1/lesson1motion/10ex15_trolley_motion.html" class="sub-lesson-item">លំហាត់លេខ១៥ចលនាកូនរទេះ ទំព័រ៣៥</a>
+                    <a href="chapter1/lesson1motion/11ex16_distance_time_graph.html" class="sub-lesson-item">លំហាត់១៦ក្រាហ្វិកចម្ងាយចរនិងពេល ទំព័រ៣៦</a>
+                    <a href="chapter1/lesson1motion/12ex17_velocity_graph.html" class="sub-lesson-item">លំហាត់លេខ១៧ចលនាចំណុចរូបធាតុមានក្រាបល្បឿន ទំព័រ៣៦</a>		
+                    <a href="chapter1/lesson1motion/13ex18_acceleration_graph.html" class="sub-lesson-item">លំហាត់លេខ១៨ចលនាចំណុចរូបធាតុមានក្រាបសំទុះ ទំព័រ៣៦</a>	
+                    <a href="chapter1/lesson1motion/8extra_ex1_two_cars_chasing.html" class="sub-lesson-item">លំហាត់បន្ថែម រថយន្តពីរប្រដេញគ្នា</a>
+                    <a href="chapter1/lesson1motion/extra_ex_velocity_graph.html" class="sub-lesson-item">លំហាត់បន្ថែម ល្បឿនមធ្យមនិងខណៈតាមក្រាហ្វិក</a>
+                </div>
+            </div>
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-lesson">២</div>
+                    <div class="lesson-title">មេរៀនទី២ ច្បាប់ចលនារបស់ញូតុន</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter1/lesson2newton/1newton_laws_123.html" class="sub-lesson-item">១ច្បាប់ចលនារបស់ញូតុនទី១ ទី២និងទី៣</a>
+                    <a href="chapter1/lesson2newton/net_force.html" class="sub-lesson-item">កម្លាំងផ្គួបលើអង្គធាតុ</a>
+                    <a href="chapter1/lesson2newton/newton_3rd_law_magnet_exp.html" class="sub-lesson-item">ពិសោធបង្ហាញច្បាប់ទី៣ញូតុនមេដែកនិងដែក</a>
+                    <a href="chapter1/lesson2newton/6application_of_newton_laws.html" class="sub-lesson-item">៦ការអនុវត្តច្បាប់ញូតុនលើប្លង់ទេរ</a>
+                    <a href="chapter1/lesson2newton/atwood_machine.html" class="sub-lesson-item">ម៉ាស៊ីនអាត់វ៉ូតលំហាត់គំរូ</a>
+                    <a href="chapter1/lesson2newton/Q_and_A_Physics_Dynamics.html" class="sub-lesson-item">សំណួរចម្លើយលេខ១ទំព័រ៥</a>
+
+                    <a href="chapter1/lesson2newton/8ex8_p51.html" class="sub-lesson-item">លំហាត់លេខ៨ទំព័រ៥១</a>
+                    <a href="chapter1/lesson2newton/9ex9_p52.html" class="sub-lesson-item">លំហាត់លេខ៩ទំព័រ៥២</a>
+                    <a href="chapter1/lesson2newton/10ex10_p52.html" class="sub-lesson-item">លំហាត់លេខ១០ទំព័រ៥២</a>
+                    <a href="chapter1/lesson2newton/11ex11_p52.html" class="sub-lesson-item">លំហាត់លេខ១១ទំព័រទី៥២</a>
+                    <a href="chapter1/lesson2newton/12ex12_p52_accelerator.html" class="sub-lesson-item">លំហាត់លេខ១២ទំព័រ៥២</a>
+                    <a href="chapter1/lesson2newton/13ex13_p53.html" class="sub-lesson-item">លំហាត់លេខ១៣ទំព័រ៥៣</a>
+                    <a href="chapter1/lesson2newton/14ex14_p53.html" class="sub-lesson-item">លំហាត់លេខ១៤ទំព័រ៥៣</a>
+                    <a href="chapter1/lesson2newton/15ex15_p53_pulling_3_objects.html" class="sub-lesson-item">លំហាត់លេខ១៥ទំព័រ៥៣កម្លាំងទាញវត្ថុ</a>
+                    <a href="chapter1/lesson2newton/16ex16_car_towing_trailer.html" class="sub-lesson-item">លំហាត់លេខ១៦រថយន្តអូសរឺម៉ក</a>
+                </div>
+            </div>
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-lesson">៣</div>
+                    <div class="lesson-title">មេរៀនទី៣ កម្មន្ត ថាមពល និងអានុភាព</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                   <a href="chapter1/lesson3work/1work_by_two_vectors.html" class="sub-lesson-item">១.កម្មន្តបង្កើតដោយវ៉ិចទ័រពីរ</a>
+                   <a href="chapter1/lesson3work/1_2example2_work_and_area.html" class="sub-lesson-item">១.២លំហាត់គំរូ២ កម្មន្តនិងក្រឡាផ្ទៃ</a>
+                   <a href="chapter1/lesson3work/2_3work_and_potential_energy.html" class="sub-lesson-item">2.3ទ្រឹស្តីបទកម្មន្តនិងថាមពលប៉ូតង់ស្យែល</a>
+                   <a href="chapter1/lesson3work/2_3example2_elevator_tension_work.html" class="sub-lesson-item">2.3លំហាត់គំរូ២ កម្មន្តតំណឹងខ្សែបន្ទប់យោង</a>
+                   <a href="chapter1/lesson3work/3instantaneous_and_average_power.html" class="sub-lesson-item">3.អានុភាពខណៈនិងអានុភាពមធ្យម</a>
+                   <a href="chapter1/lesson3work/ex5_p64.html" class="sub-lesson-item">លំហាត់លេខ៥ទំព័រទី៦៤</a>
+                   <a href="chapter1/lesson3work/ex6_p64.html" class="sub-lesson-item">លំហាត់លេខ៦ទំព័រ៦៤</a>
+                   <a href="chapter1/lesson3work/ex7_p65.html" class="sub-lesson-item">លំហាត់លេខ៧ទំព័រ៦៥</a>
+                   <a href="chapter1/lesson3work/ex8_p65.html" class="sub-lesson-item">លំហាត់លេខ៨ទំព័រ៦៥</a>
+                   <a href="chapter1/lesson3work/ex9_p65_girl_on_swing.html" class="sub-lesson-item">លំហាត់លេខ៩ទំព័រ៦៥កុមារីយោលទោង</a>
+                   <a href="chapter1/lesson3work/ex10_p66_point_mass.html" class="sub-lesson-item">លំហាត់លេខ១០ទំព័រ៦៦ចំណុចរូបធាតុមានម៉ាស</a>
+                   <a href="chapter1/lesson3work/ex11_p66_elevator_going_up.html" class="sub-lesson-item">លំហាត់លេខ១១ទំព័រ៦៦ បន្ទប់យោងឡើងលើ</a>
+                   <a href="chapter1/lesson3work/ex12_p66_two_cars_racing.html" class="sub-lesson-item">លំហាត់លេខ១២ទំព័រ៦៦ រថយន្តពីរប្រណាំងគ្នា</a>
+                   <a href="chapter1/lesson3work/ex13_p66_energy_comparison.html" class="sub-lesson-item">លំហាត់លេខ១៣ទំព័រ៦៦ ការប្រៀបធៀបថាមពល</a>
+                   <a href="chapter1/lesson3work/ex14_p67_running_stairs.html" class="sub-lesson-item">លំហាត់លេខ១៤ទំព័រលេខ៦៧រត់ចុះឡើងជណ្តើរដើម្បីកាត់បន្ថយខ្លាញ់</a>
+                   <a href="chapter1/lesson3work/ex15_p67_climbing_ladder.html" class="sub-lesson-item">លំហាត់លេខ១៥ទំព័រ៦៧ មនុស្សឡើងជណ្តើរលាបថ្នាំ</a>
+                   <a href="chapter1/lesson3work/ex16_p67_wheelchair_ramp.html" class="sub-lesson-item">លំហាត់លេខ១៦ទំព័រ៦៧ជនពិការឡើងលើប្លង់ទេរ</a>
+                </div>
+            </div>
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-lesson">៤</div>
+                    <div class="lesson-title">មេរៀនទី៤ សម្ពាធនៃសន្ទនីយស្តាទិច</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter1/lesson4pressure/1_3mercury_barometer.html" class="sub-lesson-item">1.3បារ៉ូម៉ែត្របារត</a>
+                    <a href="chapter1/lesson4pressure/1_4measuring_gas_pressure.html" class="sub-lesson-item">1.4ការវាស់សម្ពាធឧស្ម័ន</a>
+                    <a href="chapter1/lesson4pressure/2_1hydrostatics_principle.html" class="sub-lesson-item">2.1គោលការណ៍គ្រឹះអ៊ីដ្រូស្តាទិក</a>
+                    <a href="chapter1/lesson4pressure/3pascal_principle.html" class="sub-lesson-item">3.គោលការណ៍ប៉ាស្កាល់</a>
+                    <a href="chapter1/lesson4pressure/4archimedes_partially_submerged.html" class="sub-lesson-item">4.គោលការណ៍អាកស៊ីម៉ែតអង្គធាតុលិចដោយភាគ</a>
+                    <a href="chapter1/lesson4pressure/4_2fully_submerged.html" class="sub-lesson-item">4.2អង្គធាតុលិចទាំងស្រុង មនុស្សអង្គុយក្នុងសង្រែក</a>
+                    <a href="chapter1/lesson4pressure/5liquid_pressure_exp.html" class="sub-lesson-item">5.ការពិសោធសម្ពាធក្នុងអង្គធាតុរាវ</a>
+                    <a href="chapter1/lesson4pressure/ex10_p80.html" class="sub-lesson-item">លំហាត់លេខ10ទំព័រ80</a>
+                    <a href="chapter1/lesson4pressure/ex11_p81.html" class="sub-lesson-item">លំហាត់លេខ11ទំព័រ81</a>
+                    <a href="chapter1/lesson4pressure/ex12_p81.html" class="sub-lesson-item">លំហាត់លេខ 12 ទំព័រ 81</a>
+                    <a href="chapter1/lesson4pressure/ex13_p81.html" class="sub-lesson-item">លំហាត់លេខ 13 ទំព័រ 81</a>
+                    <a href="chapter1/lesson4pressure/ex14_p81.html" class="sub-lesson-item">លំហាត់លេខ 14 ទំព័រ 81</a>
+                    <a href="chapter1/lesson4pressure/ex15_p81.html" class="sub-lesson-item">លំហាត់លេខ15ទំព័រ 81</a>
+                </div>
+            </div>
+            
+            <!-- លំហាត់ជំពូកទី១ -->
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-exercise">ល.ហ</div>
+                    <div class="lesson-title" style="color: #dc3545;">លំហាត់ជំពូកទី១ មេកានិច</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter1/excericesch1/ex3_p84.html" class="sub-lesson-item">លេខ3ទំព័រ84</a>
+                    <a href="chapter1/excericesch1/ex4_p84.html" class="sub-lesson-item">លេខ4ទំព័រ84</a>
+                    <a href="chapter1/excericesch1/ex5_p84.html" class="sub-lesson-item">លេខ5ទំព័រ84</a>
+                    <a href="chapter1/excericesch1/ex6_p84.html" class="sub-lesson-item">លេខ6ទំព័រ84</a>
+                    <a href="chapter1/excericesch1/ex7_p84.html" class="sub-lesson-item">លេខ7ទំព័រ84</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ជំពូកទី២ -->
+    <div class="chapter-card">
+        <div class="card-header header-ch2">
+            <h2>ជំពូកទី២៖ ទែម៉ូឌីណាមិក</h2>
+        </div>
+        <div class="lesson-list">
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-lesson">១</div>
+                    <div class="lesson-title">មេរៀនទី១ សីតុណ្ហភាព</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter2/lesson1temperature/1celsius_scale.html" class="sub-lesson-item sub-item-quiz">១ការគណនាសីតុណ្ហភាពនៅលើមាត្រដ្ឋានសតភាគឬសែលស៊្យុស</a>
+                    <a href="chapter2/lesson1temperature/2gas_thermometer_kelvin.html" class="sub-lesson-item sub-item-quiz">២ទែម៉ូម៉ែត្រឧស្ម័ននិងមាត្រដ្ឋានសីតុណ្ហភាពដាច់ខាតឬកែលវិន</a>
+                    <a href="chapter2/lesson1temperature/3triple_point_of_water.html" class="sub-lesson-item sub-item-quiz">៣ពិសោធន៍សូន្យដាច់ខាត</a>
+                    <a href="chapter2/lesson1temperature/qa_1_to_9.html" class="sub-lesson-item sub-item-quiz">សំណួរចម្លើយលេខ១ដល់លេខ៩</a>
+
+ 			<a href="chapter2/lesson1temperature/ex10_p92.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ10ទំព័រ92</a>
+
+                    <a href="chapter2/lesson1temperature/ex13_p92.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ13ទំព័រ92</a>
+                    <a href="chapter2/lesson1temperature/ex14_p93.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ14ទំព័រ93</a>
+                    <a href="chapter2/lesson1temperature/ex15_p93.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ15ទំព័រ93</a>
+                    <a href="chapter2/lesson1temperature/ex16_p93.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ16ទំព័រ93</a>
+                </div>
+            </div>
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-lesson">២</div>
+                    <div class="lesson-title">មេរៀនទី២ ទ្រឹស្តីស៊ីនេទិចនៃរូបធាតុ</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter2/lesson2kinetic/Q_and_A_1-6.html" class="sub-lesson-item">សំណួរចម្លើយលេខ១ដល់លេខ៦</a>  
+                    <a href="chapter2/lesson2kinetic/VI_elab_experiment.html" class="sub-lesson-item">VI ដំណើរការពិសោធន៍Elab</a>
+                    <a href="chapter2/lesson2kinetic/example_atom_diameter.html" class="sub-lesson-item sub-item-quiz">លំហាត់គំរូ គណនាអង្កត់ផ្ចិតអាតូម</a>
+                    <a href="chapter2/lesson2kinetic/brownian_motion_exp.html" class="sub-lesson-item sub-item-quiz">ការពិសោធចលនាប្រោន</a>
+                    <a href="chapter2/lesson2kinetic/ex7_p101.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ7ទំព័រ101</a>
+                    <a href="chapter2/lesson2kinetic/ex8_p101.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ៨ទំព័រ101</a>
+                    <a href="chapter2/lesson2kinetic/ex9_p101.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ៩ទំព័រ101</a>
+                </div>
+            </div>
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-lesson">៣</div>
+                    <div class="lesson-title">មេរៀនទី៣ កម្តៅ</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter2/lesson3heat/example1_heat_capacity.html" class="sub-lesson-item sub-item-quiz">លំហាត់គំរូ១ចំណុះកម្តៅ</a>
+                    <a href="chapter2/lesson3heat/example2_specific_heat_sphere.html" class="sub-lesson-item sub-item-quiz">លំហាត់គំរូ២កម្តៅម៉ាសស្វ៊ែ</a>
+                    <a href="chapter2/lesson3heat/example3_identify_metal.html" class="sub-lesson-item sub-item-quiz">លំហាត់គំរូលេខ៣តើលោហៈនេះជាអ្វី</a>
+                    <a href="chapter2/lesson3heat/latent_heat_exp.html" class="sub-lesson-item sub-item-quiz">ពិសោធកម្តៅឡាតង់រលាយបង្ហួតទឹក</a>
+                    <a href="chapter2/lesson3heat/example_steam_on_ice.html" class="sub-lesson-item sub-item-quiz">លំហាត់គំរូយន្តហោះបាញ់ចំហាយលើទឹកកក</a>
+                    <a href="chapter2/lesson3heat/ex8_p118.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ8ទំព័រ118</a>
+                    <a href="chapter2/lesson3heat/ex9_p118.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ9ទំព័រ118</a>
+                    <a href="chapter2/lesson3heat/ex10_p119.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ10ទំព័រ119</a>
+                    <a href="chapter2/lesson3heat/ex11_p119.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ11ទំព័រ119</a>
+                    <a href="chapter2/lesson3heat/ex12_p119.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ12ទំព័រ119</a>
+                    <a href="chapter2/lesson3heat/ex13_p119.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ13ទំព័រ119</a>                   
+                    <a href="chapter2/lesson3heat/ex14_p119.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ14ទំព័រ119</a>
+                    <a href="chapter2/lesson3heat/ex15_p119.html" class="sub-lesson-item sub-item-quiz">លំហាត់លេខ15ទំព័រ119</a>
+                </div>
+            </div>
+            
+            <!-- លំហាត់ជំពូកទី២ -->
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-exercise">ល.ហ</div>
+                    <div class="lesson-title" style="color: #dc3545;">លំហាត់ជំពូកទី២ ទែម៉ូឌីណាមិច</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter2/exercisesch2/Q_and_A_Physics_Part2.html" class="sub-lesson-item">សំណួរចម្លើយលេខ1ដល់លេខ8</a>
+                    <a href="chapter2/exercisesch2/1ex1_p120.html" class="sub-lesson-item">លំហាត់លេខ1ទំព័រ120</a>  
+                    <a href="chapter2/exercisesch2/2ex2_p120.html" class="sub-lesson-item">លំហាត់លេខ2ទំព័រ120</a>  
+                    <a href="chapter2/exercisesch2/3ex3_p121.html" class="sub-lesson-item">លំហាត់លេខ3ទំព័រ121</a>  
+                    <a href="chapter2/exercisesch2/4ex4_p121.html" class="sub-lesson-item">លំហាត់លេខ4ទំព័រ121</a>  
+                    <a href="chapter2/exercisesch2/5ex5_p121.html" class="sub-lesson-item">លំហាត់លេខ5ទំព័រ121</a>  
+                    <a href="chapter2/exercisesch2/6ex6_p121.html" class="sub-lesson-item">លំហាត់លេខ6ទំព័រ121</a>  
+                    <a href="chapter2/exercisesch2/7ex7_p121.html" class="sub-lesson-item">លំហាត់លេខ7ទំព័រ121</a>  
+                    <a href="chapter2/exercisesch2/8ex8_p121.html" class="sub-lesson-item">លំហាត់លេខ8ទំព័រ121</a>  
+                    <a href="chapter2/exercisesch2/9ex9_p121.html" class="sub-lesson-item">លំហាត់លេខ9ទំព័រ121</a> 
+                    <a href="chapter2/exercisesch2/10ex10_p121.html" class="sub-lesson-item">លំហាត់លេខ10ទំព័រ121</a> 
+                    <a href="chapter2/exercisesch2/11ex11_p122.html" class="sub-lesson-item">លំហាត់លេខ11ទំព័រ122</a> 
+                    <a href="chapter2/exercisesch2/12ex12_p122.html" class="sub-lesson-item">លំហាត់លេខ12ទំព័រ122</a> 
+                    <a href="chapter2/exercisesch2/13ex13_p122.html" class="sub-lesson-item">លំហាត់លេខ13ទំព័រ122</a> 
+                    <a href="chapter2/exercisesch2/14ex14_p122.html" class="sub-lesson-item">លំហាត់លេខ14ទំព័រ122</a> 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ជំពូកទី៣ -->
+    <div class="chapter-card">
+        <div class="card-header header-ch3">
+            <h2>ជំពូកទី៣៖ អគ្គិសនី និងម៉ាញេទិច</h2>
+        </div>
+        <div class="lesson-list">
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-lesson">១</div>
+                    <div class="lesson-title">មេរៀនទី១ អេឡិចត្រូស្តាទិក</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter3/lesson1electrostatics/1charging_ebonite_rod.html" class="sub-lesson-item">មេរៀនទី១ ការបង្កើតបន្ទុកលើចង្កឹះអេបូនីត</a>        
+                    <a href="chapter3/lesson1electrostatics/2ebonite_rod_interaction.html" class="sub-lesson-item">មេរៀនទី១ អន្តរកម្មរវាងចង្កឹះអេបូនីត</a>
+                    <a href="chapter3/lesson1electrostatics/2electroscope.html" class="sub-lesson-item">2អេឡិចត្រូស្កូប</a>
+                    <a href="chapter3/lesson1electrostatics/4_1smoke_precipitator.html" class="sub-lesson-item">4.1ការច្រោះឧស្ម័នពុលក្នុងបំពង់ផ្សែង</a>
+                    <a href="chapter3/lesson1electrostatics/4_2van_de_graaff.html" class="sub-lesson-item">4.2ជនិតាវ៉ាន់ឌីក្រាហ្វ</a>
+                    <a href="chapter3/lesson1electrostatics/5lightning_phenomenon.html" class="sub-lesson-item">5បាតុភូតរន្ទះបាញ់</a>
+                    <a href="chapter3/lesson1electrostatics/Q_and_A_Physics_Electrostatics.html" class="sub-lesson-item">សំណួរចម្លើយលេខ១ដល់លេខ១៥</a>
+                    <a href="chapter3/lesson1electrostatics/q10_p133.html" class="sub-lesson-item">សំណួរលេខ10ទំព័រ133</a>
+                    <a href="chapter3/lesson1electrostatics/q15_p133.html" class="sub-lesson-item">សំណួរលេខ15ទំព័រ133</a>
+                </div>
+            </div>
+
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-lesson">២</div>
+                    <div class="lesson-title">មេរៀនទី២ ចរន្តជាប់និងម៉ាញេទិច</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter3/lesson2dc_magnetism/1charge_and_current.html" class="sub-lesson-item">1.1បន្ទុកអគ្គិសនីនិងចរន្តអគ្គិសនី</a>
+                    <a href="chapter3/lesson2dc_magnetism/2dc_generator_electron_flow.html" class="sub-lesson-item">1.2ជនិតាចរន្តជាប់លំហូរអេឡិចត្រុង</a>
+                    <a href="chapter3/lesson2dc_magnetism/3charge_through_motor.html" class="sub-lesson-item">1.3ការគណនាបន្ទុកឆ្លងកាត់ម៉ូទ័រ</a>
+                    <a href="chapter3/lesson2dc_magnetism/4ammeter_calculation.html" class="sub-lesson-item">1.5ការគណនាចរន្តតាមអំពែម៉ែតទ្រនិច</a>
+                    <a href="chapter3/lesson2dc_magnetism/5galvanometer_example_p138.html" class="sub-lesson-item">កាល់វ៉ាណូម៉ែតលំហាត់គំរូទំព័រ138</a>
+                    <a href="chapter3/lesson2dc_magnetism/6series_parallel_circuits.html" class="sub-lesson-item">សៀគ្វីសេរីនិងខ្នែង</a>
+                    <a href="chapter3/lesson2dc_magnetism/7connecting_voltmeter_ammeter.html" class="sub-lesson-item">របៀបតវ៉ុលម៉ែតនិងអំពែម៉ែត</a>
+                    <a href="chapter3/lesson2dc_magnetism/8pointer_voltmeter.html" class="sub-lesson-item">វ៉ុលម៉ែតទ្រនិច</a>
+                    <a href="chapter3/lesson2dc_magnetism/10magnetic_field_iron_core_solenoid.html" class="sub-lesson-item">ដែនម៉ាញេទិចក្នុងសូលេណូអ៊ីតមានស្នូលដែក</a>
+                    <a href="chapter3/lesson2dc_magnetism/10magnetic_field_straight_wire.html" class="sub-lesson-item">ដែនម៉ាញេទិចចរន្តត្រង់</a>
+                    <a href="chapter3/lesson2dc_magnetism/11example_straight_wire_p142.html" class="sub-lesson-item">លំហាត់គំរូចរន្តត្រង់ទំព័រ142</a>
+                    <a href="chapter3/lesson2dc_magnetism/12magnetic_field_solenoid.html" class="sub-lesson-item">ដែនម៉ាញេទិចនៃសូលេណូអ៊ីត</a>
+                    <a href="chapter3/lesson2dc_magnetism/13example_solenoid.html" class="sub-lesson-item">លំហាត់គំរូដែនម៉ាញេទិចនៃសូលេណូអ៊ីត</a>
+                    <a href="chapter3/lesson2dc_magnetism/14magnetization_demagnetization.html" class="sub-lesson-item">វិធីបង្កើតនិងបំបាត់ដែនម៉ាញេទិច</a>
+                    <a href="chapter3/lesson2dc_magnetism/15ohm_law_digital_exp.html" class="sub-lesson-item">ការពិសោធច្បាប់អូមតាមបែបឌីជីថល</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex10_p152.html" class="sub-lesson-item">លំហាត់លេខ10ទំព័រ152</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex11_p152.html" class="sub-lesson-item">លំហាត់លេខ11ទំព័រ152</a>    
+                    <a href="chapter3/lesson2dc_magnetism/ex12_p152.html" class="sub-lesson-item">លំហាត់លេខ12ទំព័រ152</a>                   		
+                    <a href="chapter3/lesson2dc_magnetism/ex13_p152.html" class="sub-lesson-item">លំហាត់លេខ13ទំព័រ152</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex14_p152.html" class="sub-lesson-item">លំហាត់លេខ14ទំព័រ152</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex15_p153.html" class="sub-lesson-item">លំហាត់លេខ15ទំព័រ153</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex16_p153.html" class="sub-lesson-item">លំហាត់លេខ16ទំព័រ153</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex17_p153.html" class="sub-lesson-item">លំហាត់លេខ17ទំព័រ153</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex18_p153.html" class="sub-lesson-item">លំហាត់លេខ18ទំព័រ153</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex19_p154.html" class="sub-lesson-item">លំហាត់លេខ19ទំព័រ154</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex20_p154.html" class="sub-lesson-item">លំហាត់លេខ20ទំព័រ154</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex21_p154.html" class="sub-lesson-item">លំហាត់លេខ21ទំព័រ154</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex22_p155.html" class="sub-lesson-item">លំហាត់លេខ22ទំព័រ155</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex23_p155.html" class="sub-lesson-item">លំហាត់លេខ23ទំព័រ155</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex24_p156.html" class="sub-lesson-item">លំហាត់លេខ24ទំព័រ156</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex25_p156.html" class="sub-lesson-item">លំហាត់លេខ25ទំព័រ156</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex26_p156.html" class="sub-lesson-item">លំហាត់លេខ26ទំព័រ156</a>                  
+                    <a href="chapter3/lesson2dc_magnetism/ex27_p156.html" class="sub-lesson-item">លំហាត់លេខ27ទំព័រ156</a>   
+                    <a href="chapter3/lesson2dc_magnetism/ex28_p157.html" class="sub-lesson-item">លំហាត់លេខ28ទំព័រ157</a>   
+                    <a href="chapter3/lesson2dc_magnetism/ex29_p157.html" class="sub-lesson-item">លំហាត់លេខ29ទំព័រ157</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex30_p157.html" class="sub-lesson-item">លំហាត់លេខ30ទំព័រ157</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex31_p157.html" class="sub-lesson-item">លំហាត់លេខ31ទំព័រ157</a>
+                    <a href="chapter3/lesson2dc_magnetism/ex32_p157.html" class="sub-lesson-item">លំហាត់លេខ32ទំព័រ157</a>                    
+                </div>
+            </div>
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-lesson">៣</div>
+                    <div class="lesson-title">មេរៀនទី៣ ចរន្តឆ្លាស់</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter3/lesson3ac_current/1bicycle_dynamo.html" class="sub-lesson-item">1.ឌីណាម៉ូកង់</a>
+                    <a href="chapter3/lesson3ac_current/2ticker_timer.html" class="sub-lesson-item">1.3ការអនុវត្តចរន្តឆ្លាស់</a>
+                    <a href="chapter3/lesson3ac_current/3transformer.html" class="sub-lesson-item">2.ត្រង់ស្វូ</a>
+                    <a href="chapter3/lesson3ac_current/4example_transformer1.html" class="sub-lesson-item">លំហាត់គំរូត្រង់ស្វូ1</a>
+                    <a href="chapter3/lesson3ac_current/5example_transformer2.html" class="sub-lesson-item">លំហាត់គំរូត្រង់ស្វូ2</a>
+                    <a href="chapter3/lesson3ac_current/6example_power_transmission.html" class="sub-lesson-item">លំហាត់គំរូការបញ្ជូនថាមពលអគ្គិសនី</a>
+                   
+                    <a href="chapter3/lesson3ac_current/Q_and_A_Physics_AC_Sim_v2.html" class="sub-lesson-item">សំណួរចម្លើយពីលេខ1ដល់លេខ13</a>
+                    <a href="chapter3/lesson3ac_current/7ex14_p167.html" class="sub-lesson-item">លំហាត់លេខ14ទំព័រ167</a>
+                    <a href="chapter3/lesson3ac_current/8ex15_p167.html" class="sub-lesson-item">លំហាត់លេខ15ទំព័រ167</a>
+                    <a href="chapter3/lesson3ac_current/9ex16_p168.html" class="sub-lesson-item">លំហាត់លេខ16ទំព័រ168</a>
+                    <a href="chapter3/lesson3ac_current/10ex17_p168.html" class="sub-lesson-item">លំហាត់លេខ17ទំព័រ168</a>
+                    <a href="chapter3/lesson3ac_current/11ex18_p168.html" class="sub-lesson-item">លំហាត់លេខ18ទំព័រ168</a>
+                    <a href="chapter3/lesson3ac_current/12ex19_p168.html" class="sub-lesson-item">លំហាត់លេខ19ទំព័រ168</a>
+                    <a href="chapter3/lesson3ac_current/13ex20_p168.html" class="sub-lesson-item">លំហាត់លេខ20ទំព័រ168</a>
+                    <a href="chapter3/lesson3ac_current/14ex21_p169.html" class="sub-lesson-item">លំហាត់លេខ21ទំព័រ169</a>
+                    <a href="chapter3/lesson3ac_current/15ex22_p169.html" class="sub-lesson-item">លំហាត់លេខ22ទំព័រ169</a>                                        			
+                    <a href="chapter3/lesson3ac_current/16ex23_p169.html" class="sub-lesson-item">លំហាត់លេខ23ទំព័រ169</a>	
+                </div>
+            </div>
+            
+            <!-- លំហាត់មេរៀនទី៤ -->
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-lesson">៤</div>
+                    <div class="lesson-title">មេរៀនទី៤ ដំណើរការសមាសធាតុអេឡិចត្រូនិក</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter3/lesson4electronics/1breadboard.html" class="sub-lesson-item">1បន្ទះសៀគ្វី</a>
+                    <a href="chapter3/lesson4electronics/2-1.1potentiometer.html" class="sub-lesson-item">1.1potentiometer</a>
+                    <a href="chapter3/lesson4electronics/3-1.2breadboard_potentiometer.html" class="sub-lesson-item">1.2 បន្ទះសៀគ្វី potentiometer</a>
+                    <a href="chapter3/lesson4electronics/4-2.1LDR_circuit.html" class="sub-lesson-item">2.1សៀគ្វីLDR និង អំពូល LED</a>
+                    <a href="chapter3/lesson4electronics/5-2.2LDR_breadboard.html" class="sub-lesson-item">2.2 ការប្រើប្រាស់បន្ទះសៀគ្វី តម្លើង LDR និង LED</a>
+                    <a href="chapter3/lesson4electronics/6-3.1capacitor_circuit_simulator.html" class="sub-lesson-item">3.1 សៀគ្វីមាន LED Cap និង ជនិតា</a>
+                    <a href="chapter3/lesson4electronics/7-3.2RC_breadboard.html" class="sub-lesson-item">3.2ការតម្លើងសៀគ្វីRCនៅលើបន្ទះសៀគ្វី</a>
+                    <a href="chapter3/lesson4electronics/8-5.1transistor_exp.html" class="sub-lesson-item">5.1ដំណើរការពិសោធត្រង់ស៊ីស្ទរក្នុងសៀគ្វី</a>
+                    <a href="chapter3/lesson4electronics/9-5.2testing_transistor_pins.html" class="sub-lesson-item">5.2ការវាស់ជើងត្រង់ស៊ីស្ទរ (ទំព័រ184)</a>
+                    <a href="chapter3/lesson4electronics/10-6.1SCR_circuit.html" class="sub-lesson-item">6.1សៀគ្វីដែលមានSCR</a>
+                    <a href="chapter3/lesson4electronics/11-6.2Breadboard_SCR.html" class="sub-lesson-item">6.2ការប្រើបន្ទះសៀគ្វីតម្លើងត្រង់ស៊ីស្ទរ</a>
+                    <a href="chapter3/lesson4electronics/12-7.1automatic_night_light.html" class="sub-lesson-item">6.2ការតម្លើងសៀគ្វីអំពូលអោយឆេះភ្លឺដោយស្វ័យប្រវត្តិនៅពេលយប់</a>
+                    <a href="chapter3/lesson4electronics/13-7.2Breadboard_LDR.html" class="sub-lesson-item">7.1បន្ទះសៀគ្វីបំភ្លឺស្វ័យប្រវត្តិតម្លើងលើបន្ទះសៀគ្វី</a>
+                    <a href="chapter3/lesson4electronics/13-7.2transistor_oscillator_circuit.html" class="sub-lesson-item">7.2ការតម្លើងសៀគ្វីលំយោលត្រង់ស៊ីស្ទរ</a>
+                    <a href="chapter3/lesson4electronics/14-7.3phone_charger_circuit.html" class="sub-lesson-item">7.3សៀគ្វីសម្រាប់សាកទូរសព្ទ</a>
+
+                    <a href="chapter3/lesson4electronics/15Q_and_A_Electronics_1_to_8.html" class="sub-lesson-item">សំណួរចម្លើយលេខ១ដល់លេខ៨</a>
+                    <a href="chapter3/lesson4electronics/16-ex9_p192.html" class="sub-lesson-item">លំហាត់លេខ៩ទំព័រ192</a>
+                    <a href="chapter3/lesson4electronics/17ex10_p193.html" class="sub-lesson-item">លំហាត់លេខ១០ទំព័រ193</a>
+                    <a href="chapter3/lesson4electronics/18ex11_p193.html" class="sub-lesson-item">លំហាត់លេខ១១ទំព័រ193</a>
+                    <a href="chapter3/lesson4electronics/19ex12_p193.html" class="sub-lesson-item">លំហាត់លេខ១២ទំព័រ193</a>
+                    <a href="chapter3/lesson4electronics/20ex13_p193.html" class="sub-lesson-item">លំហាត់លេខ១៣ទំព័រ193</a>
+                </div>
+            </div>
+
+            <!-- លំហាត់ជំពូកទី៣ -->
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-exercise">ល.ហ</div>
+                    <div class="lesson-title" style="color: #dc3545;">លំហាត់ជំពូកទី៣ អគ្គិសនី និងម៉ាញេទិច</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter3/exercisesch3/Q_and_A_Physics_Electricity.html" class="sub-lesson-item">សំណួរចម្លើយពីលេខIដល់លេខII</a>
+                    <a href="chapter3/exercisesch3/2ex1_p195.html" class="sub-lesson-item">លំហាត់លេខ១ទំព័រ195</a>
+                    <a href="chapter3/exercisesch3/3ex2_p195.html" class="sub-lesson-item">លំហាត់លេខ២ទំព័រ195</a>
+                    <a href="chapter3/exercisesch3/4ex3_p195.html" class="sub-lesson-item">លំហាត់លេខ៣ទំព័រ195</a>
+                    <a href="chapter3/exercisesch3/5ex4_p195.html" class="sub-lesson-item">លំហាត់លេខ៤ទំព័រ195</a>
+                    <a href="chapter3/exercisesch3/6ex5_p195.html" class="sub-lesson-item">លំហាត់លេខ៥ទំព័រ195</a>
+                    <a href="chapter3/exercisesch3/7ex6_p195.html" class="sub-lesson-item">លំហាត់លេខ៦ទំព័រ195</a>
+                    <a href="chapter3/exercisesch3/8ex7_p195.html" class="sub-lesson-item">លំហាត់លេខ៧ទំព័រ195</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ជំពូកទី៤ -->
+    <div class="chapter-card">
+        <div class="card-header header-ch4">
+            <h2>ជំពូកទី៤៖ អុបទិក</h2>
+        </div>
+        <div class="lesson-list">
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-lesson">១</div>
+                    <div class="lesson-title">មេរៀនទី១ ធម្មជាតិនិងដំណាលនៃពន្លឺ</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter4/lesson1light/1Fizeau_experimental.html" class="sub-lesson-item">Fizeau experimental</a>
+                    <a href="chapter4/lesson1light/2refraction_and_reflection.html" class="sub-lesson-item">ចំណាំងបែរនិងចំណាំងផ្លាត</a>
+                    <a href="chapter4/lesson1light/3D_light_ray_medium.html" class="sub-lesson-item">3Dដំណើរកាំពន្លឺឆ្លងកាត់មជ្ឈដ្ឋាន</a>
+                    <a href="chapter4/lesson1light/3light_reflection_refraction_exp_p201.html" class="sub-lesson-item">3ការពិសោធន៍កាំពន្លឺចាំងប៉ះចាំងបែរទំព័រ201</a>
+                    <a href="chapter4/lesson1light/light_refraction_exp.html" class="sub-lesson-item">ពិសោធន៍ចំណាំងបែរនៃពន្លឺ</a>
+                    <a href="chapter4/lesson1light/total_internal_reflection_exp.html" class="sub-lesson-item">ពិសោធន៍ចំណាំងផ្លាតទាំងស្រុង</a>
+                    <a href="chapter4/lesson1light/2_1snell_law_total_internal_reflection.html" class="sub-lesson-item">5.ច្បាប់ស្នែល ចំណាំងបែរនិងចំណាំងផ្លាតទាំងស្រុង</a>
+                    <a href="chapter4/lesson1light/Q_and_A_Physics_Optics_v2.html" class="sub-lesson-item">សំណួរលេខ១ដល់លេខ៧ទំព័រ២០៩</a>
+                    <a href="chapter4/lesson1light/ex8_p209.html" class="sub-lesson-item">លំហាត់លេខ៨ទំព័រ២០៩</a>
+                </div>
+                    <a href="chapter4/lesson1light/ex9_p209.html" class="sub-lesson-item">លំហាត់លេខ៩ទំព័រ២០៩</a>
+                </div>
+            </div>
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-lesson">២</div>
+                    <div class="lesson-title">មេរៀនទី២ ឡង់ទី</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter4/lesson2lenses/1lenses.html" class="sub-lesson-item">1ឡង់ទី</a>
+                    <a href="chapter4/lesson2lenses/1_2convex_and_concave_lenses.html" class="sub-lesson-item">1.2 ឡង់ទីប៉ោងនិងផត</a>
+                    <a href="chapter4/lesson2lenses/2lens_experiment.html" class="sub-lesson-item">2.ការពិសោធន៍ឡង់ទី</a>
+                    <a href="chapter4/lesson2lenses/3the_eye.html" class="sub-lesson-item">3ភ្នែក</a>
+                    <a href="chapter4/lesson2lenses/4simple_magnifying_glass.html" class="sub-lesson-item">4អនុវត្តកែវពង្រីកងាយ</a>
+                    <a href="chapter4/lesson2lenses/5refracting_telescope.html" class="sub-lesson-item">5តេឡេទស្សន៍ចំណាំងបែរ</a>
+                    <a href="chapter4/lesson2lenses/6Q_and_A_Physics1-7.html" class="sub-lesson-item">សំណួរចម្លើយលំហាត់លេខ1ដល់លេខ7</a>
+                    <a href="chapter4/lesson2lenses/7ex8_p229.html" class="sub-lesson-item">លំហាត់លេខ៨ទំព័រ229</a>
+                    <a href="chapter4/lesson2lenses/8ex9_p229.html" class="sub-lesson-item">លំហាត់លេខ9ទំព័រ299</a>
+                    <a href="chapter4/lesson2lenses/9ex10_p229.html" class="sub-lesson-item">9លំហាត់លេខ១០ទំព័រ299</a>
+                    <a href="chapter4/lesson2lenses/Q and A 1_7.html" class="sub-lesson-item">កម្រង់សំណួរសាកល្បងតេស្ត</a>
+                </div>
+            </div>
+            
+            <!-- លំហាត់ជំពូកទី៤ -->
+            <div class="lesson-item-container">
+                <div class="lesson-item" onclick="toggleSubList(this)">
+                    <div class="number-badge badge-exercise">ល.ហ</div>
+                    <div class="lesson-title" style="color: #dc3545;">លំហាត់ជំពូកទី៤ អុបទិច</div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="sub-lesson-list">
+                    <a href="chapter4/exercisesch4/qa_chapter4_1_to_7.html" class="sub-lesson-item">សំណួរចម្លើយជំពូកលេខ១ដល់លេខ៧</a>
+                    <a href="chapter4/exercisesch4/ex1_p231.html" class="sub-lesson-item">លំហាត់លេខ១ទំព័រ231</a>
+                    <a href="chapter4/exercisesch4/ex2_p232.html" class="sub-lesson-item">លំហាត់លេខ២ទំព័រ232</a>
+                    <a href="chapter4/exercisesch4/ex3_p232.html" class="sub-lesson-item">លំហាត់លេខ៣ទំព័រ232</a>
+                    <a href="chapter4/exercisesch4/ex4_p232.html" class="sub-lesson-item">លំហាត់លេខ៤ទំព័រ232</a>
+                    <a href="chapter4/exercisesch4/ex5_p232.html" class="sub-lesson-item">លំហាត់លេខ៥ទំព័រ232</a>
+                    <a href="chapter4/exercisesch4/ex6_p232.html" class="sub-lesson-item">លំហាត់លេខ៦ទំព័រ232</a>
+                    <a href="chapter4/exercisesch4/ex7_p232.html" class="sub-lesson-item">លំហាត់លេខ៧ទំព័រ232</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function toggleSubList(element) {
+    element.classList.toggle("expanded");
+    let subList = element.nextElementSibling;
+    if (subList && subList.classList.contains('sub-lesson-list')) {
+        if (subList.style.display === "block") {
+            subList.style.display = "none";
+        } else {
+            subList.style.display = "block";
+        }
+    }
+}
+
+function searchLessons() {
+    let input = document.getElementById('searchInput').value.toLowerCase();
+    let chapters = document.getElementsByClassName('chapter-card');
+    let hasAnyResult = false;
+
+    for (let i = 0; i < chapters.length; i++) {
+        let lessonContainers = chapters[i].getElementsByClassName('lesson-item-container');
+        let hasVisibleLesson = false;
+
+        for (let j = 0; j < lessonContainers.length; j++) {
+            let mainTitleObj = lessonContainers[j].getElementsByClassName('lesson-title')[0];
+            if (!mainTitleObj) continue;
+            
+            let mainTitle = mainTitleObj.innerText.toLowerCase();
+            let subItems = lessonContainers[j].getElementsByClassName('sub-lesson-item');
+            let subTitlesMatch = false;
+            
+            for(let k=0; k < subItems.length; k++){
+                 if(subItems[k].innerText.toLowerCase().indexOf(input) > -1){
+                     subTitlesMatch = true;
+                     break;
+                 }
+            }
+
+            if (mainTitle.indexOf(input) > -1 || subTitlesMatch) {
+                lessonContainers[j].style.display = "block";
+                hasVisibleLesson = true;
+                hasAnyResult = true;
+                
+                if(subTitlesMatch && input !== "") {
+                    let lessonItem = lessonContainers[j].getElementsByClassName('lesson-item')[0];
+                    let subList = lessonContainers[j].getElementsByClassName('sub-lesson-list')[0];
+                    if(lessonItem && subList) {
+                        lessonItem.classList.add("expanded");
+                        subList.style.display = "block";
+                    }
+                }
+            } else {
+                lessonContainers[j].style.display = "none";
+            }
+        }
+        chapters[i].style.display = hasVisibleLesson ? "block" : "none";
+    }
+    document.getElementById('noResults').style.display = hasAnyResult || input === "" ? "none" : "block";
+}
+</script>
+
+</body>
+</html>

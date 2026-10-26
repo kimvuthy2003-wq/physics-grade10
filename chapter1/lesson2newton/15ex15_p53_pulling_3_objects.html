@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <title>មេរៀនទី២លំហាត់លេខ១៥ ចលនាប្រព័ន្ធអង្គធាតុ</title>
+    <style>
+        body { font-family: 'Khmer OS Battambang', sans-serif; text-align: center; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
+        .problem-statement { background: #fff; padding: 20px 30px; margin: 0 auto 20px auto; max-width: 900px; border-left: 5px solid #007bff; border-radius: 5px; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.1); line-height: 1.8; font-size: 16px;}
+        
+        .container { display: flex; justify-content: center; gap: 20px; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
+        
+        .panel { padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; min-width: 350px;}
+        .control-group { margin: 15px 0; display: flex; align-items: center; justify-content: space-between; }
+        input[type=range] { width: 150px; }
+        span.val-display { font-weight: bold; color: #007bff; width: 60px; text-align: right; }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; justify-content: center;}
+        button { padding: 10px 20px; font-size: 16px; font-family: 'Khmer OS Battambang'; border: none; border-radius: 5px; cursor: pointer; color: white;}
+        .btn-play { background-color: #28a745; }
+        .btn-pause { background-color: #ffc107; color: #333;}
+        .btn-reset { background-color: #dc3545; }
+        button:hover { opacity: 0.8; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        .result-box { margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 5px; border-left: 4px solid #17a2b8; }
+        .result-box h4 { margin: 0 0 10px 0; color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
+        .result-box p { margin: 8px 0; font-size: 15px; }
+        .highlight { font-weight: bold; color: #d9534f; }
+
+        canvas { background-color: #ffffff; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-top: 10px;}
+    </style>
+</head>
+<body>
+
+    <h2>ច្បាប់ញូតុនទី២ និងប្រព័ន្ធអង្គធាតុ</h2>
+    
+    <!-- ប្រធានលំហាត់ -->
+    <div class="problem-statement">
+        <strong>១៥.</strong> គេសន្មតថាអង្គធាតុបីផ្លាស់ទីលើផ្ទៃរាបស្មើដោយគ្មានកកិត និងកម្លាំង <span id="text-f" class="highlight">42 N</span> បញ្ចេញលើអង្គធាតុដែលមានម៉ាស <span id="text-m3" class="highlight">3.0 kg</span> ។ កំណត់<br>
+        ក. សំទុះរបស់ប្រព័ន្ធ ។<br>
+        ខ. តំណឹងខ្សែដែលភ្ជាប់ម៉ាស <span id="text-m3-2">3.0 kg</span> និងម៉ាស <span id="text-m1">1.0 kg</span> ។<br>
+        គ. កម្លាំងដែលបញ្ចេញដោយម៉ាស <span id="text-m1-2">1.0 kg</span> លើម៉ាស <span id="text-m2">2.0 kg</span> ។
+    </div>
+    
+    <div class="container">
+        <!-- ផ្ទាំងបញ្ជា និងលទ្ធផល -->
+        <div class="panel">
+            <h3 style="margin-top:0; color:#333; border-bottom: 1px solid #ccc; padding-bottom: 10px;">កំណត់ទិន្នន័យ</h3>
+            <div class="control-group">
+                <label>ម៉ាស m<sub>1</sub> (kg): </label>
+                <input type="range" id="m1" min="0.5" max="5.0" step="0.5" value="1.0" oninput="updateValues()">
+                <span class="val-display" id="m1-val">1.0</span>
+            </div>
+            <div class="control-group">
+                <label>ម៉ាស m<sub>2</sub> (kg): </label>
+                <input type="range" id="m2" min="0.5" max="5.0" step="0.5" value="2.0" oninput="updateValues()">
+                <span class="val-display" id="m2-val">2.0</span>
+            </div>
+            <div class="control-group">
+                <label>ម៉ាស m<sub>3</sub> (kg): </label>
+                <input type="range" id="m3" min="0.5" max="5.0" step="0.5" value="3.0" oninput="updateValues()">
+                <span class="val-display" id="m3-val">3.0</span>
+            </div>
+            <div class="control-group">
+                <label>កម្លាំងទាញ F (N): </label>
+                <input type="range" id="force" min="10" max="100" step="1" value="42" oninput="updateValues()">
+                <span class="val-display" id="f-val">42</span>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-play" id="btnPlay" onclick="startSim()">▶ ចាប់ផ្តើម</button>
+                <button class="btn-pause" id="btnPause" onclick="pauseSim()" disabled>⏸ បញ្ឈប់</button>
+                <button class="btn-reset" onclick="resetSim()">↺ ដើមវិញ</button>
+            </div>
+
+            <div class="result-box">
+                <h4>លទ្ធផលគណនា៖</h4>
+                <p>ក. សំទុះប្រព័ន្ធ a = <strong><span id="res-a">7.00</span> m/s²</strong></p>
+                <p>ខ. តំណឹងខ្សែ T = <strong><span id="res-t">21.00</span> N</strong></p>
+                <p>គ. កម្លាំង m<sub>1</sub> រុញ m<sub>2</sub> (F<sub>12</sub>) = <strong><span id="res-f12">14.00</span> N</strong></p>
+            </div>
+        </div>
+
+        <!-- ផ្ទាំងគំនូរ Simulation -->
+        <div>
+            <canvas id="simCanvas" width="750" height="400"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // អថេរសម្រាប់គណនា និងចលនា
+        let m1 = 1.0, m2 = 2.0, m3 = 3.0, F = 42;
+        let a = 0, T = 0, F12 = 0;
+        
+        let isPlaying = false;
+        let posX = 50; // ទីតាំងចាប់ផ្តើមរបស់ប្រព័ន្ធ
+        let velocity = 0;
+        let animationId;
+        
+        // ធ្វើបច្ចុប្បន្នភាពទិន្នន័យពី Sliders
+        function updateValues() {
+            m1 = parseFloat(document.getElementById('m1').value);
+            m2 = parseFloat(document.getElementById('m2').value);
+            m3 = parseFloat(document.getElementById('m3').value);
+            F = parseFloat(document.getElementById('force').value);
+
+            document.getElementById('m1-val').innerText = m1.toFixed(1);
+            document.getElementById('m2-val').innerText = m2.toFixed(1);
+            document.getElementById('m3-val').innerText = m3.toFixed(1);
+            document.getElementById('f-val').innerText = F;
+
+            document.getElementById('text-m1').innerText = m1.toFixed(1) + " kg";
+            document.getElementById('text-m1-2').innerText = m1.toFixed(1) + " kg";
+            document.getElementById('text-m2').innerText = m2.toFixed(1) + " kg";
+            document.getElementById('text-m3').innerText = m3.toFixed(1) + " kg";
+            document.getElementById('text-m3-2').innerText = m3.toFixed(1) + " kg";
+            document.getElementById('text-f').innerText = F + " N";
+
+            calculatePhysics();
+            if(!isPlaying) drawFrame(); // គូរឡើងវិញពេលអូស slider បើវាមិនកំពុងរត់
+        }
+
+        // គណនារូបមន្ត
+        function calculatePhysics() {
+            // ក. សំទុះប្រព័ន្ធ: a = F / (m1 + m2 + m3)
+            let totalMass = m1 + m2 + m3;
+            a = F / totalMass;
+            
+            // ខ. តំណឹងខ្សែ: ខ្សែទាញទាំង m1 និង m2 ឲ្យមានសំទុះ a
+            // T = (m1 + m2) * a
+            T = (m1 + m2) * a;
+
+            // គ. កម្លាំង m1 រុញ m2: គឺកម្លាំងដែលធ្វើឲ្យ m2 មានសំទុះ a
+            // F12 = m2 * a
+            F12 = m2 * a;
+
+            document.getElementById('res-a').innerText = a.toFixed(2);
+            document.getElementById('res-t').innerText = T.toFixed(2);
+            document.getElementById('res-f12').innerText = F12.toFixed(2);
+        }
+
+        function drawArrow(fromX, fromY, toX, toY, color) {
+            const headlen = 10;
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = color;
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.stroke();
+        }
+
+        function drawFrame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const groundY = 300;
+
+            // គូរផ្ទៃដី
+            ctx.beginPath();
+            ctx.strokeStyle = "#999";
+            ctx.lineWidth = 4;
+            ctx.moveTo(0, groundY);
+            ctx.lineTo(canvas.width, groundY);
+            ctx.stroke();
+
+            // កំណត់ទំហំអង្គធាតុ
+            const w1 = 50, h1 = 70; // m1
+            const w2 = 70, h2 = 45; // m2
+            const w3 = 80, h3 = 90; // m3
+            const gap = 60; // ចម្ងាយខ្សែរវាង m1/m2 ទៅ m3
+
+            // កូអរដោណេ X
+            const x1 = posX;
+            const x2 = x1 + w1; // m2 នៅជាប់ m1
+            const x3 = x2 + w2 + gap; 
+
+            // គូរ m1
+            ctx.fillStyle = "#fdfdff";
+            ctx.fillRect(x1, groundY - h1, w1, h1);
+            ctx.strokeRect(x1, groundY - h1, w1, h1);
+            ctx.fillStyle = "#333";
+            ctx.font = "14px Arial";
+            ctx.fillText(m1.toFixed(1) + "kg", x1 + 5, groundY - h1 - 10);
+
+            // គូរ m2
+            ctx.fillStyle = "#fdfdff";
+            ctx.fillRect(x2, groundY - h2, w2, h2);
+            ctx.strokeRect(x2, groundY - h2, w2, h2);
+            ctx.fillStyle = "#333";
+            ctx.fillText(m2.toFixed(1) + "kg", x2 + 15, groundY - h2/2);
+
+            // គូរ m3
+            ctx.fillStyle = "#fdfdff";
+            ctx.fillRect(x3, groundY - h3, w3, h3);
+            ctx.strokeRect(x3, groundY - h3, w3, h3);
+            ctx.fillStyle = "#333";
+            ctx.fillText(m3.toFixed(1) + "kg", x3 + 20, groundY - h3 - 10);
+
+            // គូរខ្សែពី m1 ទៅ m3 (រំលងពីលើ m2)
+            ctx.beginPath();
+            ctx.strokeStyle = "#666";
+            ctx.lineWidth = 2;
+            const wireY = groundY - h1 + 10;
+            ctx.moveTo(x1 + w1, wireY);
+            ctx.lineTo(x3, wireY);
+            ctx.stroke();
+
+            // គូរកម្លាំងទាញ F (វ៉ិចទ័រខាងស្តាំ m3)
+            const fStartX = x3 + w3;
+            const fStartY = groundY - h3/2;
+            drawArrow(fStartX, fStartY, fStartX + 60, fStartY, "#d9534f");
+            ctx.fillStyle = "#d9534f";
+            ctx.font = "bold 16px Arial";
+            ctx.fillText(F + " N", fStartX + 20, fStartY - 10);
+            
+            // បង្ហាញសំទុះ
+            if (velocity > 0 || isPlaying) {
+                drawArrow(canvas.width/2, 50, canvas.width/2 + 50, 50, "#007bff");
+                ctx.fillStyle = "#007bff";
+                ctx.fillText("a = " + a.toFixed(2) + " m/s²", canvas.width/2 - 20, 40);
+            }
+        }
+
+        // មុខងារសម្រាប់ Animation
+        function animate() {
+            if (!isPlaying) return;
+
+            // កំណត់ល្បឿនចលនាឲ្យសមស្របនឹង Frame (មិនលឿនពេក)
+            const visualScale = 0.05; 
+            velocity += a * visualScale;
+            posX += velocity * visualScale;
+
+            // បើចលនាផុតអេក្រង់ ឲ្យត្រឡប់មកដើមវិញដើម្បីរត់ជាបន្តបន្ទាប់
+            if (posX > canvas.width + 100) {
+                posX = -200;
+            }
+
+            drawFrame();
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function startSim() {
+            if(a === 0) return; // បើទាញអត់រួច (ឧ. F=0) មិនបាច់រត់
+            isPlaying = true;
+            document.getElementById('btnPlay').disabled = true;
+            document.getElementById('btnPause').disabled = false;
+            animate();
+        }
+
+        function pauseSim() {
+            isPlaying = false;
+            cancelAnimationFrame(animationId);
+            document.getElementById('btnPlay').disabled = false;
+            document.getElementById('btnPause').disabled = true;
+        }
+
+        function resetSim() {
+            pauseSim();
+            posX = 50;
+            velocity = 0;
+            drawFrame();
+        }
+
+        // ចាប់ផ្តើមគូរលើកទីមួយ
+        updateValues();
+    </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <title>Newton's 2nd Law Simulator - រួមបញ្ចូលកកិត</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 20px; }
+        canvas { background-color: #ffffff; border: 2px solid #333; border-radius: 5px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); }
+        .controls { margin-top: 15px; padding: 15px; background: #fff; display: inline-block; border-radius: 5px; border: 1px solid #ccc; text-align: left; }
+        .control-group { margin-bottom: 10px; }
+        button { padding: 8px 15px; font-size: 16px; margin: 5px 5px 0 0; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        input[type="range"], input[type="checkbox"] { vertical-align: middle; }
+        .legend { font-size: 14px; margin-top: 10px; padding: 10px; background: #eef; border-radius: 5px; }
+        .legend span { display: inline-block; margin-right: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>កម្មវិធីក្លែងធ្វើ៖ ចលនាដុំឈើលើប្លង់ទេរ (ច្បាប់ទី២ញូតុន)</h2>
+    <canvas id="simCanvas" width="700" height="400"></canvas>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label>មុំនៃប្លង់ទេរ (Angle θ): <strong id="angleDisplay">30°</strong></label><br>
+            <input type="range" id="angleSlider" min="10" max="60" value="30" step="1" style="width: 200px;">
+        </div>
+        
+        <div class="control-group">
+            <label><input type="checkbox" id="frictionToggle"> <strong>មានកម្លាំងកកិត (Friction)</strong></label>
+            <br>
+            <label>មេគុណកកិត (μ): <strong id="muDisplay">0.2</strong></label><br>
+            <input type="range" id="muSlider" min="0.1" max="0.8" value="0.2" step="0.1" disabled style="width: 200px;">
+        </div>
+
+        <button id="btnPlay">▶ បញ្ចេញដុំឈើ (Play)</button>
+        <button id="btnReset" style="background:#dc3545;">↻ កំណត់ឡើងវិញ (Reset)</button>
+
+        <div class="legend">
+            <span style="color: blue;">↓ mg (ទម្ងន់)</span>
+            <span style="color: red;">↗ N (ប្រតិកម្មកែង)</span>
+            <span style="color: green;">↘ mg sin(θ)</span><br>
+            <span style="color: orange;">↖ f (កកិត)</span>
+            <span style="color: purple; font-size: 16px;">↘ ΣF (កម្លាំងផ្គួបសរុប)</span>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const angleSlider = document.getElementById('angleSlider');
+        const angleDisplay = document.getElementById('angleDisplay');
+        const frictionToggle = document.getElementById('frictionToggle');
+        const muSlider = document.getElementById('muSlider');
+        const muDisplay = document.getElementById('muDisplay');
+        const btnPlay = document.getElementById('btnPlay');
+        const btnReset = document.getElementById('btnReset');
+
+        let theta = parseInt(angleSlider.value); 
+        let isPlaying = false;
+        let position = 0; 
+        let velocity = 0;
+        let lastTime = 0;
+        
+        const g = 9.8; 
+        const scale = 50; 
+        const groundY = 350;
+        const pivotX = 600; 
+        const baseLength = 500;
+        const leftX = pivotX - baseLength;
+
+        frictionToggle.addEventListener('change', (e) => {
+            muSlider.disabled = !e.target.checked;
+            if(!isPlaying && position === 0) draw();
+        });
+
+        muSlider.addEventListener('input', (e) => {
+            muDisplay.innerText = e.target.value;
+            if(!isPlaying && position === 0) draw();
+        });
+
+        function drawArrow(fromX, fromY, toX, toY, color, label, lineWidth = 2) {
+            const headlen = 10;
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.stroke();
+
+            if (label) {
+                ctx.fillStyle = color;
+                ctx.font = "bold 14px Arial";
+                // បсуរទីតាំងអក្សរបន្តិចកុំឲ្យជាន់គ្នាពេក
+                ctx.fillText(label, toX + 5, toY + 5);
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            let thetaRad = theta * Math.PI / 180;
+            let topY = groundY - baseLength * Math.tan(thetaRad);
+            let inclineLength = Math.sqrt(baseLength*baseLength + Math.pow(groundY - topY, 2));
+
+            // គូសប្លង់ទេរ
+            ctx.fillStyle = '#e0e0e0';
+            ctx.beginPath();
+            ctx.moveTo(leftX, groundY);
+            ctx.lineTo(pivotX, groundY);
+            ctx.lineTo(leftX, topY);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // គូសមុំ
+            ctx.beginPath();
+            ctx.arc(pivotX, groundY, 30, Math.PI, Math.PI + thetaRad);
+            ctx.stroke();
+            ctx.fillStyle = "black";
+            ctx.fillText("θ", pivotX - 45, groundY - 10);
+
+            let blockW = 50;
+            let blockH = 35;
+            
+            if (position > inclineLength - blockW) {
+                position = inclineLength - blockW;
+                isPlaying = false;
+            }
+
+            let blockCenterX = leftX + position * Math.cos(thetaRad) + (blockW/2) * Math.cos(thetaRad) + (blockH/2) * Math.sin(thetaRad);
+            let blockCenterY = topY + position * Math.sin(thetaRad) + (blockW/2) * Math.sin(thetaRad) - (blockH/2) * Math.cos(thetaRad);
+
+            // គូសដុំឈើ
+            ctx.save();
+            ctx.translate(blockCenterX, blockCenterY);
+            ctx.rotate(thetaRad);
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(-blockW/2, -blockH/2, blockW, blockH);
+            ctx.restore();
+
+            let weightLen = 100;
+            
+            // 1. ទម្ងន់ (mg) ចង្អុលចុះក្រោមចំ
+            drawArrow(blockCenterX, blockCenterY, blockCenterX, blockCenterY + weightLen, 'blue', 'mg');
+            
+            // 2. កម្លាំងប្រតិកម្មកែង (N) - ឥឡូវកែងត្រឹមត្រូវ (ចង្អុលឡើងនិងស្តាំ)
+            let normalLen = weightLen * Math.cos(thetaRad);
+            let nDx = normalLen * Math.sin(thetaRad);
+            let nDy = -normalLen * Math.cos(thetaRad);
+            drawArrow(blockCenterX, blockCenterY, blockCenterX + nDx, blockCenterY + nDy, 'red', 'N');
+
+            // 3. កម្លាំងទាញស្របប្លង់ (mg sin θ)
+            let parallelLen = weightLen * Math.sin(thetaRad);
+            let pDx = parallelLen * Math.cos(thetaRad);
+            let pDy = parallelLen * Math.sin(thetaRad);
+            drawArrow(blockCenterX, blockCenterY, blockCenterX + pDx, blockCenterY + pDy, 'green', ''); // លាក់ឈ្មោះកុំឲ្យញឹកពេក
+
+            let mu = frictionToggle.checked ? parseFloat(muSlider.value) : 0;
+            let fricLen = normalLen * mu;
+            
+            // 4. កម្លាំងកកិត (f) ចង្អុលឡើងលើតាមប្លង់ទេរ (ទិសដៅផ្ទុយពីចលនា)
+            if (frictionToggle.checked && fricLen > 0) {
+                let fDx = -fricLen * Math.cos(thetaRad);
+                let fDy = -fricLen * Math.sin(thetaRad);
+                drawArrow(blockCenterX, blockCenterY, blockCenterX + fDx, blockCenterY + fDy, 'orange', 'f');
+            }
+
+            // 5. កម្លាំងផ្គួបសរុប (Net Force = mg sin θ - f)
+            let netLen = parallelLen - fricLen;
+            if (netLen < 0) netLen = 0; // ប្រសិនបើកកិតធំជាងកម្លាំងទាញ វាថេរ
+            
+            if (netLen > 0) {
+                let netDx = netLen * Math.cos(thetaRad);
+                let netDy = netLen * Math.sin(thetaRad);
+                // គូសវ៉ិចទ័រកម្លាំងផ្គួបឱ្យក្រាស់ (lineWidth = 4) ពណ៌ស្វាយ
+                drawArrow(blockCenterX, blockCenterY, blockCenterX + netDx, blockCenterY + netDy, 'purple', 'ΣF', 4);
+            }
+        }
+
+        function update(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            let dt = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+
+            if (isPlaying) {
+                let thetaRad = theta * Math.PI / 180;
+                let mu = frictionToggle.checked ? parseFloat(muSlider.value) : 0;
+                
+                // សមីការច្បាប់ទី២ញូតុន៖ a = g(sinθ - μ cosθ)
+                let a_real = g * Math.sin(thetaRad) - mu * g * Math.cos(thetaRad);
+                if (a_real < 0) a_real = 0; // ដុំឈើមិនកម្រើកបើកកិតខ្លាំងជាង
+
+                let acceleration = a_real * scale; 
+                velocity += acceleration * dt;
+                position += velocity * dt;
+            }
+            draw();
+            requestAnimationFrame(update);
+        }
+
+        angleSlider.addEventListener('input', (e) => {
+            theta = parseInt(e.target.value);
+            angleDisplay.innerText = theta + '°';
+            if(!isPlaying && position === 0) draw(); 
+        });
+
+        btnPlay.addEventListener('click', () => {
+            let thetaRad = theta * Math.PI / 180;
+            let mu = frictionToggle.checked ? parseFloat(muSlider.value) : 0;
+            let a_real = g * Math.sin(thetaRad) - mu * g * Math.cos(thetaRad);
+            
+            if (a_real <= 0) {
+                alert("ដុំឈើមិនអាចរអិលចុះទេ ព្រោះកម្លាំងកកិតធំជាងកម្លាំងទាញ!");
+            } else {
+                isPlaying = true;
+                lastTime = performance.now();
+            }
+        });
+
+        btnReset.addEventListener('click', () => {
+            isPlaying = false;
+            position = 0;
+            velocity = 0;
+            draw();
+        });
+
+        draw();
+        requestAnimationFrame(update);
+    </script>
+</body>
+</html>

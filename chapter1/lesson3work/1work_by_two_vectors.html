@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <title>ផលគុណស្កាលែ និង កម្មន្ត</title>
+    <style>
+        body { font-family: 'Khmer OS Battambang', Arial, sans-serif; text-align: center; background-color: #f8f9fa; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        canvas { background-color: #f1f8ff; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px; cursor: crosshair; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: left; background: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .control-group label { font-weight: bold; font-size: 14px; }
+        input[type="range"] { width: 100%; margin-top: 8px; }
+        .result-box { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; font-size: 20px; border: 1px solid #c3e6cb; }
+        
+        /* កែសម្រួលហ្វុងគណិតវិទ្យាអោយច្បាស់លាស់ */
+        .math { 
+            font-family: 'Times New Roman', Times, serif; 
+            font-weight: bold; 
+            font-size: 24px; 
+            font-style: italic; 
+        }
+        
+        /* បង្កើតវ៉ិចទ័រដោយប្រើ CSS ដើម្បីកុំអោយ Error ប្រអប់ៗ */
+        .vec {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            line-height: 1;
+            margin: 0 4px;
+        }
+        .vec::before {
+            content: "→";
+            font-size: 0.6em;
+            margin-bottom: -4px;
+            font-style: normal;
+        }
+        
+        .note { font-size: 15px; color: #d32f2f; margin-top: 10px; font-weight: bold; font-style: normal; font-family: 'Khmer OS Battambang', Arial, sans-serif;}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2> កម្មន្តគឺជាផលគុណស្កាលែ<br> 
+            <span class="math">W = <span class="vec">a</span> · <span class="vec">b</span> = a b cos(θ)</span>
+        </h2>
+        
+        <canvas id="vectorCanvas" width="750" height="350"></canvas>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>ប្រវែងវ៉ិចទ័រ a (បម្លាស់ទី): <span id="valA">10</span></label>
+                <input type="range" id="sliderA" min="1" max="15" value="10" step="1">
+            </div>
+            <div class="control-group">
+                <label>ប្រវែងវ៉ិចទ័រ b (កម្លាំង): <span id="valB">8</span></label>
+                <input type="range" id="sliderB" min="1" max="15" value="8" step="1">
+            </div>
+            <div class="control-group">
+                <label>មុំ θ (ដឺក្រេ): <span id="valTheta">45</span>°</label>
+                <input type="range" id="sliderTheta" min="0" max="180" value="45" step="1">
+            </div>
+        </div>
+
+        <div class="result-box">
+            <span style="font-family: 'Khmer OS Battambang', Arial, sans-serif; font-weight: bold; font-size: 16px;">ការគណនាកម្មន្ត (W):</span><br>
+            <span class="math" id="calcDisplay"></span>
+            <div class="note" id="caseNote"></div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('vectorCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const sliderA = document.getElementById('sliderA');
+        const sliderB = document.getElementById('sliderB');
+        const sliderTheta = document.getElementById('sliderTheta');
+        
+        const valA = document.getElementById('valA');
+        const valB = document.getElementById('valB');
+        const valTheta = document.getElementById('valTheta');
+        const calcDisplay = document.getElementById('calcDisplay');
+        const caseNote = document.getElementById('caseNote');
+
+        const originX = 300; 
+        const originY = 250;
+        const scale = 20; 
+
+        function drawArrow(fromX, fromY, toX, toY, color, label, isDashed = false) {
+            const headlen = 10; 
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            
+            ctx.beginPath();
+            if(isDashed) ctx.setLineDash([5, 5]);
+            else ctx.setLineDash([]);
+            
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            if(!isDashed) {
+                ctx.beginPath();
+                ctx.moveTo(toX, toY);
+                ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+                ctx.moveTo(toX, toY);
+                ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+                ctx.stroke();
+            }
+
+            ctx.setLineDash([]); 
+            
+            if (label) {
+                ctx.fillStyle = color;
+                ctx.font = "italic bold 18px 'Times New Roman', serif";
+                // បន្ថែមសញ្ញាព្រួញក្នុង Canvas (ដោយប្រើសញ្ញា Unicode ធម្មតា)
+                ctx.fillText(label + "\u20D7", toX + 5, toY - 10);
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            let a = parseFloat(sliderA.value);
+            let b = parseFloat(sliderB.value);
+            let thetaDeg = parseFloat(sliderTheta.value);
+            let thetaRad = thetaDeg * Math.PI / 180;
+
+            valA.textContent = a;
+            valB.textContent = b;
+            valTheta.textContent = thetaDeg;
+
+            let dotProduct = a * b * Math.cos(thetaRad);
+            
+            // ប្រើប្រាស់ HTML Class .vec ដើម្បីបង្ហាញវ៉ិចទ័រមិនឲ្យ error 
+            calcDisplay.innerHTML = `<span class="vec">a</span> · <span class="vec">b</span> = ${a} × ${b} × cos(${thetaDeg}°) = ${dotProduct.toFixed(2)}`;
+
+            if (thetaDeg === 0) {
+                caseNote.textContent = "ករណី θ = 0° : ផលគុណស្កាលែមានតម្លៃអតិបរមា (W វិជ្ជមានអតិបរមា)";
+            } else if (thetaDeg === 90) {
+                caseNote.textContent = "ករណី θ = 90° : ផលគុណស្កាលែមានតម្លៃស្មើ 0 (គ្មានកម្មន្ត)";
+            } else if (thetaDeg === 180) {
+                caseNote.textContent = "ករណី θ = 180° : ផលគុណស្កាលែមានតម្លៃអប្បបរមា (W អវិជ្ជមាន)";
+            } else if (thetaDeg > 90) {
+                caseNote.textContent = "ករណី 90° < θ < 180° : កម្មន្តទប់ (អវិជ្ជមាន)";
+            } else {
+                caseNote.textContent = "ករណី 0° < θ < 90° : កម្មន្តចលករ (វិជ្ជមាន)";
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(50, originY);
+            ctx.lineTo(700, originY);
+            ctx.strokeStyle = "#eee";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            let aTipX = originX + a * scale;
+            let aTipY = originY;
+            
+            let bTipX = originX + b * scale * Math.cos(thetaRad);
+            let bTipY = originY - b * scale * Math.sin(thetaRad); 
+
+            if (thetaDeg > 0) {
+                ctx.beginPath();
+                ctx.arc(originX, originY, 40, 0, -thetaRad, true);
+                ctx.strokeStyle = "#555";
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.fillStyle = "#333";
+                ctx.font = "italic 16px 'Times New Roman', serif";
+                ctx.fillText("θ", originX + 50 * Math.cos(-thetaRad/2), originY + 50 * Math.sin(-thetaRad/2) + 5);
+            }
+
+            drawArrow(originX, originY, aTipX, aTipY, "#0277bd", "a");
+            drawArrow(originX, originY, bTipX, bTipY, "#d32f2f", "b");
+
+            if (thetaDeg > 90) {
+                ctx.beginPath();
+                ctx.setLineDash([3, 3]);
+                ctx.moveTo(originX, originY);
+                ctx.lineTo(bTipX, originY);
+                ctx.strokeStyle = "#888";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            drawArrow(bTipX, bTipY, bTipX, originY, "#388e3c", "", true);
+
+            ctx.fillStyle = "#388e3c";
+            ctx.font = "italic bold 16px 'Times New Roman', serif";
+            ctx.fillText(`b cos(θ) = ${(b * Math.cos(thetaRad)).toFixed(2)}`, bTipX - 30, originY + 25);
+            
+            let dir = (thetaDeg > 90) ? 1 : -1;
+            ctx.beginPath();
+            ctx.moveTo(bTipX, originY - 8);
+            ctx.lineTo(bTipX + 8 * dir, originY - 8);
+            ctx.lineTo(bTipX + 8 * dir, originY);
+            ctx.strokeStyle = "#388e3c";
+            ctx.stroke();
+        }
+
+        sliderA.addEventListener('input', draw);
+        sliderB.addEventListener('input', draw);
+        sliderTheta.addEventListener('input', draw);
+
+        draw();
+    </script>
+</body>
+</html>

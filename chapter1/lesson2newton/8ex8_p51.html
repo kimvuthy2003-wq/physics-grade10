@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ៨ទំព័រ៥១</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Kantumruy Pro', sans-serif;
+        }
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        h1, h2 {
+            color: #38bdf8;
+            margin-bottom: 12px;
+        }
+        .problem-box {
+            background: #0f172a;
+            border-left: 4px solid #38bdf8;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+        canvas {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            width: 100%;
+            height: 400px;
+        }
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        button {
+            flex: 1;
+            min-width: 130px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: 0.2s;
+        }
+        .btn-start { background: #10b981; }
+        .btn-start:hover { background: #059669; }
+        .btn-reset { background: #ef4444; }
+        .btn-reset:hover { background: #dc2626; }
+        .btn-toggle { background: #3b82f6; }
+        .btn-toggle:hover { background: #1d4ed8; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .stat-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #38bdf8;
+            margin-top: 4px;
+        }
+        .solution-box {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #cbd5e1;
+        }
+        .solution-box strong { color: #facc15; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Problem Statement -->
+    <div class="card">
+        <h1>📌 ប្រធានលំហាត់</h1>
+        <div class="problem-box">
+            <strong>លំហាត់ ៨:</strong> ដុំឈើមួយរាងប្រលេពីប៉ែតកែងបានរអិលដោយគ្មានកកិតចុះតាមបណ្តោយប្លង់ទេរ (ដូចរូបខាងស្តាំ)។ មុំរវាងប្លង់ទេរនិងប្លង់ដេកគឺ <strong>θ = 30°</strong>។ ដុំឈើនោះចាប់ផ្តើមផ្លាស់ទីពី <strong>A</strong> ចុះក្រោមតាមបណ្តោយប្លង់ទេរបានប្រវែង <strong>d = 2.0 m</strong>។ (គេយក <strong>g = 9.80 m/s²</strong>)
+            <br><br>
+            <strong>ក.</strong> គូសដ្យាក្រាមតាងឱ្យកម្លាំងមានអំពើលើដុំឈើនោះ។<br>
+            <strong>ខ.</strong> គណនាសំទុះនៃដុំឈើនោះ។<br>
+            <strong>គ.</strong> គណនាល្បឿននៅខណៈដែលដុំឈើនោះមកដល់ចំណុច B។
+        </div>
+    </div>
+
+    <!-- Simulator Canvas & Controls -->
+    <div class="card">
+        <h2>🎮 វ៉ិចទ័រកម្លាំងមានអំពើលើដុំឈើ</h2>
+        <canvas id="simCanvas"></canvas>
+        
+        <div class="controls">
+            <button class="btn-start" id="btnPlay">▶️ ចាប់ផ្តើម</button>
+            <button class="btn-reset" id="btnReset">🔄 កំណត់ឡើងវិញ</button>
+            <button class="btn-toggle" id="btnVectors">👁️ បង្ហាញ/លាក់ កម្លាំង</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">សំទុះ (a)</div>
+                <div class="stat-value" id="valA">4.90 m/s²</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">រយៈពេល (t)</div>
+                <div class="stat-value" id="valT">0.00 s</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">ចម្ងាយចលនា (s)</div>
+                <div class="stat-value" id="valS">0.00 m / 2.0m</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">ល្បឿនបច្ចុប្បន្ន (v)</div>
+                <div class="stat-value" id="valV">0.00 m/s</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Solution -->
+    <div class="card">
+        <h2>📝 ដំណោះស្រាយសង្ខេប</h2>
+        <div class="solution-box">
+            <p><strong>ក. កម្លាំងមានអំពើលើដុំឈើ៖</strong> មានទម្ងន់ <strong>P⃗</strong> (ឈរចុះក្រោម) និងកម្លាំងប្រតិកម្មកែង <strong>N⃗</strong> (កែងនឹងប្លង់ទេរ)។</p>
+            <p><strong>ខ. គណនាសំទុះ (a)៖</strong><br>
+            a = g × sin(30°) = 9.80 × 0.5 = <strong>4.90 m/s²</strong></p>
+            <p><strong>គ. គណនាល្បឿនត្រង់ B (v<sub>B</sub>)៖</strong><br>
+            v<sub>B</sub> = √(2 × 4.90 × 2.0) = √19.6 ≈ <strong>4.43 m/s</strong></p>
+        </div>
+    </div>
+</div>
+<script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const g = 9.80;
+    const thetaDeg = 30;
+    const thetaRad = thetaDeg * Math.PI / 180;
+    const accel = g * Math.sin(thetaRad); 
+    const totalDistance = 2.0; 
+
+    let isRunning = false;
+    let showVectors = true;
+    let time = 0;
+    let currentDistance = 0;
+    let currentVelocity = 0;
+    let animId = null;
+    let lastTimestamp = null;
+
+    let originX = 100, originY = 340, rampLengthPx = 460, pxPerMeter = 230;
+
+    function resizeCanvas() {
+        // កំណត់ទំហំបម្រុងទុក (Fallback) ការពារករណី Browser មិនទាន់ Load CSS រួច
+        const w = canvas.clientWidth || 900;
+        const h = canvas.clientHeight || 400;
+        
+        canvas.width = w;
+        canvas.height = h;
+
+        rampLengthPx = Math.min(460, w * 0.75); 
+        originX = Math.max(20, (w - (rampLengthPx * Math.cos(thetaRad))) / 2.5);
+        originY = h * 0.85; 
+        pxPerMeter = rampLengthPx / totalDistance; 
+        
+        draw(); 
+    }
+
+    // ធានាថាគំនូរត្រូវគូរចេញ ទោះបីបើកលើ Browser ឬ Device ណាក៏ដោយ
+    resizeCanvas();
+    setTimeout(resizeCanvas, 150); 
+    window.addEventListener('load', resizeCanvas);
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawVectorText(symbol, desc, x, y, color) {
+        ctx.save();
+        ctx.font = "bold 16px 'Kantumruy Pro', sans-serif";
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+
+        ctx.fillText(symbol, x, y);
+        const symWidth = ctx.measureText(symbol).width;
+
+        const arrowY = y - 16;
+        ctx.beginPath();
+        ctx.moveTo(x, arrowY);
+        ctx.lineTo(x + symWidth, arrowY);
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x + symWidth - 3, arrowY - 2);
+        ctx.lineTo(x + symWidth + 2, arrowY);
+        ctx.lineTo(x + symWidth - 3, arrowY + 2);
+        ctx.fill();
+
+        if (desc) {
+            ctx.font = "14px 'Kantumruy Pro', sans-serif";
+            ctx.fillText(" " + desc, x + symWidth + 4, y);
+        }
+        ctx.restore();
+    }
+
+    function drawArrowLine(fromx, fromy, tox, toy, color) {
+        const headlen = 10;
+        const dx = tox - fromx;
+        const dy = toy - fromy;
+        const angle = Math.atan2(dy, dx);
+
+        ctx.beginPath();
+        ctx.moveTo(fromx, fromy);
+        ctx.lineTo(tox, toy);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(tox, toy);
+        ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const topX = originX;
+        const topY = originY - rampLengthPx * Math.sin(thetaRad);
+        const botX = originX + rampLengthPx * Math.cos(thetaRad);
+        const botY = originY;
+
+        ctx.beginPath();
+        ctx.moveTo(Math.max(0, topX - 30), botY);
+        ctx.lineTo(Math.min(canvas.width, botX + 50), botY);
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(topX, botY);
+        ctx.lineTo(topX, topY);
+        ctx.lineTo(botX, botY);
+        ctx.closePath();
+        ctx.fillStyle = "rgba(51, 65, 85, 0.5)";
+        ctx.fill();
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(botX, botY, 45, Math.PI, Math.PI - thetaRad, true);
+        ctx.strokeStyle = "#facc15";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = "#facc15";
+        ctx.font = "14px 'Kantumruy Pro'";
+        ctx.fillText("30°", botX - 65, botY - 12);
+
+        ctx.fillStyle = "#38bdf8";
+        ctx.font = "bold 16px 'Kantumruy Pro'";
+        ctx.fillText("A", topX - 10, topY - 15);
+        ctx.fillText("B", botX + 10, botY + 5);
+
+        const currentPx = currentDistance * pxPerMeter;
+        const blockCenterX = topX + currentPx * Math.cos(thetaRad);
+        const blockCenterY = topY + currentPx * Math.sin(thetaRad);
+
+        const blockW = 50;
+        const blockH = 30;
+
+        ctx.save();
+        ctx.translate(blockCenterX, blockCenterY);
+        ctx.rotate(thetaRad);
+
+        ctx.fillStyle = "#ef4444";
+        ctx.fillRect(-blockW / 2, -blockH, blockW, blockH);
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(-blockW / 2, -blockH, blockW, blockH);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 15px 'Kantumruy Pro'";
+        ctx.fillText("A", -5, -10);
+
+        ctx.restore();
+
+        if (showVectors) {
+            const bx = blockCenterX;
+            const by = blockCenterY - (blockH / 2) * Math.cos(thetaRad);
+            const vecScale = rampLengthPx < 300 ? 0.75 : 1;
+
+            drawArrowLine(bx, by, bx, by + 85 * vecScale, "#facc15");
+            drawVectorText("P", "(ទម្ងន់)", bx + 10, by + 85 * vecScale, "#facc15");
+
+            const nx = bx + 75 * vecScale * Math.sin(thetaRad);
+            const ny = by - 75 * vecScale * Math.cos(thetaRad);
+            drawArrowLine(bx, by, nx, ny, "#10b981");
+            drawVectorText("N", "", nx + 10, ny - 5, "#10b981");
+
+            const pxx = bx + 70 * vecScale * Math.cos(thetaRad);
+            const pxy = by + 70 * vecScale * Math.sin(thetaRad);
+            drawArrowLine(bx, by, pxx, pxy, "#38bdf8");
+            drawVectorText("Px", "", pxx + 10, pxy + 5, "#38bdf8");
+        }
+    }
+
+    function updatePhysics(timestamp) {
+        if (!isRunning) return;
+
+        if (!lastTimestamp) lastTimestamp = timestamp;
+        let dt = (timestamp - lastTimestamp) / 1000;
+        lastTimestamp = timestamp;
+
+        if (dt > 0.1) dt = 0.016;
+
+        time += dt;
+        currentDistance = 0.5 * accel * time * time;
+        currentVelocity = accel * time;
+
+        if (currentDistance >= totalDistance) {
+            currentDistance = totalDistance;
+            currentVelocity = Math.sqrt(2 * accel * totalDistance);
+            time = currentVelocity / accel;
+            isRunning = false;
+            document.getElementById('btnPlay').innerText = "▶️ ចាប់ផ្តើម";
+            document.getElementById('btnPlay').className = "btn-start";
+        }
+
+        document.getElementById('valT').innerText = time.toFixed(2) + " s";
+        document.getElementById('valS').innerText = currentDistance.toFixed(2) + " m / 2.0m";
+        document.getElementById('valV').innerText = currentVelocity.toFixed(2) + " m/s";
+
+        draw();
+
+        if (isRunning) {
+            animId = requestAnimationFrame(updatePhysics);
+        }
+    }
+
+    document.getElementById('btnPlay').addEventListener('click', function() {
+        if (currentDistance >= totalDistance) {
+            resetSimCore();
+        }
+        isRunning = !isRunning;
+        this.innerText = isRunning ? "⏸️ ផ្អាក" : "▶️ ចាប់ផ្តើម";
+        this.className = isRunning ? "btn-reset" : "btn-start";
+        
+        if (isRunning) {
+            lastTimestamp = null;
+            animId = requestAnimationFrame(updatePhysics);
+        } else {
+            if (animId) cancelAnimationFrame(animId);
+        }
+    });
+
+    function resetSimCore() {
+        isRunning = false;
+        if (animId) cancelAnimationFrame(animId);
+        time = 0;
+        currentDistance = 0;
+        currentVelocity = 0;
+        lastTimestamp = null;
+        document.getElementById('btnPlay').innerText = "▶️ ចាប់ផ្តើម";
+        document.getElementById('btnPlay').className = "btn-start";
+        document.getElementById('valT').innerText = "0.00 s";
+        document.getElementById('valS').innerText = "0.00 m / 2.0m";
+        document.getElementById('valV').innerText = "0.00 m/s";
+    }
+
+    document.getElementById('btnReset').addEventListener('click', function() {
+        resetSimCore();
+        draw();
+    });
+
+    document.getElementById('btnVectors').addEventListener('click', function() {
+        showVectors = !showVectors;
+        draw();
+    });
+</script>
+</body>
+</html>

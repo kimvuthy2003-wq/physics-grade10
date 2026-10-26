@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី១៦៖ ការក្រិតទែម៉ូម៉ែត្រឧស្ម័ន</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block; padding-top: 10px;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 500px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 14px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .btn-group {
+            display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;
+        }
+        button {
+            color: white; padding: 10px 15px; font-size: 15px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s, transform 0.1s;
+        }
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: scale(0.98); }
+        
+        .btn-abs { background: #d32f2f; }
+        .btn-ice { background: #0288d1; }
+        .btn-boil { background: #e65100; }
+        .btn-sol { background: #17a2b8; width: 100%; margin-bottom: 20px; font-size: 18px; padding: 15px;}
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .dashboard { grid-template-columns: 1fr 1fr; }
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 14px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 20px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 10px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 20px; }
+
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>១៦.</strong> សិស្សម្នាក់បានធ្វើពិសោធន៍ដោយប្រើទែម៉ូម៉ែត្រឧស្ម័ន (មានមាឌថេរ) ។ ទែម៉ូម៉ែត្រឧស្ម័នត្រូវបានក្រិតត្រង់ទឹកកកស្ងួត $-78.5^\circ\text{C}$ និងត្រង់អេទីលអាល់កុលពុះ $78.0^\circ\text{C}$ ដែលត្រូវនឹងសម្ពាធមានតម្លៃ $0.900\text{ atm}$ និង $1.635\text{ atm}$ រៀងគ្នា ។<br>
+        ក. តើតម្លៃសូន្យដាច់ខាតគិតជា $^\circ\text{C}$ ដែលត្រូវនឹងការក្រិតនេះមានតម្លៃប៉ុន្មាន?<br>
+        ខ. តើសម្ពាធដែលត្រូវបានរកឃើញមានតម្លៃប៉ុន្មានត្រង់៖ ចំណុចកក និងចំណុចទឹកពុះ? (តម្រុយប្រើទំនាក់ទំនង $P = a + bt$)
+    </div>
+
+    <!-- ប៊ូតុងលោតទីតាំងរហ័ស -->
+    <div class="btn-group">
+        <button class="btn-abs" id="btnAbsZero">📉 លោតទៅ សូន្យដាច់ខាត</button>
+        <button class="btn-ice" id="btnWaterFreeze">❄️ លោតទៅ ទឹកកក (0 °C)</button>
+        <button class="btn-boil" id="btnWaterBoil">🔥 លោតទៅ ទឹកពុះ (100 °C)</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG (Graph P vs t) -->
+    <div class="sim-area">
+        <svg viewBox="0 0 900 450" preserveAspectRatio="xMidYMid meet">
+            <!-- Grid Lines -->
+            <line x1="80" y1="350" x2="850" y2="350" stroke="#e0e0e0" stroke-width="1"/> <!-- P=0 -->
+            <line x1="80" y1="250" x2="850" y2="250" stroke="#e0e0e0" stroke-width="1"/> <!-- P=1.0 -->
+            <line x1="80" y1="150" x2="850" y2="150" stroke="#e0e0e0" stroke-width="1"/> <!-- P=2.0 -->
+
+            <line x1="600" y1="380" x2="600" y2="50" stroke="#e0e0e0" stroke-width="1"/> <!-- t=0 -->
+
+            <!-- អ័ក្ស Y (Pressure) -->
+            <line x1="600" y1="380" x2="600" y2="30" stroke="#111" stroke-width="3"/>
+            <polygon points="600,20 595,35 605,35" fill="#111"/>
+            <text x="545" y="20" font-family="Arial" font-weight="bold" font-size="16">P (atm)</text>
+            
+            <text x="565" y="355" font-family="Arial" font-size="14">0.0</text>
+            <text x="565" y="255" font-family="Arial" font-size="14">1.0</text>
+            <text x="565" y="155" font-family="Arial" font-size="14">2.0</text>
+
+            <!-- អ័ក្ស X (Temperature) -->
+            <line x1="80" y1="350" x2="850" y2="350" stroke="#111" stroke-width="3"/>
+            <polygon points="850,350 835,345 835,355" fill="#111"/>
+            <text x="810" y="380" font-family="Arial" font-weight="bold" font-size="16">t (°C)</text>
+            
+            <text x="595" y="375" font-family="Arial" font-size="14">0</text>
+
+            <!-- បន្ទាត់ក្រាហ្វ (P = a + bt) -->
+            <line id="graphLine" x1="100" y1="350" x2="800" y2="50" stroke="#1565c0" stroke-width="3"/>
+            <line id="graphExtrapolate" x1="100" y1="350" x2="200" y2="250" stroke="#1565c0" stroke-width="3" stroke-dasharray="6,4"/>
+
+            <!-- ចំណុចក្រិតទី១ (Dry Ice) -->
+            <circle id="ptDryIce" cx="200" cy="200" r="5" fill="#546e7a"/>
+            <text id="lblDryIce" x="180" y="180" font-family="Arial" font-size="12" fill="#546e7a">(-78.5, 0.9)</text>
+
+            <!-- ចំណុចក្រិតទី២ (Alcohol Boil) -->
+            <circle id="ptAlcohol" cx="400" cy="100" r="5" fill="#546e7a"/>
+            <text id="lblAlcohol" x="380" y="80" font-family="Arial" font-size="12" fill="#546e7a">(78.0, 1.635)</text>
+
+            <!-- ចំណុចរុករកបច្ចុប្បន្ន (Explorer Point) -->
+            <circle id="ptExplorer" cx="600" cy="150" r="8" fill="#d32f2f"/>
+            <line id="guideY" x1="600" y1="150" x2="600" y2="350" stroke="#d32f2f" stroke-width="2" stroke-dasharray="4,2"/>
+            <line id="guideX" x1="600" y1="150" x2="600" y2="150" stroke="#d32f2f" stroke-width="2" stroke-dasharray="4,2"/>
+            
+            <rect id="lblBox" x="610" y="135" width="130" height="40" rx="4" fill="#d32f2f"/>
+            <text id="lblExplore" x="675" y="160" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#ffffff">P = 1.27 atm</text>
+        </svg>
+    </div>
+
+    <!-- របារបញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box" style="grid-column: 1 / -1;">
+            អូសដើម្បីស្វែងរកសម្ពាធនៅសីតុណ្ហភាព $t$ ផ្សេងៗ (°C):<br>
+            <span id="valT" class="number-display" style="color: #d32f2f; font-size:24px;">0.0 °C</span>
+            <input type="range" id="sliderT" min="-300" max="150" value="0" step="0.5">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #1565c0;">មេគុណ $b$ (ជម្រាល)<br><span id="dashB" class="number-display">0.0047</span></div>
+        <div class="data-box" style="border-top: 4px solid #9c27b0;">មេគុណ $a$ ($P$ ពេល 0°C)<br><span id="dashA" class="number-display">1.269</span></div>
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">សូន្យដាច់ខាតគណនាបាន<br><span id="dashAbs" class="number-display">-270.1 °C</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">សម្ពាធនៅ $t$ បច្ចុប្បន្ន<br><span id="dashP" class="number-display">1.27 atm</span></div>
+    </div>
+
+    <button id="btnToggleSolution" class="btn-sol">📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <h3>ដំណោះស្រាយ</h3>
+        
+        <div id="mathContainer">
+            <p>ប្រព័ន្ធសមីការតាម $P = a + bt$ ៖</p>
+            <ul>
+                <li id="mathEq1">ទឹកកកស្ងួត៖ \( 0.900 = a + b(-78.5) \) (១)</li>
+                <li id="mathEq2">អាល់កុលពុះ៖ \( 1.635 = a + b(78.0) \) (២)</li>
+            </ul>
+            
+            <p>យកសមីការ (២) ដក (១)៖</p>
+            <div id="mathLineSub">$$ 1.635 - 0.900 = [a + 78.0b] - [a - 78.5b] $$</div>
+            <div id="mathLineB">$$ 0.735 = 156.5b \implies b = \frac{0.735}{156.5} \approx 0.004696 \text{ atm}/^\circ\text{C} $$</div>
+            <p>ជំនួស $b$ ក្នុងសមីការ (២) រក $a$៖</p>
+            <div id="mathLineA">$$ a = 1.635 - 78.0(0.004696) \approx 1.2687 \text{ atm} $$</div>
+
+            <p><strong>ក. រកតម្លៃសូន្យដាច់ខាតគិតជា $^\circ\text{C}$៖</strong></p>
+            <p>សូន្យដាច់ខាតគឺនៅពេលសម្ពាធ $P = 0$៖</p>
+            <div id="mathLineAbs" style="color: #d32f2f; font-weight: bold;">$$ 0 = a + b t_{abs} \implies t_{abs} = -\frac{a}{b} = -\frac{1.2687}{0.004696} \approx -270.1^\circ\text{C} $$</div>
+
+            <p><strong>ខ. សម្ពាធត្រង់ចំណុចកក និងទឹកពុះ៖</strong></p>
+            <ul>
+                <li>ចំណុចទឹកកក ($t = 0^\circ\text{C}$) ៖ $P_{0^\circ\text{C}} = a + b(0) = a \approx 1.27 \text{ atm}$</li>
+                <li>ចំណុចទឹកពុះ ($t = 100^\circ\text{C}$) ៖ $P_{100^\circ\text{C}} = 1.2687 + 0.004696(100) \approx 1.74 \text{ atm}$</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > -->
+<script>
+    var sT = document.getElementById('sliderT');
+    
+    var btnAbsZero = document.getElementById('btnAbsZero');
+    var btnWaterFreeze = document.getElementById('btnWaterFreeze');
+    var btnWaterBoil = document.getElementById('btnWaterBoil');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    // SVG Elements
+    var graphLine = document.getElementById('graphLine');
+    var graphExtrapolate = document.getElementById('graphExtrapolate');
+    var ptDryIce = document.getElementById('ptDryIce');
+    var lblDryIce = document.getElementById('lblDryIce');
+    var ptAlcohol = document.getElementById('ptAlcohol');
+    var lblAlcohol = document.getElementById('lblAlcohol');
+    
+    var ptExplorer = document.getElementById('ptExplorer');
+    var guideY = document.getElementById('guideY');
+    var guideX = document.getElementById('guideX');
+    var lblBox = document.getElementById('lblBox');
+    var lblExplore = document.getElementById('lblExplore');
+
+    // Values from problem
+    var t1 = -78.5;
+    var p1 = 0.900;
+    var t2 = 78.0;
+    var p2 = 1.635;
+
+    // Calculate constants
+    var b = (p2 - p1) / (t2 - t1);
+    var a = p1 - b * t1;
+    var t_abs = -a / b;
+
+    // Graph Mapping Constants
+    var xOrigin = 600; // x-coord for 0°C
+    var pxPerDeg = 1.5; // 1°C = 1.5px
+    var yOrigin = 350; // y-coord for 0 atm
+    var pxPerAtm = 100; // 1 atm = 100px
+
+    var targetT = 0;
+    var currentTval = 0;
+    var isAnimating = false;
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    function startAnimation(t_target) {
+        targetT = t_target;
+        if (isAnimating === false) {
+            isAnimating = true;
+            transitionLoop();
+        }
+    }
+
+    btnAbsZero.addEventListener('click', function() { startAnimation(t_abs); });
+    btnWaterFreeze.addEventListener('click', function() { startAnimation(0.0); });
+    btnWaterBoil.addEventListener('click', function() { startAnimation(100.0); });
+
+    sT.addEventListener('input', function() {
+        currentTval = parseFloat(sT.value);
+        targetT = currentTval;
+        isAnimating = false;
+        updatePhysics();
+    });
+
+    function transitionLoop() {
+        var diff = targetT - currentTval;
+        // ពិនិត្យភាពខុសគ្នាដោយមិនប្រើសញ្ញាធំជាងតូចជាង
+        if (Math.abs(diff).toFixed(2) !== "0.00") {
+            currentTval += diff * 0.1;
+            sT.value = currentTval;
+            updatePhysics();
+            requestAnimationFrame(transitionLoop);
+        } else {
+            currentTval = targetT;
+            sT.value = currentTval;
+            updatePhysics();
+            isAnimating = false;
+        }
+    }
+
+    function initGraph() {
+        document.getElementById('dashB').innerText = b.toFixed(6);
+        document.getElementById('dashA').innerText = a.toFixed(4);
+        document.getElementById('dashAbs').innerText = t_abs.toFixed(1) + " °C";
+
+        // Draw Fixed Points
+        var x1 = xOrigin + t1 * pxPerDeg;
+        var y1 = yOrigin - p1 * pxPerAtm;
+        ptDryIce.setAttribute("cx", x1); ptDryIce.setAttribute("cy", y1);
+        lblDryIce.setAttribute("x", x1 - 30); lblDryIce.setAttribute("y", y1 - 10);
+
+        var x2 = xOrigin + t2 * pxPerDeg;
+        var y2 = yOrigin - p2 * pxPerAtm;
+        ptAlcohol.setAttribute("cx", x2); ptAlcohol.setAttribute("cy", y2);
+        lblAlcohol.setAttribute("x", x2 + 10); lblAlcohol.setAttribute("y", y2 - 10);
+
+        // Draw Line (Extrapolate to t_abs)
+        var xAbs = xOrigin + t_abs * pxPerDeg;
+        var yAbs = yOrigin; // P=0
+
+        var xMax = xOrigin + 150 * pxPerDeg;
+        var yMax = yOrigin - (a + b * 150) * pxPerAtm;
+
+        // Solid line for positive pressure area
+        graphLine.setAttribute("x1", xAbs); graphLine.setAttribute("y1", yAbs);
+        graphLine.setAttribute("x2", xMax); graphLine.setAttribute("y2", yMax);
+        
+        // Let's just use one solid line and dash below t1
+        graphLine.setAttribute("x1", x1); graphLine.setAttribute("y1", y1);
+        graphExtrapolate.setAttribute("x1", xAbs); graphExtrapolate.setAttribute("y1", yAbs);
+        graphExtrapolate.setAttribute("x2", x1); graphExtrapolate.setAttribute("y2", y1);
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var t = currentTval;
+        var p = a + b * t;
+        
+        // Prevent negative pressure visual glitch
+        var visualP = Math.max(p, 0);
+
+        document.getElementById('valT').innerText = t.toFixed(1) + " °C";
+        document.getElementById('dashP').innerText = visualP.toFixed(3) + " atm";
+
+        // Update SVG Explorer
+        var xPos = xOrigin + t * pxPerDeg;
+        var yPos = yOrigin - visualP * pxPerAtm;
+
+        ptExplorer.setAttribute("cx", xPos);
+        ptExplorer.setAttribute("cy", yPos);
+
+        guideY.setAttribute("x1", xPos); guideY.setAttribute("x2", xPos);
+        guideY.setAttribute("y1", yPos); guideY.setAttribute("y2", yOrigin);
+
+        guideX.setAttribute("x1", xOrigin); guideX.setAttribute("x2", xPos);
+        guideX.setAttribute("y1", yPos); guideX.setAttribute("y2", yPos);
+
+        lblBox.setAttribute("x", xPos + 10);
+        lblBox.setAttribute("y", yPos - 20);
+        lblExplore.setAttribute("x", xPos + 75);
+        lblExplore.setAttribute("y", yPos + 5);
+        lblExplore.textContent = "P = " + p.toFixed(3) + " atm";
+
+        // Update MathJax if needed (static mostly for this one, but good practice)
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            if (typeof MathJax !== "undefined") {
+                // No dynamic mathjax needed here as the solution is static
+            }
+        }, 300);
+    }
+
+    // Initialize
+    initGraph();
+    updatePhysics();
+</script>
+
+</body>
+</html>

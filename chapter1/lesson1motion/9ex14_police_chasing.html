@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ១៤ទំព័រទី៣៥</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Khmer OS Battambang', sans-serif; }
+        #info { 
+            position: absolute; 
+            top: 15px; 
+            left: 15px; 
+            color: white; 
+            background: rgba(0,0,0,0.8); 
+            padding: 15px; 
+            border-radius: 8px; 
+            pointer-events: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            line-height: 1.6;
+            max-width: 450px;
+            font-size: 14px;
+        }
+        #info h3 { margin-top: 0; color: #4CAF50; border-bottom: 1px solid #555; padding-bottom: 5px;}
+        .problem-text {
+            color: #ddd;
+            margin-bottom: 15px;
+            font-style: italic;
+            border-left: 3px solid #4CAF50;
+            padding-left: 10px;
+        }
+        #controls { 
+            position: absolute; 
+            bottom: 20px; 
+            left: 20px; 
+            z-index: 100;
+        }
+        button { 
+            padding: 10px 20px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            margin-right: 10px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            color: white;
+            transition: 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        #startBtn { background-color: #4CAF50; }
+        #startBtn:hover { background-color: #45a049; }
+        #resetBtn { background-color: #f44336; }
+        #resetBtn:hover { background-color: #d32f2f; }
+        .data-label { color: #87CEEB; }
+    </style>
+    <!-- Include Three.js via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="info">
+        <h3>លំហាត់១៤៖ ប៉ូលីសដេញតាមរថយន្ត</h3>
+        <div class="problem-text">
+            ១៤. អ្នកបើករថយន្តម្នាក់កំពុងបើកបរដោយល្បឿនថេរ 60.0 km/h ឆ្លងកាត់ទីប្រជុំជនមួយដែលមានផ្លាកសញ្ញាព្រំដែនល្បឿន 40 km/h ។ គ្រាន់តែគាត់ឆ្លងកាត់ផ្លាកសញ្ញាភ្លាម មន្ត្រីប៉ូលីសដែលឈរជើងនៅទីនោះ ចាប់ផ្តើមបើករថយន្តដេញតាមដោយសំទុះថេរ 2.0 m/s² ។<br>
+            គណនា៖<br>
+            ក. រយៈពេលដែលមន្ត្រីប៉ូលីសដេញតាមទាន់?<br>
+            ខ. ល្បឿនរបស់រថយន្តមន្ត្រីប៉ូលីសពេលនោះ?<br>
+            គ. ចម្ងាយចរដែលអ្នកទាំងពីរផ្លាស់ទីបាន?
+        </div>
+        <div id="stats"></div>
+    </div>
+    <div id="controls">
+        <button id="startBtn">ចាប់ផ្តើម (Start)</button>
+        <button id="resetBtn">កំណត់ឡើងវិញ (Reset)</button>
+    </div>
+
+    <script>
+        // ការរៀបចំ Scene, Camera, និង Renderer
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.Fog(0x87CEEB, 50, 400);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        // ពន្លឺ
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(100, 150, 50);
+        dirLight.castShadow = true;
+        dirLight.shadow.camera.top = 100;
+        dirLight.shadow.camera.bottom = -100;
+        dirLight.shadow.camera.left = -100;
+        dirLight.shadow.camera.right = 100;
+        scene.add(dirLight);
+
+        // ផ្លូវថ្នល់
+        const roadGeo = new THREE.PlaneGeometry(2000, 12);
+        const roadMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+        const road = new THREE.Mesh(roadGeo, roadMat);
+        road.rotation.x = -Math.PI / 2;
+        road.receiveShadow = true;
+        scene.add(road);
+
+        // បន្ទាត់កណ្តាលផ្លូវ
+        for(let i=-1000; i<1000; i+=8) {
+            const lineGeo = new THREE.PlaneGeometry(4, 0.3);
+            const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const line = new THREE.Mesh(lineGeo, lineMat);
+            line.rotation.x = -Math.PI / 2;
+            line.position.set(i, 0.02, 0);
+            scene.add(line);
+        }
+
+        // វាលស្មៅ
+        const grassGeo = new THREE.PlaneGeometry(2000, 200);
+        const grassMat = new THREE.MeshStandardMaterial({ color: 0x2d4c1e });
+        const grass = new THREE.Mesh(grassGeo, grassMat);
+        grass.rotation.x = -Math.PI / 2;
+        grass.position.y = -0.1;
+        grass.receiveShadow = true;
+        scene.add(grass);
+
+        // ផ្លាកសញ្ញាចរាចរណ៍កម្រិតល្បឿន 40 (ចំណុច x = 0)
+        const signGroup = new THREE.Group();
+        const poleGeo = new THREE.CylinderGeometry(0.1, 0.1, 4);
+        const poleMat = new THREE.MeshStandardMaterial({ color: 0x999999 });
+        const pole = new THREE.Mesh(poleGeo, poleMat);
+        pole.position.y = 2;
+        pole.castShadow = true;
+        signGroup.add(pole);
+
+        const boardGeo = new THREE.CircleGeometry(1.2, 32);
+        const boardMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        const board = new THREE.Mesh(boardGeo, boardMat);
+        board.position.set(0, 3.5, 0.11);
+        signGroup.add(board);
+
+        const borderGeo = new THREE.RingGeometry(0.9, 1.2, 32);
+        const borderMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const border = new THREE.Mesh(borderGeo, borderMat);
+        border.position.set(0, 3.5, 0.12);
+        signGroup.add(border);
+
+        // គំនូសបន្ទាត់ចាប់ផ្តើមលើថ្នល់
+        const startLineGeo = new THREE.PlaneGeometry(0.5, 12);
+        const startLineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const startLine = new THREE.Mesh(startLineGeo, startLineMat);
+        startLine.rotation.x = -Math.PI / 2;
+        startLine.position.set(0, 0.03, 0);
+        scene.add(startLine);
+
+        signGroup.position.set(0, 0, -7);
+        scene.add(signGroup);
+
+        // រថយន្តល្មើសច្បាប់ (ពណ៌ក្រហម)
+        const speederGeo = new THREE.BoxGeometry(4.5, 1.5, 2.2);
+        const speederMat = new THREE.MeshStandardMaterial({ color: 0xff3333 });
+        const speeder = new THREE.Mesh(speederGeo, speederMat);
+        speeder.position.set(-150, 0.75, 2.5); // ចាប់ផ្តើមពីចម្ងាយ -150m
+        speeder.castShadow = true;
+        scene.add(speeder);
+
+        // រថយន្តប៉ូលីស
+        const policeGroup = new THREE.Group();
+        const policeBodyGeo = new THREE.BoxGeometry(4.5, 1.5, 2.2);
+        const policeBodyMat = new THREE.MeshStandardMaterial({ color: 0x0033cc });
+        const policeBody = new THREE.Mesh(policeBodyGeo, policeBodyMat);
+        policeBody.position.y = 0.75;
+        policeBody.castShadow = true;
+        policeGroup.add(policeBody);
+
+        const sirenGeo = new THREE.BoxGeometry(0.8, 0.2, 0.6);
+        const sirenMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const siren = new THREE.Mesh(sirenGeo, sirenMat);
+        siren.position.set(0, 1.6, 0);
+        policeGroup.add(siren);
+
+        policeGroup.position.set(0, 0, -2.5); // រង់ចាំនៅចំណុច 0
+        scene.add(policeGroup);
+
+        // ទិន្នន័យរូបវិទ្យា
+        const v_car = 16.667; // 60 km/h ជា m/s
+        const a_police = 2.0; 
+        
+        let startDistance = -80; // ឡានក្រហមចេញពី -80m មក
+        let x_car = startDistance; 
+        let x_police = 0;
+        let v_police = 0;
+        
+        let time_chase = 0; // ពេលប៉ូលីសចាប់ផ្តើមដេញ
+        
+        let isRunning = false;
+        let isChasing = false; // flag សំគាល់ថាប៉ូលីសកំពុងដេញឬនៅ
+        let hasCaught = false;
+
+        const clock = new THREE.Clock();
+
+        // ដំបូងអោយកាមេរ៉ាមើលទៅឡានក្រហមដែលកំពុងមក
+        camera.position.set(x_car - 15, 10, 20);
+        camera.lookAt(x_car, 0, 0);
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            if (!hasCaught) isRunning = true;
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            isRunning = false;
+            isChasing = false;
+            hasCaught = false;
+            time_chase = 0;
+            x_car = startDistance;
+            x_police = 0;
+            v_police = 0;
+            speeder.position.x = x_car;
+            policeGroup.position.x = 0;
+            sirenMat.color.setHex(0x000000); 
+            camera.position.set(x_car - 15, 10, 20);
+            camera.lookAt(x_car, 0, 0);
+            updateUI();
+        });
+
+        function updateUI() {
+            const stats = document.getElementById('stats');
+            
+            // បង្ហាញពត៌មានខុសគ្នា មុនពេល និង ក្រោយពេលប៉ូលីសចេញដេញ
+            if(!isChasing && x_car < 0) {
+                stats.innerHTML = `
+                    <span class="data-label">ឡានកំពុងមកដល់... ចម្ងាយពីប៉ូលីស៖</span> <b>${Math.abs(x_car).toFixed(1)} m</b><br>
+                    <span class="data-label">ល្បឿនឡានល្មើស (v1)៖</span> <b>60.0 km/h</b>
+                `;
+            } else {
+                stats.innerHTML = `
+                    <span class="data-label">រយៈពេលតាំងពីចាប់ផ្តើមដេញ (t)៖</span> <b>${time_chase.toFixed(2)} វិនាទី</b><br>
+                    <hr style="border-color:#555; margin:5px 0;">
+                    <span class="data-label">ល្បឿនឡានល្មើស (v1)៖</span> <b>60.0 km/h</b><br>
+                    <span class="data-label">ចម្ងាយឡានល្មើស (x1)៖</span> <b>${x_car.toFixed(2)} m</b><br>
+                    <hr style="border-color:#555; margin:5px 0;">
+                    <span class="data-label">ល្បឿនប៉ូលីស (v2)៖</span> <b>${(v_police * 3.6).toFixed(1)} km/h</b><br>
+                    <span class="data-label">ចម្ងាយប៉ូលីស (x2)៖</span> <b>${x_police.toFixed(2)} m</b><br>
+                `;
+            }
+
+            if (hasCaught) {
+                stats.innerHTML += `<br><span style="color:#ffeb3b; font-size:1.2em;"><b>✅ ប៉ូលីសតាមទាន់ហើយ!</b></span>`;
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta();
+
+            if (isRunning && !hasCaught) {
+                
+                // ដំណាក់កាលទី១៖ ឡានក្រហមកំពុងមកជិតចំណុច x=0
+                if (!isChasing) {
+                    x_car += v_car * dt;
+                    speeder.position.x = x_car;
+                    
+                    // កាមេរ៉ាផ្តោតលើឡានក្រហមដែលកំពុងមក
+                    camera.position.x = x_car - 15;
+                    camera.lookAt(x_car + 10, 0, 0);
+
+                    // នៅពេលឡានក្រហមឆ្លងកាត់ចំណុច x = 0 (ប៉ូលីស)
+                    if (x_car >= 0) {
+                        x_car = 0;
+                        isChasing = true; // ចាប់ផ្តើមដេញ
+                        time_chase = 0;
+                    }
+                } 
+                // ដំណាក់កាលទី២៖ ប៉ូលីសចាប់ផ្តើមដេញ
+                else {
+                    time_chase += dt;
+                    
+                    x_car = v_car * time_chase;
+                    v_police = a_police * time_chase;
+                    x_police = 0.5 * a_police * time_chase * time_chase;
+
+                    if (x_police >= x_car && time_chase > 0.1) {
+                        hasCaught = true;
+                        isRunning = false;
+                        
+                        // តម្លៃចុងក្រោយពិតប្រាកដ
+                        time_chase = 16.666;
+                        x_car = v_car * time_chase;
+                        x_police = x_car;
+                        v_police = a_police * time_chase;
+                    }
+
+                    speeder.position.x = x_car;
+                    policeGroup.position.x = x_police;
+
+                    // ភ្លើងស៊ីរ៉ែន
+                    if(Math.floor(time_chase * 8) % 2 === 0) {
+                        sirenMat.color.setHex(0xff0000); 
+                    } else {
+                        sirenMat.color.setHex(0x0000ff); 
+                    }
+
+                    // កាមេរ៉ាមើលចំកណ្តាលអ្នកទាំងពីរពេលកំពុងដេញ
+                    const midX = (x_car + x_police) / 2;
+                    camera.position.x = midX - 25; 
+                    camera.lookAt(midX, 0, 0);
+                }
+
+                updateUI();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        updateUI();
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

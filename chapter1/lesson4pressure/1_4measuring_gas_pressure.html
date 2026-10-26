@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>១.៤ ការវាស់សម្ពាធឧស្ម័ន (ម៉ាណូម៉ែត្រ និងដៃច្របាច់)</title>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center;
+            margin: 0;
+        }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; max-width: 600px; height: auto;
+            background: #e0f7fa; border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+        }
+
+        .slider-container {
+            margin: 20px auto; padding: 15px; background: white;
+            border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 600px; font-size: 18px; font-weight: bold;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 16px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 24px; display: block; margin-top: 8px;
+        }
+        
+        #livePgas { color: #d32f2f; }
+        #liveDeltaP { color: #28a745; }
+        #livePa { color: #007bff; }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        .solution-box ul { padding-left: 30px; margin-top: 5px; }
+        .highlight { font-weight: bold; color: #d32f2f; font-size: 19px; }
+        .note-box { background: #e8f5e9; border-left: 5px solid #28a745; padding: 15px; margin-bottom: 15px; border-radius: 4px; color: #1b5e20;}
+
+        .text-outline { text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; }
+        
+        /* ភាគល្អិតឧស្ម័ន Animation */
+        .gas-particle {
+            fill: #d32f2f; opacity: 0.6;
+            animation: moveGas 3s infinite alternate ease-in-out;
+        }
+        @keyframes moveGas {
+            0% { transform: translate(0px, 0px); }
+            100% { transform: translate(15px, -15px); }
+        }
+        
+        /* រចនាប័ទ្មសម្រាប់រូបមន្ត HTML សុទ្ធ */
+        .math-bold { font-family: 'Times New Roman', serif; font-size: 110%; font-weight: bold; }
+        .math-italic { font-family: 'Times New Roman', serif; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>១.៤ ការវាស់សម្ពាធឧស្ម័ន ៖</strong> គេប្រើឧបករណ៍ម៉ាណូម៉ែត្រ (Manometer) ដើម្បីវាស់សម្ពាធឧស្ម័ន។ នៅពេលគេច្របាច់បាឡុងបញ្ចូលឧស្ម័នទៅក្នុងម៉ាណូម៉ែត្រ ឧស្ម័នបានបង្កើតសម្ពាធមួយទៅលើផ្ទៃអង្គធាតុរាវត្រង់ <i>B</i>។ ប្រសិនបើសម្ពាធនេះធំជាងសម្ពាធបរិយាកាស នោះវាធ្វើឱ្យកម្ពស់អង្គធាតុរាវត្រង់ <i>B</i> ធ្លាក់ចុះ។ ក្នុងភាពលំនឹង សម្ពាធត្រង់ <i>B</i> និង <i>C</i> ត្រូវតែស្មើគ្នា ព្រោះវាស្ថិតនៅលើប្លង់ដេកស្មើគ្នា។ សម្ពាធឧស្ម័នត្រង់ <i>B</i> អាចសរសេរ៖ <br><br>
+        <div style="text-align: center;">
+            <span class="math-bold">P<sub>B</sub> = P<sub>at</sub> + &rho; &middot; g &middot; h</span>
+        </div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator SVG សុទ្ធ -->
+    <div class="sim-area">
+        <svg viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="liquidGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#4fc3f7"/>
+                    <stop offset="50%" stop-color="#e1f5fe"/>
+                    <stop offset="100%" stop-color="#4fc3f7"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ផ្ទៃខាងក្រោយបំពង់ (ដើម្បីបិទបាំងបន្ទាត់) -->
+            <path d="M 250 200 L 250 400 A 50 50 0 0 0 350 400 L 350 100" fill="#fff" stroke="none" />
+            <circle cx="130" cy="180" r="70" fill="#fff" />
+
+            <!-- អង្គធាតុរាវក្នុងបំពង់រាង U -->
+            <rect id="liqL" x="232" y="280" width="36" height="120" fill="url(#liquidGrad)" />
+            <rect id="liqR" x="332" y="280" width="36" height="120" fill="url(#liquidGrad)" />
+            <!-- បាតបំពង់ -->
+            <path d="M 232 400 A 68 68 0 0 0 368 400 L 332 400 A 32 32 0 0 1 268 400 Z" fill="url(#liquidGrad)" stroke="none" />
+            <!-- ផ្ទៃលើអង្គធាតុរាវ -->
+            <rect id="liqTopL" x="232" y="278" width="36" height="6" rx="3" fill="#81d4fa" />
+            <rect id="liqTopR" x="332" y="278" width="36" height="6" rx="3" fill="#81d4fa" />
+
+            <!-- គំនូសបំពង់ផ្នែកខាងក្រៅ និងក្នុង -->
+            <path d="M 190 180 L 230 180 L 230 400 A 70 70 0 0 0 370 400 L 370 100" fill="none" stroke="#546e7a" stroke-width="4" stroke-linecap="round" />
+            <path d="M 190 140 L 270 140 L 270 400 A 30 30 0 0 0 330 400 L 330 100" fill="none" stroke="#546e7a" stroke-width="4" stroke-linecap="round" />
+
+            <!-- ដបផ្ទុកឧស្ម័ន ឬ បាឡុង (Gas Bulb) - នឹងរួមតូចពេលច្របាច់ -->
+            <circle id="gasBulb" cx="130" cy="160" r="60" fill="#ffca28" stroke="#f57f17" stroke-width="4" style="transition: r 0.1s;" />
+            <text x="130" y="150" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="20" fill="#e65100">ឧស្ម័ន</text>
+            <text id="gasPressureLabel" x="130" y="175" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#d32f2f">P_B</text>
+
+            <!-- រូបភាពដៃច្របាច់បាឡុង (Squeezing Hands Emojis) -->
+            <text id="handLeft" x="70" y="165" font-size="45" dominant-baseline="middle" text-anchor="end" style="transition: x 0.1s;">👉</text>
+            <text id="handRight" x="190" y="165" font-size="45" dominant-baseline="middle" text-anchor="start" style="transition: x 0.1s;">👈</text>
+
+            <!-- ភាគល្អិតឧស្ម័ន -->
+            <circle cx="100" cy="130" r="4" class="gas-particle" />
+            <circle cx="150" cy="120" r="4" class="gas-particle" style="animation-delay: 0.5s;" />
+            <circle cx="110" cy="180" r="4" class="gas-particle" style="animation-delay: 1s;" />
+            <circle cx="160" cy="160" r="4" class="gas-particle" style="animation-delay: 1.5s;" />
+
+            <!-- ព្រួញសម្ពាធបរិយាកាស (P_at) -->
+            <line x1="350" y1="50" x2="350" y2="90" stroke="#007bff" stroke-width="3" />
+            <polygon points="345,85 355,85 350,95" fill="#007bff" />
+            <text x="350" y="40" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#007bff">P_at</text>
+
+            <!-- ព្រួញសម្ពាធឧស្ម័ន (ចុះក្រោមក្នុងបំពង់ឆ្វេង) -->
+            <line x1="250" y1="210" x2="250" y2="250" stroke="#d32f2f" stroke-width="3" />
+            <polygon points="245,245 255,245 250,255" fill="#d32f2f" />
+            <text x="250" y="200" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#d32f2f">P_B</text>
+
+            <!-- ចំណុចសម្គាល់ A, B, C និង បន្ទាត់វាស់កម្ពស់ -->
+            <g id="measurements">
+                <line id="dashA" x1="230" y1="280" x2="430" y2="280" stroke="#555" stroke-width="2" stroke-dasharray="5,5" />
+                <line id="dashC" x1="230" y1="280" x2="430" y2="280" stroke="#555" stroke-width="2" stroke-dasharray="5,5" />
+
+                <circle id="ptB" cx="250" cy="280" r="5" fill="#d32f2f" />
+                <text id="lblB" x="210" y="286" font-family="Arial" font-weight="bold" font-size="20" class="text-outline">B</text>
+
+                <circle id="ptA" cx="350" cy="280" r="5" fill="#d32f2f" />
+                <text id="lblA" x="370" y="286" font-family="Arial" font-weight="bold" font-size="20" class="text-outline">A</text>
+
+                <circle id="ptC" cx="350" cy="280" r="5" fill="#d32f2f" />
+                <text id="lblC" x="370" y="286" font-family="Arial" font-weight="bold" font-size="20" class="text-outline">C</text>
+
+                <!-- បន្ទាត់វាស់កម្ពស់ h -->
+                <line id="hLine" x1="410" y1="280" x2="410" y2="280" stroke="#28a745" stroke-width="3" />
+                <polygon id="hArrTop" points="405,280 415,280 410,280" fill="#28a745" />
+                <polygon id="hArrBot" points="405,280 415,280 410,280" fill="#28a745" />
+                <text id="hText" x="420" y="285" font-family="Arial" font-weight="bold" font-size="18" fill="#28a745">h = 0</text>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Slider កែប្រែសម្ពាធឧស្ម័ន -->
+    <div class="slider-container">
+        បញ្ជាប្តូរសម្ពាធឧស្ម័ន (ច្របាច់បាឡុង): <span id="sliderValue" style="color: #d32f2f;">1.00</span> atm
+        <input type="range" id="pressureSlider" min="0.80" max="1.20" value="1.00" step="0.01">
+        <div style="font-size: 14px; font-weight: normal; color: #666; margin-top: 5px;">* អូសទៅស្តាំដើម្បីច្របាច់ (បង្កើនសម្ពាធ P<sub>B</sub>) | អូសទៅឆ្វេងដើម្បីលែង (បន្ថយសម្ពាធ P<sub>B</sub>)</div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Grid) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">សម្ពាធឧស្ម័ន (P<sub>B</sub>)<br><span id="livePgas">1.00 atm</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">កម្ពស់ខុសគ្នា (h)<br><span id="liveDeltaP">0 mm</span></div>
+        <div class="data-box" style="border-top: 4px solid #007bff;">សម្ពាធបរិយាកាស (P<sub>at</sub>)<br><span id="livePa">1.00 atm</span></div>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box">
+        <div class="note-box">
+            💡 <strong>គោលការណ៍គ្រឹះ៖</strong> ចំណុចដែលស្ថិតនៅលើអង្គធាតុរាវតែមួយ និងនៅលើប្លង់ដេកតែមួយ គឺមានសម្ពាធស្មើគ្នា <strong>(<span class="math-italic">P<sub>B</sub> = P<sub>C</sub></span>)</strong>។
+        </div>
+        
+        <h3>ការពន្យល់រូបមន្តម៉ាណូម៉ែត្រ</h3>
+        <ul>
+            <li><strong>ចំណុច <i>B</i> ៖</strong> ស្ថិតនៅផ្ទៃប៉ះរវាងឧស្ម័ន និងអង្គធាតុរាវ ដូច្នេះសម្ពាធត្រង់ <i>B</i> គឺស្មើនឹងសម្ពាធឧស្ម័ន (<span class="math-italic">P<sub>B</sub></span>)។</li>
+            <li><strong>ចំណុច <i>C</i> ៖</strong> ស្ថិតនៅលើប្លង់ដេកតែមួយនឹង <i>B</i> ប៉ុន្តែនៅបំពង់ខាងស្តាំ។ សម្ពាធត្រង់ <i>C</i> ទទួលរងសម្ពាធបរិយាកាស (<span class="math-italic">P<sub>at</sub></span>) បូករួមនឹងសម្ពាធនៃទម្ងន់សសរអង្គធាតុរាវដែលមានកម្ពស់ <i>h</i> គឺ (<span class="math-italic">&rho; g h</span>)។</li>
+        </ul>
+
+        <p>ដោយសារ <span class="math-italic">P<sub>B</sub> = P<sub>C</sub></span> យើងទាញបានរូបមន្ត៖</p>
+        <p style="text-align: center; font-size: 22px;"><strong><span class="math-bold">P<sub>B</sub> = P<sub>at</sub> + &rho;gh</span></strong></p>
+        
+        <p><em>សម្គាល់៖</em> បើសិនសម្ពាធឧស្ម័នតូចជាងសម្ពាធបរិយាកាស (<span class="math-italic">P<sub>B</sub> &lt; P<sub>at</sub></span>) នោះនីវ៉ូទឹកនៅខាង <i>A</i> (ស្តាំ) នឹងទាបជាងនីវ៉ូទឹកនៅខាង <i>B</i> (ឆ្វេង) វិញម្តង! លោកគ្រូអាចសាកល្បងអូសរបារទៅខាងឆ្វេងដើម្បីមើលបាតុភូតនេះ។</p>
+    </div>
+</div>
+
+<script>
+    var pAt = 1.00; // atm
+    var pGas = 1.00; // atm
+    
+    // UI Elements
+    var slider = document.getElementById('pressureSlider');
+    var sliderVal = document.getElementById('sliderValue');
+    
+    var liqL = document.getElementById('liqL');
+    var liqR = document.getElementById('liqR');
+    var liqTopL = document.getElementById('liqTopL');
+    var liqTopR = document.getElementById('liqTopR');
+    
+    var gasBulb = document.getElementById('gasBulb');
+    var handLeft = document.getElementById('handLeft');
+    var handRight = document.getElementById('handRight');
+    
+    var ptB = document.getElementById('ptB');
+    var ptA = document.getElementById('ptA');
+    var ptC = document.getElementById('ptC');
+    var lblB = document.getElementById('lblB');
+    var lblA = document.getElementById('lblA');
+    var lblC = document.getElementById('lblC');
+    
+    var dashA = document.getElementById('dashA');
+    var dashC = document.getElementById('dashC');
+    var hLine = document.getElementById('hLine');
+    var hArrTop = document.getElementById('hArrTop');
+    var hArrBot = document.getElementById('hArrBot');
+    var hText = document.getElementById('hText');
+    
+    var livePgas = document.getElementById('livePgas');
+    var liveDeltaP = document.getElementById('liveDeltaP');
+
+    function updateSimulation(val) {
+        pGas = val;
+        
+        // ---------------------------------------------------------
+        // 1. រំកិលដៃច្របាច់ និង ទំហំបាឡុង (Gas Bulb Squeezing)
+        // ---------------------------------------------------------
+        // កាលណា pGas កើនពី 1.0 ទៅ 1.2 នោះកាំ (r) រួញពី 60px ទៅ 48px
+        // កាលណា pGas ថយពី 1.0 ទៅ 0.8 នោះកាំ (r) រីកពី 60px ទៅ 72px
+        var newR = 60 - (pGas - 1.0) * 60; 
+        gasBulb.setAttribute('r', newR);
+        
+        // ទីតាំងដៃឆ្វេង-ស្តាំ រត់តាមទំហំកាំបាឡុង
+        handLeft.setAttribute('x', 130 - newR + 5); 
+        handRight.setAttribute('x', 130 + newR - 5);
+        
+        // ---------------------------------------------------------
+        // 2. ការប្រែប្រួលនីវ៉ូអង្គធាតុរាវក្នុងបំពង់
+        // ---------------------------------------------------------
+        var deltaP_atm = pGas - pAt;
+        var h_mm = deltaP_atm * 760;
+        var pxOffset = (h_mm / 76) * 60;
+        
+        var yBase = 280; 
+        var yL = yBase + (pxOffset / 2);
+        var yR = yBase - (pxOffset / 2);
+
+        liqL.setAttribute("y", yL);
+        liqL.setAttribute("height", 400 - yL);
+        liqTopL.setAttribute("y", yL - 3);
+
+        liqR.setAttribute("y", yR);
+        liqR.setAttribute("height", 400 - yR);
+        liqTopR.setAttribute("y", yR - 3);
+
+        ptB.setAttribute("cy", yL);
+        lblB.setAttribute("y", yL + 6);
+        
+        ptA.setAttribute("cy", yR);
+        lblA.setAttribute("y", yR - 10);
+
+        // កំណត់ទីតាំងចំណុច C និងបន្ទាត់ h
+        if (pGas === pAt || pGas - pAt === Math.abs(pGas - pAt)) {
+            ptC.setAttribute("cx", 350);
+            ptC.setAttribute("cy", yL);
+            lblC.setAttribute("x", 370);
+            lblC.setAttribute("y", yL + 6);
+
+            dashA.setAttribute("y1", yR); dashA.setAttribute("y2", yR);
+            dashC.setAttribute("y1", yL); dashC.setAttribute("y2", yL);
+
+            hLine.setAttribute("y1", yR); hLine.setAttribute("y2", yL);
+            hArrTop.setAttribute("points", "405," + (yR+10) + " 415," + (yR+10) + " 410," + yR);
+            hArrBot.setAttribute("points", "405," + (yL-10) + " 415," + (yL-10) + " 410," + yL);
+            hText.setAttribute("y", (yR + yL)/2 + 5);
+        } else {
+            ptC.setAttribute("cx", 250);
+            ptC.setAttribute("cy", yR);
+            lblC.setAttribute("x", 210);
+            lblC.setAttribute("y", yR + 6);
+
+            dashA.setAttribute("y1", yR); dashA.setAttribute("y2", yR);
+            dashC.setAttribute("y1", yL); dashC.setAttribute("y2", yL);
+
+            hLine.setAttribute("y1", yL); hLine.setAttribute("y2", yR);
+            hArrTop.setAttribute("points", "405," + (yL+10) + " 415," + (yL+10) + " 410," + yL);
+            hArrBot.setAttribute("points", "405," + (yR-10) + " 415," + (yR-10) + " 410," + yR);
+            hText.setAttribute("y", (yR + yL)/2 + 5);
+        }
+
+        // អាប់ដេតទិន្នន័យលេខ
+        sliderVal.innerText = pGas.toFixed(2);
+        livePgas.innerText = pGas.toFixed(2) + " atm";
+        liveDeltaP.innerText = Math.round(Math.abs(h_mm)) + " mm";
+        hText.textContent = "h = " + Math.round(Math.abs(h_mm)) + " mm";
+    }
+
+    slider.addEventListener('input', function() {
+        updateSimulation(parseFloat(this.value));
+    });
+
+    // ហៅអនុគមន៍ដើម្បីកំណត់ទីតាំងដើម
+    updateSimulation(1.00);
+</script>
+
+</body>
+</html>

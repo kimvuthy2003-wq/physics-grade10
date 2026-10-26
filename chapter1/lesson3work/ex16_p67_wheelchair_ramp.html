@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ១៦ - ទ្រឹស្តីបទកម្មន្ត និងថាមពលស៊ីនេទិច</title>
+    
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        /* ប្រធានលំហាត់ */
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 18px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        /* ផ្ទាំងបម្រាប់ */
+        .info-panel {
+            background: #fff; padding: 15px; border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;
+            display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px;
+            border-left: 6px solid #28a745; font-size: 16px;
+        }
+        .info-panel strong { color: #d32f2f; font-size: 18px; }
+
+        /* ផ្ទាំង Simulator */
+        .sim-area {
+            position: relative; width: 100%; height: 450px;
+            background: #e0f7fa; border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); margin: 0 auto 20px;
+        }
+
+        /* SVG Environment */
+        svg { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+        .incline { fill: #8d6e63; stroke: #5d4037; stroke-width: 3; }
+        .ground-line { stroke: #5d4037; stroke-width: 4; }
+        
+        /* គំនូសមុំ និង រង្វាស់ */
+        .measure-line { stroke: #1976d2; stroke-width: 2; stroke-dasharray: 5,5; }
+        .measure-text { fill: #1976d2; font-weight: bold; font-size: 16px; font-family: Arial; }
+        .angle-arc { fill: rgba(211, 47, 47, 0.2); stroke: #d32f2f; stroke-width: 2; }
+        .angle-text { fill: #d32f2f; font-weight: bold; font-size: 18px; }
+
+        /* តួអង្គរទេះរុញ */
+        .wheelchair {
+            position: absolute; width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 3;
+        }
+        
+        /* គម្របសម្រាប់បង្វិលតែរូបមនុស្ស មិនបង្វិលកម្លាំងវ៉ិចទ័រ */
+        .emoji-wrapper {
+            font-size: 50px;
+            transform-origin: center bottom;
+            /* នឹងត្រូវបានបង្វិលដោយ JS ឱ្យស្របនឹងប្លង់ទេរ */
+        }
+
+        /* ព្រួញកម្លាំង F (ទិសដេកជានិច្ច) */
+        .force-arrow-F {
+            position: absolute; top: 15px; left: 45px;
+            width: 70px; height: 4px; background: #28a745; z-index: 2;
+        }
+        .force-arrow-F::after {
+            content: ''; position: absolute; right: -8px; top: -6px;
+            border-left: 10px solid #28a745; border-top: 8px solid transparent; border-bottom: 8px solid transparent;
+        }
+        .force-label-F { position: absolute; right: -25px; top: -12px; color: #28a745; font-weight: bold; font-size: 18px; text-shadow: 1px 1px 0 #fff; }
+
+        /* ព្រួញទម្ងន់ P (ឈរចុះក្រោមជានិច្ច) */
+        .force-arrow-P {
+            position: absolute; top: 30px; left: 30px;
+            width: 4px; height: 65px; background: #6f42c1; z-index: 2;
+        }
+        .force-arrow-P::after {
+            content: ''; position: absolute; bottom: -8px; left: -6px;
+            border-top: 10px solid #6f42c1; border-left: 8px solid transparent; border-right: 8px solid transparent;
+        }
+        .force-label-P { position: absolute; left: 10px; bottom: -20px; color: #6f42c1; font-weight: bold; font-size: 18px; text-shadow: 1px 1px 0 #fff; }
+
+        /* ផ្ទាំងទិន្នន័យ (Grid) - ៦ ប្រអប់ */
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 16px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 24px; display: block; margin-top: 5px;
+        }
+        
+        #liveDist { color: #555; }
+        #liveVel { color: #007bff; }
+        #liveWf { color: #28a745; }
+        #liveWp { color: #6f42c1; }
+        #liveWnet { color: #e65100; }
+        #liveK { color: #d32f2f; }
+
+        /* ប៊ូតុងបញ្ជា */
+        .controls {
+            margin-top: 20px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; align-items: center;
+        }
+        button {
+            padding: 12px 20px; font-size: 17px; font-weight: bold;
+            font-family: inherit; cursor: pointer; border: none;
+            border-radius: 6px; color: white; transition: 0.2s; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        .btn-play { background: #007bff; } .btn-play:hover { background: #0056b3; }
+        .btn-pause { background: #ffc107; color: black; } .btn-pause:hover { background: #e0a800; }
+        #resetBtn { background: #6c757d; } #resetBtn:hover { background: #5a6268; }
+        #solutionBtn { background: #17a2b8; } #solutionBtn:hover { background: #138496; }
+
+        .status-bar {
+            margin-top: 20px; font-size: 18px; font-weight: bold;
+            background: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #333; border-left: 6px solid #ccc;
+        }
+
+        /* ដំណោះស្រាយ */
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        .solution-box ul { padding-left: 30px; margin-top: 5px; }
+        .highlight { font-weight: bold; color: #d32f2f; font-size: 19px; }
+        .note-box { background: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin-bottom: 15px; border-radius: 4px; color: #664d03;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>លំហាត់ទី ១៦ ៖</strong> ជនពិការជើងម្នាក់អង្គុយលើរទេះរុញដែលកង់រទេះរមៀលដោយគ្មានកកិត និងចាត់ទុកថាចលនារបស់ប្រព័ន្ធជនពិការ-រទេះ ជាចលនារំកិល។ គាត់ជិះឡើងតាមប្លង់ទេរដែលមានមុំ $30.0^\circ$ ធៀបនឹងខ្សែដេក។ ម៉ាសសរុបរបស់គាត់ និងរទេះគឺ $85.0 \text{ kg}$។ គាត់ផ្លាស់ទីបានប្រវែង $3.50 \text{ m}$ តាមបណ្តោយប្លង់ទេរដោយបញ្ចេញកម្លាំងថេរ $600 \text{ N}$ តាមទិសដេក។ ល្បឿនរបស់ជនពិការនៅបាតប្លង់ទេរគឺ $2.00 \text{ m/s}$។ ដោយប្រើទ្រឹស្តីបទកម្មន្ត-ថាមពល ចូរកំណត់ល្បឿនរបស់គាត់នៅកំពូលនៃប្លង់ទេរ។
+    </div>
+
+    <div class="info-panel">
+        <div>ម៉ាសសរុប ($m$) = <strong>85.0 kg</strong></div>
+        <div>កម្លាំងផ្ដេក ($F$) = <strong>600 N</strong></div>
+        <div>ល្បឿនដើម ($v_0$) = <strong>2.00 m/s</strong></div>
+        <div>ចម្ងាយឡើង ($d$) = <strong>3.50 m</strong></div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator -->
+    <div class="sim-area">
+        <svg id="svgEnv">
+            <!-- គំនូសដី -->
+            <line x1="0" y1="400" x2="1000" y2="400" class="ground-line" />
+            
+            <!-- ប្លង់ទេរ នឹងត្រូវបានគូរដោយ JS (ដោយប្រើមុំមើលឃើញទាបជាងមុន) -->
+            <polygon id="inclinePoly" class="incline" points="" />
+            
+            <!-- គូសមុំ 30 ដឺក្រេ (គូសឱ្យច្បាស់នៅជ្រុងខាងក្រោម) -->
+            <path id="angleArc" class="angle-arc" d="" />
+            <text id="angleText" class="angle-text">30&deg;</text>
+            
+            <!-- បន្ទាត់វាស់ចម្ងាយ d = 3.5m ស្របនឹងប្លង់ទេរ -->
+            <line id="dLine" class="measure-line" x1="" y1="" x2="" y2="" />
+            <text id="dText" class="measure-text">d = 3.50 m</text>
+        </svg>
+        
+        <!-- តួអង្គជនពិការ -->
+        <div class="wheelchair" id="wheelchair">
+            <!-- រូបមនុស្សត្រូវបានបង្វិល និងត្រឡប់ផ្ទៃមុខដោយ JS -->
+            <div class="emoji-wrapper" id="emojiWrapper">
+                <div style="transform: scaleX(-1);">👨‍🦽</div>
+            </div>
+            
+            <!-- វ៉ិចទ័រកម្លាំង ដែលមិនបង្វិលតាមរូបមនុស្សឡើយ -->
+            <div class="force-arrow-F" title="កម្លាំងទាញផ្ដេក 600N"><div class="force-label-F">F</div></div>
+            <div class="force-arrow-P" title="កម្លាំងទម្ងន់ mg"><div class="force-label-P">P</div></div>
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងប្រៀបធៀបទិន្នន័យ (៦ ប្រអប់) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #555;">ចម្ងាយផ្លាស់ទី ($d$)<br><span id="liveDist">0.00 m</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">កម្មន្តកម្លាំង $\vec{F}$ ($W_F$)<br><span id="liveWf">0.0 J</span></div>
+        <div class="data-box" style="border-top: 4px solid #6f42c1;">កម្មន្តទម្ងន់ $\vec{P}$ ($W_P$)<br><span id="liveWp">0.0 J</span></div>
+        <div class="data-box" style="border-top: 4px solid #e65100;">កម្មន្តសរុប ($W_{net}$)<br><span id="liveWnet">0.0 J</span></div>
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">ថាមពលស៊ីនេទិច ($K$)<br><span id="liveK">170.0 J</span></div>
+        <div class="data-box" style="border-top: 4px solid #007bff;">ល្បឿនខណៈ ($v$)<br><span id="liveVel">2.00 m/s</span></div>
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="controls">
+        <button class="btn-play" id="playBtn">▶ ចាប់ផ្តើមធ្វើចលនា</button>
+        <button class="btn-pause" id="pauseBtn">⏸ ផ្អាក</button>
+        <button id="resetBtn">🔄 ត្រឡប់ដើម</button>
+        <button id="solutionBtn">📖 បង្ហាញដំណោះស្រាយ</button>
+    </div>
+
+    <div class="status-bar" id="statusText">រង់ចាំចាប់ផ្តើម...</div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div id="solutionBox" class="solution-box" style="display: none;">
+        <div class="note-box">
+            💡 <strong>ចំណុចគួរកត់សម្គាល់៖</strong> កម្លាំង $600\text{ N}$ គឺមានទិសដៅ <strong>ផ្ដេក (Horizontal)</strong> ស្របនឹងដី វាមិនស្របនឹងប្លង់ទេរទេ។ ដូច្នេះមុំរវាងកម្លាំង $\vec{F}$ និងបម្លាស់ទី $\vec{d}$ គឺ $30^\circ$។
+        </div>
+        
+        <h3>ដំណោះស្រាយ</h3>
+        <p><strong>បម្រាប់៖</strong> $m = 85.0 \text{ kg}$, $v_0 = 2.00 \text{ m/s}$, $F = 600 \text{ N}$ (ផ្ដេក), $d = 3.50 \text{ m}$, $\theta = 30^\circ$, $g = 9.8 \text{ m/s}^2$។</p>
+        
+        <p><strong>១. គណនាកម្មន្តសរុប ($W_{net}$) ៖</strong></p>
+        <ul>
+            <li>កម្មន្តនៃកម្លាំងទាញ $\vec{F}$ ៖ $W_F = F \cdot d \cdot \cos(30^\circ) = 600 \times 3.50 \times \frac{\sqrt{3}}{2} = 1818.65 \text{ J}$</li>
+            <li>កម្មន្តនៃទម្ងន់ $\vec{P}$ ៖ $W_P = -mgh = -mg(d \cdot \sin 30^\circ) = -85.0 \times 9.8 \times 3.50 \times 0.5 = -1457.75 \text{ J}$</li>
+            <li>កម្មន្តសរុប ៖ $W_{net} = W_F + W_P = 1818.65 - 1457.75 = \mathbf{360.9 \text{ J}}$</li>
+        </ul>
+
+        <p><strong>២. អនុវត្តទ្រឹស្តីបទកម្មន្ត-ថាមពលស៊ីនេទិច ៖</strong></p>
+        <ul>
+            <li>$W_{net} = \Delta K = K_f - K_0 \implies W_{net} = \frac{1}{2}mv^2 - \frac{1}{2}mv_0^2$</li>
+            <li>$360.9 = \frac{1}{2}(85.0)v^2 - \frac{1}{2}(85.0)(2.00)^2$</li>
+            <li>$360.9 = 42.5 v^2 - 170 \implies 42.5 v^2 = 530.9$</li>
+            <li>$v^2 = \frac{530.9}{42.5} \approx 12.49 \implies v = \sqrt{12.49} \approx$ <span class="highlight">3.53 m/s</span></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // -----------------------------------------------------
+    // ១. រៀបចំ UI និងគូសប្លង់ទេរ
+    // -----------------------------------------------------
+    const m = 85.0; // kg
+    const g = 9.8; 
+    const thetaMath = 30.0; // សម្រាប់គណនាលេខ
+    const thetaRadMath = thetaMath * Math.PI / 180;
+    
+    // បន្ថយមុំគំនូរ (Visual) ឱ្យមើលទៅទាបសមរម្យសម្រាប់រទេះរុញ (ឧ. 20 ដឺក្រេ)
+    const drawThetaDeg = 20.0; 
+    const drawThetaRad = drawThetaDeg * Math.PI / 180;
+
+    const F = 600; // N
+    const v0 = 2.00; // m/s
+    const targetD = 3.50; // m
+
+    // Scale SVG (ធ្វើឱ្យទំហំមើលទៅធំច្បាស់)
+    const scalePx = 180; 
+    
+    // ចំណុចចាប់ផ្តើមនៃប្លង់ទេរ (ខាងឆ្វេងបាត)
+    const startX = 50;
+    const startY = 400; // ផ្ទៃដី
+    
+    // គណនាប្រវែងនិងកម្ពស់ (ផ្អែកលើមុំគំនូរ drawThetaRad)
+    const L_px = targetD * scalePx; 
+    const dx_px = L_px * Math.cos(drawThetaRad); 
+    const dy_px = L_px * Math.sin(drawThetaRad); 
+    
+    const endX = startX + dx_px;
+    const endY = startY - dy_px;
+
+    // គូសប្លង់ទេរ
+    const inclinePoly = document.getElementById('inclinePoly');
+    inclinePoly.setAttribute("points", `${startX},${startY} ${endX},${endY} ${endX},${startY}`);
+    
+    // គូសមុំ 30 ដឺក្រេ (នៅបាតខាងឆ្វេង)
+    const arcRadius = 100;
+    const arcEndX = startX + arcRadius * Math.cos(drawThetaRad);
+    const arcEndY = startY - arcRadius * Math.sin(drawThetaRad);
+    
+    const angleArc = document.getElementById('angleArc');
+    // Path: Move to (startX+R, startY), Arc to (arcEndX, arcEndY), Line to (startX, startY)
+    angleArc.setAttribute("d", `M ${startX + arcRadius} ${startY} A ${arcRadius} ${arcRadius} 0 0 0 ${arcEndX} ${arcEndY} L ${startX} ${startY} Z`);
+    
+    // ដាក់អក្សរ 30° នៅកណ្តាលមុំ
+    const angleText = document.getElementById('angleText');
+    const textRad = drawThetaRad / 2;
+    angleText.setAttribute("x", startX + (arcRadius - 35) * Math.cos(textRad));
+    angleText.setAttribute("y", startY - (arcRadius - 40) * Math.sin(textRad));
+
+    // គូសបន្ទាត់វាស់ចម្ងាយ d ស្របនឹងប្លង់ទេរ (អណ្តែតពីលើបន្តិច)
+    const dLine = document.getElementById('dLine');
+    const offset = 40; 
+    dLine.setAttribute("x1", startX - offset*Math.sin(drawThetaRad));
+    dLine.setAttribute("y1", startY - offset*Math.cos(drawThetaRad));
+    dLine.setAttribute("x2", endX - offset*Math.sin(drawThetaRad));
+    dLine.setAttribute("y2", endY - offset*Math.cos(drawThetaRad));
+    
+    const dText = document.getElementById('dText');
+    // ដាក់អក្សរ d = 3.5m នៅកណ្តាលបន្ទាត់
+    dText.setAttribute("x", startX + dx_px/2 - 50 - offset*Math.sin(drawThetaRad));
+    dText.setAttribute("y", startY - dy_px/2 - 10 - offset*Math.cos(drawThetaRad));
+
+    // បង្វិលតួអង្គមនុស្សឱ្យស្របតាមប្លង់ទេរ
+    const emojiWrapper = document.getElementById('emojiWrapper');
+    emojiWrapper.style.transform = `rotate(-${drawThetaDeg}deg)`;
+
+    // -----------------------------------------------------
+    // ២. ទិន្នន័យរូបវិទ្យា និង Animation (ប្រើប្រាស់ thetaMath = 30°)
+    // -----------------------------------------------------
+    let animationFrameId;
+    let isRunning = false;
+    let time = 0;
+    let dist = 0; 
+    let vel = v0; 
+    let lastTimeMs = 0;
+
+    // គណនាសំទុះ a តាមច្បាប់ទី២ញូតុន ដោយប្រើមុំពិតប្រាកដ 30°
+    const F_net = F * Math.cos(thetaRadMath) - m * g * Math.sin(thetaRadMath);
+    const a = F_net / m; 
+    const K0 = 0.5 * m * v0 * v0;
+
+    // UI Elements
+    const wheelchairEl = document.getElementById('wheelchair');
+    const distDisp = document.getElementById('liveDist');
+    const velDisp = document.getElementById('liveVel');
+    const wfDisp = document.getElementById('liveWf');
+    const wpDisp = document.getElementById('liveWp');
+    const wnetDisp = document.getElementById('liveWnet');
+    const kDisp = document.getElementById('liveK');
+    const statusText = document.getElementById('statusText');
+
+    function updateUI() {
+        // គណនាកម្មន្តដោយប្រើមុំ 30° ពិតប្រាកដ
+        let Wf = F * dist * Math.cos(thetaRadMath);
+        let Wp = -m * g * dist * Math.sin(thetaRadMath);
+        let Wnet = Wf + Wp;
+        let K = K0 + Wnet; 
+        
+        vel = Math.sqrt((2 * K) / m);
+
+        distDisp.innerText = dist.toFixed(2) + " m";
+        velDisp.innerText = vel.toFixed(2) + " m/s";
+        wfDisp.innerText = Wf.toFixed(1) + " J";
+        wpDisp.innerText = Wp.toFixed(1) + " J";
+        wnetDisp.innerText = Wnet.toFixed(1) + " J";
+        kDisp.innerText = K.toFixed(1) + " J";
+
+        // ទីតាំង Rooding (គណនាតាមមុំគំនូរ Visual 20°)
+        let px = startX + (dist/targetD) * dx_px;
+        let py = startY - (dist/targetD) * dy_px;
+        
+        wheelchairEl.style.transform = `translate(${px - 30}px, ${py - 60}px)`;
+    }
+
+    function animate(timestamp) {
+        if (!lastTimeMs) lastTimeMs = timestamp;
+        let dt = (timestamp - lastTimeMs) / 1000;
+        if (dt > 0.1) dt = 0.1;
+        lastTimeMs = timestamp;
+
+        if (isRunning) {
+            time += dt;
+            
+            // ចលនាស្ទុះស្មើ
+            dist = (v0 * time) + (0.5 * a * time * time);
+
+            if (dist >= targetD) {
+                dist = targetD;
+                isRunning = false;
+                updateUI(); 
+                
+                statusText.innerHTML = `✅ ដល់គោលដៅ! តាមទ្រឹស្តីបទ $W_{net} = \\Delta K$ ល្បឿនចុងក្រោយគឺ $\\mathbf{v = 3.53 \\text{ m/s}}$។`;
+                statusText.style.borderLeftColor = "#28a745";
+                MathJax.typesetPromise([statusText]);
+            } else {
+                updateUI();
+                animationFrameId = requestAnimationFrame(animate);
+            }
+        }
+    }
+
+    document.getElementById('playBtn').addEventListener('click', () => {
+        if (!isRunning && dist < targetD) {
+            isRunning = true;
+            lastTimeMs = performance.now();
+            statusText.innerText = "កំពុងធ្វើចលនា... សង្កេតមើលកម្លាំងផ្ដេក F ពណ៌បៃតង!";
+            statusText.style.borderLeftColor = "#007bff";
+            animationFrameId = requestAnimationFrame(animate);
+        }
+    });
+
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+        isRunning = false;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        statusText.innerText = "⏸ បានផ្អាក។";
+        statusText.style.borderLeftColor = "#ffc107";
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        isRunning = false;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        time = 0; dist = 0; vel = v0;
+        updateUI();
+        statusText.innerText = "រង់ចាំចាប់ផ្តើម...";
+        statusText.style.borderLeftColor = "#ccc";
+    });
+
+    document.getElementById('solutionBtn').addEventListener('click', () => {
+        const box = document.getElementById('solutionBox');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // កំណត់ទីតាំងដើម
+    updateUI();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី១៤៖ ទែម៉ូម៉ែត្រឧស្ម័នមាឌថេរ</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 500px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 600px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .btn-group {
+            display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;
+        }
+        button {
+            color: white; padding: 12px 24px; font-size: 18px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s, transform 0.1s;
+        }
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: scale(0.98); }
+        
+        .btn-triple { background: #0288d1; }
+        .btn-freeze { background: #546e7a; }
+        .btn-sol { background: #17a2b8; width: 100%; margin-bottom: 20px; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 15px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 10px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>១៤.</strong> សម្ពាធនៃឧស្ម័នមួយត្រង់ចំណុចរួមមួយនៃភាពទាំងបីរបស់ទឹក (Triple point of water) គឺ $1.35 \text{ atm}$ ។ ប្រសិនបើមាឌរបស់វាថេរ តើសម្ពាធរបស់វានឹងមានតម្លៃប៉ុន្មានត្រង់សីតុណ្ហភាពដែល $\text{CO}_2$ កក? គេឱ្យ $\text{CO}_2$ កកនៅសីតុណ្ហភាព $-78.0^\circ\text{C}$ ។
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-triple" id="btnTriple">🌡️ ត្រាំក្នុងចំណុចទ្រីបនៃទឹក (0.01 °C)</button>
+        <button class="btn-freeze" id="btnFreeze">❄️ ត្រាំក្នុង CO₂ កក (-78.0 °C)</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="flaskGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+                    <stop offset="50%" stop-color="#e0f7fa" stop-opacity="0.5"/>
+                    <stop offset="100%" stop-color="#b2ebf2" stop-opacity="0.8"/>
+                </linearGradient>
+                <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#cfd8dc"/>
+                    <stop offset="50%" stop-color="#ffffff"/>
+                    <stop offset="100%" stop-color="#90a4ae"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ធុងត្រាំ (Bath Tank) -->
+            <rect x="250" y="180" width="300" height="230" rx="10" fill="#eceff1" stroke="#90a4ae" stroke-width="4"/>
+            
+            <!-- ទឹកចំណុចទ្រីប (Triple Point Water Layer) -->
+            <path id="bathWater" d="M 252 200 L 548 200 L 548 408 A 8 8 0 0 1 540 408 L 260 408 A 8 8 0 0 1 252 408 Z" fill="#90caf9" opacity="1"/>
+            
+            <!-- CO2 កក (Dry Ice Layer) -->
+            <path id="bathDryIce" d="M 252 200 L 548 200 L 548 408 A 8 8 0 0 1 540 408 L 260 408 A 8 8 0 0 1 252 408 Z" fill="#b0bec5" opacity="0"/>
+            
+            <!-- អក្សរបង្ហាញលើធុង -->
+            <text id="lblBathStatus" x="400" y="440" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="20" fill="#1565c0">Triple Point Water (273.16 K)</text>
+
+            <!-- ទែម៉ូម៉ែត្រក្នុងធុង -->
+            <rect x="270" y="120" width="16" height="270" rx="8" fill="#ffffff" stroke="#78909c" stroke-width="2"/>
+            <circle cx="278" cy="380" r="14" fill="#d32f2f"/>
+            <rect id="thermoLiq" x="274" y="180" width="8" height="200" fill="#d32f2f"/>
+            <line x1="260" y1="180" x2="270" y2="180" stroke="#111" stroke-width="2"/>
+            <text x="240" y="185" font-family="Arial" font-weight="bold" font-size="14" fill="#111">0°C</text>
+
+            <!-- ដបឧស្ម័ន (Constant Volume Flask) -->
+            <path d="M 380 90 L 380 200 A 80 80 0 1 0 420 200 L 420 90 Z" fill="url(#flaskGrad)" stroke="#546e7a" stroke-width="4"/>
+            <line x1="375" y1="90" x2="425" y2="90" stroke="#546e7a" stroke-width="6"/>
+
+            <!-- ភាគល្អិតឧស្ម័ន (Gas Particles) -->
+            <!-- នឹងត្រូវបានបង្កើតដោយ JavaScript -->
+            <g id="gasParticles"></g>
+
+            <!-- នាឡិកាវាស់សម្ពាធ (Pressure Gauge) -->
+            <g transform="translate(400, 70)">
+                <circle cx="0" cy="0" r="45" fill="url(#metalGrad)" stroke="#37474f" stroke-width="4"/>
+                <circle cx="0" cy="0" r="35" fill="#ffffff" stroke="#ccc" stroke-width="1"/>
+                
+                <!-- គំនូស -->
+                <line x1="0" y1="-35" x2="0" y2="-28" stroke="#111" stroke-width="2" transform="rotate(-60)"/>
+                <line x1="0" y1="-35" x2="0" y2="-28" stroke="#111" stroke-width="2" transform="rotate(0)"/>
+                <line x1="0" y1="-35" x2="0" y2="-28" stroke="#111" stroke-width="2" transform="rotate(60)"/>
+                
+                <!-- ទ្រនិច -->
+                <line id="gaugeNeedle" x1="0" y1="0" x2="0" y2="-25" stroke="#d32f2f" stroke-width="3" stroke-linecap="round" transform="rotate(0)"/>
+                <circle cx="0" cy="0" r="4" fill="#111"/>
+
+                <text id="lblGaugeP" x="0" y="25" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#d32f2f">1.35 atm</text>
+            </g>
+
+            <!-- សញ្ញាព្រួញពន្យល់ -->
+            <line x1="450" y1="70" x2="520" y2="70" stroke="#0288d1" stroke-width="2" stroke-dasharray="4,2"/>
+            <text x="530" y="75" font-family="Arial" font-weight="bold" font-size="18" fill="#0288d1">Pressure Gauge</text>
+
+            <line x1="480" y1="280" x2="520" y2="280" stroke="#0288d1" stroke-width="2" stroke-dasharray="4,2"/>
+            <text x="530" y="285" font-family="Arial" font-weight="bold" font-size="18" fill="#0288d1">Constant Volume (V)</text>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជាតម្លៃទូទៅ -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            សម្ពាធនៅចំណុចទ្រីប $P_1$ (atm):<br>
+            <span id="valP1" class="number-display" style="color: #d32f2f; font-size:24px;">1.35 atm</span>
+            <input type="range" id="sliderP1" min="0.50" max="3.00" value="1.35" step="0.05">
+        </div>
+        <div class="slider-box">
+            សីតុណ្ហភាពគោលដៅ $t_2$ (°C):<br>
+            <span id="valT2" class="number-display" style="color: #0288d1; font-size:24px;">-78.0 °C</span>
+            <input type="range" id="sliderT2" min="-200.0" max="100.0" value="-78.0" step="1.0">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #0288d1;">សីតុណ្ហភាពបច្ចុប្បន្ន $T$<br><span id="dashT" class="number-display">273.16 K</span></div>
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">សម្ពាធបច្ចុប្បន្ន $P$<br><span id="dashP" class="number-display">1.350 atm</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">ស្ថានភាព<br><span id="dashStatus" style="font-family: 'Siemreap', sans-serif; color: #28a745;">ចំណុចទ្រីបទឹក</span></div>
+    </div>
+
+    <button id="btnToggleSolution" class="btn-sol">📖 បង្ហាញ / លាក់ដំណោះស្រាយ</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box">
+            💡 <strong>ច្បាប់ហ្គេលុយសាក់ (Gay-Lussac's Law)៖</strong> នៅពេលមាឌឧស្ម័នថេរ សម្ពាធសមាមាត្រផ្ទាល់ទៅនឹងសីតុណ្ហភាពដាច់ខាត (គិតជាកែលវិន)។
+        </div>
+
+        <h3>ដំណោះស្រាយលំហាត់គំរូ</h3>
+        
+        <div id="mathContainer">
+            <p><strong>១. បំប្លែងសីតុណ្ហភាពទៅជាកែលវិន (K)៖</strong></p>
+            <ul>
+                <li>ចំណុចទ្រីបនៃទឹក៖ $T_1 = 273.16 \text{ K}$</li>
+                <li id="mathValT2">ចំណុចកក $\text{CO}_2$៖ $T_2 = -78.0 + 273.15 = 195.15 \text{ K}$</li>
+            </ul>
+
+            <p><strong>២. អនុវត្តរូបមន្តច្បាប់ហ្គេលុយសាក់៖</strong></p>
+            <div id="mathLine1">$$ \frac{P_1}{T_1} = \frac{P_2}{T_2} \implies P_2 = \frac{P_1 \cdot T_2}{T_1} $$</div>
+            
+            <p><strong>៣. ជំនួសលេខចូល៖</strong></p>
+            <div id="mathLine2">$$ P_2 = \frac{1.35 \times 195.15}{273.16} $$</div>
+            <div id="mathLine3" style="color: #d32f2f; font-weight: bold; text-align: center; margin-top: 15px; font-size: 1.2em;">
+                $$ P_2 = 0.964 \text{ atm} $$
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > -->
+<script>
+    var sP1 = document.getElementById('sliderP1');
+    var sT2 = document.getElementById('sliderT2');
+    
+    var btnTriple = document.getElementById('btnTriple');
+    var btnFreeze = document.getElementById('btnFreeze');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    var bathWater = document.getElementById('bathWater');
+    var bathDryIce = document.getElementById('bathDryIce');
+    var lblBathStatus = document.getElementById('lblBathStatus');
+    var thermoLiq = document.getElementById('thermoLiq');
+    var gaugeNeedle = document.getElementById('gaugeNeedle');
+    var lblGaugeP = document.getElementById('lblGaugeP');
+
+    var T_triple = 273.16; // K
+    
+    var targetState = 0; // 0 = Triple Point, 1 = Freezing CO2
+    var currentState = 0; 
+    var isAnimating = false;
+
+    // --- ការបង្កើតភាគល្អិតឧស្ម័នដោយសុវត្ថិភាព ---
+    var gasParticlesGroup = document.getElementById('gasParticles');
+    var particles = [];
+    var numParticles = 40;
+    
+    // បង្កើតរង្វិលជុំ (Loop) ដោយមិនប្រើសញ្ញា
+    var i = 0;
+    while(i !== numParticles) {
+        var circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("r", "3");
+        circle.setAttribute("fill", "#ff9800");
+        gasParticlesGroup.appendChild(circle);
+
+        particles.push({
+            el: circle,
+            offset1: Math.random() * 100,
+            offset2: Math.random() * 100,
+            r_amp: Math.random() * 55 + 5, // រង្វង់ចលនាចន្លោះ 5 ទៅ 60px ពីកណ្តាល
+            speedScale: Math.random() * 0.6 + 0.4
+        });
+        i++;
+    }
+
+    var time = 0;
+    var current_T_K = T_triple; // សីតុណ្ហភាពបច្ចុប្បន្នសម្រាប់កំណត់ល្បឿន
+
+    function animateGas() {
+        // ល្បឿនប្រែប្រួលតាមសីតុណ្ហភាពដាច់ខាត T (ចលនាប្រោន)
+        var speedFactor = current_T_K / T_triple; 
+        time += 0.05 * speedFactor; 
+
+        var j = 0;
+        while(j !== particles.length) {
+            var p = particles[j];
+            // ប្រើអនុគមន៍ស៊ីនុស និងកូស៊ីនុស ដើម្បីបង្កើតចលនាហោះហើរ (Swarm/Lissajous) 
+            // ដោយមិនចាំបាច់មានលក្ខខណ្ឌប៉ះជញ្ជាំង
+            var cx = 400 + Math.sin(time * p.speedScale + p.offset1) * p.r_amp * Math.cos(p.offset2);
+            var cy = 280 + Math.cos(time * p.speedScale + p.offset1) * p.r_amp * Math.sin(p.offset2);
+            
+            p.el.setAttribute("cx", cx);
+            p.el.setAttribute("cy", cy);
+            j++;
+        }
+        requestAnimationFrame(animateGas);
+    }
+    // ចាប់ផ្តើមចលនាឧស្ម័ន
+    animateGas();
+    // ------------------------------------------
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    btnTriple.addEventListener('click', function() {
+        targetState = 0;
+        if (isAnimating === false) {
+            isAnimating = true;
+            transitionLoop();
+        }
+    });
+
+    btnFreeze.addEventListener('click', function() {
+        targetState = 1;
+        if (isAnimating === false) {
+            isAnimating = true;
+            transitionLoop();
+        }
+    });
+
+    function transitionLoop() {
+        var diff = targetState - currentState;
+        // ប្រើ Math.abs ដើម្បីចៀសវាងសញ្ញា
+        if (Math.abs(diff).toFixed(3) !== "0.000") {
+            currentState += diff * 0.05; 
+            drawGraphics();
+            requestAnimationFrame(transitionLoop);
+        } else {
+            currentState = targetState;
+            drawGraphics();
+            isAnimating = false;
+        }
+    }
+
+    function drawGraphics() {
+        var p1 = parseFloat(sP1.value);
+        var t2_c = parseFloat(sT2.value);
+        var t2_k = t2_c + 273.15;
+        
+        var p2 = p1 * (t2_k / T_triple);
+
+        // Interpolate values based on currentState (0 to 1)
+        var currentP = p1 + (p2 - p1) * currentState;
+        current_T_K = T_triple + (t2_k - T_triple) * currentState;
+        var current_T_C = current_T_K - 273.15;
+
+        // អាប់ដេត Gauge
+        // សន្មត 0 atm = -120 deg, 3 atm = 120 deg (Range 240 deg)
+        var angle = -120 + (currentP / 3) * 240;
+        gaugeNeedle.setAttribute("transform", "rotate(" + angle + ")");
+        lblGaugeP.textContent = currentP.toFixed(3) + " atm";
+
+        // អាប់ដេតទែម៉ូម៉ែត្រ
+        // 0°C នៅ y=180, -100°C នៅ y=360 -> 1°C = -1.8px
+        var thermoY = 180 - (current_T_C * 1.8);
+        // រក្សាកុំឱ្យហួសបំពង់ដោយប្រើ Math.max/min
+        var safeThermoY = Math.max(125, Math.min(thermoY, 380));
+        thermoLiq.setAttribute("y", safeThermoY);
+        thermoLiq.setAttribute("height", 380 - safeThermoY);
+
+        // ពណ៌ធុង និងអក្សរ
+        bathWater.setAttribute("opacity", 1 - currentState);
+        bathDryIce.setAttribute("opacity", currentState);
+
+        if (currentState === 0) {
+            lblBathStatus.textContent = "Triple Point Water (273.16 K)";
+            lblBathStatus.setAttribute("fill", "#1565c0");
+            document.getElementById('dashStatus').innerText = "ចំណុចទ្រីបទឹក";
+            document.getElementById('dashStatus').style.color = "#0288d1";
+        } else if (currentState === 1) {
+            lblBathStatus.textContent = "Freezing CO₂ (" + t2_k.toFixed(2) + " K)";
+            lblBathStatus.setAttribute("fill", "#455a64");
+            document.getElementById('dashStatus').innerText = "ចំណុចកក CO₂";
+            document.getElementById('dashStatus').style.color = "#546e7a";
+        } else {
+            lblBathStatus.textContent = "កំពុងប្រែប្រួលសីតុណ្ហភាព...";
+            lblBathStatus.setAttribute("fill", "#00796b");
+            document.getElementById('dashStatus').innerText = "កំពុងប្រែប្រួល...";
+            document.getElementById('dashStatus').style.color = "#00796b";
+        }
+
+        // អាប់ដេត Dashboard
+        document.getElementById('dashT').innerText = current_T_K.toFixed(2) + " K";
+        document.getElementById('dashP').innerText = currentP.toFixed(3) + " atm";
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var p1 = parseFloat(sP1.value);
+        var t2_c = parseFloat(sT2.value);
+        var t2_k = t2_c + 273.15;
+        var p2 = p1 * (t2_k / T_triple);
+
+        document.getElementById('valP1').innerText = p1.toFixed(2) + " atm";
+        document.getElementById('valT2').innerText = t2_c.toFixed(1) + " °C";
+
+        // បើកំពុងស្ងៀម អាប់ដេតក្រាហ្វិក
+        if (isAnimating === false) {
+            drawGraphics();
+        }
+
+        // Update MathJax Safely (No Khmer in Math)
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            document.getElementById('mathValT2').innerHTML = "ចំណុចគោលដៅ៖ \\( T_2 = " + t2_c.toFixed(1) + " + 273.15 = " + t2_k.toFixed(2) + " \\text{ K} \\)";
+            document.getElementById('mathLine2').innerHTML = "$$ P_2 = \\frac{" + p1.toFixed(2) + " \\times " + t2_k.toFixed(2) + "}{273.16} $$";
+            document.getElementById('mathLine3').innerHTML = "$$ P_2 = " + p2.toFixed(3) + " \\text{ atm} $$";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    sP1.addEventListener('input', updatePhysics);
+    sT2.addEventListener('input', updatePhysics);
+
+    // Initial run
+    updatePhysics();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី១០៖ សម្ពាធ និងទម្ងន់ទឹកក្នុងពូក (3D Interactive)</title>
+
+    <!-- បញ្ចូលបណ្ណាល័យ Three.js សម្រាប់គូរ 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- បញ្ចូលមុខងារ OrbitControls សម្រាប់ទាញបង្វិលរូប 3D -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        /* ទីតាំងសម្រាប់បង្ហាញ 3D */
+        #canvas-container {
+            width: 100%; height: 450px; background: #e0f7fa;
+            border: 2px solid #ced4da; border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            cursor: grab; overflow: hidden; position: relative;
+        }
+        #canvas-container:active { cursor: grabbing; }
+
+        .instruction-badge {
+            position: absolute; top: 15px; left: 15px;
+            background: rgba(0, 0, 0, 0.6); color: white;
+            padding: 8px 12px; border-radius: 5px; font-size: 14px;
+            pointer-events: none; z-index: 10;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 16px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 24px; display: block; margin-top: 8px;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>លំហាត់ទី១០៖</strong> ពូកបណ្តែតទឹករាងប្រលេពីប៉ែតកែងមួយមានបណ្តោយប្រវែង ២.០០ ម៉ែត្រ ទទឹងប្រវែង ១.៨០ ម៉ែត្រ និងកម្ពស់ប្រវែង ៣០.០ សង់ទីម៉ែត្រ។<br>
+        ក. កំណត់ទម្ងន់ទឹកដែលស្ថិតក្នុងពូកនេះ។<br>
+        ខ. កំណត់សម្ពាធដែលទឹកបញ្ចេញលើផ្ទៃបាតក្រោមនៃពូក។ (យក $\rho = 1000 \text{ kg/m}^3, g = 9.80 \text{ m/s}^2$)
+    </div>
+
+    <!-- ផ្ទាំង 3D Interactive -->
+    <div id="canvas-container">
+        <div class="instruction-badge">👆 អូសបង្វិល / Zoom ដើម្បីមើលជុំវិញ</div>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            បណ្តោយ ($L$): <span id="valL" style="color:#28a745;">2.00</span> m
+            <input type="range" id="sliderL" min="1.00" max="4.00" value="2.00" step="0.10">
+        </div>
+        <div class="slider-box">
+            ទទឹង ($w$): <span id="valW" style="color:#6f42c1;">1.80</span> m
+            <input type="range" id="sliderW" min="1.00" max="3.00" value="1.80" step="0.10">
+        </div>
+        <div class="slider-box">
+            កម្ពស់ទឹក ($h$): <span id="valH" style="color:#d32f2f;">30.0</span> cm
+            <input type="range" id="sliderH" min="10.0" max="50.0" value="30.0" step="1.0">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Grid) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #007bff;">មាឌទឹកសរុប ($V$)<br><span id="liveV">1.08 m&sup3;</span></div>
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">ទម្ងន់ទឹក ($W$)<br><span id="liveWeight">10,584 N</span></div>
+        <div class="data-box" style="border-top: 4px solid #e65100;">សម្ពាធបាតពូក ($P$)<br><span id="liveP">2,940 Pa</span></div>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ (ប្រើប្រាស់ MathJax) -->
+    <div class="solution-box">
+        <h3>ដំណោះស្រាយលំហាត់គំរូ</h3>
+        
+        <div id="mathContainer">
+            <p><strong>ក. គណនាទម្ងន់ទឹកក្នុងពូក ($W$) ៖</strong></p>
+            <div id="mathLine1">$$ V = L \times w \times h = 2.00 \times 1.80 \times 0.30 = 1.08 \text{ m}^3 $$</div>
+            <div id="mathLine2">$$ W = \rho \cdot V \cdot g = 1000 \times 1.08 \times 9.80 = 10584 \text{ N} $$</div>
+            <div style="text-align: center; color: #d32f2f; font-weight: bold;">ឬ $W \approx 1.06 \times 10^4 \text{ N}$</div>
+
+            <hr style="border: 0; border-top: 2px dashed #cbd5e0; margin: 20px 0;">
+
+            <p><strong>ខ. គណនាសម្ពាធលើបាតពូក ($P$) ៖</strong></p>
+            <div id="mathLine3">$$ P = \rho \cdot g \cdot h = 1000 \times 9.80 \times 0.30 = 2940 \text{ Pa} $$</div>
+            <div style="text-align: center; color: #e65100; font-weight: bold;">ឬ $P \approx 2.94 \times 10^3 \text{ Pa}$</div>
+        </div>
+    </div>
+</div>
+
+<!-- កូដ JavaScript សុវត្ថិភាពខ្ពស់ គ្មានប្រើសញ្ញា < ឬ > ដើម្បីការពារ Error -->
+<script>
+    // ការរៀបចំ Three.js Scene
+    var container = document.getElementById('canvas-container');
+    var scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xe0f7fa); // ផ្ទៃខាងក្រោយពណ៌ផ្ទៃមេឃស្រាល
+
+    // រៀបចំ Camera
+    var camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(3, 2, 4);
+
+    // រៀបចំ Renderer
+    var renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    // រៀបចំ OrbitControls (សម្រាប់អូសបង្វិល និង Zoom)
+    var controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxDistance = 10;
+    controls.minDistance = 2;
+
+    // រៀបចំពន្លឺ (Lighting) ឱ្យមើលទៅភ្លឺរលោង
+    var ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    
+    var dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(5, 10, 7);
+    scene.add(dirLight);
+
+    var dirLight2 = new THREE.DirectionalLight(0xe0f2f1, 0.4);
+    dirLight2.position.set(-5, 5, -5);
+    scene.add(dirLight2);
+
+    // បង្កើត ក្រឡាចត្រង្គបាត (Grid Helper)
+    var gridHelper = new THREE.GridHelper(10, 20, 0x888888, 0xcccccc);
+    scene.add(gridHelper);
+
+    // បង្កើត ពូក (Mattress 3D Model)
+    var geometry = new THREE.BoxGeometry(1, 1, 1);
+    
+    // ពណ៌ និងសាច់សម្ភារៈពូក (ពណ៌ទឹកសមុទ្រ ភ្លឺរលោងចំណាំងផ្លាត)
+    var material = new THREE.MeshPhysicalMaterial({
+        color: 0x0288d1,
+        transparent: true,
+        opacity: 0.85,
+        metalness: 0.1,
+        roughness: 0.1,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.1
+    });
+    
+    var mattress = new THREE.Mesh(geometry, material);
+    scene.add(mattress);
+
+    // បង្កើតខ្សែបន្ទាត់គែមពូកឱ្យមើលទៅកាន់តែច្បាស់ (Wireframe Edges)
+    var edges = new THREE.EdgesGeometry(geometry);
+    var lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+    var mattressEdges = new THREE.LineSegments(edges, lineMaterial);
+    mattress.add(mattressEdges);
+
+    // អថេរ UI
+    var sL = document.getElementById('sliderL');
+    var sW = document.getElementById('sliderW');
+    var sH = document.getElementById('sliderH');
+
+    var vL = document.getElementById('valL');
+    var vW = document.getElementById('valW');
+    var vH = document.getElementById('valH');
+
+    var rho = 1000;
+    var g = 9.80;
+
+    var mathTimeout;
+
+    // អនុគមន៍សម្រាប់អាប់ដេតរូបវិទ្យា និង រូប 3D
+    function updatePhysics() {
+        var L = parseFloat(sL.value);
+        var w = parseFloat(sW.value);
+        var h_cm = parseFloat(sH.value);
+        var h_m = h_cm / 100;
+
+        // អាប់ដេតលេខរង្វាស់
+        vL.innerText = L.toFixed(2);
+        vW.innerText = w.toFixed(2);
+        vH.innerText = h_cm.toFixed(1);
+
+        // អាប់ដេតរាងពូក 3D
+        mattress.scale.set(L, h_m, w);
+        mattress.position.y = h_m / 2; // រុញឱ្យនៅស្អិតលើក្រឡាចត្រង្គបាតជានិច្ច
+
+        // គណនារូបវិទ្យា
+        var volume = L * w * h_m;
+        var weight = rho * volume * g;
+        var pressure = rho * g * h_m;
+
+        document.getElementById('liveV').innerHTML = volume.toFixed(2) + " m&sup3;";
+        document.getElementById('liveWeight').innerText = Math.round(weight).toLocaleString() + " N";
+        document.getElementById('liveP').innerText = Math.round(pressure).toLocaleString() + " Pa";
+
+        // អាប់ដេត MathJax ដោយប្រើសុវត្ថិភាព
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            document.getElementById('mathLine1').innerText = "$$ V = L \\times w \\times h = " + L.toFixed(2) + " \\times " + w.toFixed(2) + " \\times " + h_m.toFixed(2) + " = " + volume.toFixed(2) + " \\text{ m}^3 $$";
+            document.getElementById('mathLine2').innerText = "$$ W = \\rho \\cdot V \\cdot g = 1000 \\times " + volume.toFixed(2) + " \\times 9.80 = " + Math.round(weight) + " \\text{ N} $$";
+            document.getElementById('mathLine3').innerText = "$$ P = \\rho \\cdot g \\cdot h = 1000 \\times 9.80 \\times " + h_m.toFixed(2) + " = " + Math.round(pressure) + " \\text{ Pa} $$";
+            
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    // អនុគមន៍លោតគំនូរ 3D ជាប្រចាំ
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update(); // ចាំបាច់សម្រាប់ Damping
+        renderer.render(scene, camera);
+    }
+
+    // ចាប់យកព្រឹត្តិការណ៍ពេលអូស Slider
+    sL.addEventListener('input', updatePhysics);
+    sW.addEventListener('input', updatePhysics);
+    sH.addEventListener('input', updatePhysics);
+
+    // រក្សាទំហំ 3D ឱ្យត្រូវពេលបង្វិលអេក្រង់ទូរស័ព្ទ (Resize handling)
+    window.addEventListener('resize', function() {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    // ចាប់ផ្តើមដំណើរការ
+    updatePhysics();
+    animate();
+</script>
+
+</body>
+</html>

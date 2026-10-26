@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulator: ចលនាចោលឡើងលើនៃបាល់ពីរ</title>
+    
+    <!-- ភ្ជាប់ Font ប៉ុណ្ណោះ គ្មានប្រព័ន្ធជំនួយផ្សេងដែលធ្វើឱ្យធ្ងន់ទេ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ================= ការរចនាទូទៅ (Pure CSS) ================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Battambang', 'Khmer OS Battambang', Arial, sans-serif;
+            background-color: #f1f5f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 25px 15px;
+            color: #1e293b;
+        }
+        h2 { 
+            color: #0f172a; 
+            text-align: center; 
+            font-size: 24px;
+            margin-bottom: 25px; 
+        }
+
+        /* ---------------- ប្រអប់ប្រធានលំហាត់ ---------------- */
+        .problem-box {
+            background-color: #ffffff;
+            border-left: 6px solid #2563eb;
+            padding: 20px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            max-width: 850px;
+            width: 100%;
+            margin-bottom: 30px;
+            line-height: 1.8;
+            font-size: 16px;
+            border-top: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .problem-title {
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 10px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ---------------- រចនា Simulator ---------------- */
+        .main-container {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 850px;
+            width: 100%;
+        }
+        canvas {
+            background-color: #e0f2fe; /* ពណ៌ផ្ទៃមេឃស្រាល */
+            border: 2px solid #94a3b8;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            max-width: 100%;
+        }
+        
+        .control-panel {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* ---------------- ប៊ូតុងបញ្ជា ---------------- */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            flex: 1;
+            padding: 12px 5px;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: inherit;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button:active { transform: scale(0.96); }
+        
+        #startBtn { background-color: #22c55e; color: white; }
+        #startBtn:hover { background-color: #16a34a; }
+        
+        #pauseBtn { background-color: #f59e0b; color: white; }
+        #pauseBtn:hover { background-color: #d97706; }
+
+        #resetBtn { background-color: #ef4444; color: white; }
+        #resetBtn:hover { background-color: #dc2626; }
+        
+        /* ---------------- ប្រអប់ទិន្នន័យ ---------------- */
+        .data-box {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 15px;
+            font-size: 16px;
+            line-height: 1.8;
+            border-top: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .data-row { margin-bottom: 5px; }
+        .val-t { color: #334155; font-weight: bold; }
+        .ball1-text { color: #2563eb; font-weight: bold; }
+        .ball2-text { color: #dc2626; font-weight: bold; }
+        
+        #resultBox {
+            display: none;
+            border-left-color: #9333ea;
+            background-color: #faf5ff;
+        }
+        .highlight { color: #9333ea; font-weight: bold; font-size: 18px; display: block; margin-bottom: 5px; }
+        
+        .notes {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: auto;
+            line-height: 1.6;
+            padding-top: 15px;
+            border-top: 1px dashed #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>ពិសោធន៍៖ បាតុភូតបាល់ពីរចោលឡើងលើរួចជួបគ្នា</h2>
+    
+    <!-- ប្រអប់ប្រធានលំហាត់ -->
+    <div class="problem-box">
+        <div class="problem-title">📝 ប្រធានលំហាត់ទី១២៖</div>
+        ១២. គេចោលបាល់មួយត្រង់ឡើងលើដោយល្បឿនដើម 20 m/s ។ ពីរវិនាទីក្រោយមក គេចោលបាល់មួយទៀតត្រង់ឡើងលើក្នុងលក្ខខណ្ឌដូចបាល់ទី 1 ដែរ ។ តើបាល់ទី 2 នោះនឹងជួបគ្នាជាមួយបាល់ទី 1 នៅខណៈណា និងនៅទីតាំងណា? គេសន្មតចលនារបស់បាល់ជាចលនាទម្លាក់សេរី និងយក g ≈ 9.80 m/s² ។
+    </div>
+
+    <div class="main-container">
+        <!-- ផ្ទាំង Canvas -->
+        <canvas id="simCanvas" width="400" height="500"></canvas>
+
+        <!-- ផ្ទាំងបញ្ជា -->
+        <div class="control-panel">
+            <div class="btn-group">
+                <button id="startBtn" onclick="startSim()">▶ ចាប់ផ្តើម</button>
+                <button id="pauseBtn" onclick="pauseSim()">⏸ ផ្អាក</button>
+                <button id="resetBtn" onclick="resetSim()">↻ សារដើម</button>
+            </div>
+
+            <div class="data-box">
+                <div class="data-row val-t">⏱ ពេលវេលា t: <span id="timeDisplay">0.00</span> s</div>
+                <div class="data-row ball1-text">🔵 កម្ពស់បាល់ទី១ y₁: <span id="y1Display">0.00</span> m</div>
+                <div class="data-row ball2-text">🔴 កម្ពស់បាល់ទី២ y₂: <span id="y2Display">0.00</span> m</div>
+            </div>
+
+            <!-- ប្រអប់បង្ហាញលទ្ធផលពេលជួបគ្នា -->
+            <div class="data-box" id="resultBox">
+                <span class="highlight">💥 បាល់ទាំងពីរជួបគ្នា!</span>
+                នៅខណៈ t = <span id="meetTime" style="font-weight:bold; color:#1e293b;"></span> s<br>
+                ត្រង់កម្ពស់ y = <span id="meetHeight" style="font-weight:bold; color:#1e293b;"></span> m
+            </div>
+            
+            <div class="notes">
+                * សម្គាល់៖ ល្បឿន v₀ = 20 m/s , g = 9.8 m/s² ។<br>
+                * បាល់ទី១ ចេញដំណើរនៅខណៈពេល t = 0<br>
+                * បាល់ទី២ ចេញដំណើរនៅខណៈ t = 2s ក្រោយបាល់ទី១ ។
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================= ផ្នែកដំណើរការ Simulator =================
+        const canvas = document.getElementById("simCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // អថេររូបវិទ្យា
+        const v0 = 20; 
+        const g = 9.8; 
+        const tDelay = 2; 
+        const scale = 15; // 1 ម៉ែត្រ = 15 pixels
+        const groundY = 450; // កម្រិតដី
+
+        let t = 0;
+        let y1 = 0;
+        let y2 = 0;
+        let simRunning = false;
+        let animationId;
+        let meetRecorded = false;
+
+        // អនុគមន៍គូរផ្ទៃខាងក្រោយ
+        function drawEnvironment() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // គូរផ្ទៃដី
+            ctx.fillStyle = "#22c55e"; 
+            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+            
+            // គូរបន្ទាត់កម្ពស់ (ក្រិត)
+            ctx.fillStyle = "#cbd5e1";
+            ctx.font = "12px Arial";
+            for(let i = 0; i <= 25; i += 5) {
+                let py = groundY - i * scale;
+                ctx.beginPath();
+                ctx.moveTo(0, py);
+                ctx.lineTo(canvas.width, py);
+                ctx.strokeStyle = "rgba(148, 163, 184, 0.3)";
+                ctx.stroke();
+                ctx.fillStyle = "#64748b";
+                ctx.fillText(i + " m", 10, py - 5);
+            }
+        }
+
+        // អនុគមន៍គួរបាល់
+        function drawBall(x, yPosition, color) {
+            let pixelY = groundY - yPosition * scale;
+            ctx.beginPath();
+            ctx.arc(x, pixelY, 12, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = "#1e293b";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+
+        // អនុគមន៍គណនាចលនារៀងរាល់ Frame
+        function update() {
+            if (!simRunning) return;
+
+            // បង្កើនពេលវេលា
+            t += 0.02; 
+
+            // គណនាកម្ពស់បាល់ទី១
+            if (t > 0) {
+                y1 = v0 * t - 0.5 * g * t * t;
+                if (y1 < 0) y1 = 0; 
+            }
+
+            // គណនាកម្ពស់បាល់ទី២
+            if (t >= tDelay) {
+                let t2 = t - tDelay;
+                y2 = v0 * t2 - 0.5 * g * t2 * t2;
+                if (y2 < 0) y2 = 0; 
+            }
+
+            // បង្ហាញទិន្នន័យលើអេក្រង់
+            document.getElementById("timeDisplay").innerText = t.toFixed(2);
+            document.getElementById("y1Display").innerText = y1.toFixed(2);
+            document.getElementById("y2Display").innerText = (t >= tDelay ? y2.toFixed(2) : "0.00");
+
+            drawEnvironment();
+            drawBall(150, y1, "#3b82f6"); // បាល់ទី១ ពណ៌ខៀវ
+            drawBall(250, y2, "#ef4444"); // បាល់ទី២ ពណ៌ក្រហម
+
+            // ពិនិត្យពេលជួបគ្នា (ខុសគ្នា < 0.2m)
+            if (t > tDelay && Math.abs(y1 - y2) < 0.2 && !meetRecorded && y1 > 0) {
+                meetRecorded = true;
+                document.getElementById("resultBox").style.display = "block";
+                document.getElementById("meetTime").innerText = t.toFixed(2);
+                document.getElementById("meetHeight").innerText = y1.toFixed(2);
+                
+                // បង្ហាញសញ្ញាផ្ទុះនៅចន្លោះបាល់
+                let meetPixelY = groundY - y1 * scale;
+                ctx.font = "28px Arial";
+                ctx.fillText("💥", 185, meetPixelY + 10);
+                
+                simRunning = false; 
+                return; 
+            }
+
+            // បញ្ឈប់ស៊ីមូឡាទ័រទាំងស្រុងពេលបាល់ធ្លាក់ដល់ដីទាំងពីរ
+            if (y1 <= 0 && y2 <= 0 && t > tDelay + 0.5) {
+                simRunning = false;
+                return;
+            }
+
+            animationId = requestAnimationFrame(update);
+        }
+
+        // អនុគមន៍សម្រាប់ប៊ូតុង
+        function startSim() {
+            if (!simRunning) {
+                if (y1 <= 0 && t > 0) {
+                    resetSim(); // បើដល់ដីហើយ ចុច Start វានឹងលោតសារដើមដោយស្វ័យប្រវត្តិ
+                }
+                simRunning = true;
+                update();
+            }
+        }
+
+        function pauseSim() {
+            simRunning = false;
+        }
+
+        function resetSim() {
+            simRunning = false;
+            cancelAnimationFrame(animationId);
+            t = 0;
+            y1 = 0;
+            y2 = 0;
+            meetRecorded = false;
+            document.getElementById("timeDisplay").innerText = "0.00";
+            document.getElementById("y1Display").innerText = "0.00";
+            document.getElementById("y2Display").innerText = "0.00";
+            document.getElementById("resultBox").style.display = "none";
+            
+            drawEnvironment();
+            drawBall(150, 0, "#3b82f6");
+            drawBall(250, 0, "#ef4444");
+        }
+
+        // ចាប់ផ្តើមគូរផ្ទៃនៅពេលកូដដើរ
+        document.addEventListener("DOMContentLoaded", function() {
+            resetSim();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី១០៖ ការគណនាសីតុណ្ហភាពតាមទែម៉ូម៉ែត្រ</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 500px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .btn-group {
+            display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;
+        }
+        button {
+            background: #007bff; color: white; padding: 12px 24px; font-size: 18px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s;
+        }
+        button:hover { filter: brightness(1.1); }
+        .btn-case1 { background: #28a745; }
+        .btn-sol { background: #17a2b8; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 16px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 26px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>១០.</strong> គេដាក់ទែម៉ូម៉ែត្របារតមួយត្រាំក្នុងទឹកកកដែលចាប់ផ្ដើមរលាយ ពេលនោះបារតលូតបានប្រវែង $25 \text{ mm}$ ។ នៅពេលគេដាក់ទែម៉ូម៉ែត្រចូលក្នុងទឹកកំពុងពុះដែលចំហាយបិទក្រោមសម្ពាធ $1 \text{ atm}$ ពេលនោះបារតលូតបានប្រវែង $200 \text{ mm}$ ។ គណនាសីតុណ្ហភាព $t$ នៅពេលដែលបារតមានប្រវែង $95 \text{ mm}$ ។
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-case1" id="btnCase1">🎯 កំណត់តម្លៃតាមលំហាត់ ($\ell_t = 95 \text{ mm}$)</button>
+        <button class="btn-sol" id="btnToggleSolution">📖 បង្ហាញ / លាក់ដំណោះស្រាយ</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 900 450" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="mercuryGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#b71c1c"/>
+                    <stop offset="50%" stop-color="#f44336"/>
+                    <stop offset="100%" stop-color="#d32f2f"/>
+                </linearGradient>
+                <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#e0f7fa" stop-opacity="0.8"/>
+                    <stop offset="50%" stop-color="#ffffff" stop-opacity="0.9"/>
+                    <stop offset="100%" stop-color="#b2ebf2" stop-opacity="0.8"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ផ្នែកទី១៖ ទែម៉ូម៉ែត្រ (Thermometer) -->
+            <g transform="translate(150, 0)">
+                <!-- បំពង់កញ្ចក់ -->
+                <rect x="-12" y="30" width="24" height="360" rx="12" fill="url(#glassGrad)" stroke="#78909c" stroke-width="2"/>
+                <circle cx="0" cy="400" r="20" fill="url(#glassGrad)" stroke="#78909c" stroke-width="2"/>
+                
+                <!-- ទឹកបារតក្នុងក្បាល និងបំពង់ -->
+                <circle cx="0" cy="400" r="16" fill="url(#mercuryGrad)"/>
+                <!-- បំពង់បារត - កម្ពស់ប្រែប្រួលតាម JS -->
+                <rect id="liqRect" x="-6" y="185" width="12" height="200" rx="6" fill="url(#mercuryGrad)"/>
+                
+                <!-- គំនូសមាត្រដ្ឋាន 0 និង 100 ថេរ -->
+                <line id="markL0" x1="-20" y1="355" x2="20" y2="355" stroke="#111" stroke-width="2"/>
+                <text id="lblL0" x="30" y="360" font-family="Arial" font-weight="bold" font-size="16" fill="#111">l_0</text>
+
+                <line id="markL100" x1="-20" y1="180" x2="20" y2="180" stroke="#111" stroke-width="2"/>
+                <text id="lblL100" x="30" y="185" font-family="Arial" font-weight="bold" font-size="16" fill="#111">l_100</text>
+
+                <!-- គំនូសប្រវែងបច្ចុប្បន្ន l_t -->
+                <line id="markLt" x1="-25" y1="285" x2="0" y2="285" stroke="#d32f2f" stroke-width="2" stroke-dasharray="4,2"/>
+                <text id="lblLt" x="-65" y="290" font-family="Arial" font-weight="bold" font-size="16" fill="#d32f2f">l_t</text>
+            </g>
+
+            <!-- ផ្នែកទី២៖ ក្រាហ្វ (Graph l vs t) -->
+            <g transform="translate(450, 0)">
+                <!-- អ័ក្ស X (t in °C) -->
+                <!-- Origin (0,0) នៅ y=380, x=100 -->
+                <line x1="20" y1="380" x2="420" y2="380" stroke="#333" stroke-width="3"/>
+                <polygon points="420,380 410,375 410,385" fill="#333"/>
+                <text x="400" y="365" font-family="Arial" font-weight="bold" font-size="16">t (°C)</text>
+
+                <!-- អ័ក្ស Y (l in mm) -->
+                <line x1="100" y1="410" x2="100" y2="30" stroke="#333" stroke-width="3"/>
+                <polygon points="100,30 95,40 105,40" fill="#333"/>
+                <text x="80" y="20" font-family="Arial" font-weight="bold" font-size="16">l_t (mm)</text>
+
+                <!-- គំនូស Grid 0°C និង 100°C -->
+                <line x1="100" y1="375" x2="100" y2="385" stroke="#111" stroke-width="2"/>
+                <text x="85" y="405" font-family="Arial" font-size="14">0</text>
+                
+                <!-- 100°C ស្មើនឹង 250px ពី 0 -> x = 350 -->
+                <line x1="350" y1="375" x2="350" y2="385" stroke="#111" stroke-width="2"/>
+                <text x="335" y="405" font-family="Arial" font-size="14">100</text>
+
+                <!-- បន្ទាត់ក្រាហ្វ (Linear Line) -->
+                <line id="graphLine" x1="50" y1="367.5" x2="400" y2="80" stroke="#1565c0" stroke-width="3"/>
+
+                <!-- ចំណុចសំខាន់ៗ (Points) -->
+                <!-- P0 (0, l_0) -->
+                <circle id="ptL0" cx="100" cy="355" r="5" fill="#111"/>
+                <line id="guideL0" x1="100" y1="355" x2="90" y2="355" stroke="#111" stroke-width="1" stroke-dasharray="4,2"/>
+                <text id="graphLblL0" x="50" y="360" font-family="Arial" font-size="14">l_0</text>
+
+                <!-- P100 (100, l_100) -->
+                <circle id="ptL100" cx="350" cy="180" r="5" fill="#111"/>
+                <line id="guideL100_Y" x1="350" y1="180" x2="100" y2="180" stroke="#111" stroke-width="1" stroke-dasharray="4,2"/>
+                <line id="guideL100_X" x1="350" y1="180" x2="350" y2="380" stroke="#111" stroke-width="1" stroke-dasharray="4,2"/>
+                <text id="graphLblL100" x="45" y="185" font-family="Arial" font-size="14">l_100</text>
+
+                <!-- ចំណុច (t, l_t) បច្ចុប្បន្ន -->
+                <circle id="ptLt" cx="200" cy="285" r="7" fill="#d32f2f"/>
+                <line id="guideLt_Y" x1="200" y1="285" x2="100" y2="285" stroke="#d32f2f" stroke-width="2" stroke-dasharray="5,3"/>
+                <line id="guideLt_X" x1="200" y1="285" x2="200" y2="380" stroke="#d32f2f" stroke-width="2" stroke-dasharray="5,3"/>
+                <text id="graphLblLt" x="65" y="290" font-family="Arial" font-weight="bold" font-size="14" fill="#d32f2f">l_t</text>
+                <text id="graphLblT" x="190" y="405" font-family="Arial" font-weight="bold" font-size="16" fill="#d32f2f">t</text>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            ប្រវែងនៅ $0^\circ\text{C}$ ($\ell_0$) ជា mm:<br>
+            <span id="valL0" class="number-display" style="color: #546e7a;">25 mm</span>
+            <input type="range" id="sliderL0" min="0" max="80" value="25" step="1">
+        </div>
+        <div class="slider-box">
+            ប្រវែងនៅ $100^\circ\text{C}$ ($\ell_{100}$) ជា mm:<br>
+            <span id="valL100" class="number-display" style="color: #0288d1;">200 mm</span>
+            <input type="range" id="sliderL100" min="150" max="300" value="200" step="1">
+        </div>
+        <div class="slider-box">
+            ប្រវែងបច្ចុប្បន្ន ($\ell_t$) ជា mm:<br>
+            <span id="valLt" class="number-display" style="color: #d32f2f;">95 mm</span>
+            <input type="range" id="sliderLt" min="0" max="300" value="95" step="1">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Grid) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">ប្រវែង $\ell_t$ បច្ចុប្បន្ន<br><span id="dashLt" class="number-display">95 mm</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">សីតុណ្ហភាពគណនាបាន $t$<br><span id="dashT" class="number-display">40.0 °C</span></div>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <h3>ដំណោះស្រាយលំហាត់</h3>
+        
+        <div id="mathContainer">
+            <p><strong>រូបមន្តគណនាសីតុណ្ហភាព៖</strong></p>
+            <div id="mathFormula">$$ t = \frac{\ell_t - \ell_0}{\ell_{100} - \ell_0} \times 100^\circ\text{C} $$</div>
+            
+            <p><strong>ជំនួសលេខចូល៖</strong></p>
+            <ul>
+                <li id="mathL0">\( \ell_0 = 25 \text{ mm} \)</li>
+                <li id="mathL100">\( \ell_{100} = 200 \text{ mm} \)</li>
+                <li id="mathLt">\( \ell_t = 95 \text{ mm} \)</li>
+            </ul>
+            
+            <div id="mathCalc">$$ t = \frac{95 - 25}{200 - 25} \times 100^\circ\text{C} $$</div>
+            <div id="mathResult" style="color: #d32f2f; font-weight: bold; text-align: center; margin-top: 15px; font-size: 1.2em;">
+                $$ t = \frac{70}{175} \times 100^\circ\text{C} = 0.4 \times 100^\circ\text{C} = 40^\circ\text{C} $$
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > -->
+<script>
+    var sL0 = document.getElementById('sliderL0');
+    var sL100 = document.getElementById('sliderL100');
+    var sLt = document.getElementById('sliderLt');
+
+    var btnCase1 = document.getElementById('btnCase1');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    // SVG Elements
+    var liqRect = document.getElementById('liqRect');
+    var markL0 = document.getElementById('markL0');
+    var markL100 = document.getElementById('markL100');
+    var markLt = document.getElementById('markLt');
+    var lblL0 = document.getElementById('lblL0');
+    var lblL100 = document.getElementById('lblL100');
+    var lblLt = document.getElementById('lblLt');
+
+    // Graph Elements
+    var graphLine = document.getElementById('graphLine');
+    var ptL0 = document.getElementById('ptL0');
+    var ptL100 = document.getElementById('ptL100');
+    var ptLt = document.getElementById('ptLt');
+    var guideL0 = document.getElementById('guideL0');
+    var guideL100_Y = document.getElementById('guideL100_Y');
+    var guideL100_X = document.getElementById('guideL100_X');
+    var guideLt_Y = document.getElementById('guideLt_Y');
+    var guideLt_X = document.getElementById('guideLt_X');
+    
+    var graphLblL0 = document.getElementById('graphLblL0');
+    var graphLblL100 = document.getElementById('graphLblL100');
+    var graphLblLt = document.getElementById('graphLblLt');
+    var graphLblT = document.getElementById('graphLblT');
+
+    // Scales (1mm = 1px)
+    var yBase = 380; // កូអរដោណេ Y សម្រាប់ 0mm
+    var xOrigin = 100; // កូអរដោណេ X សម្រាប់ 0°C
+    var pxPerDeg = 2.5; // 1°C = 2.5px លើអ័ក្ស X (100°C = 250px -> x=350)
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    btnCase1.addEventListener('click', function() {
+        sL0.value = 25;
+        sL100.value = 200;
+        sLt.value = 95;
+        updatePhysics();
+    });
+
+    var mathTimeout;
+    function updatePhysics() {
+        var l0 = parseFloat(sL0.value);
+        var l100 = parseFloat(sL100.value);
+        var lt = parseFloat(sLt.value);
+
+        // ការពារករណីភាគបែងសូន្យ
+        var dl = l100 - l0;
+        if (dl === 0) {
+            dl = 0.1;
+        }
+
+        // គណនាសីតុណ្ហភាព t
+        var t = ((lt - l0) / dl) * 100;
+
+        // Update UI Text
+        document.getElementById('valL0').innerText = l0 + " mm";
+        document.getElementById('valL100').innerText = l100 + " mm";
+        document.getElementById('valLt').innerText = lt + " mm";
+        
+        document.getElementById('dashLt').innerText = lt + " mm";
+        document.getElementById('dashT').innerText = t.toFixed(1) + " °C";
+
+        // Update SVG Thermometer (1mm = 1px)
+        var y_l0 = yBase - l0;
+        var y_l100 = yBase - l100;
+        var y_lt = yBase - lt;
+
+        markL0.setAttribute("y1", y_l0); markL0.setAttribute("y2", y_l0);
+        lblL0.setAttribute("y", y_l0 + 5);
+
+        markL100.setAttribute("y1", y_l100); markL100.setAttribute("y2", y_l100);
+        lblL100.setAttribute("y", y_l100 + 5);
+
+        markLt.setAttribute("y1", y_lt); markLt.setAttribute("y2", y_lt);
+        lblLt.setAttribute("y", y_lt + 5);
+
+        liqRect.setAttribute("y", y_lt);
+        liqRect.setAttribute("height", 385 - y_lt); // 385 ភ្ជាប់នឹងក្បាល
+
+        // Update SVG Graph
+        // P0 (0, l0)
+        ptL0.setAttribute("cy", y_l0);
+        guideL0.setAttribute("y1", y_l0); guideL0.setAttribute("y2", y_l0);
+        graphLblL0.setAttribute("y", y_l0 + 5);
+
+        // P100 (100, l100) -> X: 100 + (100*2.5) = 350
+        ptL100.setAttribute("cy", y_l100);
+        guideL100_Y.setAttribute("y1", y_l100); guideL100_Y.setAttribute("y2", y_l100);
+        graphLblL100.setAttribute("y", y_l100 + 5);
+
+        // Pt (t, lt)
+        var x_t = xOrigin + (t * pxPerDeg);
+        ptLt.setAttribute("cx", x_t); ptLt.setAttribute("cy", y_lt);
+        
+        guideLt_Y.setAttribute("x1", x_t); guideLt_Y.setAttribute("y1", y_lt); guideLt_Y.setAttribute("y2", y_lt);
+        graphLblLt.setAttribute("y", y_lt + 5);
+
+        guideLt_X.setAttribute("x1", x_t); guideLt_X.setAttribute("x2", x_t); guideLt_X.setAttribute("y1", y_lt);
+        graphLblT.setAttribute("x", x_t - 10);
+        graphLblT.textContent = t.toFixed(0) + "°";
+
+        // Update Graph Line (បន្ទាត់ក្រាហ្វអូសពី t=-20 ដល់ t=120)
+        var t_min = -20;
+        var x_min = xOrigin + (t_min * pxPerDeg);
+        var y_min = yBase - (l0 + (t_min/100)*dl);
+        
+        var t_max = 120;
+        var x_max = xOrigin + (t_max * pxPerDeg);
+        var y_max = yBase - (l0 + (t_max/100)*dl);
+        
+        graphLine.setAttribute("x1", x_min); graphLine.setAttribute("y1", y_min);
+        graphLine.setAttribute("x2", x_max); graphLine.setAttribute("y2", y_max);
+
+        // Update MathJax Safely (No Khmer in Math)
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            var num = (lt - l0);
+            var den = dl;
+
+            document.getElementById('mathL0').innerHTML = "\\( \\ell_0 = " + l0 + " \\text{ mm} \\)";
+            document.getElementById('mathL100').innerHTML = "\\( \\ell_{100} = " + l100 + " \\text{ mm} \\)";
+            document.getElementById('mathLt').innerHTML = "\\( \\ell_t = " + lt + " \\text{ mm} \\)";
+
+            document.getElementById('mathCalc').innerHTML = "$$ t = \\frac{" + lt + " - " + l0 + "}{" + l100 + " - " + l0 + "} \\times 100^\\circ\\text{C} $$";
+            
+            // Format សម្រាប់បង្ហាញលេខទសភាគបើចាំបាច់ តែលំហាត់នេះចែកដាច់
+            var t_str = (t % 1 === 0) ? t.toString() : t.toFixed(1);
+            
+            document.getElementById('mathResult').innerHTML = "$$ t = \\frac{" + num + "}{" + den + "} \\times 100^\\circ\\text{C} = " + t_str + "^\\circ\\text{C} $$";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    sL0.addEventListener('input', updatePhysics);
+    sL100.addEventListener('input', updatePhysics);
+    sLt.addEventListener('input', updatePhysics);
+
+    // Initial run
+    updatePhysics();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ចលនាត្រង់ប្រែប្រួលស្មើ</title>
+    <style>
+        body {
+            font-family: 'Khmer OS Siemreap', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #0f172a; /* Darker text */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 { color: #1e3a8a; margin-bottom: 15px; text-align: center; font-weight: 800; }
+        
+        .problem-box {
+            background: white;
+            padding: 20px;
+            border-left: 6px solid #2563eb;
+            border-radius: 8px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            line-height: 1.8;
+            font-size: 16px;
+            font-weight: 500;
+            color: #000000; /* Fully black for high contrast */
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .controls-panel {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .btn-group { display: flex; gap: 10px; }
+        button {
+            padding: 12px 20px;
+            font-family: 'Khmer OS Siemreap', sans-serif;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+            transition: 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-play { background-color: #10b981; }
+        .btn-play:hover { background-color: #059669; }
+        .btn-pause { background-color: #f59e0b; }
+        .btn-pause:hover { background-color: #d97706; }
+        .btn-reset { background-color: #ef4444; }
+        .btn-reset:hover { background-color: #dc2626; }
+        
+        .slider-group {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: 200px;
+            font-weight: bold;
+        }
+        input[type="range"] { flex-grow: 1; cursor: pointer; height: 6px; }
+
+        .anim-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #roadCanvas {
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 800px;
+            height: 120px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) { .dashboard { grid-template-columns: 1fr; } }
+        
+        .graph-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .graph-card b { font-size: 16px; margin-bottom: 8px; color: #000; }
+        
+        canvas.graph {
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 4px;
+            width: 100%;
+            height: 250px;
+        }
+        .metric-boxes {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .metric { 
+            text-align: center; 
+            background: #e0f2fe; 
+            padding: 10px 15px; 
+            border-radius: 6px; 
+            min-width: 90px;
+            border: 1px solid #bae6fd;
+            font-weight: bold;
+            color: #0f172a;
+        }
+        .metric span { display: block; font-size: 22px; font-weight: 900; color: #0369a1; margin-top: 4px; }
+        
+        .solution-box {
+            background: #fefce8;
+            border: 2px solid #fde047;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 15.5px;
+            line-height: 1.8;
+            color: #000000;
+            font-weight: 500;
+        }
+        .solution-box h4 { margin: 0 0 12px 0; color: #854d0e; font-size: 18px; font-weight: 800; }
+        .highlight { font-weight: bold; color: #b91c1c; font-size: 16.5px;}
+    </style>
+</head>
+<body>
+
+    <h2>លំហាត់លេខ១១ ក្នុងសៀវភៅសិស្សទំព័រ34 សមីការ x = 10 + 20t - 5t²</h2>
+
+    <div class="problem-box">
+        <b>ប្រធានលំហាត់លេខ១១៖</b> ចលនាត្រង់មួយមានសមីការពេល x = 10 + 20t - 5t² ដែល x គិតជាម៉ែត្រ (m) និង t គិតជាវិនាទី (s)។<br>
+        ក. កំណត់ប្រភេទនៃចលនានិងគណនាសំទុះ។<br>
+        ខ. គណនាល្បឿនខណៈនៅខណៈ t = 0 និង t = 2 s។<br>
+        គ. តើចល័តស្ថិតនៅទីតាំងណា នៅខណៈដែលល្បឿនមានតម្លៃស្មើនឹងសូន្យ?
+    </div>
+
+    <div class="layout">
+        <div class="anim-container">
+            <div class="metric-boxes">
+                <div class="metric">ពេលវេលា (t) <span id="valT">0.00 s</span></div>
+                <div class="metric">ទីតាំង (x) <span id="valX">10.00 m</span></div>
+                <div class="metric">ល្បឿន (v) <span id="valV" style="color:#059669;">20.00 m/s</span></div>
+                <div class="metric">សំទុះ (a) <span id="valA" style="color:#dc2626;">-10 m/s²</span></div>
+            </div>
+            
+            <canvas id="roadCanvas" width="800" height="120"></canvas>
+            
+            <div class="controls-panel" style="width: 100%; margin-top: 15px; box-sizing: border-box;">
+                <div class="btn-group">
+                    <button class="btn-play" id="btnPlay">▶ ចាក់បញ្ចាំង</button>
+                    <button class="btn-pause" id="btnPause">⏸ ផ្អាក</button>
+                    <button class="btn-reset" id="btnReset">⏹ ឡើងវិញ</button>
+                </div>
+                <div class="slider-group">
+                    <b>t:</b>
+                    <input type="range" id="tSlider" min="0" max="4" step="0.02" value="0">
+                    <span id="sliderVal" style="min-width: 50px;">0.00 s</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="graph-card">
+                <b>ក្រាបទីតាំង x(t)</b>
+                <canvas id="graphX" class="graph" width="400" height="250"></canvas>
+            </div>
+            <div class="graph-card">
+                <b>ក្រាបល្បឿន v(t)</b>
+                <canvas id="graphV" class="graph" width="400" height="250"></canvas>
+            </div>
+        </div>
+
+        <div class="solution-box" id="solutionBox">
+            <h4>💡 ចម្លើយផ្ទៀងផ្ទាត់ដោយ Simulator៖</h4>
+            <p><b>ក.</b> សមីការទូទៅ x = x₀ + v₀t + ½at² ធៀបនឹង x = 10 + 20t - 5t²<br>
+            ⇒ នាំឱ្យ ½a = -5 ⇒ <span class="highlight">សំទុះ a = -10 m/s²</span> (ជាចលនាត្រង់ប្រែប្រួលយឺតស្មើ)។</p>
+            
+            <p><b>ខ.</b> សមីការល្បឿន v = x'(t) = 20 - 10t<br>
+            - នៅ t = 0 s : <span class="highlight" id="ansV0">v = 20 m/s</span><br>
+            - នៅ t = 2 s : <span class="highlight" id="ansV2">v = 0 m/s</span></p>
+
+            <p><b>គ.</b> ទីតាំងពេលល្បឿន v = 0 (វត្ថុឈប់ដើម្បីត្រឡប់ក្រោយ) គឺនៅខណៈ t = 2 s។<br>
+            ជំនួស t = 2 ក្នុងសមីការពេល៖ x = 10 + 20(2) - 5(2)² = <span class="highlight" id="ansX">30 m</span></p>
+        </div>
+    </div>
+
+    <script>
+        function getX(t) { return 10 + 20*t - 5*t*t; }
+        function getV(t) { return 20 - 10*t; }
+        const a = -10;
+
+        let t = 0;
+        const maxT = 4;
+        let isPlaying = false;
+        let animFrame;
+        let lastTime = 0;
+
+        const roadCanvas = document.getElementById('roadCanvas');
+        const rCtx = roadCanvas.getContext('2d');
+        const graphXCanvas = document.getElementById('graphX');
+        const gxCtx = graphXCanvas.getContext('2d');
+        const graphVCanvas = document.getElementById('graphV');
+        const gvCtx = graphVCanvas.getContext('2d');
+
+        const valT = document.getElementById('valT');
+        const valX = document.getElementById('valX');
+        const valV = document.getElementById('valV');
+        const tSlider = document.getElementById('tSlider');
+        const sliderVal = document.getElementById('sliderVal');
+
+        function drawRoad() {
+            rCtx.clearRect(0, 0, roadCanvas.width, roadCanvas.height);
+            
+            const originX = 100;
+            const pxPerMeter = 18;
+            
+            rCtx.strokeStyle = '#475569'; // Darker gray
+            rCtx.lineWidth = 3; // Thicker line
+            rCtx.beginPath();
+            rCtx.moveTo(20, 80);
+            rCtx.lineTo(roadCanvas.width - 20, 80);
+            rCtx.stroke();
+            
+            rCtx.fillStyle = '#0f172a';
+            rCtx.font = 'bold 13px Arial';
+            rCtx.textAlign = 'center';
+            for(let i = -5; i <= 35; i += 5) {
+                let px = originX + i * pxPerMeter;
+                rCtx.beginPath(); rCtx.moveTo(px, 75); rCtx.lineTo(px, 85); rCtx.stroke();
+                rCtx.fillText(i, px, 102);
+            }
+            rCtx.fillText("x (m)", roadCanvas.width - 30, 70);
+
+            rCtx.fillStyle = '#dc2626';
+            rCtx.fillText("0", originX, 63);
+
+            let currentX = getX(t);
+            let carPx = originX + currentX * pxPerMeter;
+            
+            rCtx.fillStyle = '#2563eb';
+            rCtx.fillRect(carPx - 15, 60, 30, 15);
+            rCtx.fillStyle = '#000000';
+            rCtx.beginPath(); rCtx.arc(carPx - 8, 75, 4.5, 0, Math.PI*2); rCtx.fill();
+            rCtx.beginPath(); rCtx.arc(carPx + 8, 75, 4.5, 0, Math.PI*2); rCtx.fill();
+
+            let currentV = getV(t);
+            if(Math.abs(currentV) > 0.5) {
+                rCtx.strokeStyle = '#059669';
+                rCtx.lineWidth = 3;
+                rCtx.beginPath();
+                rCtx.moveTo(carPx, 48);
+                let vecLen = currentV * 2;
+                rCtx.lineTo(carPx + vecLen, 48);
+                rCtx.stroke();
+                
+                rCtx.beginPath();
+                let dir = currentV > 0 ? 1 : -1;
+                rCtx.moveTo(carPx + vecLen, 48);
+                rCtx.lineTo(carPx + vecLen - dir*7, 43);
+                rCtx.lineTo(carPx + vecLen - dir*7, 53);
+                rCtx.fillStyle = '#059669';
+                rCtx.fill();
+            }
+        }
+
+        function drawGraphX() {
+            gxCtx.clearRect(0, 0, graphXCanvas.width, graphXCanvas.height);
+            // Increased padding on X to avoid clipping numbers
+            const pX = 50, pY = 30, w = graphXCanvas.width, h = graphXCanvas.height;
+            const gW = w - pX - 20, gH = h - pY - 20;
+            
+            const maxY = 40; // Changed to 40 for cleaner intervals
+
+            gxCtx.strokeStyle = '#475569'; gxCtx.lineWidth = 2; // Bolder axes
+            gxCtx.beginPath(); gxCtx.moveTo(pX, 10); gxCtx.lineTo(pX, h-pY); gxCtx.lineTo(w-10, h-pY); gxCtx.stroke();
+            gxCtx.fillStyle = '#0f172a'; gxCtx.font = 'bold 12px Arial'; gxCtx.fillText("t(s)", w-25, h-10); gxCtx.fillText("x(m)", 15, 15);
+
+            gxCtx.textAlign = 'right';
+            for(let i=0; i<=maxY; i+=10) {
+                let py = h - pY - (i/maxY)*gH;
+                gxCtx.fillText(i, pX-8, py+5); // Move text slightly left
+                // Tick mark
+                gxCtx.beginPath(); gxCtx.moveTo(pX-4, py); gxCtx.lineTo(pX, py); gxCtx.stroke();
+            }
+            gxCtx.textAlign = 'center';
+            for(let i=1; i<=maxT; i++) {
+                let px = pX + (i/maxT)*gW;
+                gxCtx.fillText(i, px, h-pY+16);
+                gxCtx.beginPath(); gxCtx.moveTo(px, h-pY); gxCtx.lineTo(px, h-pY+4); gxCtx.stroke();
+            }
+
+            gxCtx.strokeStyle = '#2563eb'; gxCtx.lineWidth = 3; // Thicker curve
+            gxCtx.beginPath();
+            for(let i=0; i<=maxT; i+=0.1) {
+                let cx = pX + (i/maxT)*gW;
+                let cy = h - pY - (getX(i)/maxY)*gH;
+                if(i===0) gxCtx.moveTo(cx, cy); else gxCtx.lineTo(cx, cy);
+            }
+            gxCtx.stroke();
+
+            let curPx = pX + (t/maxT)*gW;
+            let curPy = h - pY - (getX(t)/maxY)*gH;
+            
+            let slope = getV(t) * (gH/maxY) / (gW/maxT) * -1;
+            let dtLine = 35;
+            gxCtx.strokeStyle = 'rgba(5, 150, 105, 0.7)'; gxCtx.lineWidth = 3;
+            gxCtx.beginPath(); gxCtx.moveTo(curPx - dtLine, curPy - slope*dtLine); gxCtx.lineTo(curPx + dtLine, curPy + slope*dtLine); gxCtx.stroke();
+
+            gxCtx.fillStyle = '#dc2626';
+            gxCtx.beginPath(); gxCtx.arc(curPx, curPy, 5, 0, Math.PI*2); gxCtx.fill();
+        }
+
+        function drawGraphV() {
+            gvCtx.clearRect(0, 0, graphVCanvas.width, graphVCanvas.height);
+            // Increased padding on X to avoid clipping negative numbers
+            const pX = 50, pY = 30, w = graphVCanvas.width, h = graphVCanvas.height;
+            const gW = w - pX - 20, gH = h - pY - 20;
+            
+            const maxY = 20; const minY = -20; // Exact bounds for velocity 20 to -20
+            const rangeY = maxY - minY;
+            const zeroY = h - pY - (0 - minY)/rangeY * gH;
+
+            gvCtx.strokeStyle = '#475569'; gvCtx.lineWidth = 2; // Bolder axes
+            gvCtx.beginPath(); gvCtx.moveTo(pX, 10); gvCtx.lineTo(pX, h-pY); gvCtx.stroke();
+            gvCtx.beginPath(); gvCtx.moveTo(pX, zeroY); gvCtx.lineTo(w-10, zeroY); gvCtx.stroke();
+            
+            gvCtx.fillStyle = '#0f172a'; gvCtx.font = 'bold 12px Arial'; 
+            gvCtx.fillText("t(s)", w-25, zeroY - 8); gvCtx.fillText("v(m/s)", 15, 15);
+
+            gvCtx.textAlign = 'right';
+            for(let i=minY; i<=maxY; i+=10) {
+                let py = h - pY - (i - minY)/rangeY * gH;
+                gvCtx.fillText(i, pX-8, py+5);
+                gvCtx.beginPath(); gvCtx.moveTo(pX-4, py); gvCtx.lineTo(pX, py); gvCtx.stroke();
+            }
+
+            gvCtx.textAlign = 'center';
+            for(let i=1; i<=maxT; i++) {
+                let px = pX + (i/maxT)*gW;
+                gvCtx.fillText(i, px, zeroY+16);
+                gvCtx.beginPath(); gvCtx.moveTo(px, zeroY); gvCtx.lineTo(px, zeroY+4); gvCtx.stroke();
+            }
+
+            gvCtx.strokeStyle = '#059669'; gvCtx.lineWidth = 3; // Thicker line
+            gvCtx.beginPath();
+            let startY = h - pY - (getV(0) - minY)/rangeY * gH;
+            let endY = h - pY - (getV(maxT) - minY)/rangeY * gH;
+            gvCtx.moveTo(pX, startY);
+            gvCtx.lineTo(pX + gW, endY);
+            gvCtx.stroke();
+
+            let curPx = pX + (t/maxT)*gW;
+            let curPy = h - pY - (getV(t) - minY)/rangeY * gH;
+            gvCtx.fillStyle = '#dc2626';
+            gvCtx.beginPath(); gvCtx.arc(curPx, curPy, 5, 0, Math.PI*2); gvCtx.fill();
+        }
+
+        function updateUI() {
+            valT.innerHTML = t.toFixed(2) + " s";
+            valX.innerHTML = getX(t).toFixed(2) + " m";
+            valV.innerHTML = getV(t).toFixed(2) + " m/s";
+            tSlider.value = t;
+            sliderVal.innerHTML = t.toFixed(2) + " s";
+
+            drawRoad();
+            drawGraphX();
+            drawGraphV();
+            
+            if(Math.abs(t - 0) < 0.05) document.getElementById('ansV0').style.backgroundColor = '#fde047';
+            else document.getElementById('ansV0').style.backgroundColor = 'transparent';
+            
+            if(Math.abs(t - 2) < 0.05) {
+                document.getElementById('ansV2').style.backgroundColor = '#fde047';
+                document.getElementById('ansX').style.backgroundColor = '#fde047';
+            } else {
+                document.getElementById('ansV2').style.backgroundColor = 'transparent';
+                document.getElementById('ansX').style.backgroundColor = 'transparent';
+            }
+        }
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            let dt = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+
+            if (isPlaying) {
+                t += dt;
+                if (t >= maxT) {
+                    t = maxT;
+                    isPlaying = false;
+                    document.getElementById('btnPlay').innerText = "▶ ចាក់បញ្ចាំង";
+                }
+                updateUI();
+                animFrame = requestAnimationFrame(animate);
+            }
+        }
+
+        document.getElementById('btnPlay').addEventListener('click', () => {
+            if (!isPlaying) {
+                if (t >= maxT) t = 0;
+                isPlaying = true;
+                lastTime = performance.now();
+                animFrame = requestAnimationFrame(animate);
+                document.getElementById('btnPlay').innerText = "▶ កំពុងចាក់...";
+            }
+        });
+
+        document.getElementById('btnPause').addEventListener('click', () => {
+            isPlaying = false;
+            cancelAnimationFrame(animFrame);
+            document.getElementById('btnPlay').innerText = "▶ បន្ត";
+        });
+
+        document.getElementById('btnReset').addEventListener('click', () => {
+            isPlaying = false;
+            cancelAnimationFrame(animFrame);
+            t = 0;
+            updateUI();
+            document.getElementById('btnPlay').innerText = "▶ ចាក់បញ្ចាំង";
+        });
+
+        tSlider.addEventListener('input', (e) => {
+            isPlaying = false;
+            cancelAnimationFrame(animFrame);
+            document.getElementById('btnPlay').innerText = "▶ ចាក់បញ្ចាំង";
+            t = parseFloat(e.target.value);
+            updateUI();
+        });
+
+        updateUI();
+    </script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Fall Simulator - ក្រាបល្បឿននិងពេល</title>
+    <style>
+        body {
+            font-family: 'Khmer OS Battambang', Arial, sans-serif;
+            background-color: #f4f7f6;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h2 { color: #2c3e50; }
+        
+        /* រចនាប្រធានលំហាត់ */
+        .problem-statement {
+            background-color: #eaf2f8;
+            color: #2c3e50;
+            border-left: 5px solid #3498db;
+            padding: 15px 20px;
+            border-radius: 5px;
+            max-width: 850px;
+            margin: 0 auto 20px auto;
+            text-align: left;
+            line-height: 1.8;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        canvas {
+            border: 1px solid #bdc3c7;
+            background: #fff;
+            border-radius: 5px;
+        }
+        
+        /* រចនាប៊ូតុង */
+        .controls {
+            margin-top: 15px;
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin: 0 10px;
+            transition: opacity 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        button:hover { opacity: 0.8; }
+        .btn-start { background-color: #2ecc71; } /* ពណ៌បៃតង */
+        .btn-pause { background-color: #f39c12; } /* ពណ៌ទឹកក្រូច */
+        .btn-reset { background-color: #e74c3c; } /* ពណ៌ក្រហម */
+
+        #stats {
+            font-size: 18px;
+            margin-top: 15px;
+            color: #34495e;
+            text-align: left;
+            line-height: 1.8;
+            background: #fdfefe;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ecf0f1;
+        }
+        .highlight { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2> ចលនាទម្លាក់សេរី</h2>
+    
+    <!-- ប្រធានលំហាត់ -->
+    <div class="problem-statement">
+        <strong>ប្រធានលំហាត់ទី១៣៖</strong> ឃ្លីមួយធ្លាក់ដោយសេរីដែលល្បឿនជាអនុគមន៍នៃពេល បញ្ជាក់តាមក្រាប។<br>
+        <strong>ក.</strong> រកទំនាក់ទំនងរវាង <i>v</i> និង <i>t</i> ។ ចូរទាញរកទំនាក់ទំនងរវាងចម្ងាយចរ <i>x</i> និងពេល <i>t</i> ។<br>
+        <strong>ខ.</strong> បង្ហាញថា ខណៈ <i>t<sub>0</sub></i> ចម្ងាយ <i>x</i> សមាមាត្រនឹងផ្ទៃក្រឡានៃត្រីកោណ OAB ។<br>
+        <strong>គ.</strong> កំណត់ចម្ងាយចររវាងខណៈ <i>t = 2 s</i> និង <i>t = 5 s</i> តាមក្រាប និងតាមការគណនា។
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="controls">
+        <button class="btn-start" onclick="startSim()">▶ ចាប់ផ្តើម / បន្ត</button>
+        <button class="btn-pause" onclick="pauseSim()">⏸ ផ្អាក (Pause)</button>
+        <button class="btn-reset" onclick="resetSim()">⏹ ចាប់ផ្តើមឡើងវិញ (Reset)</button>
+    </div>
+
+    <div class="container">
+        <!-- ផ្ទាំងចលនាជាក់ស្តែង -->
+        <div class="panel">
+            <h3 style="margin-top:0;">ការធ្លាក់នៃឃ្លី</h3>
+            <canvas id="dropCanvas" width="150" height="400"></canvas>
+        </div>
+
+        <!-- ផ្ទាំងក្រាបនិងទិន្នន័យ -->
+        <div class="panel">
+            <h3 style="margin-top:0;">ក្រាបល្បឿន-ពេល (v-t)</h3>
+            <canvas id="graphCanvas" width="400" height="400"></canvas>
+            <div id="stats">
+                ⏱ ពេល <i>t</i> : <span id="timeVal" class="highlight">0.00</span> s<br>
+                🚀 ល្បឿន <i>v</i> : <span id="velVal" class="highlight">0.0</span> m/s<br>
+                📏 ចម្ងាយ <i>x</i> (ក្រឡាផ្ទៃពណ៌ខៀវ) : <span id="distVal" class="highlight">0.0</span> m
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropCanvas = document.getElementById('dropCanvas');
+        const dropCtx = dropCanvas.getContext('2d');
+        const graphCanvas = document.getElementById('graphCanvas');
+        const graphCtx = graphCanvas.getContext('2d');
+
+        let animationId;
+        let t = 0; // Time
+        const a = 10; // Acceleration (m/s^2)
+        let isRunning = false;
+
+        // Scaling factors for drawing
+        const scaleY_drop = 3;   // 1m = 3px on drop canvas
+        const scaleX_graph = 70; // 1s = 70px on graph canvas
+        const scaleY_graph = 6;  // 1m/s = 6px on graph canvas
+
+        function drawDrop() {
+            dropCtx.clearRect(0, 0, dropCanvas.width, dropCanvas.height);
+            
+            // Calculate distance x = 5t^2
+            let x = 0.5 * a * t * t;
+            let pixelY = 20 + (x * scaleY_drop);
+
+            // Draw Ruler/Marks
+            dropCtx.fillStyle = '#7f8c8d';
+            dropCtx.font = '12px Arial';
+            for(let i=0; i<=125; i+=25) {
+                let y = 20 + (i * scaleY_drop);
+                dropCtx.fillRect(0, y, 10, 1);
+                dropCtx.fillText(i + 'm', 15, y+4);
+            }
+
+            // Limit falling to the ground (125m)
+            if (pixelY > dropCanvas.height - 20) {
+                pixelY = dropCanvas.height - 20;
+            }
+            
+            // Draw Marble
+            dropCtx.beginPath();
+            dropCtx.arc(dropCanvas.width / 2 + 15, pixelY, 12, 0, Math.PI * 2);
+            dropCtx.fillStyle = '#e67e22'; // ពណ៌ទឹកក្រូច
+            dropCtx.fill();
+            dropCtx.lineWidth = 2;
+            dropCtx.strokeStyle = '#d35400';
+            dropCtx.stroke();
+        }
+
+        function drawGraph() {
+            graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+            
+            let originX = 40;
+            let originY = graphCanvas.height - 40;
+
+            // Draw Grid
+            graphCtx.strokeStyle = '#ecf0f1';
+            graphCtx.lineWidth = 1;
+            for(let i=0; i<=5; i++) {
+                let gx = originX + (i * scaleX_graph);
+                graphCtx.beginPath(); graphCtx.moveTo(gx, 0); graphCtx.lineTo(gx, originY); graphCtx.stroke();
+            }
+            for(let i=0; i<=50; i+=10) {
+                let gy = originY - (i * scaleY_graph);
+                graphCtx.beginPath(); graphCtx.moveTo(originX, gy); graphCtx.lineTo(graphCanvas.width, gy); graphCtx.stroke();
+            }
+
+            // Draw Axes
+            graphCtx.strokeStyle = '#2c3e50';
+            graphCtx.lineWidth = 2;
+            graphCtx.beginPath();
+            graphCtx.moveTo(originX, 0); graphCtx.lineTo(originX, originY); // Y axis
+            graphCtx.lineTo(graphCanvas.width, originY); // X axis
+            graphCtx.stroke();
+
+            // Labels
+            graphCtx.fillStyle = '#2c3e50';
+            graphCtx.font = '12px Arial';
+            graphCtx.fillText("v (m/s)", originX - 35, 15);
+            graphCtx.fillText("t (s)", graphCanvas.width - 30, originY + 20);
+            
+            for(let i=1; i<=5; i++) graphCtx.fillText(i, originX + (i * scaleX_graph) - 4, originY + 20);
+            for(let i=10; i<=50; i+=10) graphCtx.fillText(i, originX - 25, originY - (i * scaleY_graph) + 4);
+
+            // Draw Area (Distance = Area under the graph)
+            if(t > 0) {
+                let currentX = originX + (t * scaleX_graph);
+                let currentY = originY - ((a * t) * scaleY_graph);
+                
+                // Fill Area
+                graphCtx.beginPath();
+                graphCtx.moveTo(originX, originY);
+                graphCtx.lineTo(currentX, currentY);
+                graphCtx.lineTo(currentX, originY);
+                graphCtx.fillStyle = 'rgba(52, 152, 219, 0.4)'; // ពណ៌ខៀវថ្លា
+                graphCtx.fill();
+
+                // Draw Line (v = at)
+                graphCtx.strokeStyle = '#2980b9';
+                graphCtx.lineWidth = 3;
+                graphCtx.beginPath();
+                graphCtx.moveTo(originX, originY);
+                graphCtx.lineTo(currentX, currentY);
+                graphCtx.stroke();
+                
+                // Draw dot at current point
+                graphCtx.beginPath();
+                graphCtx.arc(currentX, currentY, 5, 0, Math.PI * 2);
+                graphCtx.fillStyle = '#c0392b'; // ពណ៌ក្រហម
+                graphCtx.fill();
+            }
+        }
+
+        function updateStats() {
+            let v = a * t;
+            let x = 0.5 * a * t * t;
+            document.getElementById('timeVal').innerText = t.toFixed(2);
+            document.getElementById('velVal').innerText = v.toFixed(1);
+            document.getElementById('distVal').innerText = x.toFixed(1);
+        }
+
+        function loop() {
+            if (isRunning) {
+                t += 0.02; // Update time (Speed of simulation)
+                if (t >= 5) {
+                    t = 5;
+                    isRunning = false;
+                }
+                drawDrop();
+                drawGraph();
+                updateStats();
+                
+                if (isRunning) {
+                    animationId = requestAnimationFrame(loop);
+                }
+            }
+        }
+
+        // Functions for Buttons
+        function startSim() {
+            if (!isRunning && t < 5) {
+                isRunning = true;
+                loop();
+            }
+        }
+
+        function pauseSim() {
+            isRunning = false;
+            cancelAnimationFrame(animationId); // បញ្ឈប់ចលនាបណ្ដោះអាសន្ន
+        }
+
+        function resetSim() {
+            isRunning = false;
+            cancelAnimationFrame(animationId);
+            t = 0;
+            drawDrop();
+            drawGraph();
+            updateStats();
+        }
+
+        // Initialize First Frame
+        drawDrop();
+        drawGraph();
+        updateStats();
+    </script>
+</body>
+</html>

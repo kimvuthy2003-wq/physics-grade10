@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>សំណួរ និងចម្លើយ - ស៊ីនេម៉ាទិច</title>
+    <style>
+        body {
+            font-family: 'Khmer OS Battambang', 'Khmer OS Siemreap', 'Suwannaphum', Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.8;
+        }
+        h1 {
+            text-align: center;
+            color: #1e3a8a;
+            margin-bottom: 30px;
+        }
+        .qa-container {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+        .question {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+        .answer {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8fafc;
+            border-left: 4px solid #16a34a;
+            border-radius: 4px;
+            color: #334155;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            text-align: center;
+            font-size: 0.95em;
+            font-family: inherit;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.25s;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .btn-hide {
+            background-color: #dc2626;
+        }
+        .btn-hide:hover {
+            background-color: #b91c1c;
+        }
+        .formula {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.1em;
+            background-color: #e2e8f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>សំណួរ និងចម្លើយរូបវិទ្យា (ស៊ីនេម៉ាទិច)</h1>
+
+    <!-- Q1 -->
+    <div class="qa-container">
+        <div class="question">១. ដូចម្តេចហៅថាទំហំស្កាលែ និងទំហំវ៉ិចទ័រ? លើកយកឧទាហរណ៍មកបញ្ជាក់។</div>
+        <button id="btn-1" onclick="toggleAnswer(1)">បង្ហាញចម្លើយ</button>
+        <div id="answer-1" class="answer">
+            <b>ចម្លើយ៖</b><br>
+            - <b>ទំហំស្កាលែ (Scalar quantity)៖</b> ជាទំហំដែលកំណត់ដោយរង្វាស់ (តម្លៃលេខ) តែមួយគត់ ដោយគ្មានទិស និងទិសដៅទេ។<br>
+            &nbsp;&nbsp;<i>ឧទាហរណ៍៖</i> ម៉ាស (m), ពេល (t), សីតុណ្ហភាព (T), ប្រវែង (l), មាឌ (V)...<br>
+            - <b>ទំហំវ៉ិចទ័រ (Vector quantity)៖</b> ជាទំហំដែលកំណត់ដោយរង្វាស់ (ម៉ូឌុល) ព្រមទាំងមានទិស និងទិសដៅច្បាស់លាស់។<br>
+            &nbsp;&nbsp;<i>ឧទាហរណ៍៖</i> កម្លាំង (F), ល្បឿន (v), សំទុះ (a), បម្លាស់ទី (d)...
+        </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="qa-container">
+        <div class="question">២. ចូរពណ៌នាអំពីវ៉ិចទ័រ។</div>
+        <button id="btn-2" onclick="toggleAnswer(2)">បង្ហាញចម្លើយ</button>
+        <div id="answer-2" class="answer">
+            <b>ចម្លើយ៖</b> វ៉ិចទ័រត្រូវបានតាងដោយអង្កត់ឈើគូសមានព្រួញនៅចុងម្ខាង ដែលមានលក្ខណៈ ៤ យ៉ាងគឺ៖<br>
+            ១. <b>ចំណុចចាប់ផ្តើម (គល់វ៉ិចទ័រ)៖</b> ជាចំណុចដែលកម្លាំង ឬទំហំនោះចាប់ផ្តើមមានអំពើ។<br>
+            ២. <b>ទិស (បន្ទាត់ទ្រ)៖</b> ជាខ្សែបន្ទាត់ត្រង់ដែលវ៉ិចទ័រនោះស្ថិតនៅ (ដេក, ឈរ, ទ្រេត...)។<br>
+            ៣. <b>ទិសដៅ៖</b> ចង្អុលបង្ហាញដោយក្បាលព្រួញ (ឆ្វេងទៅស្តាំ, លើចុះក្រោម...)។<br>
+            ៤. <b>ម៉ូឌុល ឬរង្វាស់៖</b> ជាប្រវែងនៃអង្កត់វ៉ិចទ័រ ដែលតំណាងឱ្យទំហំធំឬតូចនៃវ៉ិចទ័រនោះ។
+        </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="qa-container">
+        <div class="question">៣. តើបម្លាស់ទី និងចម្ងាយចរខុសគ្នាដូចម្តេច?</div>
+        <button id="btn-3" onclick="toggleAnswer(3)">បង្ហាញចម្លើយ</button>
+        <div id="answer-3" class="answer">
+            <b>ចម្លើយ៖</b><br>
+            - <b>ចម្ងាយចរ (Distance, d ឬ s)៖</b> ជាប្រវែងសរុបនៃគន្លងដែលអង្គធាតុបានធ្វើចលនា។ វាជាទំហំស្កាលែ អាស្រ័យនឹងរាងនៃគន្លង និងតែងតែមានតម្លៃវិជ្ជមានជានិច្ច។<br>
+            - <b>បម្លាស់ទី (Displacement, &Delta;x)៖</b> ជាវ៉ិចទ័រភ្ជាប់ពីទីតាំងដើម ទៅទីតាំងស្រេចនៃចលនា។ វាជាទំហំវ៉ិចទ័រ ដែលអាស្រ័យតែលើទីតាំងដើមនិងចុង (មិនខ្វល់ពីរាងនៃគន្លងវាងឡើយ) ហើយអាចមានតម្លៃវិជ្ជមាន អវិជ្ជមាន ឬស្មើសូន្យ។
+        </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="qa-container">
+        <div class="question">៤. ចូរសរសេររូបមន្តល្បឿនមធ្យមនិងបញ្ជាក់ខ្នាតនៃទំហំនីមួយៗរបស់វាក្នុងប្រព័ន្ធ SI ។</div>
+        <button id="btn-4" onclick="toggleAnswer(4)">បង្ហាញចម្លើយ</button>
+        <div id="answer-4" class="answer">
+            <b>ចម្លើយ៖</b><br>
+            រូបមន្តល្បឿនមធ្យមគឺ៖ <span class="formula">V<sub>av</sub> = d / t</span> &nbsp;(ឬ V = &Delta;d / &Delta;t)<br>
+            ដោយបញ្ជាក់ខ្នាតក្នុងប្រព័ន្ធអន្តរជាតិ (SI)៖<br>
+            - <b>V<sub>av</sub></b> : ជាល្បឿនមធ្យម មានខ្នាតគិតជា ម៉ែត្រក្នុងមួយវិនាទី <b>(m/s)</b><br>
+            - <b>d</b> : ជាចម្ងាយចរសរុប មានខ្នាតគិតជា ម៉ែត្រ <b>(m)</b><br>
+            - <b>t</b> : ជារយៈពេលធ្វើចលនា មានខ្នាតគិតជា វិនាទី <b>(s)</b>
+        </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="qa-container">
+        <div class="question">៥. ចូរសរសេរសមីការដែលបញ្ជាក់ពីទំនាក់ទំនង a, x, v<sub>0</sub> និង t ក្នុងចលនាតាមមួយវិមាត្រ។</div>
+        <button id="btn-5" onclick="toggleAnswer(5)">បង្ហាញចម្លើយ</button>
+        <div id="answer-5" class="answer">
+            <b>ចម្លើយ៖</b> នេះគឺជាសមីការទីតាំងនៃចលនាត្រង់ប្រែប្រួលស្មើ តាមមួយវិមាត្រ ដែលមានទំនាក់ទំនងដូចខាងក្រោម៖<br><br>
+            <div style="text-align:center;">
+                <span class="formula">x = x<sub>0</sub> + v<sub>0</sub>t + &frac12; at&sup2;</span>
+            </div><br>
+            <i>(បញ្ជាក់៖ បើទីតាំងដើម x<sub>0</sub> = 0 នោះសមីការក្លាយជា <span class="formula">x = v<sub>0</sub>t + &frac12; at&sup2;</span> )</i>
+        </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="qa-container">
+        <div class="question">៦. ដូចម្តេចហៅថាទម្លាក់សេរី?</div>
+        <button id="btn-6" onclick="toggleAnswer(6)">បង្ហាញចម្លើយ</button>
+        <div id="answer-6" class="answer">
+            <b>ចម្លើយ៖</b> <b>ទម្លាក់សេរី</b> គឺជាចលនារបស់អង្គធាតុដែលធ្លាក់ចុះក្រោម ក្រោមអំពើនៃទម្ងន់របស់វាតែមួយគត់ (កម្លាំងទំនាញផែនដី P) ដោយមិនគិតពីកម្លាំងទប់នៃខ្យល់ឡើយ។<br>
+            <i>(ចំណាំ៖ ក្នុងទម្លាក់សេរី អង្គធាតុតែងតែមានចលនាស្ទុះស្មើ ដែលមានល្បឿនដើម v<sub>0</sub> = 0 និងមានសំទុះស្មើនឹងសំទុះទំនាញដី a = g &approx; 9.8 m/s²)</i>
+        </div>
+    </div>
+
+    <script>
+        function toggleAnswer(id) {
+            var answerDiv = document.getElementById('answer-' + id);
+            var btn = document.getElementById('btn-' + id);
+            
+            if (answerDiv.style.display === 'none' || answerDiv.style.display === '') {
+                answerDiv.style.display = 'block';
+                btn.innerText = 'លាក់ចម្លើយ';
+                btn.classList.add('btn-hide');
+            } else {
+                answerDiv.style.display = 'none';
+                btn.innerText = 'បង្ហាញចម្លើយ';
+                btn.classList.remove('btn-hide');
+            }
+        }
+    </script>
+</body>
+</html>

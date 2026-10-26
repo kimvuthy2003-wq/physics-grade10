@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ១០ - កម្មន្តនៃកម្លាំងរក្សា (ក្រាហ្វ & ជាក់ស្តែង)</title>
+    
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9;
+            padding: 20px;
+            color: #111;
+            text-align: center;
+        }
+        .container { max-width: 1050px; margin: 0 auto; }
+        
+        /* ប្រធានលំហាត់ */
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px;
+            font-size: 19px; font-weight: bold; line-height: 1.7;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        /* ផ្ទាំងបម្រាប់ */
+        .info-panel {
+            background: #fff; padding: 15px; border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;
+            display: flex; justify-content: space-around; flex-wrap: wrap;
+            border-left: 6px solid #28a745; font-size: 18px;
+        }
+        .info-panel strong { color: #d32f2f; font-size: 20px; }
+        
+        /* ផ្ទាំង Simulator បែងចែកជា ២ (ឆ្វេង និងស្តាំ) */
+        .sim-container {
+            display: grid; grid-template-columns: 1fr 1fr;
+            height: 350px; background: white; border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); margin: 0 auto;
+        }
+
+        .sim-left {
+            position: relative; border-right: 2px solid #ced4da; background: #fff;
+        }
+        .sim-right {
+            position: relative; background: #e0f6ff; /* ពណ៌មេឃ */
+        }
+
+        /* ចំណងជើងលើផ្ទាំងនីមួយៗ */
+        .view-title {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            background: rgba(255,255,255,0.8); padding: 4px 10px;
+            border-radius: 4px; font-weight: bold; font-size: 15px; color: #333;
+            z-index: 5; border: 1px solid #ccc; white-space: nowrap;
+        }
+
+        /* SVG & Grid Styling */
+        svg { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+        .axis-line { stroke: #333; stroke-width: 2; }
+        .path-line { fill: none; stroke-width: 3; stroke-dasharray: 6,4; }
+        .path-1 { stroke: #007bff; } 
+        .path-2 { stroke: #28a745; } 
+        .path-3 { stroke: #d32f2f; } 
+        .label { font-family: Arial; font-size: 13px; font-weight: bold; fill: #333; }
+        
+        /* ចំណុចរូបធាតុលើក្រាហ្វ (ឆ្វេង) */
+        .particle-graph {
+            position: absolute; width: 20px; height: 20px;
+            background: #ff9800; border: 2px solid #e65100;
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-weight: bold; font-size: 12px; color: white;
+            z-index: 3; transform: translate(-50%, -50%);
+        }
+        
+        /* អង្គធាតុជាក់ស្តែង (ស្តាំ) */
+        .particle-real {
+            position: absolute; width: 40px; height: 40px;
+            background: #8d6e63; border: 2px solid #5d4037; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; z-index: 4; transform: translate(-50%, -50%);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* ព្រួញទម្ងន់ P */
+        .weight-arrow {
+            position: absolute; left: 50%; top: 100%;
+            width: 3px; height: 30px; background: #673ab7;
+            transform: translateX(-50%); z-index: 2;
+        }
+        .weight-arrow::after {
+            content: ''; position: absolute; bottom: -8px; left: -4.5px;
+            border-top: 8px solid #673ab7; border-left: 6px solid transparent; border-right: 6px solid transparent;
+        }
+        .weight-label {
+            position: absolute; top: 30px; left: 8px;
+            color: #673ab7; font-weight: bold; font-size: 14px;
+        }
+
+        /* ទិន្នន័យ Live Data */
+        .live-data {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 15px; margin-top: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+            font-size: 18px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 26px; 
+            display: inline-block; margin-top: 8px;
+        }
+        
+        #livePos { color: #0056b3; } 
+        #liveDy { color: #6f42c1; } 
+        #liveWork { color: #d32f2f; } 
+
+        /* ប៊ូតុងបញ្ជា */
+        .controls {
+            margin-top: 20px; display: flex; justify-content: center;
+            gap: 12px; flex-wrap: wrap; align-items: center;
+        }
+        button {
+            padding: 10px 18px; font-size: 16px; font-weight: bold;
+            font-family: inherit; cursor: pointer; border: none;
+            border-radius: 6px; color: white; transition: 0.2s;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        .btn-p1 { background: #007bff; } .btn-p1:hover { background: #0056b3; }
+        .btn-p2 { background: #28a745; } .btn-p2:hover { background: #218838; }
+        .btn-p3 { background: #dc3545; } .btn-p3:hover { background: #c82333; }
+        #resetBtn { background: #6c757d; } #resetBtn:hover { background: #5a6268; }
+        #solutionBtn { background: #17a2b8; } #solutionBtn:hover { background: #138496; }
+
+        .status {
+            margin-top: 15px; font-size: 20px; font-weight: 900;
+            color: #333; min-height: 30px;
+        }
+
+        /* ដំណោះស្រាយ */
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 {
+            margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0;
+            padding-bottom: 10px; font-size: 22px;
+        }
+        .solution-box ul { padding-left: 30px; margin-top: 5px; }
+        .highlight { font-weight: bold; color: #d32f2f; }
+        .note-box {
+            background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107;
+            margin-bottom: 15px; border-radius: 4px; color: #664d03;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>លំហាត់ទី ១០ ៖</strong> ចំណុចរូបធាតុម៉ាស $m = 1.50 \text{ kg}$ ផ្លាស់ទីពីគល់តម្រុយ $O$ ទៅចំណុច $P$ តាមទិសដៅអ័ក្ស $x$ វិជ្ជមានដែលមានកូអរដោនេ $x = 8.00 \text{ m}$ និង $y = 6.00 \text{ m}$។ កម្លាំងដែលបញ្ចេញលើចំណុចរូបធាតុពីគល់តម្រុយ $O$ ទៅចំណុច $P$ គឺជាកម្លាំងទាញនៃផែនដី (ទម្ងន់) ដែលអនុវត្តន៍តាមទិសដៅអ័ក្ស $y$ អវិជ្ជមាន។ គណនាកម្មន្តដែលបានធ្វើដោយកម្លាំងទាញផែនដីលើចំណុចរូបធាតុកាលណាវាផ្លាស់ទីពីគល់តម្រុយ $O$ ទៅ $P$៖<br>
+        <strong>ក.</strong> តាមគន្លងទី (1)<br>
+        <strong>ខ.</strong> តាមគន្លងទី (2)<br>
+        <strong>គ.</strong> តាមគន្លងទី (3)<br>
+        <strong>ឃ.</strong> តើចម្លើយរបស់អ្នកទាំងអស់ដូចគ្នាឬទេ? ហេតុអ្វីបានជាដូច្នេះ?
+    </div>
+    
+    <div class="info-panel">
+        <div>ម៉ាស ($m$) = <strong>1.50 kg</strong></div>
+        <div>ទម្ងន់ទាញចុះ ($P = mg$) = <strong>14.7 N</strong></div>
+        <div>គោលដៅ ($P$) = <strong>(8.00, 6.00)</strong></div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator (ឆ្វេង និង ស្តាំ) -->
+    <div class="sim-container">
+        <!-- ផ្នែកខាងឆ្វេង (Graph) -->
+        <div class="sim-left">
+            <div class="view-title">ក្រាហ្វកូអរដោនេ (Graph View)</div>
+            <svg>
+                <!-- គន្លងទាំង ៣ -->
+                <polyline class="path-line path-1" points="60,280 340,280 340,70" />
+                <polyline class="path-line path-2" points="60,280 60,70 340,70" />
+                <line class="path-line path-3" x1="60" y1="280" x2="340" y2="70" />
+
+                <!-- អ័ក្ស X និង Y -->
+                <line class="axis-line" x1="60" y1="300" x2="60" y2="30" />
+                <polygon points="55,35 65,35 60,25" fill="#333" />
+                <line class="axis-line" x1="40" y1="280" x2="380" y2="280" />
+                <polygon points="375,275 375,285 385,280" fill="#333" />
+
+                <!-- អក្សរចំណាំ -->
+                <text x="45" y="295" class="label">O</text>
+                <text x="330" y="295" class="label">M(8,0)</text>
+                <text x="10" y="75" class="label">N(0,6)</text>
+                <text x="345" y="65" class="label">P(8,6)</text>
+                <text x="370" y="300" class="label">x</text>
+                <text x="25" y="35" class="label">y</text>
+            </svg>
+            <div class="particle-graph" id="particleGraph">m</div>
+        </div>
+
+        <!-- ផ្នែកខាងស្តាំ (Real World) -->
+        <div class="sim-right">
+            <div class="view-title">រូបភាពជាក់ស្តែង (Real-world View)</div>
+            <svg>
+                <!-- ដី (Ground) -->
+                <rect x="0" y="280" width="100%" height="70" fill="#4caf50" />
+                <rect x="0" y="285" width="100%" height="70" fill="#795548" />
+
+                <!-- បរិស្ថាន គន្លងទី ១ (រុញតាមដី រួចលើកឡើង) -->
+                <g id="env-path1" style="display:none;">
+                    <rect x="315" y="70" width="50" height="210" fill="#9e9e9e" opacity="0.4" /> <!-- ជណ្តើរយន្តស្តាំ -->
+                    <line x1="60" y1="280" x2="340" y2="280" stroke="#ffeb3b" stroke-width="4" stroke-dasharray="5,5" />
+                </g>
+
+                <!-- បរិស្ថាន គន្លងទី ២ (លើកឡើង រួចរុញតាមស្ពានអាកាស) -->
+                <g id="env-path2" style="display:none;">
+                    <rect x="35" y="70" width="50" height="210" fill="#9e9e9e" opacity="0.4" /> <!-- ជណ្តើរយន្តឆ្វេង -->
+                    <rect x="60" y="70" width="280" height="10" fill="#607d8b" /> <!-- ស្ពាន -->
+                </g>
+
+                <!-- បរិស្ថាន គន្លងទី ៣ (ទាញតាមប្លង់ទេរ) -->
+                <g id="env-path3" style="display:none;">
+                    <polygon points="60,280 340,280 340,70" fill="#8d6e63" stroke="#5d4037" stroke-width="2" />
+                    <text x="200" y="190" class="label" fill="#fff" transform="rotate(-36.8, 200, 190)">ប្លង់ទេរ (Ramp)</text>
+                </g>
+
+                <!-- ទីតាំងគោលដៅ P -->
+                <rect x="310" y="60" width="60" height="10" fill="#f44336" />
+                <text x="340" y="50" text-anchor="middle" font-weight="bold" fill="#d32f2f">គោលដៅ P</text>
+            </svg>
+            
+            <div class="particle-real" id="particleReal">
+                📦
+                <!-- ព្រួញទម្ងន់បង្ហាញតែនៅលើរូបពិត ដើម្បីឱ្យសិស្សចាប់អារម្មណ៍ -->
+                <div class="weight-arrow">
+                    <div class="weight-label">P</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ប្រអប់តម្លៃលេខ Live -->
+    <div class="live-data">
+        <div class="data-box" style="border-top: 5px solid #0056b3;">កូអរដោនេ (x, y)<br><span id="livePos">(0.00, 0.00)</span></div>
+        <div class="data-box" style="border-top: 5px solid #6f42c1;">កម្ពស់ដែលឡើងបាន ($\Delta y$)<br><span id="liveDy">0.00</span> m</div>
+        <div class="data-box" style="border-top: 5px solid #d32f2f;">កម្មន្តនៃទម្ងន់ ($W = -mg\Delta y$)<br><span id="liveWork">0.0</span> J</div>
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="controls">
+        <button class="btn-p1" onclick="startPath(1)">▶ គន្លងទី ១ (រុញដី រួចលើក)</button>
+        <button class="btn-p2" onclick="startPath(2)">▶ គន្លងទី ២ (លើក រួចរុញស្ពាន)</button>
+        <button class="btn-p3" onclick="startPath(3)">▶ គន្លងទី ៣ (ទាញតាមប្លង់ទេរ)</button>
+        <button id="resetBtn">🔄 ត្រឡប់ដើម</button>
+        <button id="solutionBtn">📖 លាក់/បង្ហាញ ដំណោះស្រាយ</button>
+    </div>
+
+    <div class="status" id="statusText">រង់ចាំចាប់ផ្តើម...</div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div id="solutionBox" class="solution-box" style="display: none;">
+        <div class="note-box">
+            💡 <strong>ចំណាំ៖</strong> កម្លាំងទាញនៃផែនដី (ទម្ងន់) មានទិសដៅឈរចុះក្រោមជានិច្ច ($\vec{P} = -mg\vec{j}$ ឬ $F_y = -14.7 \text{ N}, F_x = 0$)។ ដូច្នេះ កម្មន្តរបស់វាអាស្រ័យតែលើបម្រែបម្រួលកម្ពស់តាមអ័ក្ស $y$ ប៉ុណ្ណោះ ឯការផ្លាស់ទីតាមអ័ក្ស $x$ (ដេក) មិនបង្កើតកម្មន្តទេ ($W_x = 0$)។
+        </div>
+        
+        <h3>ដំណោះស្រាយ</h3>
+        <p><strong>បម្រាប់៖</strong> $m = 1.50 \text{ kg}$, $g = 9.8 \text{ m/s}^2 \Rightarrow P = mg = 14.7 \text{ N}$</p>
+        <p>រូបមន្តកម្មន្តទូទៅ៖ $W = \vec{F} \cdot \Delta\vec{r} = F_x\Delta x + F_y\Delta y = (0)\Delta x + (-mg)\Delta y = -mg\Delta y$</p>
+        
+        <p><strong>ក. តាមគន្លងទី (1) (ពី $O \rightarrow M \rightarrow P$)៖</strong></p>
+        <ul>
+            <li>កំណាត់ $OM$: $\Delta y = 0$ នាំឱ្យ $W_{OM} = 0 \text{ J}$ (កម្លាំងកែងនឹងបម្លាស់ទី)</li>
+            <li>កំណាត់ $MP$: $\Delta y = 6.00 \text{ m}$ នាំឱ្យ $W_{MP} = -14.7 \times 6.00 = -88.2 \text{ J}$</li>
+            <li>សរុប៖ $W_1 = W_{OM} + W_{MP} = 0 - 88.2 =$ <span class="highlight">-88.2 J</span></li>
+        </ul>
+
+        <p><strong>ខ. តាមគន្លងទី (2) (ពី $O \rightarrow N \rightarrow P$)៖</strong></p>
+        <ul>
+            <li>កំណាត់ $ON$: $\Delta y = 6.00 \text{ m}$ នាំឱ្យ $W_{ON} = -14.7 \times 6.00 = -88.2 \text{ J}$</li>
+            <li>កំណាត់ $NP$: $\Delta y = 0$ នាំឱ្យ $W_{NP} = 0 \text{ J}$</li>
+            <li>សរុប៖ $W_2 = W_{ON} + W_{NP} = -88.2 + 0 =$ <span class="highlight">-88.2 J</span></li>
+        </ul>
+
+        <p><strong>គ. តាមគន្លងទី (3) (ពី $O \rightarrow P$ តាមប្លង់ទេរ)៖</strong></p>
+        <ul>
+            <li>បម្លាស់ទីបញ្ឈរសរុប: $\Delta y = y_P - y_O = 6.00 \text{ m}$</li>
+            <li>សរុប៖ $W_3 = -mg\Delta y = -14.7 \times 6.00 =$ <span class="highlight">-88.2 J</span></li>
+        </ul>
+
+        <p><strong>ឃ. ការសន្និដ្ឋាន៖</strong></p>
+        <ul>
+            <li>ចម្លើយរបស់យើងគឺ <strong>ដូចគ្នា</strong> សម្រាប់គន្លងទាំង៣ ($W_1 = W_2 = W_3 = -88.2 \text{ J}$)។</li>
+            <li><strong>ហេតុផល៖</strong> ព្រោះកម្លាំងទាញនៃផែនដី (ទម្ងន់) គឺជា <strong>កម្លាំងរក្សា (Conservative Force)</strong>។ កម្មន្តនៃកម្លាំងរក្សាមិនអាស្រ័យនឹងគន្លងផ្លូវទេ វាអាស្រ័យតែលើទីតាំងដើម និងទីតាំងស្រេចប៉ុណ្ណោះ។</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const m = 1.50; 
+    const g = 9.8; 
+    const weight = m * g; // 14.7 N
+    
+    const targetX = 8.00;
+    const targetY = 6.00;
+
+    // Scale សម្រាប់ក្រាហ្វ (1m = 35px) ដើម្បីឱ្យសមល្មមនឹងប្រអប់ 500px
+    const scalePx = 35; 
+    const originX = 60; 
+    const originY = 280; 
+
+    // DOM Elements
+    const pGraph = document.getElementById('particleGraph');
+    const pReal = document.getElementById('particleReal');
+    
+    const posDisp = document.getElementById('livePos');
+    const dyDisp = document.getElementById('liveDy');
+    const workDisp = document.getElementById('liveWork');
+    const statusText = document.getElementById('statusText');
+    const solutionBtn = document.getElementById('solutionBtn');
+    const solutionBox = document.getElementById('solutionBox');
+
+    let animationFrameId;
+    let isRunning = false;
+    let currentPath = 0;
+    let physX = 0, physY = 0; 
+    let speed = 4.0; 
+
+    function updatePhysicsUI(x, y) {
+        physX = x; physY = y;
+        
+        const W = -weight * y;
+
+        posDisp.innerText = `(${x.toFixed(2)}, ${y.toFixed(2)})`;
+        dyDisp.innerText = y.toFixed(2);
+        workDisp.innerText = W.toFixed(1);
+
+        const px = originX + (x * scalePx);
+        const py = originY - (y * scalePx); 
+        
+        // អាប់ដេតទីតាំងទាំងសងខាង
+        pGraph.style.left = `${px}px`;
+        pGraph.style.top = `${py}px`;
+        
+        pReal.style.left = `${px}px`;
+        pReal.style.top = `${py}px`;
+    }
+
+    function animatePath(timestamp, lastTime, state) {
+        let dt = (timestamp - lastTime) / 1000;
+        if (dt > 0.1) dt = 0.1;
+
+        let reachedEnd = false;
+        let step = speed * dt;
+
+        if (currentPath === 1) {
+            if (state.phase === 1) { 
+                physX += step;
+                if (physX >= targetX) { physX = targetX; state.phase = 2; }
+            } else if (state.phase === 2) { 
+                physY += step;
+                if (physY >= targetY) { physY = targetY; reachedEnd = true; }
+            }
+        } 
+        else if (currentPath === 2) {
+            if (state.phase === 1) { 
+                physY += step;
+                if (physY >= targetY) { physY = targetY; state.phase = 2; }
+            } else if (state.phase === 2) { 
+                physX += step;
+                if (physX >= targetX) { physX = targetX; reachedEnd = true; }
+            }
+        } 
+        else if (currentPath === 3) {
+            let angle = Math.atan2(targetY, targetX);
+            physX += step * Math.cos(angle);
+            physY += step * Math.sin(angle);
+            
+            if (physX >= targetX || physY >= targetY) {
+                physX = targetX; physY = targetY; reachedEnd = true;
+            }
+        }
+
+        updatePhysicsUI(physX, physY);
+
+        if (reachedEnd) {
+            isRunning = false;
+            statusText.innerText = `✅ ដល់គោលដៅ P! កម្មន្តសរុប W = -88.2 J`;
+            statusText.style.color = "#28a745";
+        } else if (isRunning) {
+            animationFrameId = requestAnimationFrame((t) => animatePath(t, timestamp, state));
+        }
+    }
+
+    window.startPath = function(pathNum) {
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        
+        currentPath = pathNum;
+        isRunning = true;
+        physX = 0; physY = 0; 
+        updatePhysicsUI(0, 0);
+        
+        // បិទ/បើកបរិស្ថានពិតទៅតាមគន្លង (Ramp, Elevator, Bridge)
+        document.getElementById('env-path1').style.display = 'none';
+        document.getElementById('env-path2').style.display = 'none';
+        document.getElementById('env-path3').style.display = 'none';
+        document.getElementById('env-path' + pathNum).style.display = 'block';
+
+        let pathName = pathNum === 1 ? "គន្លងទី ១ (រុញតាមដី រួចលើកបញ្ឈរ)" : pathNum === 2 ? "គន្លងទី ២ (លើកបញ្ឈរ រួចរុញលើស្ពាន)" : "គន្លងទី ៣ (ទាញតាមប្លង់ទេរ)";
+        statusText.innerText = `កំពុងផ្លាស់ទីតាម ${pathName}...`;
+        statusText.style.color = pathNum === 1 ? "#007bff" : pathNum === 2 ? "#28a745" : "#dc3545";
+
+        let state = { phase: 1 };
+        animationFrameId = requestAnimationFrame((t) => animatePath(t, t, state));
+    };
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        isRunning = false;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        physX = 0; physY = 0;
+        updatePhysicsUI(0, 0);
+        
+        document.getElementById('env-path1').style.display = 'none';
+        document.getElementById('env-path2').style.display = 'none';
+        document.getElementById('env-path3').style.display = 'none';
+        
+        statusText.innerText = "រង់ចាំចាប់ផ្តើម...";
+        statusText.style.color = "#333";
+    });
+
+    solutionBtn.addEventListener('click', () => {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    // កំណត់ទីតាំងដើម
+    updatePhysicsUI(0, 0);
+</script>
+
+</body>
+</html>

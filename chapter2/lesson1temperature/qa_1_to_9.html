@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់រូបវិទ្យា៖ សីតុណ្ហភាព និងកម្ដៅ</title>
+    <!-- បញ្ចូលបណ្ណាល័យ MathJax សម្រាប់បង្ហាញរូបមន្តគណិតវិទ្យា -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Khmer OS Battambang', 'Hanuman', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .header-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .qa-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #3498db;
+        }
+        .question {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .toggle-btn {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .toggle-btn:hover {
+            background-color: #2980b9;
+        }
+        .answer {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e8f4f8;
+            border-radius: 4px;
+            border-left: 3px solid #2ecc71;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <center><h2 class="header-title">សំណួរ និងចម្លើយ៖ សីតុណ្ហភាព</h2></center>
+
+    <!-- សំណួរទី ១ -->
+    <div class="qa-card">
+        <div class="question">១. តើអ្វីទៅជាសីតុណ្ហភាព? អ្វីទៅជាកម្ដៅ?</div>
+        <button class="toggle-btn" onclick="toggleAnswer(this)">បង្ហាញចម្លើយ</button>
+        <div class="answer">
+            <b>សីតុណ្ហភាព</b> គឺជារង្វាស់ដែលបញ្ជាក់ពីកម្រិតក្តៅ ឬត្រជាក់នៃអង្គធាតុមួយ។ <br>
+            <b>កម្ដៅ</b> គឺជាទម្រង់ថាមពលដែលប្តូរពីអង្គធាតុមួយដែលមានសីតុណ្ហភាពខ្ពស់ ទៅកាន់អង្គធាតុមួយទៀតដែលមានសីតុណ្ហភាពទាបជាង។
+        </div>
+    </div>
+
+    <!-- សំណួរទី ២ -->
+    <div class="qa-card">
+        <div class="question">២. តើអ្វីជាចំណុចនឹងមួយនៃភាពទាំងបីរបស់ទឹក (Triple point of water)?</div>
+        <button class="toggle-btn" onclick="toggleAnswer(this)">បង្ហាញចម្លើយ</button>
+        <div class="answer">
+            <b>ចំណុចនឹងមួយនៃភាពទាំងបីរបស់ទឹក</b> គឺជាសីតុណ្ហភាពនិងសម្ពាធតែមួយគត់ដែលទឹកអាចស្ថិតក្នុងភាពទាំងបី (រឹង រាវ និងឧស្ម័ន) ក្នុងពេលតែមួយ និងក្នុងលំនឹងកម្តៅ។ វាមានតម្លៃសីតុណ្ហភាព \(T_{tr} = 273.16 \text{ K}\) (ឬ \(0.01^\circ\text{C}\)) និងសម្ពាធ \(4.58 \text{ mmHg}\)។
+        </div>
+    </div>
+
+    <!-- សំណួរទី ៣ -->
+    <div class="qa-card">
+        <div class="question">៣. តើសូន្យដាច់ខាតមានន័យដូចម្តេច?</div>
+        <button class="toggle-btn" onclick="toggleAnswer(this)">បង្ហាញចម្លើយ</button>
+        <div class="answer">
+            <b>សូន្យដាច់ខាត (Absolute zero)</b> គឺជាសីតុណ្ហភាពទាបបំផុតតាមទ្រឹស្តី ដែលនៅសីតុណ្ហភាពនោះចលនារបស់ម៉ូលេគុលឬអាតូមនៃរូបធាតុឈប់ទាំងស្រុង (ថាមពលស៊ីនេទិចសរុបស្មើស្មូន្យ)។ វាត្រូវនឹង \(0 \text{ K}\) ឬ \(-273.15^\circ\text{C}\)។
+        </div>
+    </div>
+
+    <!-- សំណួរទី ៤ -->
+    <div class="qa-card">
+        <div class="question">៤. ចូរសរសេរសមីការសីតុណ្ហភាពសម្រាប់មាត្រដ្ឋានសេនទីក្រាត ដែលទាក់ទងនឹងទំហំអង្គធាតុរាវក្នុងទែម៉ូម៉ែត្រ។</div>
+        <button class="toggle-btn" onclick="toggleAnswer(this)">បង្ហាញចម្លើយ</button>
+        <div class="answer">
+            សមីការសីតុណ្ហភាពគឺ៖<br>
+            \(t = \frac{X_t - X_0}{X_{100} - X_0} \times 100^\circ\text{C}\)<br>
+            ដែល \(X_t, X_0, X_{100}\) ជាទំហំរូបវិទ្យា (ដូចជាប្រវែង ឬមាឌអង្គធាតុរាវ) នៅសីតុណ្ហភាព \(t\), \(0^\circ\text{C}\), និង \(100^\circ\text{C}\)។
+        </div>
+    </div>
+
+    <!-- សំណួរទី ៥ -->
+    <div class="qa-card">
+        <div class="question">៥. ចូរសរសេរសមីការបង្ហាញពីទំនាក់ទំនងមាត្រដ្ឋានសែលស៊្យុសនិងមាត្រដ្ឋានកែលវិន។</div>
+        <button class="toggle-btn" onclick="toggleAnswer(this)">បង្ហាញចម្លើយ</button>
+        <div class="answer">
+            សមីការទំនាក់ទំនងគឺ៖<br>
+            \(T(\text{K}) = t(^\circ\text{C}) + 273.15\)<br>
+            (សម្រាប់ការគណនាងាយស្រួល គេច្រើនប្រើ \(T = t + 273\))។
+        </div>
+    </div>
+
+    <!-- សំណួរទី ៦ -->
+    <div class="qa-card">
+        <div class="question">៦. គណនាសីតុណ្ហភាពដាច់ខាតដែលត្រូវនឹង -5°C, 3°C, 20°C, 60°C ។</div>
+        <button class="toggle-btn" onclick="toggleAnswer(this)">បង្ហាញចម្លើយ</button>
+        <div class="answer">
+            ប្រើរូបមន្ត \(T = t + 273\) ៖<br>
+            <ul>
+                <li>បើ \(t = -5^\circ\text{C} \Rightarrow T = -5 + 273 = 268 \text{ K}\)</li>
+                <li>បើ \(t = 3^\circ\text{C} \Rightarrow T = 3 + 273 = 276 \text{ K}\)</li>
+                <li>បើ \(t = 20^\circ\text{C} \Rightarrow T = 20 + 273 = 293 \text{ K}\)</li>
+                <li>បើ \(t = 60^\circ\text{C} \Rightarrow T = 60 + 273 = 333 \text{ K}\)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- សំណួរទី ៧ -->
+    <div class="qa-card">
+        <div class="question">៧. កុមារម្នាក់គ្រុនក្តៅមានសីតុណ្ហភាព 40°C ។ គណនាសីតុណ្ហភាពដាច់ខាតរបស់កុមារនោះ។</div>
+        <button class="toggle-btn" onclick="toggleAnswer(this)">បង្ហាញចម្លើយ</button>
+        <div class="answer">
+            តាមរូបមន្ត \(T = t + 273\)<br>
+            ដោយ \(t = 40^\circ\text{C}\)<br>
+            នាំឱ្យ \(T = 40 + 273 = 313 \text{ K}\)<br>
+            ដូចនេះ សីតុណ្ហភាពដាច់ខាតរបស់កុមារគឺ <b>\(313 \text{ K}\)</b> ។
+        </div>
+    </div>
+
+    <!-- សំណួរទី ៨ -->
+    <div class="qa-card">
+        <div class="question">៨. នៅប្រទេសកម្ពុជាក្នុងឆ្នាំមួយនោះសីតុណ្ហភាពធ្លាក់ចុះដល់ 16°C ។ ចូរគិតជាសីតុណ្ហភាពកែលវិន។</div>
+        <button class="toggle-btn" onclick="toggleAnswer(this)">បង្ហាញចម្លើយ</button>
+        <div class="answer">
+            តាមរូបមន្ត \(T = t + 273\)<br>
+            ដោយ \(t = 16^\circ\text{C}\)<br>
+            នាំឱ្យ \(T = 16 + 273 = 289 \text{ K}\)<br>
+            ដូចនេះ សីតុណ្ហភាពគិតជាកែលវិនគឺ <b>\(289 \text{ K}\)</b> ។
+        </div>
+    </div>
+
+    <!-- សំណួរទី ៩ -->
+    <div class="qa-card">
+        <div class="question">៩. នាពាក់កណ្តាលរដូវរងា នៅមហាសមុទ្រអង់តាក់ទិកសីតុណ្ហភាពមានតម្លៃ 186 K ។ ចូរគិតសីតុណ្ហភាពនេះជាសែលស៊្យុស។</div>
+        <button class="toggle-btn" onclick="toggleAnswer(this)">បង្ហាញចម្លើយ</button>
+        <div class="answer">
+            តាមរូបមន្ត \(T = t + 273 \Rightarrow t = T - 273\)<br>
+            ដោយ \(T = 186 \text{ K}\)<br>
+            នាំឱ្យ \(t = 186 - 273 = -87^\circ\text{C}\)<br>
+            ដូចនេះ សីតុណ្ហភាពគិតជាសែលស៊្យុសគឺ <b>\(-87^\circ\text{C}\)</b> ។
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function toggleAnswer(btn) {
+        // រកមើល div class="answer" ដែលនៅជាប់នឹងប៊ូតុងដែលបានចុច
+        var answerDiv = btn.nextElementSibling;
+        
+        if (answerDiv.style.display === "none" || answerDiv.style.display === "") {
+            answerDiv.style.display = "block";
+            btn.innerText = "លាក់ចម្លើយ";
+            btn.style.backgroundColor = "#e74c3c"; // ដូរពណ៌ទៅក្រហមពេលលាក់
+        } else {
+            answerDiv.style.display = "none";
+            btn.innerText = "បង្ហាញចម្លើយ";
+            btn.style.backgroundColor = "#3498db"; // ត្រឡប់ពណ៌ដើម
+        }
+    }
+</script>
+
+</body>
+</html>

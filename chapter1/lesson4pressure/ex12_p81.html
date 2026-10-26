@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី១២៖ ឃ្នាស់អ៊ីដ្រូលីក (ច្បាប់ប៉ាស្កាល់)</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្ត -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        /* ផ្ទៃបង្ហាញ SVG ដែលមានសុវត្ថិភាព មិនបែករាង */
+        .sim-area {
+            position: relative; width: 100%; max-width: 600px; height: auto;
+            background: #e0f7fa; border: 2px solid #0277bd;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        @media (min-width: 600px) {
+            .controls-grid { grid-template-columns: 1fr 1fr 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 16px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        button {
+            background: #007bff; color: white; padding: 12px 24px; font-size: 18px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s; width: 100%; margin-bottom: 20px;
+        }
+        button:hover { filter: brightness(1.1); }
+        #btnSetValues { background: #28a745; }
+
+        .dashboard {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 16px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 8px;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 18px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        
+        .number-display { font-family: 'Times New Roman', serif; font-weight: bold; }
+        .text-outline { text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>១២. ឃ្នាស់អ៊ីដ្រូលីក ៖</strong> ពីស្តុងតូចនៃឃ្នាស់អ៊ីដ្រូលីកមានផ្ទៃមុខកាត់ $3.00 \text{ cm}^2$ និងពីស្តុងធំមានផ្ទៃមុខកាត់ $200 \text{ cm}^2$ ។ គណនាអាំងតង់ស៊ីតេនៃកម្លាំង $F_1$ ដែលបញ្ចេញលើពីស្តុងតូច ដើម្បីលើករថយន្តមួយមានម៉ាស $1400 \text{ kg}$ ។
+    </div>
+
+    <button id="btnSetValues">🎯 កំណត់តម្លៃតាមលំហាត់ (F₁ = 206 N)</button>
+
+    <!-- ផ្ទាំង Simulator 2D SVG สុទ្ធ (ធានាមិនបែករាង) -->
+    <div class="sim-area">
+        <svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="fluidGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#4fc3f7"/>
+                    <stop offset="100%" stop-color="#0277bd"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ទម្រង់បំពង់ឃ្នាស់អ៊ីដ្រូលីកខាងក្រៅ -->
+            <!-- ជញ្ជាំងកោងភ្ជាប់គ្នាជាបំណែកតែមួយដើម្បីកុំឱ្យមានស្នាមតភ្ជាប់ -->
+            <path d="M 100 100 L 100 350 L 520 350 L 520 100 M 180 100 L 180 280 L 300 280 L 300 100" fill="none" stroke="#546e7a" stroke-width="8" stroke-linejoin="round"/>
+
+            <!-- ផ្ទៃទឹកពណ៌ខៀវ (ប្រើប្រាស់ Path តែមួយដើម្បីចាក់ពណ៌) -->
+            <!-- យើងនឹងប្រើ JS ដើម្បី Update កម្ពស់ទឹកសងខាង -->
+            <path id="fluidShape" d="M 104 346 L 516 346 L 516 200 L 304 200 L 304 284 L 176 284 L 176 200 L 104 200 Z" fill="url(#fluidGrad)" />
+
+            <!-- ពីស្តុងទី១ (តូចខាងឆ្វេង) -->
+            <g id="piston1Group" transform="translate(140, 200)">
+                <rect x="-36" y="-15" width="72" height="15" fill="#78909c" stroke="#37474f" stroke-width="2"/>
+                <!-- ដុំទម្ងន់ F1 ពណ៌ក្រហម -->
+                <rect x="-20" y="-55" width="40" height="40" fill="#d32f2f" stroke="#b71c1c" stroke-width="2" rx="4"/>
+                <text x="0" y="-28" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#fff">F₁</text>
+                
+                <!-- ព្រួញចង្អុលចុះក្រោម -->
+                <g id="arrow1" style="opacity: 0;">
+                    <line x1="-40" y1="-80" x2="-40" y2="-20" stroke="#d32f2f" stroke-width="4"/>
+                    <polygon points="-40,-15 -45,-25 -35,-25" fill="#d32f2f"/>
+                </g>
+            </g>
+
+            <!-- ពីស្តុងទី២ (ធំខាងស្តាំ) -->
+            <g id="piston2Group" transform="translate(410, 200)">
+                <rect x="-106" y="-20" width="212" height="20" fill="#78909c" stroke="#37474f" stroke-width="2"/>
+                
+                <!-- រូបរថយន្ត -->
+                <g transform="translate(0, -20)">
+                    <circle cx="-50" cy="-12" r="14" fill="#424242" stroke="#212121" stroke-width="3"/>
+                    <circle cx="50" cy="-12" r="14" fill="#424242" stroke="#212121" stroke-width="3"/>
+                    <circle cx="-50" cy="-12" r="6" fill="#e0e0e0"/>
+                    <circle cx="50" cy="-12" r="6" fill="#e0e0e0"/>
+                    <path d="M -80 -12 L 80 -12 L 80 -35 L 45 -65 L -30 -65 L -80 -35 Z" fill="#263238" stroke="#111" stroke-width="2"/>
+                    <!-- កញ្ចក់ឡាន -->
+                    <polygon points="-25,-60 40,-60 70,-35 -25,-35" fill="#81d4fa" opacity="0.8"/>
+                    <line x1="10" y1="-60" x2="10" y2="-35" stroke="#263238" stroke-width="4"/>
+                </g>
+                
+                <!-- ព្រួញចង្អុលឡើងលើ -->
+                <g id="arrow2" style="opacity: 0;">
+                    <line x1="120" y1="-10" x2="120" y2="-70" stroke="#28a745" stroke-width="4"/>
+                    <polygon points="120,-75 115,-65 125,-65" fill="#28a745"/>
+                    <text x="130" y="-40" font-family="Arial" font-weight="bold" font-size="18" fill="#28a745" class="text-outline">F₂</text>
+                </g>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            កម្លាំងសង្កត់ $F_1$ (គិតជា N):<br>
+            <span id="valF1" class="number-display" style="color: #d32f2f; font-size:24px;">0 N</span>
+            <input type="range" id="sliderF1" min="0" max="300" value="0" step="1">
+        </div>
+        <div class="slider-box">
+            ផ្ទៃមុខកាត់ $A_1$ (គិតជា cm²):<br>
+            <span id="valA1" class="number-display" style="color: #007bff; font-size:24px;">3.00 cm²</span>
+            <input type="range" id="sliderA1" min="1.0" max="10.0" value="3.0" step="0.1">
+        </div>
+        <div class="slider-box">
+            ផ្ទៃមុខកាត់ $A_2$ (គិតជា cm²):<br>
+            <span id="valA2" class="number-display" style="color: #28a745; font-size:24px;">200 cm²</span>
+            <input type="range" id="sliderA2" min="100" max="400" value="200" step="10">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Grid) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #28a745;">កម្លាំងរុញលើកឡាន $F_2$<br><span id="liveF2" class="number-display">0 N</span></div>
+        <div class="data-box" style="border-top: 4px solid #6f42c1;">ស្ថានភាពរថយន្ត<br><span id="liveStatus" style="font-family: 'Siemreap', sans-serif;">នៅនឹងថ្កល់បាត</span></div>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box">
+        <h3>ដំណោះស្រាយ</h3>
+        <p>តាមច្បាប់ប៉ាស្កាល់ សម្ពាធបញ្ជូនគ្រប់ទិសទីស្មើៗគ្នា ($P_1 = P_2$)៖</p>
+        <div id="mathContainer">
+            <div style="font-size: 1.1em; margin: 15px 0; text-align: center;">
+                $$ \frac{F_1}{A_1} = \frac{F_2}{A_2} \implies F_1 = F_2 \times \frac{A_1}{A_2} $$
+            </div>
+            <p>ដើម្បីលើករថយន្តរួច កម្លាំង $F_2$ ត្រូវស្មើនឹងទម្ងន់រថយន្ត៖</p>
+            <div style="font-size: 1.1em; margin: 15px 0; text-align: center;">
+                $$ F_2 = W = M \cdot g = 1400 \times 9.80 = 13720 \text{ N} $$
+            </div>
+            <p>ជំនួសលេខចូលសមីការដើម យើងបាន៖</p>
+            <div style="font-size: 1.1em; margin: 15px 0; text-align: center; font-weight: bold; color: #d32f2f;">
+                $$ F_1 = 13720 \times \frac{3.00}{200} = 205.8 \text{ N} \approx 206 \text{ N} $$
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាព គ្មានសញ្ញា < ឬ > ដើម្បីការពារ Error លើទូរស័ព្ទ -->
+<script>
+    var sF1 = document.getElementById('sliderF1');
+    var sA1 = document.getElementById('sliderA1');
+    var sA2 = document.getElementById('sliderA2');
+
+    var btnSet = document.getElementById('btnSetValues');
+
+    var fluidShape = document.getElementById('fluidShape');
+    var piston1Group = document.getElementById('piston1Group');
+    var piston2Group = document.getElementById('piston2Group');
+    var arrow1 = document.getElementById('arrow1');
+    var arrow2 = document.getElementById('arrow2');
+
+    var carMass = 1400; // kg
+    var g = 9.80;
+    var wCar = carMass * g; // 13720 N
+
+    function updateSimulation() {
+        var f1 = parseFloat(sF1.value);
+        var a1 = parseFloat(sA1.value);
+        var a2 = parseFloat(sA2.value);
+
+        // គណនាកម្លាំង F2
+        var f2 = f1 * (a2 / a1);
+
+        // អាប់ដេតទិន្នន័យលេខសកល
+        document.getElementById('valF1').innerText = f1 + " N";
+        document.getElementById('valA1').innerText = a1.toFixed(2) + " cm\u00B2";
+        document.getElementById('valA2').innerText = a2 + " cm\u00B2";
+
+        var f2Str = Math.round(f2).toLocaleString() + " N";
+        document.getElementById('liveF2').innerText = f2Str;
+
+        // គណនាអត្រានៃការលើក (ធៀបកម្លាំង F2 និងទម្ងន់រថយន្ត 13720N)
+        var forceRatio = f2 / wCar;
+        // រក្សាតម្លៃត្រឹម 1 (100%) ដើម្បីការពារការលើស
+        var progress = Math.min(1, forceRatio); 
+
+        // ធ្វើចលនាក្រាហ្វិក (Animation)
+        // ពេល f1 សង្កត់ (progress កើន) -> piston1 ចុះក្រោម, piston2 ឡើងលើ
+        var maxDrop1 = 80; // px
+        var maxLift2 = 50; // px
+
+        var drop1 = progress * maxDrop1;
+        var lift2 = progress * maxLift2;
+
+        var y1 = 200 + drop1;
+        var y2 = 200 - lift2;
+
+        piston1Group.setAttribute("transform", "translate(140, " + y1 + ")");
+        piston2Group.setAttribute("transform", "translate(410, " + y2 + ")");
+
+        // អាប់ដេតទម្រង់ទឹកឱ្យរត់តាមពីស្តុង (M 104 346 L 516 346 L 516 y2 L 304 y2 L 304 284 L 176 284 L 176 y1 L 104 y1 Z)
+        fluidShape.setAttribute("d", "M 104 346 L 516 346 L 516 " + y2 + " L 304 " + y2 + " L 304 284 L 176 284 L 176 " + y1 + " L 104 " + y1 + " Z");
+
+        // បង្ហាញព្រួញកម្លាំង និងស្ថានភាព
+        var isFullyLifted = (progress === 1);
+        
+        if (f1 !== 0) {
+            arrow1.style.opacity = "1";
+            arrow2.style.opacity = "1";
+        } else {
+            arrow1.style.opacity = "0";
+            arrow2.style.opacity = "0";
+        }
+
+        var statusEl = document.getElementById('liveStatus');
+        if (isFullyLifted === true) {
+            statusEl.innerText = "រថយន្តត្រូវបានលើកឡើង!";
+            statusEl.style.color = "#28a745";
+        } else if (f1 !== 0) {
+            statusEl.innerText = "កំពុងប្រឹងរុញឡើង...";
+            statusEl.style.color = "#e65100";
+        } else {
+            statusEl.innerText = "នៅនឹងថ្កល់បាត";
+            statusEl.style.color = "#6f42c1";
+        }
+    }
+
+    btnSet.addEventListener('click', function() {
+        sF1.value = 206;
+        sA1.value = 3.0;
+        sA2.value = 200;
+        updateSimulation();
+    });
+
+    sF1.addEventListener('input', updateSimulation);
+    sA1.addEventListener('input', updateSimulation);
+    sA2.addEventListener('input', updateSimulation);
+
+    // Initial update
+    updateSimulation();
+</script>
+
+</body>
+</html>

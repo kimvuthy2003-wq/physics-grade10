@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ13ទំព័រ122</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS Styles -->
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .math-font { font-family: 'Lora', serif; }
+
+        /* Solution Toggle */
+        .solution-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out, padding 0.4s ease-in-out;
+            opacity: 0;
+        }
+        .solution-content.open {
+            max-height: 1000px;
+            opacity: 1;
+        }
+
+        /* 2D Apparatus */
+        .apparatus-container {
+            position: relative;
+            width: 100%;
+            height: 380px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 30px;
+        }
+
+        /* Insulated Thermos Container */
+        .thermos {
+            width: 240px;
+            height: 260px;
+            border: 12px solid #94a3b8; /* slate-400 representing thick insulation */
+            border-top: none;
+            border-radius: 0 0 24px 24px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(226,232,240,0.5) 100%);
+            position: relative;
+            box-shadow: inset 0 -5px 15px rgba(0,0,0,0.1), 0 10px 20px -5px rgba(0,0,0,0.2);
+            overflow: hidden;
+            z-index: 10;
+        }
+        
+        .water {
+            background: linear-gradient(180deg, #38bdf8, #0ea5e9);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 65%;
+            opacity: 0.9;
+            z-index: 1;
+        }
+
+        /* Ice Block */
+        .ice-block {
+            position: absolute;
+            width: 120px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(186,230,253,0.8));
+            border: 2px solid #7dd3fc;
+            border-radius: 8px;
+            bottom: 10px; /* Floating / resting in water */
+            left: 50%;
+            transform: translateX(-50%) scale(1);
+            transform-origin: bottom center;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0284c7;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.8), 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Heat Arrows (Water to Ice) */
+        .heat-arrow {
+            position: absolute;
+            opacity: 0;
+            z-index: 15;
+            color: #ef4444; /* red-500 */
+        }
+        
+        .sim-active .heat-arrow {
+            animation: flowToIce 1.5s infinite ease-in;
+        }
+
+        .ha-1 { left: 15%; bottom: 20%; animation-delay: 0s !important; }
+        .ha-2 { right: 15%; bottom: 20%; animation-delay: 0.4s !important; }
+        .ha-3 { left: 30%; bottom: 5%; animation-delay: 0.8s !important; }
+        .ha-4 { right: 30%; bottom: 5%; animation-delay: 1.2s !important; }
+
+        @keyframes flowToIce {
+            0% {
+                transform: translate(0, 0) scale(0.8);
+                opacity: 0;
+            }
+            30% { opacity: 1; }
+            100% {
+                /* Flowing towards center (ice) */
+                transform: translate(calc(50% - var(--tx, 0px)), -40px) scale(1.2);
+                opacity: 0;
+            }
+        }
+        
+        /* Adjusting target X for different arrows for realistic flow */
+        .ha-1 { --tx: -50px; }
+        .ha-2 { --tx: 50px; }
+        .ha-3 { --tx: -30px; }
+        .ha-4 { --tx: 30px; }
+
+        .temp-badge {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- Problem Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+            <div class="flex items-start gap-4">
+                <div class="text-xl font-semibold math-font text-slate-700 mt-1">13.</div>
+                <div class="text-lg leading-relaxed text-slate-800">
+                    គេដាក់ទឹកកក <span class="math-font">500 g</span> នៅសីតុណ្ហភាព <span class="math-font">0°C</span> ក្នុងធុងអ៊ីសូឡង់មួយ រួចគេចាក់ទឹក <span class="math-font">1.00 L</span> នៅសីតុណ្ហភាព <span class="math-font">20.0°C</span> ចូលទៅក្នុងធុងនោះ។<br>
+                    ក. គណនាសីតុណ្ហភាពសម្រេច។<br>
+                    ខ. គណនាម៉ាសទឹកកកដែលនៅសល់។ គេឱ្យកម្ដៅឡាតង់រលាយទឹកកក <span class="math-font">3.33 × 10<sup>5</sup> J/kg</span> និងកម្ដៅម៉ាសទឹក <span class="math-font">4186 J/kg·°C</span> ។<br>
+                    <span class="text-slate-600 font-semibold text-base mt-2 inline-block">ចម្លើយ៖ ក. <span class="math-font text-blue-600">t<sub>f</sub> = 0°C</span> &nbsp; ខ. <span class="math-font text-blue-600">m = 249 g</span></span>
+                </div>
+            </div>
+
+            <!-- Toggle Solution Button -->
+            <div class="mt-6 flex justify-end">
+                <button onclick="toggleSolution()" class="flex items-center gap-2 px-5 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl font-medium transition-colors">
+                    <span>បង្ហាញដំណោះស្រាយ</span>
+                    <svg id="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+            </div>
+
+            <!-- Solution Content -->
+            <div id="solution-box" class="solution-content bg-slate-50 rounded-xl mt-4 border border-slate-100">
+                <div class="p-6 space-y-4 text-slate-700 text-base">
+                    <p class="font-semibold text-blue-700">ដំណោះស្រាយ៖</p>
+                    <p>ជាដំបូង យើងត្រូវផ្ទៀងផ្ទាត់ថាតើថាមពលកម្ដៅរបស់ទឹកគ្រប់គ្រាន់ក្នុងការរំលាយទឹកកកទាំងស្រុងឬទេ។</p>
+                    
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li>ថាមពលកម្ដៅអតិបរមាដែលទឹកអាចបញ្ចេញ (ចុះដល់ 0°C)៖</li>
+                        <div class="math-font bg-white p-3 rounded-lg border border-slate-200 inline-block">
+                            Q<sub>water</sub> = m<sub>w</sub>c<sub>w</sub>Δt = 1.00 × 4186 × (20 - 0) = 83,720 J
+                        </div>
+                        <li>ថាមពលកម្ដៅដែលត្រូវការដើម្បីរំលាយទឹកកកទាំងស្រុង៖</li>
+                        <div class="math-font bg-white p-3 rounded-lg border border-slate-200 inline-block">
+                            Q<sub>melt_all</sub> = m<sub>ice</sub>L<sub>f</sub> = 0.500 × 3.33 × 10<sup>5</sup> = 166,500 J
+                        </div>
+                    </ul>
+
+                    <p>ក. រកសីតុណ្ហភាពសម្រេច (<span class="math-font">t<sub>f</sub></span>)៖</p>
+                    <p>ដោយសារ <span class="math-font">Q<sub>water</sub> < Q<sub>melt_all</sub> (83,720 J < 166,500 J)</span> នោះទឹកមិនអាចរំលាយទឹកកកអស់ទេ។ ប្រព័ន្ធនឹងនៅសល់ទាំងទឹកនិងទឹកកកក្នុងលំនឹងកម្ដៅ។<br>
+                    ដូចនេះ សីតុណ្ហភាពសម្រេចគឺ <span class="font-bold text-red-600 math-font">t<sub>f</sub> = 0°C</span> ។</p>
+
+                    <p>ខ. រកម៉ាសទឹកកកដែលនៅសល់ (<span class="math-font">m</span>)៖</p>
+                    <p>ម៉ាសទឹកកកដែលបានរលាយ៖</p>
+                    <div class="math-font bg-white p-3 rounded-lg border border-slate-200 inline-block">
+                        m<sub>melt</sub> = Q<sub>water</sub> / L<sub>f</sub> = 83,720 / 333,000 ≈ 0.2514 kg = 251 g
+                    </div>
+                    <p>ម៉ាសទឹកកកដែលនៅសល់៖</p>
+                    <div class="math-font bg-white p-3 rounded-lg border border-slate-200 inline-block">
+                        m<sub>remain</sub> = m<sub>initial</sub> - m<sub>melt</sub> = 500 - 251 = <span class="font-bold text-red-600">249 g</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulator Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
+                <span class="text-2xl">🧊</span>
+                <h2 class="text-lg font-bold text-slate-800">កម្មវិធីពិសោធន៍ 2D</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2">
+                <!-- Left: 2D Apparatus -->
+                <div class="p-6 relative bg-gradient-to-b from-slate-50 to-white flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-100">
+                    
+                    <!-- Temp Badges -->
+                    <div class="flex justify-between items-start w-full relative z-20">
+                        <div class="temp-badge border border-blue-300 rounded-xl p-3 shadow-sm text-center">
+                            <div class="text-xs font-bold text-blue-600 mb-1 uppercase tracking-wider">ទឹក (Water)</div>
+                            <div class="text-2xl font-bold text-blue-600 math-font"><span id="lbl-water">20.0</span> °C</div>
+                        </div>
+                        <div class="temp-badge border border-cyan-300 rounded-xl p-3 shadow-sm text-center">
+                            <div class="text-xs font-bold text-cyan-600 mb-1 uppercase tracking-wider">ទឹកកក (Ice)</div>
+                            <div class="text-2xl font-bold text-cyan-600 math-font"><span id="lbl-ice">0.0</span> °C</div>
+                        </div>
+                    </div>
+
+                    <!-- 2D Canvas Area -->
+                    <div class="apparatus-container" id="sim-area">
+                        <!-- Thermos Container & Water -->
+                        <div class="thermos flex justify-center relative">
+                            <!-- Heat Arrows -->
+                            <svg class="heat-arrow ha-1" width="28" height="28" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none"><path d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                            <svg class="heat-arrow ha-2" width="28" height="28" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none"><path d="M11 7l-5 5m0 0l5 5m-5-5h12"></path></svg>
+                            <svg class="heat-arrow ha-3" width="28" height="28" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none"><path d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                            <svg class="heat-arrow ha-4" width="28" height="28" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none"><path d="M11 7l-5 5m0 0l5 5m-5-5h12"></path></svg>
+
+                            <div class="water" id="water-level"></div>
+                            
+                            <!-- Ice Block -->
+                            <div class="ice-block" id="ice-block">
+                                <span class="math-font text-cyan-700" id="ice-label">500g</span>
+                            </div>
+                        </div>
+                        <!-- Thermos Lid representation -->
+                        <div class="absolute top-[90px] w-[260px] h-[16px] bg-slate-500 rounded-t-lg z-20 shadow-md"></div>
+                    </div>
+                </div>
+
+                <!-- Right: Chart -->
+                <div class="p-6 flex flex-col justify-center">
+                    <!-- Chart Legend overlay -->
+                    <div class="flex justify-center gap-6 mb-4 mt-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-1.5 bg-blue-500 rounded-full"></div>
+                            <span class="text-sm text-slate-600">ទឹក (°C)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-1.5 bg-cyan-400 rounded-full"></div>
+                            <span class="text-sm text-slate-600">ទឹកកក (°C)</span>
+                        </div>
+                    </div>
+                    <div class="relative w-full h-[320px]">
+                        <canvas id="tempChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls (Bottom) -->
+            <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-center gap-4">
+                <button id="btn-start" onclick="startSim()" class="flex items-center gap-2 px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-all shadow-sm shadow-red-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                    <span>ចាប់ផ្ដើម (Replay)</span>
+                </button>
+                <button id="btn-reset" onclick="resetSim()" class="flex items-center gap-2 px-8 py-3 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl font-medium transition-all shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                    <span>ត្រឡប់ដើម (Reset)</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- UI Interactions ---
+        function toggleSolution() {
+            const content = document.getElementById('solution-box');
+            const icon = document.getElementById('chevron-icon');
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                content.style.padding = "0 1.5rem";
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.classList.add('open');
+                content.style.padding = "1.5rem";
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // --- Physics Variables ---
+        const T_INIT_W = 20.0;
+        const T_INIT_ICE = 0.0;
+        const T_FINAL = 0.0;
+        const SIM_DURATION = 10.0; // 10 seconds total
+        const ICE_M_INIT = 500;
+        const ICE_M_FINAL = 249;
+
+        let currentTime = 0;
+        let simInterval = null;
+        let isRunning = false;
+
+        // --- DOM Elements ---
+        const lblWater = document.getElementById('lbl-water');
+        const lblIce = document.getElementById('lbl-ice');
+        const iceBlock = document.getElementById('ice-block');
+        const iceLabel = document.getElementById('ice-label');
+        const simArea = document.getElementById('sim-area');
+
+        // --- Chart.js Setup ---
+        const ctx = document.getElementById('tempChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: 'ទឹក',
+                        data: [{x: 0, y: T_INIT_W}],
+                        borderColor: '#3b82f6', // blue-500
+                        backgroundColor: '#3b82f6',
+                        showLine: true,
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        pointHitRadius: 10,
+                        tension: 0
+                    },
+                    {
+                        label: 'ទឹកកក',
+                        data: [{x: 0, y: T_INIT_ICE}],
+                        borderColor: '#22d3ee', // cyan-400
+                        backgroundColor: '#22d3ee',
+                        showLine: true,
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        pointHitRadius: 10,
+                        tension: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false, // Disable default animation for progressive drawing
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}°C នាទីទី ${context.parsed.x.toFixed(1)}s`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        min: 0,
+                        max: 10,
+                        title: { display: true, text: 'ពេលវេលា (s)', font: { family: 'Kantumruy Pro' } },
+                        ticks: { stepSize: 1, font: { family: 'Lora' } },
+                        grid: { color: '#f1f5f9' }
+                    },
+                    y: {
+                        min: -5,
+                        max: 25,
+                        title: { display: true, text: 'សីតុណ្ហភាព (°C)', font: { family: 'Kantumruy Pro' } },
+                        ticks: { stepSize: 5, font: { family: 'Lora' } },
+                        grid: { color: '#f1f5f9' }
+                    }
+                }
+            }
+        });
+
+        // --- Simulation Logic ---
+        function updateUI(t) {
+            let progress = Math.min(t / SIM_DURATION, 1.0);
+            
+            // Linear interpolation for water temp
+            let currentTw = T_INIT_W - (T_INIT_W * progress); // 20 down to 0
+            let currentTi = T_INIT_ICE; // Stays at 0
+
+            // Update Labels
+            lblWater.textContent = currentTw.toFixed(1);
+            lblIce.textContent = currentTi.toFixed(1);
+
+            // Scale Ice Block (from 1.0 down to ~0.7)
+            // Volume representation: if mass is ~half, scale should be somewhat proportional
+            let currentIceMass = ICE_M_INIT - ((ICE_M_INIT - ICE_M_FINAL) * progress);
+            let iceScale = 0.5 + 0.5 * (currentIceMass / ICE_M_INIT); // Scales from 1.0 -> ~0.749
+            
+            iceBlock.style.transform = `translateX(-50%) scale(${iceScale})`;
+            iceLabel.textContent = `${Math.round(currentIceMass)}g`;
+
+            // Update Chart
+            chart.data.datasets[0].data.push({x: t, y: currentTw});
+            chart.data.datasets[1].data.push({x: t, y: currentTi});
+            chart.update('none');
+        }
+
+        function startSim() {
+            if (isRunning) return;
+            
+            resetSim(false);
+            isRunning = true;
+            currentTime = 0;
+
+            // Start Heat Waves
+            simArea.classList.add('sim-active');
+
+            // Tick interval for rendering
+            const tickRate = 50; 
+            const timeStep = tickRate / 1000; 
+
+            simInterval = setInterval(() => {
+                currentTime += timeStep;
+                
+                if (currentTime >= SIM_DURATION) {
+                    currentTime = SIM_DURATION;
+                    clearInterval(simInterval);
+                    isRunning = false;
+                    simArea.classList.remove('sim-active'); // Stop heat arrows
+                }
+                
+                updateUI(currentTime);
+
+            }, tickRate);
+        }
+
+        function resetSim(fullReset = true) {
+            clearInterval(simInterval);
+            isRunning = fullReset ? false : isRunning;
+            currentTime = 0;
+
+            // Reset UI Labels & Ice
+            lblWater.textContent = T_INIT_W.toFixed(1);
+            lblIce.textContent = T_INIT_ICE.toFixed(1);
+            iceBlock.style.transform = 'translateX(-50%) scale(1)';
+            iceLabel.textContent = `${ICE_M_INIT}g`;
+
+            // Stop Animations
+            simArea.classList.remove('sim-active');
+
+            // Reset Chart Data
+            chart.data.datasets[0].data = [{x: 0, y: T_INIT_W}];
+            chart.data.datasets[1].data = [{x: 0, y: T_INIT_ICE}];
+            chart.update('none');
+        }
+
+        // Initialize state on load
+        window.onload = () => {
+            resetSim();
+        };
+
+    </script>
+</body>
+</html>

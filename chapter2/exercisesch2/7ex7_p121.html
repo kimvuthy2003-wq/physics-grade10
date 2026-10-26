@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ៧ទំព័រ១២១</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS Styles -->
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .math-font { font-family: 'Lora', serif; }
+
+        /* Solution Toggle Transition */
+        .solution-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out;
+            opacity: 0;
+        }
+        .solution-content.open {
+            max-height: 1000px;
+            opacity: 1;
+        }
+
+        /* 2D Apparatus Styling */
+        .beaker {
+            border: 4px solid #94a3b8; /* slate-400 */
+            border-top: none;
+            border-radius: 0 0 16px 16px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.5) 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 -4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .water {
+            background: linear-gradient(180deg, #60a5fa, #3b82f6);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            transform-origin: bottom;
+            /* Will be scaled via JS */
+            transform: scaleY(1);
+            opacity: 0.85;
+            box-shadow: inset 0px 4px 6px rgba(255,255,255,0.3);
+        }
+
+        .hotplate {
+            background: #334155;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        .hotplate.active {
+            background: #1e293b;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4), inset 0 4px 10px rgba(239, 68, 68, 0.5);
+        }
+        .heating-coil {
+            background: #475569;
+            transition: background 0.5s;
+        }
+        .hotplate.active .heating-coil {
+            background: #ef4444; /* red-500 */
+            box-shadow: 0 0 15px #ef4444;
+        }
+
+        /* Heat Arrows */
+        .heat-arrow {
+            opacity: 0;
+            color: #ef4444;
+            transition: opacity 0.3s;
+        }
+        .heat-active .animate-heat-up {
+            animation: heatRise 1.2s infinite ease-out;
+            opacity: 1;
+        }
+        @keyframes heatRise {
+            0% { transform: translateY(10px) scale(0.8); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-20px) scale(1.1); opacity: 0; }
+        }
+
+        /* Steam Particles */
+        .steam-particle {
+            position: absolute;
+            background: radial-gradient(circle, rgba(203,213,225,0.8) 0%, rgba(203,213,225,0) 70%);
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .steam-active .steam-particle {
+            animation: steamRise 2s infinite ease-in;
+        }
+        @keyframes steamRise {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { opacity: 0.6; }
+            100% { transform: translateY(-100px) scale(2); opacity: 0; }
+        }
+
+        /* Thermometer Display */
+        .thermo-display {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #cbd5e1;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center min-h-screen">
+
+    <div class="max-w-6xl w-full">
+        
+        <!-- Header & Problem Statement -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+            <div class="p-6 md:p-8 text-slate-800 leading-relaxed text-lg lg:text-xl space-y-4">
+                <p class="font-medium leading-9">
+                    <span class="text-indigo-600 font-bold math-font mr-2">៧.</span> 
+                    គណនាថាមពលកម្ដៅចាំបាច់ដើម្បីបង្ហួតទឹក <span class="math-font font-semibold text-slate-700">50.0 g</span> ។ គេដឹងថាសីតុណ្ហភាពដើមនៃទឹក <span class="math-font font-semibold text-sky-600">0&deg;C</span> ហើយសីតុណ្ហភាពរំពុះនៃទឹក <span class="math-font font-semibold text-red-500">100&deg;C</span> ។ គេឱ្យកម្ដៅឡាតង់បង្ហួតនៃទឹក <span class="math-font font-semibold text-slate-700">2.26 &times; 10<sup>6</sup> J/kg</span> ។
+                </p>
+                <p class="text-sm text-slate-500 italic mt-2">សម្គាល់៖ កម្ដៅម៉ាសនៃទឹក <span class="math-font">c = 4186 J/kg&cdot;&deg;C</span></p>
+            </div>
+
+            <!-- Solution Toggle Button -->
+            <div class="px-6 md:px-8 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+                <button id="btnToggleSol" class="text-slate-700 hover:text-indigo-700 px-5 py-2.5 rounded-lg bg-white border border-slate-300 hover:bg-indigo-50 transition font-medium flex items-center gap-2 shadow-sm">
+                    <span id="solBtnText">បង្ហាញដំណោះស្រាយ</span>
+                    <svg id="solIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+            <!-- Solution Content -->
+            <div id="solutionDiv" class="solution-content border-t border-slate-200 bg-white">
+                <div class="p-6 md:p-8 text-slate-800 text-lg space-y-6 bg-slate-50/50">
+                    <h3 class="font-bold text-xl text-indigo-800 border-b border-indigo-100 pb-2">ចម្លើយ៖ គណនាថាមពលកម្ដៅសរុប (Q)</h3>
+                    
+                    <div class="math-font space-y-4 text-slate-700 md:pl-4">
+                        <p class="font-bold font-['Kantumruy_Pro'] text-slate-800">ថាមពលកម្ដៅសរុប គឺស្មើនឹងកម្ដៅដាំទឹកឱ្យពុះ បូកនឹងកម្ដៅបង្ហួត៖</p>
+                        <p class="text-xl font-bold text-indigo-900 bg-indigo-50 inline-block px-4 py-2 rounded-lg border border-indigo-100">Q = Q<sub class="text-sm">1</sub> + Q<sub class="text-sm">2</sub></p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <!-- Q1 Calculation -->
+                            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm space-y-2">
+                                <p class="font-['Kantumruy_Pro'] font-bold text-blue-700">១. កម្ដៅដាំទឹកពី 0°C ទៅ 100°C (Q<sub class="text-sm">1</sub>)</p>
+                                <p>Q<sub class="text-sm">1</sub> = m &times; c &times; &Delta;T</p>
+                                <p>Q<sub class="text-sm">1</sub> = 0.05 &times; 4186 &times; (100 - 0)</p>
+                                <p>Q<sub class="text-sm">1</sub> = 20,930 J</p>
+                            </div>
+
+                            <!-- Q2 Calculation -->
+                            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm space-y-2">
+                                <p class="font-['Kantumruy_Pro'] font-bold text-orange-600">២. កម្ដៅបង្ហួតទឹកនៅសីតុណ្ហភាព 100°C (Q<sub class="text-sm">2</sub>)</p>
+                                <p>Q<sub class="text-sm">2</sub> = m &times; L<sub class="text-sm">v</sub></p>
+                                <p>Q<sub class="text-sm">2</sub> = 0.05 &times; (2.26 &times; 10<sup>6</sup>)</p>
+                                <p>Q<sub class="text-sm">2</sub> = 113,000 J</p>
+                            </div>
+                        </div>
+
+                        <div class="pl-4 border-l-4 border-indigo-300 mt-6 pt-2">
+                            <p>Q = 20,930 J + 113,000 J</p>
+                            <p>Q = 133,930 J</p>
+                            <p class="font-bold text-2xl text-emerald-600 mt-4 border-2 border-emerald-200 inline-block px-5 py-2 bg-white rounded-lg shadow-sm">
+                                Q &approx; 1.34 &times; 10<sup>5</sup> J
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" /></svg>
+                    កម្មវិធីពិសោធន៍ 2D (កើនកម្ដៅ និងបង្ហួត)
+                </h2>
+            </div>
+            
+            <div class="flex flex-col md:flex-row w-full">
+                
+                <!-- Left Column: Experimental Setup -->
+                <div class="w-full md:w-5/12 p-8 border-b md:border-b-0 md:border-r border-slate-200 flex flex-col items-center justify-end relative min-h-[420px] bg-slate-50/50">
+                    
+                    <!-- Thermometer Display -->
+                    <div class="thermo-display absolute top-6 left-6 px-4 py-2 rounded-xl z-30">
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">សីតុណ្ហភាព (Temp)</p>
+                        <p class="text-3xl font-bold text-red-500 math-font"><span id="lblTemp">0.0</span> &deg;C</p>
+                    </div>
+
+                    <div class="relative flex flex-col justify-end items-center mt-12 w-full h-[320px]">
+                        
+                        <!-- Steam Area -->
+                        <div id="steamContainer" class="absolute w-32 h-32 bottom-[140px] z-30 pointer-events-none">
+                            <!-- Steam particles will be injected here via JS -->
+                        </div>
+
+                        <!-- Beaker with Water -->
+                        <div class="beaker w-32 h-36 z-20 relative flex justify-center items-end">
+                            <div id="waterLevel" class="water w-full"></div>
+                        </div>
+
+                        <!-- Heat Transfer Arrows -->
+                        <div id="heatArrows" class="flex justify-center gap-4 w-full h-8 z-10 -mt-2 mb-2">
+                            <svg class="heat-arrow animate-heat-up w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="animation-delay: 0s;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 13l-5-5m0 0l-5 5m5-5v12"></path></svg>
+                            <svg class="heat-arrow animate-heat-up w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="animation-delay: 0.3s;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 13l-5-5m0 0l-5 5m5-5v12"></path></svg>
+                            <svg class="heat-arrow animate-heat-up w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="animation-delay: 0.6s;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 13l-5-5m0 0l-5 5m5-5v12"></path></svg>
+                        </div>
+
+                        <!-- Hotplate -->
+                        <div id="hotplateObj" class="hotplate w-48 h-10 z-20 relative flex flex-col justify-start items-center p-1">
+                            <div class="heating-coil w-3/4 h-2 rounded-full mt-1"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Right Column: Chart.js Graph -->
+                <div class="w-full md:w-7/12 p-4 flex items-center justify-center min-h-[420px]">
+                    <div class="w-full h-full relative">
+                        <canvas id="tempChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="p-6 bg-white border-t border-slate-200 flex flex-wrap justify-center items-center gap-4">
+                <button id="btnStart" class="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-xl shadow-md hover:shadow-lg font-bold text-lg transition flex justify-center items-center gap-3 transform hover:-translate-y-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span id="txtBtnStart">ចាប់ផ្ដើម (Start)</span>
+                </button>
+                
+                <button id="btnReset" class="bg-white border-2 border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-800 px-6 py-3 rounded-xl shadow-sm hover:shadow font-bold text-lg transition flex justify-center items-center gap-2 transform hover:-translate-y-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    ត្រឡប់ដើម (Reset)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Solution Toggle Logic ---
+        const btnToggleSol = document.getElementById('btnToggleSol');
+        const solDiv = document.getElementById('solutionDiv');
+        const solIcon = document.getElementById('solIcon');
+        const solBtnText = document.getElementById('solBtnText');
+
+        btnToggleSol.addEventListener('click', () => {
+            solDiv.classList.toggle('open');
+            if (solDiv.classList.contains('open')) {
+                solIcon.classList.add('rotate-180');
+                solBtnText.textContent = 'លាក់ដំណោះស្រាយ';
+            } else {
+                solIcon.classList.remove('rotate-180');
+                solBtnText.textContent = 'បង្ហាញដំណោះស្រាយ';
+            }
+        });
+
+        // --- 2. Chart.js Setup ---
+        const ctx = document.getElementById('tempChart').getContext('2d');
+        let tempChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [0], // Time in seconds
+                datasets: [{
+                    label: 'សីតុណ្ហភាពទឹក (°C)',
+                    data: [0],
+                    borderColor: '#ef4444', // red-500
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    fill: true,
+                    tension: 0.1 // Slight tension for smoother corners
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false, // Turn off default animation for live updates
+                scales: {
+                    x: {
+                        title: { display: true, text: 'ពេលវេលា (s)', font: { family: 'Kantumruy Pro', size: 14 } },
+                        min: 0,
+                        max: 20, // ប្ដូរទៅ ២០ វិនាទី
+                        ticks: { 
+                            maxTicksLimit: 11 // ការពារកុំឱ្យលេខជាន់គ្នា (កំណត់ត្រឹម ១១ ចន្លោះ)
+                        }
+                    },
+                    y: {
+                        title: { display: true, text: 'សីតុណ្ហភាព (°C)', font: { family: 'Kantumruy Pro', size: 14 } },
+                        min: -10,
+                        max: 120,
+                        ticks: { stepSize: 20 }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { font: { family: 'Kantumruy Pro', size: 14 } } },
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+
+        // --- 3. Animation Logic ---
+        const btnStart = document.getElementById('btnStart');
+        const txtBtnStart = document.getElementById('txtBtnStart');
+        const btnReset = document.getElementById('btnReset');
+        
+        const hotplateObj = document.getElementById('hotplateObj');
+        const heatArrows = document.getElementById('heatArrows');
+        const waterLevel = document.getElementById('waterLevel');
+        const steamContainer = document.getElementById('steamContainer');
+        const lblTemp = document.getElementById('lblTemp');
+
+        let animationFrameId;
+        let isAnimating = false;
+        let hasCompleted = false;
+
+        // Generate Steam Particles in DOM
+        function createSteamParticles() {
+            steamContainer.innerHTML = '';
+            for(let i=0; i<8; i++) {
+                let particle = document.createElement('div');
+                particle.className = 'steam-particle';
+                // Randomize size, position and delay
+                let size = Math.random() * 20 + 15;
+                let left = Math.random() * 80 + 10; // 10% to 90%
+                let delay = Math.random() * 2; // 0 to 2s
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${left}%`;
+                particle.style.bottom = `10px`;
+                particle.style.animationDelay = `${delay}s`;
+                
+                steamContainer.appendChild(particle);
+            }
+        }
+        createSteamParticles();
+
+        function resetSimulation() {
+            cancelAnimationFrame(animationFrameId);
+            isAnimating = false;
+            hasCompleted = false;
+            
+            // Buttons
+            btnStart.classList.remove('opacity-75', 'cursor-not-allowed');
+            txtBtnStart.textContent = 'ចាប់ផ្ដើម (Start)';
+
+            // Reset UI Elements
+            hotplateObj.classList.remove('active');
+            heatArrows.classList.remove('heat-active');
+            steamContainer.classList.remove('steam-active');
+            
+            waterLevel.style.transform = 'scaleY(1)';
+            lblTemp.textContent = '0.0';
+            lblTemp.style.color = '#ef4444';
+
+            // Reset Chart
+            tempChart.data.labels = [0];
+            tempChart.data.datasets[0].data = [0];
+            tempChart.update();
+        }
+
+        btnReset.addEventListener('click', resetSimulation);
+
+        btnStart.addEventListener('click', () => {
+            if (isAnimating) return;
+            if (hasCompleted) resetSimulation();
+
+            isAnimating = true;
+            hasCompleted = false;
+            
+            btnStart.classList.add('opacity-75', 'cursor-not-allowed');
+            txtBtnStart.textContent = 'កំពុងដំណើរការ...';
+
+            // Turn on Hotplate and Heat
+            hotplateObj.classList.add('active');
+            heatArrows.classList.add('heat-active');
+
+            const totalDuration = 20000; // កំណត់រយៈពេលសរុប ២០ វិនាទី
+            const phase1Duration = 10000; // វគ្គ១ (ដាំទឹក) រយៈពេល ១០ វិនាទី
+            const phase2Duration = 10000; // វគ្គ២ (រំហួត) រយៈពេល ១០ វិនាទី
+            const startTime = performance.now();
+
+            function updateFrame(currentTime) {
+                const elapsed = currentTime - startTime;
+                
+                let curTemp = 0;
+                let curWaterScale = 1;
+                let timeSec = (elapsed / 1000).toFixed(2);
+
+                if (elapsed <= phase1Duration) {
+                    // Phase 1: Heating
+                    let progress = elapsed / phase1Duration;
+                    curTemp = progress * 100;
+                    curWaterScale = 1;
+                    steamContainer.classList.remove('steam-active');
+                } else if (elapsed <= totalDuration) {
+                    // Phase 2: Boiling / Vaporization
+                    let progress = (elapsed - phase1Duration) / phase2Duration;
+                    curTemp = 100;
+                    curWaterScale = 1 - progress;
+                    steamContainer.classList.add('steam-active');
+                } else {
+                    // End of animation
+                    curTemp = 100;
+                    curWaterScale = 0;
+                    timeSec = 20.00; // បញ្ចប់ត្រឹម ២០ វិនាទី
+                }
+
+                // Update UI
+                lblTemp.textContent = curTemp.toFixed(1);
+                waterLevel.style.transform = `scaleY(${Math.max(0, curWaterScale)})`;
+
+                // Update Chart periodically (every ~0.05s) to avoid lag, or at the exact end
+                const lastLabel = tempChart.data.labels[tempChart.data.labels.length - 1];
+                if (timeSec - lastLabel >= 0.05 || elapsed >= totalDuration) {
+                    tempChart.data.labels.push(timeSec);
+                    tempChart.data.datasets[0].data.push(curTemp);
+                    tempChart.update();
+                }
+
+                if (elapsed < totalDuration) {
+                    animationFrameId = requestAnimationFrame(updateFrame);
+                } else {
+                    // Completed
+                    isAnimating = false;
+                    hasCompleted = true;
+                    btnStart.classList.remove('opacity-75', 'cursor-not-allowed');
+                    txtBtnStart.textContent = 'ចាក់ឡើងវិញ (Replay)';
+                    
+                    // Turn off heat and hotplate after water is gone
+                    hotplateObj.classList.remove('active');
+                    heatArrows.classList.remove('heat-active');
+                    steamContainer.classList.remove('steam-active');
+                }
+            }
+
+            // Start loop
+            animationFrameId = requestAnimationFrame(updateFrame);
+        });
+    </script>
+</body>
+</html>
