@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ពិសោធន៍ទែម៉ូឌីណាមិច: ទង់ដែង និងនីត្រូសែនរាវ</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- General Styling --- */
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .math-font {
+            font-family: 'Lora', serif;
+        }
+        
+        /* --- Solution Toggle Animation --- */
+        .solution-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out;
+            opacity: 0;
+        }
+        .solution-content.open {
+            max-height: 1000px;
+            opacity: 1;
+        }
+
+        /* --- Simulator Visuals --- */
+        .simulator-area {
+            position: relative;
+            height: 450px;
+            background: linear-gradient(to bottom, #ffffff, #e2e8f0);
+            border-radius: 1rem;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 20px;
+        }
+
+        /* Dewar Flask (Beaker for LN2) */
+        .dewar-flask {
+            position: relative;
+            width: 180px;
+            height: 250px;
+            background: rgba(255, 255, 255, 0.4);
+            border: 4px solid #cbd5e1;
+            border-top: none;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.8), 0 10px 15px -3px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        .dewar-flask::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            height: 12px;
+            border: 4px solid #cbd5e1;
+            border-radius: 5px;
+            background: #f1f5f9;
+        }
+
+        /* Liquid Nitrogen */
+        .liquid-nitrogen {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80%; /* Initial fill level */
+            background: linear-gradient(180deg, rgba(186,230,253,0.7) 0%, rgba(125,211,252,0.9) 100%);
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 5;
+            transition: height 0.2s ease-out;
+            overflow: hidden;
+        }
+
+        /* Copper Block */
+        .copper-block {
+            position: absolute;
+            top: 20px; /* Initial position outside */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #e59866 0%, #b87333 50%, #8c4a16 100%);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 2px 2px 4px rgba(255,255,255,0.4);
+            z-index: 15;
+            transition: top 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53); /* Drop animation */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+
+        /* Steam/Fog */
+        .steam-container {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 150px;
+            z-index: 20;
+            pointer-events: none;
+        }
+        .fog {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            filter: blur(5px);
+            opacity: 0;
+        }
+
+        /* Bubbles */
+        .bubble {
+            position: absolute;
+            background: rgba(255,255,255,0.6);
+            border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 50%;
+            bottom: 10px;
+            opacity: 0;
+        }
+
+        @keyframes floatUpFog {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { opacity: 0.8; }
+            100% { transform: translateY(-150px) scale(3) translateX(var(--tx)); opacity: 0; }
+        }
+
+        @keyframes floatBubble {
+            0% { transform: translateY(0); opacity: 0.8; }
+            100% { transform: translateY(-150px); opacity: 0; }
+        }
+
+        /* Live Overlay */
+        .overlay-stats {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 30;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center">
+
+    <div class="max-w-6xl w-full">
+        
+        <!-- --- Header & Problem Statement --- -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+            <div class="p-6 md:p-8">
+                <div class="flex items-center gap-3 mb-4 border-b border-slate-100 pb-4">
+                    <div class="bg-indigo-100 p-2 rounded-lg text-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                    </div>
+                    <h1 class="text-xl md:text-2xl font-bold text-slate-800">លំហាត់ទែម៉ូឌីណាមិច (រំហួតនីត្រូសែនរាវ)</h1>
+                </div>
+
+                <p class="text-slate-700 leading-loose text-lg text-justify mb-4">
+                    <span class="math-font font-bold text-slate-900">15.</span> គេទម្លាក់ដុំទង់ដែង <span class="math-font font-semibold text-indigo-700">1.00 kg</span> នៅសីតុណ្ហភាព <span class="math-font font-semibold text-indigo-700">20.0°C</span> ចូលក្នុងជើងនីត្រូសែនរាវនៅសីតុណ្ហភាព <span class="math-font font-semibold text-sky-600">77.3K</span> ។ តើនីត្រូសែនពុះអស់ម៉ាសប៉ុន្មាន នៅពេលទង់ដែងចុះដល់សីតុណ្ហភាព <span class="math-font font-semibold text-sky-600">77.3K</span> ? 
+                    គេឱ្យកម្ដៅម៉ាសទង់ដែងគឺ <span class="math-font">387 J/kg·°C</span> និងកម្ដៅឡាតង់រំហួតនៃនីត្រូសែនគឺ <span class="math-font">2.01 × 10<sup>5</sup> J/kg</span> ។
+                </p>
+
+                <!-- Answers summary -->
+                <div class="mt-4 flex items-center bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 w-fit">
+                    <span class="font-bold text-indigo-900 mr-3">ចម្លើយ៖</span> 
+                    <span class="math-font text-lg font-semibold text-indigo-800"><span class="math-font italic">m</span> = 0.415 kg</span>
+                </div>
+            </div>
+
+            <!-- --- Action Buttons --- -->
+            <div class="px-6 md:px-8 py-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+                <button id="btnToggleSol" class="text-slate-600 hover:text-slate-900 px-4 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 transition font-medium flex items-center gap-2 shadow-sm">
+                    <span id="solBtnText">បង្ហាញដំណោះស្រាយ</span>
+                    <svg id="solIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+            <!-- --- Hidden Solution Content --- -->
+            <div id="solutionDiv" class="solution-content border-t border-slate-200 bg-white">
+                <div class="p-6 md:p-8 text-slate-800 text-lg space-y-4">
+                    <h3 class="font-bold text-xl mb-3 text-indigo-800 border-b pb-2">ដំណោះស្រាយ</h3>
+                    <p>១. បំប្លែងសីតុណ្ហភាពទង់ដែងពី °C ទៅជា K៖<br>
+                       <span class="math-font text-slate-600 ml-4 italic">T<sub>i</sub> = 20.0°C = 293 K</span> (បម្រែបម្រួលសីតុណ្ហភាពគិតជា K ឬ °C មានតម្លៃស្មើគ្នា)
+                    </p>
+                    <p>២. គណនាបម្រែបម្រួលសីតុណ្ហភាពរបស់ទង់ដែង៖<br>
+                       <span class="math-font text-slate-600 ml-4 italic">ΔT = 293 K - 77.3 K = 215.7 K</span>
+                    </p>
+                    <p>៣. គណនាកម្ដៅដែលទង់ដែងបញ្ចេញ៖<br>
+                       <span class="math-font text-slate-600 ml-4 italic">Q<sub>out</sub> = m<sub>Cu</sub> × c<sub>Cu</sub> × ΔT</span><br>
+                       <span class="math-font text-slate-600 ml-4 italic">Q<sub>out</sub> = 1.00 kg × 387 J/(kg·K) × 215.7 K = 83,475.9 J</span>
+                    </p>
+                    <p>៤. តាមគោលការណ៍រក្សាបរិមាណកម្ដៅ (កម្ដៅស្រូប = កម្ដៅបញ្ចេញ) កម្ដៅនេះត្រូវបានស្រូបយកដោយនីត្រូសែនដើម្បីរំហួត៖<br>
+                       <span class="math-font text-slate-600 ml-4 italic">Q<sub>in</sub> = Q<sub>out</sub></span><br>
+                       <span class="math-font text-slate-600 ml-4 italic">m<sub>N2</sub> × L<sub>v</sub> = 83,475.9 J</span><br>
+                       <span class="math-font text-slate-600 ml-4 italic">m<sub>N2</sub> = 83,475.9 / (2.01 × 10<sup>5</sup>)</span><br>
+                    </p>
+                    <p class="font-bold text-xl text-indigo-700 mt-4 pl-4 border-l-4 border-indigo-500">
+                        <span class="math-font italic">m<sub>N2</sub> ≈ 0.415 kg</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- --- Simulator Section --- -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-slate-800">ផ្ទាំងពិសោធន៍ (Simulation)</h2>
+                <button id="btnStartSim" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg shadow-md font-semibold transition transform hover:scale-105 active:scale-95 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
+                    ចាប់ផ្ដើមពិសោធន៍
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                
+                <!-- Left: Animation -->
+                <div class="simulator-area">
+                    <!-- Overlay Stats -->
+                    <div class="overlay-stats">
+                        <div class="flex items-center justify-between gap-4 mb-1">
+                            <span class="text-orange-700 font-semibold">T ទង់ដែង (Cu):</span>
+                            <span id="statCuTemp" class="math-font font-bold">293.0 K</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-4">
+                            <span class="text-sky-700 font-semibold">ម៉ាស N<sub>2</sub> រំហួត:</span>
+                            <span id="statN2Mass" class="math-font font-bold">0.000 kg</span>
+                        </div>
+                    </div>
+
+                    <!-- Steam Engine -->
+                    <div id="steamContainer" class="steam-container"></div>
+
+                    <!-- Lab Setup -->
+                    <div class="dewar-flask">
+                        <div id="liquidNitrogen" class="liquid-nitrogen">
+                            <div id="bubblesContainer" class="absolute inset-0 overflow-hidden w-full h-full pointer-events-none z-10"></div>
+                        </div>
+                        <div id="copperBlock" class="copper-block">Cu</div>
+                    </div>
+                </div>
+
+                <!-- Right: Chart -->
+                <div class="h-[450px] border border-slate-200 rounded-xl bg-white p-4 shadow-inner relative flex flex-col">
+                    <h3 class="text-center font-bold text-slate-600 mb-2 text-sm">ក្រាហ្វបង្ហាញពីទំនាក់ទំនងសីតុណ្ហភាព និងម៉ាសរំហួត</h3>
+                    <div class="flex-grow relative w-full h-full">
+                        <canvas id="simChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- UI Interactions ---
+        const btnToggleSol = document.getElementById('btnToggleSol');
+        const solDiv = document.getElementById('solutionDiv');
+        const solIcon = document.getElementById('solIcon');
+        const solBtnText = document.getElementById('solBtnText');
+
+        btnToggleSol.addEventListener('click', () => {
+            solDiv.classList.toggle('open');
+            if (solDiv.classList.contains('open')) {
+                solIcon.classList.add('rotate-180');
+                solBtnText.textContent = 'លាក់ដំណោះស្រាយ';
+            } else {
+                solIcon.classList.remove('rotate-180');
+                solBtnText.textContent = 'បង្ហាញដំណោះស្រាយ';
+            }
+        });
+
+        // --- Chart.js Setup ---
+        const ctx = document.getElementById('simChart').getContext('2d');
+        const simChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], 
+                datasets: [
+                    {
+                        label: 'សីតុណ្ហភាពទង់ដែង (K)',
+                        data: [],
+                        borderColor: '#d97706', // amber-600
+                        backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        tension: 0.2,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'ម៉ាស N₂ រំហួត (kg)',
+                        data: [],
+                        borderColor: '#0284c7', // sky-600
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        tension: 0.2,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false, 
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'ពេលវេលា (s)', font: { family: 'Kantumruy Pro' } },
+                        grid: { color: '#f1f5f9' },
+                    },
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'សីតុណ្ហភាព (K)', font: { family: 'Kantumruy Pro', size: 12 } },
+                        min: 50, max: 320,
+                        grid: { color: '#e2e8f0' },
+                        ticks: { color: '#d97706', font: { family: 'Lora' } }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: 'ម៉ាសរំហួត (kg)', font: { family: 'Kantumruy Pro', size: 12 } },
+                        min: 0, max: 0.5,
+                        grid: { drawOnChartArea: false },
+                        ticks: { color: '#0284c7', font: { family: 'Lora' } }
+                    }
+                }
+            }
+        });
+
+        // --- Simulation Physics Engine & Animation ---
+        const els = {
+            btnStart: document.getElementById('btnStartSim'),
+            copperBlock: document.getElementById('copperBlock'),
+            liquidN2: document.getElementById('liquidNitrogen'),
+            steamContainer: document.getElementById('steamContainer'),
+            bubblesContainer: document.getElementById('bubblesContainer'),
+            statCuTemp: document.getElementById('statCuTemp'),
+            statN2Mass: document.getElementById('statN2Mass')
+        };
+
+        // Constants based on the problem
+        const InitialCuTemp = 293.0; // K (20C + 273)
+        const N2Temp = 77.3; // K
+        const CuMass = 1.0; // kg
+        const CuSpecificHeat = 387; // J/kgK
+        const N2LatentHeat = 2.01e5; // J/kg
+        
+        let simInterval;
+        let fogInterval;
+        let bubbleInterval;
+
+        function resetSimulation() {
+            clearInterval(simInterval);
+            clearInterval(fogInterval);
+            clearInterval(bubbleInterval);
+            
+            // Reset Visuals
+            els.copperBlock.style.transition = 'none';
+            els.copperBlock.style.top = '20px';
+            els.liquidN2.style.height = '80%';
+            els.steamContainer.innerHTML = '';
+            els.bubblesContainer.innerHTML = '';
+            
+            // Reset Stats
+            els.statCuTemp.textContent = InitialCuTemp.toFixed(1) + ' K';
+            els.statN2Mass.textContent = '0.000 kg';
+            
+            // Reset Chart
+            simChart.data.labels = [];
+            simChart.data.datasets[0].data = [];
+            simChart.data.datasets[1].data = [];
+            simChart.update();
+            
+            els.btnStart.disabled = false;
+            els.btnStart.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function createFog() {
+            const p = document.createElement('div');
+            p.className = 'fog';
+            p.style.width = (Math.random() * 40 + 20) + 'px';
+            p.style.height = p.style.width;
+            p.style.left = (Math.random() * 80 + 10) + '%';
+            p.style.setProperty('--tx', (Math.random() * 100 - 50) + 'px');
+            p.style.animation = `floatUpFog ${Math.random() * 1 + 1}s ease-in forwards`;
+            els.steamContainer.appendChild(p);
+            setTimeout(() => { if (els.steamContainer.contains(p)) p.remove(); }, 2000);
+        }
+
+        function createBubble() {
+            const b = document.createElement('div');
+            b.className = 'bubble';
+            const size = Math.random() * 10 + 4;
+            b.style.width = size + 'px';
+            b.style.height = size + 'px';
+            b.style.left = (Math.random() * 80 + 10) + '%';
+            b.style.animation = `floatBubble ${Math.random() * 0.5 + 0.3}s ease-in forwards`;
+            els.bubblesContainer.appendChild(b);
+            setTimeout(() => { if (els.bubblesContainer.contains(b)) b.remove(); }, 800);
+        }
+
+        function startSimulation() {
+            resetSimulation();
+            els.btnStart.disabled = true;
+            els.btnStart.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // 1. Drop the block
+            setTimeout(() => {
+                els.copperBlock.style.transition = 'top 0.4s cubic-bezier(0.55, 0.085, 0.68, 0.53)';
+                els.copperBlock.style.top = '190px'; // Inside the flask
+            }, 50);
+
+            // 2. Start thermodynamics engine after drop (approx 400ms)
+            setTimeout(() => {
+                let time = 0;
+                let dt = 0.05; // Time step
+                let currentTemp = InitialCuTemp;
+                let currentMassN2 = 0;
+                let k = 1.2; // Cooling rate constant
+
+                // Visual effects intense at start
+                fogInterval = setInterval(createFog, 50);
+                bubbleInterval = setInterval(createBubble, 20);
+
+                simInterval = setInterval(() => {
+                    time += dt;
+
+                    // Exponential cooling law: T(t) = T_env + (T_initial - T_env) * e^(-kt)
+                    currentTemp = N2Temp + (InitialCuTemp - N2Temp) * Math.exp(-k * time);
+                    
+                    // Heat transferred: Q = m * c * (T_initial - T_current)
+                    let Q = CuMass * CuSpecificHeat * (InitialCuTemp - currentTemp);
+                    
+                    // Mass of N2 evaporated: m = Q / L
+                    currentMassN2 = Q / N2LatentHeat;
+
+                    // Update UI Overlays
+                    els.statCuTemp.textContent = currentTemp.toFixed(1) + ' K';
+                    els.statN2Mass.textContent = currentMassN2.toFixed(3) + ' kg';
+
+                    // Update Liquid Level (starts at 80%, drops as it evaporates)
+                    // Max evaporated is ~0.415kg. Let's say 0.415kg = 30% drop in height
+                    let levelDrop = (currentMassN2 / 0.415) * 30;
+                    els.liquidN2.style.height = (80 - levelDrop) + '%';
+
+                    // Update Chart (every few frames to reduce lag)
+                    if (Math.round(time * 20) % 2 === 0) {
+                        simChart.data.labels.push(time.toFixed(1));
+                        simChart.data.datasets[0].data.push(currentTemp);
+                        simChart.data.datasets[1].data.push(currentMassN2);
+                        simChart.update();
+                    }
+
+                    // Adjust effects intensity based on temperature difference
+                    let tempDiff = currentTemp - N2Temp;
+                    if (tempDiff < 5) {
+                        clearInterval(fogInterval);
+                        clearInterval(bubbleInterval);
+                        fogInterval = setInterval(createFog, 300);
+                        bubbleInterval = setInterval(createBubble, 200);
+                    }
+
+                    // Stop condition
+                    if (tempDiff < 0.1 || time > 5) {
+                        clearInterval(simInterval);
+                        clearInterval(fogInterval);
+                        clearInterval(bubbleInterval);
+                        
+                        // Set final exact values
+                        els.statCuTemp.textContent = N2Temp.toFixed(1) + ' K';
+                        els.statN2Mass.textContent = '0.415 kg';
+                        
+                        els.btnStart.disabled = false;
+                        els.btnStart.classList.remove('opacity-50', 'cursor-not-allowed');
+                        els.btnStart.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+                            សាកល្បងម្ដងទៀត
+                        `;
+                    }
+                }, Math.round(dt * 1000));
+            }, 450);
+        }
+
+        els.btnStart.addEventListener('click', startSimulation);
+    </script>
+</body>
+</html>

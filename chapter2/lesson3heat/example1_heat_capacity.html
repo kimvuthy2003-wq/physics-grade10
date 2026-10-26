@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី១៖ ចំណុះកម្ដៅ និងថាមពលកម្ដៅ</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block; padding-top: 10px;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 450px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .btn-group {
+            display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;
+        }
+        button {
+            color: white; padding: 12px 20px; font-size: 16px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s, transform 0.1s;
+        }
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: scale(0.98); }
+        
+        .btn-action { background: #d32f2f; font-size: 18px; padding: 15px 30px; }
+        .btn-reset { background: #546e7a; }
+        .btn-sol { background: #17a2b8; width: 100%; margin-bottom: 20px; font-size: 18px; padding: 15px;}
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .dashboard { grid-template-columns: 1fr 1fr; }
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 14px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 10px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 20px; }
+        
+        .note-box { 
+            background: #e8f5e9; border-left: 6px solid #28a745; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #1b5e20; 
+        }
+
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ប្រធានលំហាត់ (Dynamic Text) -->
+    <div class="problem-statement">
+        <strong>លំហាត់គំរូ ១៖</strong> ក្នុងការពិសោធន៍ទឹក <span id="probM">100</span> g ត្រូវការថាមពលកម្ដៅ <span id="probQ">12600</span> J ដើម្បីដំឡើងសីតុណ្ហភាពពី <span id="probT1">30</span>°C ទៅ <span id="probT2">60</span>°C ។ គណនា៖<br>
+        ក. ចំណុះកម្ដៅរបស់ទឹកដែលមានម៉ាស <span id="probM_a">100</span> g ។<br>
+        ខ. ចំណុះកម្ដៅរបស់ទឹកដែលមានម៉ាស 1000 g ។<br>
+        គ. ថាមពលកម្ដៅដែលទឹក <span id="probM_c">100</span> g ស្រូបយកដើម្បីដំឡើងសីតុណ្ហភាពពី <span id="probT1_c">30</span>°C ទៅ <span id="probT3">40</span>°C ។
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="btn-group">
+        <button class="btn-action" id="btnHeat">🔥 ចាប់ផ្តើមផ្ដល់កម្ដៅ</button>
+        <button class="btn-reset" id="btnReset">🔄 ចាប់ផ្តើមឡើងវិញ</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#81d4fa" stop-opacity="0.8"/>
+                    <stop offset="100%" stop-color="#0288d1" stop-opacity="0.95"/>
+                </linearGradient>
+                <linearGradient id="hotPlateGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#cfd8dc"/>
+                    <stop offset="100%" stop-color="#78909c"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ចង្ក្រានអគ្គិសនី (Hot Plate) -->
+            <rect x="250" y="320" width="300" height="40" rx="8" fill="url(#hotPlateGrad)" stroke="#455a64" stroke-width="4"/>
+            <!-- ខ្សែដុត (Heating Element) -->
+            <rect id="heatingCoil" x="280" y="315" width="240" height="10" rx="5" fill="#37474f"/>
+            
+            <!-- កែវបេស៊ែរ (Beaker) -->
+            <path d="M 300 150 L 300 315 A 10 10 0 0 0 310 325 L 490 325 A 10 10 0 0 0 500 315 L 500 150" fill="none" stroke="#90a4ae" stroke-width="6"/>
+            
+            <!-- ទឹកក្នុងកែវ -->
+            <path id="waterBody" d="M 303 220 L 303 315 A 7 7 0 0 0 310 322 L 490 322 A 7 7 0 0 0 497 315 L 497 220 Z" fill="url(#waterGrad)"/>
+            <line id="waterSurface" x1="303" y1="220" x2="497" y2="220" stroke="#0288d1" stroke-width="3"/>
+            
+            <!-- ពពុះទឹកពុះ -->
+            <g id="bubbleGroup"></g>
+
+            <!-- ទែម៉ូម៉ែត្រ -->
+            <rect x="420" y="50" width="16" height="260" rx="8" fill="#ffffff" stroke="#546e7a" stroke-width="3"/>
+            <circle cx="428" cy="305" r="14" fill="#d32f2f"/>
+            <rect id="thermoLiq" x="424" y="240" width="8" height="65" fill="#d32f2f"/>
+            
+            <!-- គំនូសមាត្រដ្ឋានទែម៉ូម៉ែត្រ -->
+            <line x1="405" y1="240" x2="420" y2="240" stroke="#111" stroke-width="2"/>
+            <text id="lblTempScale" x="375" y="245" font-family="Arial" font-weight="bold" font-size="14" fill="#111">30 °C</text>
+            <line x1="405" y1="60" x2="420" y2="60" stroke="#111" stroke-width="2"/>
+            <text x="365" y="65" font-family="Arial" font-weight="bold" font-size="14" fill="#111">100 °C</text>
+
+            <!-- Counter ថាមពលកម្ដៅ -->
+            <rect x="580" y="150" width="160" height="70" rx="8" fill="#212121" stroke="#ffb74d" stroke-width="3"/>
+            <text x="660" y="175" text-anchor="middle" font-family="Siemreap, Arial" font-size="16" fill="#ffb74d">ថាមពលស្រូប (Q)</text>
+            <text id="liveQ" x="660" y="205" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="22" fill="#00e676">0 J</text>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            ម៉ាសទឹក $m$ (g):<br>
+            <span id="valM" class="number-display" style="color: #0288d1; font-size:24px;">100 g</span>
+            <input type="range" id="sliderM" min="50" max="1000" value="100" step="50">
+        </div>
+        <div class="slider-box">
+            សីតុណ្ហភាពដើម $T_1$ (°C):<br>
+            <span id="valT1" class="number-display" style="color: #546e7a; font-size:24px;">30 °C</span>
+            <input type="range" id="sliderT1" min="0" max="50" value="30" step="1">
+        </div>
+        <div class="slider-box">
+            សីតុណ្ហភាពស្រេច $T_2$ (°C):<br>
+            <span id="valT2" class="number-display" style="color: #d32f2f; font-size:24px;">60 °C</span>
+            <input type="range" id="sliderT2" min="10" max="100" value="60" step="1">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #0288d1;">ចំណុះកម្ដៅ $C$<br><span id="dashC" class="number-display">420 J/°C</span></div>
+        <div class="data-box" style="border-top: 4px solid #6f42c1;">កម្ដៅម៉ាស $c$<br><span id="dashSmallC" class="number-display">4200 J/kg·°C</span></div>
+        <div class="data-box" style="border-top: 4px solid #e65100;">បម្រែបម្រួល $\Delta T$<br><span id="dashDt" class="number-display">30 °C</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">ថាមពលសរុប $Q$<br><span id="dashTotalQ" class="number-display">12600 J</span></div>
+    </div>
+
+    <button id="btnToggleSolution" class="btn-sol">📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ (Dynamic Texts) -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box">
+            💡 <strong>រូបមន្តសំខាន់ៗ៖</strong> <br>
+            • ចំណុះកម្ដៅ៖ $C = \frac{Q}{\Delta T}$ ឬ $C = m \times c$ <br>
+            • កម្ដៅម៉ាស (Specific Heat)៖ $c = \frac{C}{m}$ <br>
+            • ថាមពលកម្ដៅ៖ $Q = m \cdot c \cdot \Delta T$ ឬ $Q = C \cdot \Delta T$
+        </div>
+
+        <h3>ដំណោះស្រាយលំហាត់គំរូ ១</h3>
+        
+        <div id="mathContainer">
+            <p id="titleA"><strong>ក. ចំណុះកម្ដៅរបស់ទឹក 100 g ៖</strong></p>
+            <p id="descA">តាមបម្រាប់ $m = 100 \text{ g} = 0.1 \text{ kg}$, $Q = 12600 \text{ J}$, $\Delta T = 60 - 30 = 30^\circ\text{C}$</p>
+            <div id="mathLineA">$$ C_{100} = \frac{Q}{\Delta T} = \frac{12600}{30} = 420 \text{ J/}^\circ\text{C} $$</div>
+            
+            <p><strong>ខ. ចំណុះកម្ដៅរបស់ទឹក $1000 \text{ g}$ ៖</strong></p>
+            <p>យើងត្រូវរកកម្ដៅម៉ាស $c$ របស់ទឹកជាមុនសិន៖</p>
+            <div id="mathLineB1">$$ c = \frac{C}{m} = \frac{420}{0.1} = 4200 \text{ J/(kg}\cdot^\circ\text{C)} $$</div>
+            <p>ម៉ាសថ្មី $m' = 1000 \text{ g} = 1 \text{ kg}$ ដូច្នេះចំណុះកម្ដៅថ្មីគឺ៖</p>
+            <div id="mathLineB2">$$ C_{1000} = m' \cdot c = 1 \times 4200 = 4200 \text{ J/}^\circ\text{C} $$</div>
+
+            <p id="titleC"><strong>គ. ថាមពលកម្ដៅដើម្បីដំឡើងទឹក 100 g ពី 30°C ទៅ 40°C ៖</strong></p>
+            <p>បម្រែបម្រួលសីតុណ្ហភាពថ្មី $\Delta T' = 10^\circ\text{C}$</p>
+            <div id="mathLineC" style="color: #28a745; font-weight: bold;">
+                $$ Q' = C_{100} \cdot \Delta T' = 420 \times 10 = 4200 \text{ J} $$
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > ក្នុងតក្កវិជ្ជា -->
+<script>
+    var sM = document.getElementById('sliderM');
+    var sT1 = document.getElementById('sliderT1');
+    var sT2 = document.getElementById('sliderT2');
+
+    var btnHeat = document.getElementById('btnHeat');
+    var btnReset = document.getElementById('btnReset');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    var heatingCoil = document.getElementById('heatingCoil');
+    var waterBody = document.getElementById('waterBody');
+    var waterSurface = document.getElementById('waterSurface');
+    var thermoLiq = document.getElementById('thermoLiq');
+    var lblTempScale = document.getElementById('lblTempScale');
+    var liveQ = document.getElementById('liveQ');
+    var bubbleGroup = document.getElementById('bubbleGroup');
+
+    var c_water = 4200; // J/(kg.C)
+    
+    var targetProgress = 0; 
+    var currentProgress = 0;
+    var isHeating = false;
+
+    // --- បង្កើតពពុះទឹកពុះ ---
+    var bubbles = [];
+    var numBubbles = 15;
+    var b = 0;
+    while(b !== numBubbles) {
+        var bCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        bCircle.setAttribute("r", Math.random() * 4 + 2);
+        bCircle.setAttribute("fill", "rgba(255,255,255,0.6)");
+        bCircle.setAttribute("opacity", "0"); 
+        bubbleGroup.appendChild(bCircle);
+
+        bubbles.push({
+            el: bCircle,
+            x: 310 + Math.random() * 180, 
+            y: 320 - Math.random() * 100,
+            speed: Math.random() * 2 + 1
+        });
+        b++;
+    }
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    // ការពារកុំឱ្យ T1 ធំជាង ឬស្មើ T2
+    sT1.addEventListener('input', function() {
+        var t1 = parseFloat(sT1.value);
+        var t2 = parseFloat(sT2.value);
+        var isValid = (Math.max(t2, t1) === t2 && t1 !== t2);
+        if (isValid === false) {
+            sT2.value = t1 + 1;
+        }
+        resetSim();
+    });
+
+    sT2.addEventListener('input', function() {
+        var t1 = parseFloat(sT1.value);
+        var t2 = parseFloat(sT2.value);
+        var isValid = (Math.max(t2, t1) === t2 && t1 !== t2);
+        if (isValid === false) {
+            sT1.value = t2 - 1;
+        }
+        resetSim();
+    });
+
+    sM.addEventListener('input', resetSim);
+
+    function resetSim() {
+        targetProgress = 0;
+        currentProgress = 0;
+        isHeating = false;
+        btnHeat.innerText = "🔥 ចាប់ផ្តើមផ្ដល់កម្ដៅ";
+        btnHeat.style.background = "#d32f2f";
+        updatePhysics();
+    }
+
+    btnReset.addEventListener('click', resetSim);
+
+    btnHeat.addEventListener('click', function() {
+        if (targetProgress === 0) {
+            targetProgress = 1; 
+            btnHeat.innerText = "⏸️ បញ្ឈប់ការផ្ដល់កម្ដៅ";
+            btnHeat.style.background = "#f57c00";
+        } else {
+            targetProgress = 0; 
+            btnHeat.innerText = "🔥 បន្តផ្ដល់កម្ដៅ";
+            btnHeat.style.background = "#d32f2f";
+        }
+        
+        if (isHeating === false) {
+            isHeating = true;
+            loopAnimation();
+        }
+    });
+
+    function loopAnimation() {
+        var diff = targetProgress - currentProgress;
+        if (Math.abs(diff).toFixed(3) !== "0.000") {
+            currentProgress += diff * 0.005; 
+            drawGraphics();
+            requestAnimationFrame(loopAnimation);
+        } else {
+            currentProgress = targetProgress;
+            drawGraphics();
+            isHeating = false;
+            if(targetProgress === 1) {
+                btnHeat.innerText = "✅ សម្រេចគោលដៅ";
+                btnHeat.style.background = "#28a745";
+            }
+        }
+    }
+
+    function drawGraphics() {
+        var m_g = parseFloat(sM.value);
+        var t1 = parseFloat(sT1.value);
+        var t2 = parseFloat(sT2.value);
+        
+        var m_kg = m_g / 1000;
+        var C = m_kg * c_water;
+        var dt = t2 - t1;
+        var q_total = C * dt;
+
+        var currentT = t1 + (dt * currentProgress);
+        var currentQ = q_total * currentProgress;
+
+        liveQ.textContent = Math.round(currentQ) + " J";
+        lblTempScale.textContent = Math.round(currentT) + " °C";
+
+        var diff = targetProgress - currentProgress;
+        var isProgressing = (Math.abs(diff).toFixed(3) !== "0.000" && targetProgress === 1);
+        if (isProgressing === true) {
+            heatingCoil.setAttribute("fill", "#ff1744"); 
+        } else {
+            heatingCoil.setAttribute("fill", "#37474f"); 
+        }
+
+        var waterY = 300 - ((m_g - 50) / 950) * 140;
+        waterBody.setAttribute("d", "M 303 " + waterY + " L 303 315 A 7 7 0 0 0 310 322 L 490 322 A 7 7 0 0 0 497 315 L 497 " + waterY + " Z");
+        waterSurface.setAttribute("y1", waterY);
+        waterSurface.setAttribute("y2", waterY);
+
+        var thermoY = 280 - (currentT * 2.2);
+        thermoY = Math.max(60, Math.min(thermoY, 280));
+        thermoLiq.setAttribute("y", thermoY);
+        thermoLiq.setAttribute("height", 300 - thermoY);
+        lblTempScale.setAttribute("y", thermoY + 5);
+
+        var isBoiling = (Math.max(currentT, 99) === currentT);
+        var k = 0;
+        while(k !== bubbles.length) {
+            var bub = bubbles[k];
+            if (isBoiling === true && isProgressing === true) {
+                bub.y -= bub.speed;
+                var isTop = (Math.min(bub.y, waterY) === bub.y);
+                if (isTop === true) {
+                    bub.y = 315;
+                    bub.x = 310 + Math.random() * 180;
+                }
+                bub.el.setAttribute("opacity", "1");
+            } else {
+                bub.el.setAttribute("opacity", "0");
+            }
+            bub.el.setAttribute("cx", bub.x);
+            bub.el.setAttribute("cy", bub.y);
+            k++;
+        }
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var m_g = parseFloat(sM.value);
+        var t1 = parseFloat(sT1.value);
+        var t2 = parseFloat(sT2.value);
+        var t3 = t1 + 10;
+        
+        var m_kg = m_g / 1000;
+        var C = m_kg * c_water;
+        var dt = t2 - t1;
+        var q_total = C * dt;
+
+        // UI Dashboard
+        document.getElementById('valM').innerText = m_g + " g";
+        document.getElementById('valT1').innerText = t1 + " °C";
+        document.getElementById('valT2').innerText = t2 + " °C";
+
+        document.getElementById('dashC').innerText = C.toFixed(1) + " J/°C";
+        document.getElementById('dashDt').innerText = dt + " °C";
+        document.getElementById('dashTotalQ').innerText = q_total.toLocaleString() + " J";
+
+        // UI Problem Statement Texts
+        document.getElementById('probM').innerText = m_g;
+        document.getElementById('probQ').innerText = Math.round(q_total);
+        document.getElementById('probT1').innerText = t1;
+        document.getElementById('probT2').innerText = t2;
+        document.getElementById('probM_a').innerText = m_g;
+        document.getElementById('probM_c').innerText = m_g;
+        document.getElementById('probT1_c').innerText = t1;
+        document.getElementById('probT3').innerText = t3;
+
+        // Solution Box dynamic texts
+        document.getElementById('titleA').innerHTML = "<strong>ក. ចំណុះកម្ដៅរបស់ទឹក " + m_g + " g ៖</strong>";
+        document.getElementById('titleC').innerHTML = "<strong>គ. ថាមពលកម្ដៅដើម្បីដំឡើងទឹក " + m_g + " g ពី " + t1 + "°C ទៅ " + t3 + "°C ៖</strong>";
+
+        if (isHeating === false) {
+            drawGraphics();
+        }
+
+        // Update MathJax Safely
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            
+            document.getElementById('descA').innerHTML = "\\( m = " + m_g + " \\text{ g} = " + m_kg.toFixed(3) + " \\text{ kg} \\), \\( Q = " + Math.round(q_total) + " \\text{ J} \\), \\( \\Delta T = " + t2 + " - " + t1 + " = " + dt + "^\\circ\\text{C} \\)";
+            
+            document.getElementById('mathLineA').innerHTML = "$$ C_{" + m_g + "} = \\frac{Q}{\\Delta T} = \\frac{" + Math.round(q_total) + "}{" + dt + "} = " + C.toFixed(1) + " \\text{ J/}^\\circ\\text{C} $$";
+            
+            document.getElementById('mathLineB1').innerHTML = "$$ c = \\frac{C_{" + m_g + "}}{m} = \\frac{" + C.toFixed(1) + "}{" + m_kg.toFixed(3) + "} = 4200 \\text{ J/(kg}\\cdot^\\circ\\text{C)} $$";
+            document.getElementById('mathLineB2').innerHTML = "$$ C_{1000} = 1 \\text{ kg} \\times 4200 = 4200 \\text{ J/}^\\circ\\text{C} $$";
+
+            var q_10 = C * 10;
+            document.getElementById('mathLineC').innerHTML = "$$ Q' = C_{" + m_g + "} \\cdot \\Delta T' = " + C.toFixed(1) + " \\times 10 = " + q_10.toFixed(1) + " \\text{ J} $$";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    // Initial run
+    updatePhysics();
+</script>
+
+</body>
+</html>

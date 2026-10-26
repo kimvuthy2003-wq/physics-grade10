@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ៩ទំព័រ១១៨</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; line-height: 1.6; margin: 0;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block; padding-top: 20px; padding-bottom: 20px;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 450px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .btn-group {
+            display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;
+        }
+        button {
+            color: white; padding: 12px 20px; font-size: 16px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s, transform 0.1s;
+        }
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: scale(0.98); }
+        
+        .btn-action { background: #d32f2f; font-size: 18px; padding: 15px 30px; }
+        .btn-reset { background: #546e7a; }
+        .btn-sol { background: #17a2b8; width: 100%; margin-bottom: 20px; font-size: 18px; padding: 15px;}
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .dashboard { grid-template-columns: 1fr 1fr; }
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 14px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 20px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 10px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 20px; }
+        
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+        
+        .metal-name { font-family: 'Siemreap', sans-serif; color: #d32f2f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ប្រធានលំហាត់ (Dynamic Text) -->
+    <div class="problem-statement">
+        <strong>៩.</strong> កាឡូរីម៉ែត្រអាលុយមីញ៉ូមមួយមានម៉ាស 100 g ដាក់ទឹក 250 g ។ កាឡូរីម៉ែត្រនិងទឹកមានលំនឹងនៅសីតុណ្ហភាព 10.0°C ។ គេដាក់ដុំលោហៈពីរចូលទៅក្នុងទឹក មួយជាដុំទង់ដែងដែលមានម៉ាស <span id="probMcu" style="color:#e65100;">50.0</span> g នៅសីតុណ្ហភាព 80.0°C និងមួយទៀតជាដុំលោហៈមិនស្គាល់មានម៉ាស <span id="probMx" style="color:#607d8b;">70.0</span> g នៅសីតុណ្ហភាព 100°C ។ ប្រព័ន្ធទាំងមូលមានលំនឹងនៅសីតុណ្ហភាពសម្រេច <span id="probTf" style="color:#d32f2f;">20.0</span> °C ។<br>
+        ក. កំណត់កម្ដៅម៉ាសនៃលោហៈមិនស្គាល់ ។<br>
+        ខ. កំណត់ឈ្មោះលោហៈមិនស្គាល់នោះដោយប្រើតារាងកម្ដៅម៉ាស ។
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="btn-group">
+        <button class="btn-action" id="btnDrop">⬇️ ទម្លាក់ដុំលោហៈចូល</button>
+        <button class="btn-reset" id="btnReset">🔄 ចាប់ផ្តើមឡើងវិញ</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#81d4fa" stop-opacity="0.8"/>
+                    <stop offset="100%" stop-color="#0288d1" stop-opacity="0.95"/>
+                </linearGradient>
+                <linearGradient id="calGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#eceff1"/>
+                    <stop offset="100%" stop-color="#cfd8dc"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ជើងទម្រ (Table) -->
+            <rect x="250" y="320" width="300" height="20" rx="4" fill="#546e7a"/>
+
+            <!-- កាឡូរីម៉ែត្រ (Calorimeter) -->
+            <path d="M 320 150 L 320 310 A 10 10 0 0 0 330 320 L 470 320 A 10 10 0 0 0 480 310 L 480 150" fill="url(#calGrad)" stroke="#90a4ae" stroke-width="8"/>
+            
+            <!-- ទឹកក្នុងកាឡូរីម៉ែត្រ (Water) -->
+            <path id="waterBody" d="M 324 220 L 324 310 A 6 6 0 0 0 330 316 L 470 316 A 6 6 0 0 0 476 310 L 476 220 Z" fill="url(#waterGrad)"/>
+            <line id="waterSurface" x1="324" y1="220" x2="476" y2="220" stroke="#0288d1" stroke-width="3"/>
+
+            <!-- ដុំទង់ដែង (Copper Block) -->
+            <g id="blockCu" transform="translate(360, 80)">
+                <rect x="0" y="0" width="30" height="30" rx="4" fill="#ff7043" stroke="#d84315" stroke-width="2"/>
+                <text x="15" y="20" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="12" fill="#fff">Cu</text>
+            </g>
+
+            <!-- ដុំលោហៈមិនស្គាល់ (Unknown Block) -->
+            <g id="blockX" transform="translate(410, 80)">
+                <rect x="0" y="0" width="35" height="35" rx="4" fill="#78909c" stroke="#455a64" stroke-width="2"/>
+                <text x="17.5" y="22.5" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#fff">X</text>
+            </g>
+
+            <!-- ទែម៉ូម៉ែត្រ (Thermometer) -->
+            <rect x="510" y="50" width="16" height="260" rx="8" fill="#ffffff" stroke="#546e7a" stroke-width="3"/>
+            <circle cx="518" cy="305" r="14" fill="#d32f2f"/>
+            <rect id="thermoLiq" x="514" y="280" width="8" height="25" fill="#d32f2f"/>
+            
+            <!-- គំនូសមាត្រដ្ឋានទែម៉ូម៉ែត្រ -->
+            <line x1="495" y1="280" x2="510" y2="280" stroke="#111" stroke-width="2"/>
+            <text id="lblTemp1" x="460" y="285" font-family="Arial" font-weight="bold" font-size="14" fill="#111">10 °C</text>
+            
+            <line x1="495" y1="200" x2="510" y2="200" stroke="#111" stroke-width="2"/>
+            <text id="lblTemp2" x="460" y="205" font-family="Arial" font-weight="bold" font-size="14" fill="#111">20 °C</text>
+            
+            <rect id="lblTempBg" x="535" y="270" width="50" height="24" rx="4" fill="#d32f2f"/>
+            <text id="lblTempLive" x="560" y="287" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#fff">10.0 °C</text>
+            
+            <!-- Heat Flow Arrows (លេចឡើងពេលកំពុងលាយ) -->
+            <g id="heatArrows" opacity="0">
+                <path d="M 375 270 Q 350 250 350 230" fill="none" stroke="#ff5252" stroke-width="3" marker-end="url(#arrowhead)"/>
+                <path d="M 425 270 Q 450 250 450 230" fill="none" stroke="#ff5252" stroke-width="3" marker-end="url(#arrowhead)"/>
+            </g>
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#ff5252" />
+                </marker>
+            </defs>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            ម៉ាសទង់ដែង $m_{cu}$ (g):<br>
+            <span id="valMcu" class="number-display" style="color: #e65100; font-size:22px;">50.0 g</span>
+            <input type="range" id="sliderMcu" min="10" max="100" value="50" step="1">
+        </div>
+        <div class="slider-box">
+            ម៉ាសលោហៈ X $m_x$ (g):<br>
+            <span id="valMx" class="number-display" style="color: #607d8b; font-size:22px;">70.0 g</span>
+            <input type="range" id="sliderMx" min="10" max="150" value="70" step="1">
+        </div>
+        <div class="slider-box">
+            សីតុណ្ហភាពសម្រេច $T_f$ (°C):<br>
+            <span id="valTf" class="number-display" style="color: #d32f2f; font-size:22px;">20.0 °C</span>
+            <input type="range" id="sliderTf" min="11" max="50" value="20" step="0.5">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #0288d1;">កម្ដៅស្រូបសរុប $Q_{gain}$<br><span id="dashQgain" class="number-display">11365 J</span></div>
+        <div class="data-box" style="border-top: 4px solid #ff7043;">កម្ដៅ Cu បញ្ចេញ<br><span id="dashQcu" class="number-display">1161 J</span></div>
+        <div class="data-box" style="border-top: 4px solid #607d8b;">កម្ដៅ X បញ្ចេញ<br><span id="dashQx" class="number-display">10204 J</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">កម្ដៅម៉ាស $c_x$<br><span id="dashCx" class="number-display">1822 J/kg·°C</span></div>
+    </div>
+
+    <button id="btnToggleSolution" class="btn-sol">📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ (គ្មានអក្សរខ្មែរក្នុង MathJax) -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box">
+            💡 <strong>គោលការណ៍រក្សាកម្ដៅ៖</strong> <br>
+            ថាមពលកម្ដៅស្រូបស្មើនឹងថាមពលកម្ដៅបញ្ចេញ $\sum Q_{\text{ស្រូប}} = \sum Q_{\text{បញ្ចេញ}}$
+        </div>
+
+        <h3>ដំណោះស្រាយលំហាត់</h3>
+        
+        <div id="mathContainer">
+            <p><strong>បម្រាប់៖</strong></p>
+            <ul>
+                <li>កាឡូរីម៉ែត្រអាលុយមីញ៉ូម៖ \( m_{cal} = 100 \text{ g} = 0.1 \text{ kg} \), \( c_{cal} = 900 \text{ J/kg}^\circ\text{C} \)</li>
+                <li>ទឹក៖ \( m_w = 250 \text{ g} = 0.25 \text{ kg} \), \( c_w = 4186 \text{ J/kg}^\circ\text{C} \)</li>
+                <li id="mathValMcu">ទង់ដែង៖ \( m_{cu} = 50 \text{ g} = 0.05 \text{ kg} \), \( c_{cu} = 387 \text{ J/kg}^\circ\text{C} \)</li>
+                <li id="mathValMx">លោហៈ X៖ \( m_x = 70 \text{ g} = 0.07 \text{ kg} \), \( c_x = \text{ ?} \)</li>
+                <li id="mathValT">សីតុណ្ហភាព៖ \( T_1 = 10^\circ\text{C} \), \( T_{cu} = 80^\circ\text{C} \), \( T_x = 100^\circ\text{C} \), \( T_f = 20^\circ\text{C} \)</li>
+            </ul>
+
+            <p><strong>ក. គណនាកម្ដៅម៉ាសនៃលោហៈមិនស្គាល់ $c_x$ ៖</strong></p>
+            <p>កម្ដៅស្រូបសរុប (ទឹក + កាឡូរីម៉ែត្រ) ៖</p>
+            <div id="mathLineQgain">$$ Q_{gain} = (m_{cal} c_{cal} + m_w c_w)(T_f - T_1) $$</div>
+            
+            <p>កម្ដៅបញ្ចេញសរុប (ទង់ដែង + លោហៈ X) ៖</p>
+            <div id="mathLineQloss">$$ Q_{loss} = m_{cu} c_{cu} (T_{cu} - T_f) + m_x c_x (T_x - T_f) $$</div>
+
+            <p>តាមច្បាប់រក្សាកម្ដៅ \( Q_{gain} = Q_{loss} \) ទាញរក \( c_x \) ៖</p>
+            <div id="mathLineCalc">$$ 11365 = 1161 + 0.07 \cdot c_x \cdot (100 - 20) $$</div>
+            <div id="mathLineFinalCx" style="font-weight: bold; color: #28a745; text-align: center; margin-top: 15px; font-size: 1.2em;">
+                $$ c_x = 1822 \text{ J/kg}^\circ\text{C} $$
+            </div>
+            
+            <p><strong>ខ. កំណត់ឈ្មោះលោហៈមិនស្គាល់ ៖</strong></p>
+            <div id="mathLineMetal" style="text-align: center; font-size: 1.1em;">
+                ផ្អែកតាមតារាងកម្ដៅម៉ាស លោហៈដែលមាន \( c \approx 1822 \text{ J/kg}^\circ\text{C} \) គឺ <strong>បេរីល្យូម (Beryllium)</strong> ។
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > ក្នុងតក្កវិជ្ជា -->
+<script>
+    var sMcu = document.getElementById('sliderMcu');
+    var sMx = document.getElementById('sliderMx');
+    var sTf = document.getElementById('sliderTf');
+
+    var btnDrop = document.getElementById('btnDrop');
+    var btnReset = document.getElementById('btnReset');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    var blockCu = document.getElementById('blockCu');
+    var blockX = document.getElementById('blockX');
+    var thermoLiq = document.getElementById('thermoLiq');
+    var lblTempLive = document.getElementById('lblTempLive');
+    var lblTempBg = document.getElementById('lblTempBg');
+    var heatArrows = document.getElementById('heatArrows');
+    var waterBody = document.getElementById('waterBody');
+    var waterSurface = document.getElementById('waterSurface');
+
+    // Constants
+    var c_cal = 900;
+    var c_w = 4186;
+    var c_cu = 387;
+    var m_cal = 0.1;
+    var m_w = 0.25;
+    var t1 = 10;
+    var t_cu = 80;
+    var t_x = 100;
+    
+    var targetProgress = 0; 
+    var currentProgress = 0;
+    var isAnimating = false;
+
+    btnToggleSolution.addEventListener('click', function() {
+        var isHidden = (solutionBox.style.display === 'none');
+        if (isHidden === true) {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    sMcu.addEventListener('input', resetSim);
+    sMx.addEventListener('input', resetSim);
+    sTf.addEventListener('input', resetSim);
+
+    function resetSim() {
+        targetProgress = 0;
+        currentProgress = 0;
+        isAnimating = false;
+        btnDrop.innerText = "⬇️ ទម្លាក់ដុំលោហៈចូល";
+        btnDrop.style.background = "#d32f2f";
+        updatePhysics();
+    }
+
+    btnReset.addEventListener('click', resetSim);
+
+    btnDrop.addEventListener('click', function() {
+        var isZero = (targetProgress === 0);
+        if (isZero === true) {
+            targetProgress = 1; 
+            btnDrop.innerText = "⏳ កំពុងផ្លាស់ប្តូរកម្ដៅ...";
+            btnDrop.style.background = "#f57c00";
+        }
+        
+        if (isAnimating === false) {
+            isAnimating = true;
+            loopAnimation();
+        }
+    });
+
+    function loopAnimation() {
+        var diff = targetProgress - currentProgress;
+        var isDiff = (Math.abs(diff).toFixed(3) !== "0.000");
+
+        if (isDiff === true) {
+            currentProgress += 0.015; // ល្បឿនធ្លាក់ និងឡើងកម្ដៅ
+            var isOver = (Math.max(currentProgress, targetProgress) === currentProgress);
+            if (isOver === true) currentProgress = targetProgress;
+            
+            drawGraphics();
+            requestAnimationFrame(loopAnimation);
+        } else {
+            drawGraphics();
+            isAnimating = false;
+            var isDone = (targetProgress === 1);
+            if(isDone === true) {
+                btnDrop.innerText = "✅ ឈានដល់លំនឹងកម្ដៅ";
+                btnDrop.style.background = "#28a745";
+            }
+        }
+    }
+
+    function drawGraphics() {
+        var t_f = parseFloat(sTf.value);
+        
+        // គណនាសីតុណ្ហភាពបច្ចុប្បន្នពេលកំពុងលាយ
+        var currentT = t1 + ((t_f - t1) * currentProgress);
+        lblTempLive.textContent = currentT.toFixed(1) + " °C";
+
+        // ចលនាទម្លាក់ដុំលោហៈ (Y: 80 -> 270)
+        var blockY = 80 + (190 * Math.min(currentProgress * 2, 1)); // ធ្លាក់លឿនជាងសីតុណ្ហភាពបន្តិច
+        blockCu.setAttribute("transform", "translate(360, " + blockY + ")");
+        blockX.setAttribute("transform", "translate(410, " + blockY + ")");
+
+        // កម្ពស់ទឹកឡើងបន្តិចពេលទម្លាក់ចូល (Y: 220 -> 210)
+        var waterY = 220 - (10 * Math.min(currentProgress * 2, 1));
+        waterBody.setAttribute("d", "M 324 " + waterY + " L 324 310 A 6 6 0 0 0 330 316 L 470 316 A 6 6 0 0 0 476 310 L 476 " + waterY + " Z");
+        waterSurface.setAttribute("y1", waterY);
+        waterSurface.setAttribute("y2", waterY);
+
+        // បង្ហាញព្រួញកម្ដៅពេលដុំធ្លាក់ដល់ទឹក
+        var isSubmerged = (Math.max(currentProgress, 0.5) === currentProgress);
+        var isNotDone = (Math.min(currentProgress, 0.95) === currentProgress);
+        var showArrows = (isSubmerged === true && isNotDone === true);
+        if (showArrows === true) {
+            heatArrows.setAttribute("opacity", "1");
+        } else {
+            heatArrows.setAttribute("opacity", "0");
+        }
+
+        // កម្ពស់ទែម៉ូម៉ែត្រ (10°C = y:280, 50°C = y:120 -> 1°C = -4px)
+        var thermY = 280 - ((currentT - 10) * 4);
+        thermY = Math.max(50, Math.min(thermY, 280));
+        thermoLiq.setAttribute("y", thermY);
+        thermoLiq.setAttribute("height", 305 - thermY);
+        
+        lblTempBg.setAttribute("y", thermY - 12);
+        lblTempLive.setAttribute("y", thermY + 5);
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var m_cu_g = parseFloat(sMcu.value);
+        var m_x_g = parseFloat(sMx.value);
+        var t_f = parseFloat(sTf.value);
+        
+        var m_cu = m_cu_g / 1000;
+        var m_x = m_x_g / 1000;
+
+        // ការគណនា
+        var dt_gain = t_f - t1;
+        var q_gain = (m_cal * c_cal + m_w * c_w) * dt_gain;
+        
+        var q_cu = m_cu * c_cu * (t_cu - t_f);
+        var q_x = q_gain - q_cu; // តាមច្បាប់រក្សាកម្ដៅ
+        
+        var dt_x = t_x - t_f;
+        var c_x = 0;
+        var isDtValid = (Math.max(dt_x, 0.1) === dt_x);
+        if (isDtValid === true) {
+            c_x = q_x / (m_x * dt_x);
+        }
+
+        // ការកំណត់ឈ្មោះលោហៈប្រហាក់ប្រហែល
+        var metalName = "មិនស្គាល់";
+        var isBe = (Math.min(c_x, 1900) === c_x && Math.max(c_x, 1750) === c_x);
+        var isAl = (Math.min(c_x, 950) === c_x && Math.max(c_x, 850) === c_x);
+        var isFe = (Math.min(c_x, 500) === c_x && Math.max(c_x, 400) === c_x);
+        var isPb = (Math.min(c_x, 150) === c_x && Math.max(c_x, 100) === c_x);
+        
+        if (isBe === true) metalName = "បេរីល្យូម (Beryllium)";
+        else if (isAl === true) metalName = "អាលុយមីញ៉ូម (Aluminum)";
+        else if (isFe === true) metalName = "ដែក (Iron)";
+        else if (isPb === true) metalName = "សំណ (Lead)";
+
+        // UI Dashboard
+        document.getElementById('valMcu').innerText = m_cu_g.toFixed(1) + " g";
+        document.getElementById('valMx').innerText = m_x_g.toFixed(1) + " g";
+        document.getElementById('valTf').innerText = t_f.toFixed(1) + " °C";
+
+        document.getElementById('dashQgain').innerText = Math.round(q_gain) + " J";
+        document.getElementById('dashQcu').innerText = Math.round(q_cu) + " J";
+        document.getElementById('dashQx').innerText = Math.round(q_x) + " J";
+        document.getElementById('dashCx').innerText = Math.round(c_x) + " J/kg·°C";
+
+        // Problem Texts
+        document.getElementById('probMcu').innerText = m_cu_g.toFixed(1);
+        document.getElementById('probMx').innerText = m_x_g.toFixed(1);
+        document.getElementById('probTf').innerText = t_f.toFixed(1);
+
+        if (isAnimating === false) {
+            drawGraphics();
+        }
+
+        // Update MathJax Safely (Removed Khmer from inside math boundaries)
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            
+            document.getElementById('mathValMcu').innerHTML = "ទង់ដែង៖ \\( m_{cu} = " + m_cu_g + " \\text{ g} = " + m_cu.toFixed(3) + " \\text{ kg} \\) , \\( c_{cu} = 387 \\text{ J/kg}^\\circ\\text{C} \\)";
+            document.getElementById('mathValMx').innerHTML = "លោហៈ X៖ \\( m_x = " + m_x_g + " \\text{ g} = " + m_x.toFixed(3) + " \\text{ kg} \\) , \\( c_x = \\text{ ?} \\)";
+            document.getElementById('mathValT').innerHTML = "សីតុណ្ហភាព៖ \\( T_1 = 10^\\circ\\text{C} \\) , \\( T_{cu} = 80^\\circ\\text{C} \\) , \\( T_x = 100^\\circ\\text{C} \\) , \\( T_f = " + t_f + "^\\circ\\text{C} \\)";
+            
+            document.getElementById('mathLineQgain').innerHTML = "$$ Q_{gain} = (0.1 \\times 900 + 0.25 \\times 4186)(" + t_f + " - 10) = " + Math.round(q_gain) + " \\text{ J} $$";
+            
+            document.getElementById('mathLineQloss').innerHTML = "$$ Q_{loss} = " + m_cu.toFixed(3) + " \\times 387 \\times (80 - " + t_f + ") + " + m_x.toFixed(3) + " \\cdot c_x \\cdot (100 - " + t_f + ") $$";
+            
+            document.getElementById('mathLineCalc').innerHTML = "$$ " + Math.round(q_gain) + " = " + Math.round(q_cu) + " + " + (m_x * dt_x).toFixed(3) + " \\cdot c_x $$";
+            
+            document.getElementById('mathLineFinalCx').innerHTML = "$$ c_x = " + Math.round(c_x) + " \\text{ J/kg}^\\circ\\text{C} $$";
+            
+            document.getElementById('mathLineMetal').innerHTML = "ផ្អែកតាមតារាងកម្ដៅម៉ាស លោហៈដែលមាន \\( c \\approx " + Math.round(c_x) + " \\text{ J/kg}^\\circ\\text{C} \\) គឺ <strong class=\"metal-name\">" + metalName + "</strong> ។";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    // Initial run
+    updatePhysics();
+</script>
+
+</body>
+</html>

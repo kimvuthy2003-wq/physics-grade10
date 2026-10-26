@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី២៖ ចំណុះកម្ដៅនៃស្វ៊ែរសំណ</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block; padding-top: 10px;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 450px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .btn-group {
+            display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;
+        }
+        button {
+            color: white; padding: 12px 20px; font-size: 16px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s, transform 0.1s;
+        }
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: scale(0.98); }
+        
+        .btn-action { background: #d32f2f; font-size: 18px; padding: 15px 30px; }
+        .btn-reset { background: #546e7a; }
+        .btn-sol { background: #17a2b8; width: 100%; margin-bottom: 20px; font-size: 18px; padding: 15px;}
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 14px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 10px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 20px; }
+        
+        .note-box { 
+            background: #e8f5e9; border-left: 6px solid #28a745; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #1b5e20; 
+        }
+
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ប្រធានលំហាត់ថ្មី -->
+    <div class="problem-statement">
+        <strong>លំហាត់គំរូ ២ ៖</strong> ស្វ៊ែរសំណមួយត្រូវការបរិមាណកម្ដៅ $1.152 \times 10^5 \text{ J}$ ដើម្បីដំឡើងសីតុណ្ហភាពពី $25^\circ\text{C}$ ទៅ $61^\circ\text{C}$ ។ តើស្វ៊ែរសំណនោះមានចំណុះកម្ដៅស្មើនឹងប៉ុន្មាន?
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="btn-group">
+        <button class="btn-action" id="btnHeat">🔥 ចាប់ផ្តើមផ្ដល់កម្ដៅ</button>
+        <button class="btn-reset" id="btnReset">🔄 ចាប់ផ្តើមឡើងវិញ</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="hotPlateGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#cfd8dc"/>
+                    <stop offset="100%" stop-color="#78909c"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ចង្ក្រានអគ្គិសនី (Hot Plate) -->
+            <rect x="250" y="320" width="300" height="40" rx="8" fill="url(#hotPlateGrad)" stroke="#455a64" stroke-width="4"/>
+            <!-- ខ្សែដុត (Heating Element) - ប្រែពណ៌ក្រហមពេលដុត -->
+            <rect id="heatingCoil" x="280" y="315" width="240" height="10" rx="5" fill="#37474f"/>
+            
+            <!-- ស្វ៊ែរសំណ (Lead Sphere) -->
+            <circle id="leadSphere" cx="400" cy="265" r="50" fill="#757575" stroke="#424242" stroke-width="3"/>
+            <text id="sphereLabel" x="400" y="270" text-anchor="middle" font-family="Hanuman, Arial" font-size="18" fill="#ffffff">សំណ</text>
+
+            <!-- ទែម៉ូម៉ែត្រ (Thermometer) -->
+            <rect x="520" y="50" width="16" height="260" rx="8" fill="#ffffff" stroke="#546e7a" stroke-width="3"/>
+            <circle cx="528" cy="305" r="14" fill="#d32f2f"/>
+            <rect id="thermoLiq" x="524" y="240" width="8" height="65" fill="#d32f2f"/>
+            
+            <!-- គំនូសមាត្រដ្ឋានទែម៉ូម៉ែត្រ -->
+            <line x1="505" y1="240" x2="520" y2="240" stroke="#111" stroke-width="2"/>
+            <text id="lblTempScale" x="475" y="245" font-family="Arial" font-weight="bold" font-size="14" fill="#111">25 °C</text>
+            <line x1="505" y1="60" x2="520" y2="60" stroke="#111" stroke-width="2"/>
+            <text x="465" y="65" font-family="Arial" font-weight="bold" font-size="14" fill="#111">100 °C</text>
+
+            <!-- Counter ថាមពលកម្ដៅ (Joule Meter) -->
+            <rect x="620" y="150" width="160" height="70" rx="8" fill="#212121" stroke="#ffb74d" stroke-width="3"/>
+            <text x="700" y="175" text-anchor="middle" font-family="Siemreap, Arial" font-size="16" fill="#ffb74d">ថាមពលស្រូប (Q)</text>
+            <text id="liveQ" x="700" y="205" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="22" fill="#00e676">0 J</text>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            បរិមាណកម្ដៅ $Q$ (J):<br>
+            <span id="valQ" class="number-display" style="color: #0288d1; font-size:24px;">115200 J</span>
+            <input type="range" id="sliderQ" min="50000" max="200000" value="115200" step="100">
+        </div>
+        <div class="slider-box">
+            សីតុណ្ហភាពដើម $T_1$ (°C):<br>
+            <span id="valT1" class="number-display" style="color: #546e7a; font-size:24px;">25 °C</span>
+            <input type="range" id="sliderT1" min="0" max="50" value="25" step="1">
+        </div>
+        <div class="slider-box">
+            សីតុណ្ហភាពស្រេច $T_2$ (°C):<br>
+            <span id="valT2" class="number-display" style="color: #d32f2f; font-size:24px;">61 °C</span>
+            <input type="range" id="sliderT2" min="51" max="100" value="61" step="1">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #28a745;">ថាមពលសរុប $Q$<br><span id="dashTotalQ" class="number-display">115200 J</span></div>
+        <div class="data-box" style="border-top: 4px solid #e65100;">បម្រែបម្រួល $\Delta T$<br><span id="dashDt" class="number-display">36 °C</span></div>
+        <div class="data-box" style="border-top: 4px solid #0288d1;">ចំណុះកម្ដៅ $C$<br><span id="dashC" class="number-display">3200 J/°C</span></div>
+    </div>
+
+    <button id="btnToggleSolution" class="btn-sol">📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box">
+            💡 <strong>រូបមន្តសំខាន់ៗ៖</strong> <br>
+            • ចំណុះកម្ដៅ៖ $C = \frac{Q}{\Delta T}$ <br>
+            • បម្រែបម្រួលសីតុណ្ហភាព៖ $\Delta T = T_2 - T_1$
+        </div>
+
+        <h3>ដំណោះស្រាយលំហាត់គំរូ ២</h3>
+        
+        <div id="mathContainer">
+            <p><strong>គណនាចំណុះកម្ដៅនៃស្វ៊ែរសំណ៖</strong></p>
+            <p>តាមរូបមន្ត $C = \frac{Q}{\Delta T}$ ដោយបម្រែបម្រួលសីតុណ្ហភាព $\Delta T = T_2 - T_1$</p>
+            <p>បម្រាប់ដែលយើងមាន៖</p>
+            <ul style="line-height: 1.8;">
+                <li>បរិមាណកម្ដៅ $Q = 1.152 \times 10^5 \text{ J} = 115200 \text{ J}$</li>
+                <li>សីតុណ្ហភាពដើម $T_1 = 25^\circ\text{C}$</li>
+                <li>សីតុណ្ហភាពស្រេច $T_2 = 61^\circ\text{C}$</li>
+            </ul>
+            <p>នាំឱ្យ $\Delta T = 61^\circ\text{C} - 25^\circ\text{C} = 36^\circ\text{C}$</p>
+            <br>
+            <div id="mathLineSol">$$ C = \frac{115200}{36} = 3200 \text{ J/}^\circ\text{C} $$</div>
+            <p style="color: #28a745; font-weight: bold; margin-top: 20px;">
+                ដូចនេះ ស្វ៊ែរសំណនោះមានចំណុះកម្ដៅ $C = 3200 \text{ J/}^\circ\text{C}$ ។
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > ក្នុងតក្កវិជ្ជា -->
+<script>
+    var sQ = document.getElementById('sliderQ');
+    var sT1 = document.getElementById('sliderT1');
+    var sT2 = document.getElementById('sliderT2');
+
+    var btnHeat = document.getElementById('btnHeat');
+    var btnReset = document.getElementById('btnReset');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    var heatingCoil = document.getElementById('heatingCoil');
+    var leadSphere = document.getElementById('leadSphere');
+    var thermoLiq = document.getElementById('thermoLiq');
+    var lblTempScale = document.getElementById('lblTempScale');
+    var liveQ = document.getElementById('liveQ');
+    
+    var targetProgress = 0; // 0 to 1
+    var currentProgress = 0;
+    var isHeating = false;
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none' || solutionBox.style.display === '') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    // ការពារកុំឱ្យ T1 ធំជាង ឬស្មើ T2
+    sT1.addEventListener('input', function() {
+        var t1 = parseFloat(sT1.value);
+        var t2 = parseFloat(sT2.value);
+        var isValid = (Math.max(t2, t1) === t2 && t1 !== t2);
+        if (isValid === false) {
+            sT2.value = t1 + 1;
+        }
+        resetSim();
+    });
+
+    sT2.addEventListener('input', function() {
+        var t1 = parseFloat(sT1.value);
+        var t2 = parseFloat(sT2.value);
+        var isValid = (Math.max(t2, t1) === t2 && t1 !== t2);
+        if (isValid === false) {
+            sT1.value = t2 - 1;
+        }
+        resetSim();
+    });
+
+    sQ.addEventListener('input', resetSim);
+
+    function resetSim() {
+        targetProgress = 0;
+        currentProgress = 0;
+        isHeating = false;
+        btnHeat.innerText = "🔥 ចាប់ផ្តើមផ្ដល់កម្ដៅ";
+        btnHeat.style.background = "#d32f2f";
+        updatePhysics();
+    }
+
+    btnReset.addEventListener('click', resetSim);
+
+    btnHeat.addEventListener('click', function() {
+        if (targetProgress === 0) {
+            targetProgress = 1; // Heat up
+            btnHeat.innerText = "⏸️ បញ្ឈប់ការផ្ដល់កម្ដៅ";
+            btnHeat.style.background = "#f57c00";
+        } else {
+            targetProgress = 0; // Cool down
+            btnHeat.innerText = "🔥 បន្តផ្ដល់កម្ដៅ";
+            btnHeat.style.background = "#d32f2f";
+        }
+        
+        if (isHeating === false) {
+            isHeating = true;
+            loopAnimation();
+        }
+    });
+
+    function loopAnimation() {
+        var diff = targetProgress - currentProgress;
+        if (Math.abs(diff).toFixed(3) !== "0.000") {
+            currentProgress += diff * 0.005; // ឡើងយឺតៗ
+            drawGraphics();
+            requestAnimationFrame(loopAnimation);
+        } else {
+            currentProgress = targetProgress;
+            drawGraphics();
+            isHeating = false;
+            if(targetProgress === 1) {
+                btnHeat.innerText = "✅ សម្រេចគោលដៅ";
+                btnHeat.style.background = "#28a745";
+            }
+        }
+    }
+
+    function drawGraphics() {
+        var q_total = parseFloat(sQ.value);
+        var t1 = parseFloat(sT1.value);
+        var t2 = parseFloat(sT2.value);
+        
+        var dt = t2 - t1;
+
+        // សីតុណ្ហភាព និងថាមពលបច្ចុប្បន្ន
+        var currentT = t1 + (dt * currentProgress);
+        var currentQ = q_total * currentProgress;
+
+        // Update UI Live
+        liveQ.textContent = Math.round(currentQ) + " J";
+        lblTempScale.textContent = Math.round(currentT) + " °C";
+
+        // ១. ប្តូរពណ៌ចង្ក្រានពេលកំពុងដុត (ចលនា)
+        var diff = targetProgress - currentProgress;
+        var isProgressing = (Math.abs(diff).toFixed(3) !== "0.000" && targetProgress === 1);
+        if (isProgressing === true) {
+            heatingCoil.setAttribute("fill", "#ff1744"); // ក្រហមឆ្អៅ
+            leadSphere.setAttribute("fill", "#ff8a65"); // ស្វ៊ែរឡើងកម្ដៅ (ពណ៌ក្រហមព្រឿងៗ)
+        } else {
+            heatingCoil.setAttribute("fill", "#37474f"); // ត្រជាក់
+            leadSphere.setAttribute("fill", "#757575");
+        }
+
+        // ២. កម្ពស់ទែម៉ូម៉ែត្រ (0°C = y:280, 100°C = y:60 -> 1°C = -2.2px)
+        var thermoY = 280 - (currentT * 2.2);
+        thermoY = Math.max(60, Math.min(thermoY, 280));
+        thermoLiq.setAttribute("y", thermoY);
+        thermoLiq.setAttribute("height", 300 - thermoY);
+        lblTempScale.setAttribute("y", thermoY + 5);
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var q_total = parseFloat(sQ.value);
+        var t1 = parseFloat(sT1.value);
+        var t2 = parseFloat(sT2.value);
+        
+        var dt = t2 - t1;
+        var C = q_total / dt;
+
+        // UI Dashboard
+        document.getElementById('valQ').innerText = q_total.toLocaleString() + " J";
+        document.getElementById('valT1').innerText = t1 + " °C";
+        document.getElementById('valT2').innerText = t2 + " °C";
+
+        document.getElementById('dashC').innerText = C.toFixed(1) + " J/°C";
+        document.getElementById('dashDt').innerText = dt + " °C";
+        document.getElementById('dashTotalQ').innerText = q_total.toLocaleString() + " J";
+
+        if (isHeating === false) {
+            drawGraphics();
+        }
+
+        // Update MathJax Safely (Debounced)
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            // គណនាសម្រាប់ប្រអប់ដំណោះស្រាយ
+            document.getElementById('mathLineSol').innerHTML = "$$ C = \\frac{Q}{\\Delta T} = \\frac{" + q_total + "}{" + dt + "} = " + C.toFixed(1) + " \\text{ J/}^\\circ\\text{C} $$";
+            
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    // Initial run
+    updatePhysics();
+</script>
+
+</body>
+</html>

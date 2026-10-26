@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ១៣ទំព័រ១១៩</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Kantumruy Pro for Khmer, Lora for Math/Latin -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+
+        .math-font {
+            font-family: 'Lora', serif;
+        }
+
+        .math-var {
+            font-family: 'Lora', serif;
+            font-style: italic;
+        }
+
+        .khmer-title {
+            font-family: 'Kantumruy Pro', sans-serif;
+            line-height: 1.6;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background-color: #e2e8f0;
+            border-radius: 0.75rem;
+            box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+        }
+
+        /* Smooth reveal for solution */
+        .solution-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .solution-content.open {
+            max-height: 2000px; /* Arbitrary large number to allow full expansion */
+        }
+
+        .stat-value {
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <main class="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden mb-12 border border-slate-200">
+        
+        <!-- Problem Statement -->
+        <section class="p-6 md:p-10 bg-sky-50/50 border-b border-slate-200">
+            <h2 class="text-xl font-bold text-slate-700 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                ប្រធានលំហាត់៖
+            </h2>
+            <p class="text-slate-800 leading-relaxed text-xl md:text-2xl font-medium text-justify">
+                <span class="math-font font-bold">១៣.</span> គេបាញ់ក្បាលគ្រាប់មួយធ្វើពីសំណមានម៉ាស <span class="math-font text-sky-700 font-semibold">4.00 g</span> នៅសីតុណ្ហភាព <span class="math-font text-sky-700 font-semibold">32.0°C</span> ចូលកប់ក្នុងដុំទឹកកកធំមួយនៅសីតុណ្ហភាព <span class="math-font text-sky-700 font-semibold">0°C</span> ដោយល្បឿន <span class="math-font text-sky-700 font-semibold">240 m/s</span> ។ កំណត់បរិមាណទឹកកកដែលរលាយ ។ គេឱ្យកម្ដៅឡាតង់រលាយទឹកកក <span class="math-font text-sky-700 font-semibold">3.33 × 10<sup>5</sup> J/kg</span> និងកម្ដៅម៉ាសសំណ <span class="math-font text-sky-700 font-semibold">128 J/kg·°C</span> ។
+            </p>
+            <div class="mt-6 inline-flex items-center bg-yellow-100 px-5 py-3 rounded-xl border border-yellow-300 shadow-sm text-lg">
+                <strong class="text-yellow-800 mr-3">ចម្លើយ៖</strong> 
+                <span class="text-sky-800 math-font font-bold text-xl"><span class="math-var">m</span> = 0.395 g</span>
+            </div>
+        </section>
+
+        <!-- Simulation Area -->
+        <section class="p-6 md:p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                
+                <!-- Canvas Container -->
+                <div class="lg:col-span-2 relative">
+                    <canvas id="simCanvas" width="800" height="400" class="w-full"></canvas>
+                    
+                    <!-- Controls below canvas -->
+                    <div class="flex justify-center gap-4 mt-6">
+                        <button id="fireBtn" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-sky-300 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                            </svg>
+                            បាញ់គ្រាប់សំណ (Fire)
+                        </button>
+                        <button id="resetBtn" class="bg-white hover:bg-slate-50 text-slate-700 font-bold py-3 px-8 rounded-full shadow border border-slate-300 transition focus:outline-none focus:ring-4 focus:ring-slate-200">
+                            កំណត់ឡើងវិញ (Reset)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Dashboard -->
+                <div class="bg-slate-800 rounded-xl p-6 shadow-inner border border-slate-700 text-slate-200 lg:col-span-1 h-full flex flex-col justify-center">
+                    <h3 class="text-lg font-bold text-sky-400 mb-6 border-b border-slate-700 pb-2">ទិន្នន័យពេលប៉ះទង្គិច (Impact Data)</h3>
+                    
+                    <div class="space-y-6">
+                        <!-- Kinetic Energy -->
+                        <div>
+                            <div class="flex justify-between items-end mb-1">
+                                <span class="text-sm text-slate-400">ថាមពលស៊ីនេទិច (<span class="math-font text-xs">W<sub>k</sub></span>)</span>
+                                <span class="text-xl font-bold text-emerald-400 math-font"><span id="statWk" class="stat-value">0.0</span> <span class="text-sm font-normal text-emerald-500/70">J</span></span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-1.5">
+                                <div id="barWk" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-100" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Heat from Cooling -->
+                        <div>
+                            <div class="flex justify-between items-end mb-1">
+                                <span class="text-sm text-slate-400">កម្ដៅសំណចុះត្រជាក់ (<span class="math-font text-xs">Q<sub>cool</sub></span>)</span>
+                                <span class="text-xl font-bold text-orange-400 math-font"><span id="statQ" class="stat-value">0.0</span> <span class="text-sm font-normal text-orange-500/70">J</span></span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-1.5">
+                                <div id="barQ" class="bg-orange-500 h-1.5 rounded-full transition-all duration-100" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Melted Mass -->
+                        <div class="pt-4 border-t border-slate-700">
+                            <div class="flex justify-between items-end mb-1">
+                                <span class="text-slate-300 font-semibold">ម៉ាសទឹកកករលាយ (<span class="math-font text-xs">m</span>)</span>
+                                <span class="text-3xl font-bold text-sky-400 math-font"><span id="statM" class="stat-value">0.000</span> <span class="text-base font-normal text-sky-500/70">g</span></span>
+                            </div>
+                            <div class="text-xs text-slate-500 text-right mt-1 math-font">Max: 0.395 g</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Solution Section Toggle -->
+        <div class="bg-slate-50 border-t border-slate-200 p-4 text-center">
+            <button id="toggleSolutionBtn" class="text-sky-600 hover:text-sky-800 font-semibold text-lg flex items-center justify-center gap-2 mx-auto w-full p-2 transition">
+                បង្ហាញដំណោះស្រាយលម្អិត
+                <svg id="solutionChevron" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Hidden Solution Content -->
+        <section id="solutionContent" class="solution-content bg-white">
+            <div class="p-6 md:p-10 border-t border-slate-100">
+                <div class="max-w-3xl mx-auto">
+                    
+                    <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                        <span class="bg-emerald-100 text-emerald-600 w-8 h-8 flex items-center justify-center rounded-full text-base">✓</span>
+                        ដំណោះស្រាយ
+                    </h3>
+
+                    <div class="space-y-6 text-slate-700 text-lg">
+                        
+                        <!-- Step 1: Identify given data -->
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <p class="font-bold mb-3 text-slate-800">បម្រាប់៖</p>
+                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 math-font text-[1.1rem]">
+                                <li><span class="math-var">m<sub>1</sub></span> = 4.00 g = 0.004 kg (ម៉ាសសំណ)</li>
+                                <li><span class="math-var">T<sub>1</sub></span> = 32.0 °C (សីតុណ្ហភាពសំណ)</li>
+                                <li><span class="math-var">v</span> = 240 m/s (ល្បឿនសំណ)</li>
+                                <li><span class="math-var">T<sub>2</sub></span> = 0 °C (សីតុណ្ហភាពទឹកកក)</li>
+                                <li><span class="math-var">L<sub>f</sub></span> = 3.33 × 10<sup>5</sup> J/kg (កម្ដៅឡាតង់)</li>
+                                <li><span class="math-var">c</span> = 128 J/kg·°C (កម្ដៅម៉ាសសំណ)</li>
+                            </ul>
+                        </div>
+
+                        <!-- Step 2: Logic -->
+                        <div class="pt-4">
+                            <p class="mb-4">នៅពេលក្បាលគ្រាប់បុកចូលទឹកកក វាបញ្ចេញថាមពលពីរផ្នែកដើម្បីរំលាយទឹកកក៖</p>
+                            <ol class="list-decimal pl-6 space-y-4">
+                                <li>
+                                    ថាមពលស៊ីនេទិចរបស់ក្បាលគ្រាប់បំប្លែងជាកម្ដៅទាំងស្រុង៖
+                                    <div class="math-font text-center my-3 text-xl bg-sky-50 py-3 rounded-lg border border-sky-100">
+                                        <span class="math-var">W<sub>k</sub></span> = ½ <span class="math-var">m<sub>1</sub>v</span><sup>2</sup> 
+                                        = 0.5 × 0.004 × (240)<sup>2</sup> 
+                                        = <strong class="text-sky-700">115.2 J</strong>
+                                    </div>
+                                </li>
+                                <li>
+                                    កម្ដៅដែលក្បាលគ្រាប់សំណបញ្ចេញពេលចុះត្រជាក់ពី 32°C ទៅ 0°C៖
+                                    <div class="math-font text-center my-3 text-xl bg-sky-50 py-3 rounded-lg border border-sky-100">
+                                        <span class="math-var">Q<sub>cool</sub></span> = <span class="math-var">m<sub>1</sub>c</span>Δ<span class="math-var">T</span> 
+                                        = 0.004 × 128 × (32 - 0) 
+                                        = <strong class="text-sky-700">16.384 J</strong>
+                                    </div>
+                                </li>
+                            </ol>
+                        </div>
+
+                        <!-- Step 3: Calculation -->
+                        <div class="pt-4">
+                            <p class="mb-4">កម្ដៅសរុបដែលទឹកកកស្រូបយកដើម្បីរលាយ (<span class="math-font italic">Q<sub>total</sub></span>) ស្មើនឹងផលបូកថាមពលខាងលើ៖</p>
+                            
+                            <div class="math-font flex flex-col items-center justify-center space-y-4 text-xl border-l-4 border-emerald-400 pl-6 py-2 ml-4">
+                                <div><span class="math-var">Q<sub>total</sub></span> = <span class="math-var">W<sub>k</sub></span> + <span class="math-var">Q<sub>cool</sub></span></div>
+                                <div><span class="math-var">Q<sub>total</sub></span> = 115.2 + 16.384 = <strong class="text-emerald-700">131.584 J</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4">
+                            <p class="mb-4">តាមរូបមន្តបរិមាណកម្ដៅរលាយទឹកកក <span class="math-font italic">Q = m L<sub>f</sub></span> ទាញរកម៉ាសទឹកកករលាយ <span class="math-font italic">m</span> ៖</p>
+                            
+                            <div class="math-font flex flex-col items-center justify-center text-xl bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm">
+                                <div class="mb-4 flex items-center">
+                                    <span class="math-var mr-2">m</span> = 
+                                    <div class="inline-flex flex-col text-center ml-2 align-middle">
+                                        <span class="border-b-2 border-slate-400 pb-1 px-2"><span class="math-var">Q<sub>total</sub></span></span>
+                                        <span class="pt-1 px-2"><span class="math-var">L<sub>f</sub></span></span>
+                                    </div>
+                                </div>
+                                <div class="mb-4 flex items-center">
+                                    <span class="math-var mr-2">m</span> = 
+                                    <div class="inline-flex flex-col text-center ml-2 align-middle">
+                                        <span class="border-b-2 border-slate-400 pb-1 px-2">131.584</span>
+                                        <span class="pt-1 px-2">333000</span>
+                                    </div>
+                                </div>
+                                <div class="text-2xl mt-2 text-slate-800">
+                                    <span class="math-var">m</span> ≈ 0.000395 kg
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Final Answer Box -->
+                        <div class="mt-8 flex justify-center">
+                            <div class="bg-emerald-50 border-2 border-emerald-200 rounded-xl px-10 py-5 text-center shadow-md">
+                                <p class="text-emerald-800 font-bold mb-2">ដូចនេះ បរិមាណទឹកកកដែលរលាយគឺ៖</p>
+                                <strong class="text-3xl md:text-4xl text-emerald-700 math-font block"><span class="math-var">m</span> = 0.395 g</strong>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- UI Interaction ---
+        const toggleBtn = document.getElementById('toggleSolutionBtn');
+        const solutionContent = document.getElementById('solutionContent');
+        const chevron = document.getElementById('solutionChevron');
+
+        toggleBtn.addEventListener('click', () => {
+            solutionContent.classList.toggle('open');
+            if (solutionContent.classList.contains('open')) {
+                chevron.classList.add('rotate-180');
+                toggleBtn.innerHTML = `លាក់ដំណោះស្រាយលម្អិត <svg id="solutionChevron" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>`;
+                // Scroll down slightly to show content
+                setTimeout(() => {
+                    solutionContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            } else {
+                chevron.classList.remove('rotate-180');
+                toggleBtn.innerHTML = `បង្ហាញដំណោះស្រាយលម្អិត <svg id="solutionChevron" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>`;
+            }
+        });
+
+        // --- Physics Constants & Expected Results ---
+        const finalWk = 115.2;
+        const finalQcool = 16.384;
+        const finalMeltedMass = 0.395;
+
+        // --- Canvas & Simulation State ---
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const fireBtn = document.getElementById('fireBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // DOM Stats Elements
+        const elWk = document.getElementById('statWk');
+        const elQ = document.getElementById('statQ');
+        const elM = document.getElementById('statM');
+        const barWk = document.getElementById('barWk');
+        const barQ = document.getElementById('barQ');
+
+        let animationId;
+        let simState = 'idle'; // 'idle', 'firing', 'melting', 'done'
+        let meltStartTime = 0;
+        const meltDuration = 2000; // ms
+
+        // Simulation Entities
+        const groundY = 320;
+        
+        let bullet = {
+            startX: 50,
+            x: 50,
+            y: 200,
+            width: 25,
+            height: 10,
+            speed: 25 // pixels per frame for animation purposes
+        };
+
+        const ice = {
+            x: 450,
+            y: 120,
+            width: 250,
+            height: 200,
+            puddleRadiusX: 0,
+            puddleRadiusY: 0,
+            maxPuddleRadiusX: 80,
+            maxPuddleRadiusY: 20
+        };
+
+        // --- Drawing Functions ---
+        function drawBackground() {
+            // Sky/Wall
+            ctx.fillStyle = '#e2e8f0'; // slate-200
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Grid lines for scale feel
+            ctx.strokeStyle = '#cbd5e1'; // slate-300
+            ctx.lineWidth = 1;
+            for(let i=0; i<canvas.width; i+=50) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+            }
+            for(let i=0; i<canvas.height; i+=50) {
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+            }
+
+            // Table/Ground
+            ctx.fillStyle = '#94a3b8'; // slate-400
+            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+            // Table top edge
+            ctx.fillStyle = '#64748b'; // slate-500
+            ctx.fillRect(0, groundY, canvas.width, 5);
+        }
+
+        function drawBullet() {
+            ctx.save();
+            ctx.translate(bullet.x, bullet.y);
+            
+            // Motion blur if moving
+            if(simState === 'firing') {
+                ctx.fillStyle = 'rgba(71, 85, 105, 0.3)'; // slate-600 faded
+                ctx.fillRect(-bullet.width*1.5, -bullet.height/2, bullet.width*1.5, bullet.height);
+            }
+
+            // Bullet body
+            ctx.fillStyle = '#475569'; // slate-600
+            ctx.beginPath();
+            ctx.moveTo(0, -bullet.height/2);
+            ctx.lineTo(bullet.width - 5, -bullet.height/2);
+            // Pointy tip
+            ctx.quadraticCurveTo(bullet.width, -bullet.height/2, bullet.width, 0);
+            ctx.quadraticCurveTo(bullet.width, bullet.height/2, bullet.width - 5, bullet.height/2);
+            ctx.lineTo(0, bullet.height/2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Bullet highlight
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.fillRect(2, -bullet.height/2 + 2, bullet.width - 8, 2);
+
+            ctx.restore();
+        }
+
+        function drawIce() {
+            ctx.save();
+            
+            // Draw puddle under ice if it exists
+            if (ice.puddleRadiusX > 0) {
+                ctx.beginPath();
+                // Center puddle slightly ahead of bullet entry point
+                ctx.ellipse(ice.x + 50, groundY, ice.puddleRadiusX, ice.puddleRadiusY, 0, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.6)'; // sky-400 semi-transparent
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(2, 132, 199, 0.4)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // Ice block
+            // Background fill
+            ctx.fillStyle = 'rgba(186, 230, 253, 0.6)'; // sky-200 transparent
+            ctx.fillRect(ice.x, ice.y, ice.width, ice.height);
+            
+            // Ice borders / facets
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(ice.x, ice.y, ice.width, ice.height);
+            
+            // Inner highlights to make it look like a block
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(ice.x + 10, ice.y + 10);
+            ctx.lineTo(ice.x + ice.width - 10, ice.y + 10);
+            ctx.lineTo(ice.x + ice.width - 10, ice.y + ice.height - 10);
+            ctx.stroke();
+
+            // Cracklines if hit
+            if (simState === 'melting' || simState === 'done') {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                // Origin of cracks at bullet entry (ice.x, bullet.y)
+                let cx = ice.x + 30; // slightly inside
+                let cy = bullet.y;
+                
+                ctx.moveTo(cx, cy); ctx.lineTo(cx + 40, cy - 30);
+                ctx.moveTo(cx, cy); ctx.lineTo(cx + 50, cy + 20);
+                ctx.moveTo(cx, cy); ctx.lineTo(cx + 20, cy - 50);
+                ctx.moveTo(cx+40, cy-30); ctx.lineTo(cx + 70, cy - 40);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function drawThermometer(x, y, temp, label) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            // Box
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.fillRect(0, 0, 80, 40);
+            ctx.strokeStyle = '#94a3b8';
+            ctx.strokeRect(0, 0, 80, 40);
+            
+            // Text
+            ctx.fillStyle = '#334155';
+            ctx.font = '12px "Lora", serif';
+            ctx.fillText(label, 5, 15);
+            
+            ctx.fillStyle = temp > 0 ? '#ef4444' : '#0ea5e9'; // Red for warm, blue for cold
+            ctx.font = 'bold 16px "Lora", serif';
+            ctx.fillText(temp + ' °C', 5, 32);
+
+            ctx.restore();
+        }
+
+        function animate(timestamp) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackground();
+
+            // Draw initial thermometers
+            if (simState === 'idle') {
+                drawThermometer(bullet.x - 20, bullet.y - 60, "32.0", "T₁ (Pb)");
+            }
+            drawThermometer(ice.x + ice.width/2 - 40, ice.y - 50, "0.0", "T₂ (Ice)");
+
+
+            if (simState === 'firing') {
+                bullet.x += bullet.speed;
+                // Check collision (embed slightly into ice)
+                if (bullet.x + bullet.width > ice.x + 40) {
+                    bullet.x = ice.x + 40 - bullet.width; // Snap to embedded position
+                    simState = 'melting';
+                    meltStartTime = timestamp;
+                }
+            }
+
+            if (simState === 'melting') {
+                let progress = (timestamp - meltStartTime) / meltDuration;
+                if (progress > 1) progress = 1;
+
+                // Ease out function for smoother UI updates
+                let easedProgress = 1 - Math.pow(1 - progress, 3);
+
+                // Animate puddle growth
+                ice.puddleRadiusX = ice.maxPuddleRadiusX * easedProgress;
+                ice.puddleRadiusY = ice.maxPuddleRadiusY * easedProgress;
+
+                // Update UI DOM Stats
+                updateDOMStats(easedProgress);
+
+                if (progress === 1) {
+                    simState = 'done';
+                    updateDOMStats(1); // Ensure final values are exact
+                    fireBtn.disabled = true;
+                    fireBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
+            // Render order matters
+            drawIce();
+            // Only draw bullet if it hasn't completely entered the ice (for simplicity, we draw it over ice but ice is transparent, so it looks embedded)
+            drawBullet();
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function updateDOMStats(progress) {
+            // Update Numbers
+            elWk.textContent = (finalWk * progress).toFixed(1);
+            elQ.textContent = (finalQcool * progress).toFixed(3);
+            elM.textContent = (finalMeltedMass * progress).toFixed(3);
+
+            // Update Progress Bars (relative to their max)
+            barWk.style.width = `${progress * 100}%`;
+            barQ.style.width = `${progress * 100}%`;
+        }
+
+        function resetSim() {
+            cancelAnimationFrame(animationId);
+            simState = 'idle';
+            bullet.x = bullet.startX;
+            ice.puddleRadiusX = 0;
+            ice.puddleRadiusY = 0;
+            
+            // Reset UI
+            updateDOMStats(0);
+            barWk.style.width = '0%';
+            barQ.style.width = '0%';
+            
+            fireBtn.disabled = false;
+            fireBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            // Draw initial frame
+            requestAnimationFrame(animate);
+        }
+
+        // --- Event Listeners ---
+        fireBtn.addEventListener('click', () => {
+            if (simState === 'idle') {
+                simState = 'firing';
+            }
+        });
+
+        resetBtn.addEventListener('click', resetSim);
+
+        // --- Initialization ---
+        // Pre-load fonts by forcing a draw slightly later, or just start
+        document.fonts.ready.then(function () {
+            requestAnimationFrame(animate);
+        });
+        
+        // Initial draw fallback
+        resetSim();
+
+    </script>
+</body>
+</html>

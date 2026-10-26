@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់៖ ថាមពលកម្ដៅ (កំនក និងការចុះត្រជាក់)</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f0f2f5; padding: 20px; color: #111; line-height: 1.6; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #263238; border: 4px solid #b0bec5;
+            border-radius: 12px; overflow: hidden;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.3); margin: 0 auto 20px;
+            display: block; padding-top: 10px;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 450px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .btn-group {
+            display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;
+        }
+        button {
+            color: white; padding: 12px 20px; font-size: 16px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s, transform 0.1s;
+        }
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: scale(0.98); }
+        
+        .btn-action { background: #d32f2f; font-size: 18px; padding: 15px 30px; }
+        .btn-reset { background: #546e7a; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        @media (max-width: 600px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 14px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 10px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 20px; }
+        
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="problem-statement">
+        <strong>លំហាត់គំរូ៖</strong> យន្តហោះប្រតិកម្មមួយបញ្ចេញចំហាយទឹកពីបំពង់នៅសីតុណ្ហភាព 100°C ទៅលើដុំទឹកកកនៅសីតុណ្ហភាព 0°C ។ ចំហាយទឹកខ្លះកកជាទឹក និងផ្នែកនៃទឹកកកខ្លះត្រូវរលាយ។ ចំហាយដែលកកជាទឹកមានម៉ាស <span id="probM" style="color:#d32f2f;">0.40</span> kg នៅសីតុណ្ហភាព 0°C ។ គណនា៖<br>
+        ក. ថាមពលកម្ដៅបញ្ចេញដោយចំហាយទឹកដែលបង្ករជាទឹកនៅសីតុណ្ហភាព 100°C<br>
+        ខ. ថាមពលកម្ដៅបញ្ចេញដោយទឹកបានពីចំហាយ ដើម្បីបញ្ចុះសីតុណ្ហភាពពី 100°C មក 0°C ។<br>
+        <em>(គេឱ្យ កម្ដៅឡាតង់បង្រួញជាទឹក $l_v = 2200 \text{ kJ/kg}$ និងកម្ដៅម៉ាសទឹក $c = 4.2 \text{ kJ/kg}\cdot^\circ\text{C}$)</em>
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="btn-group">
+        <button class="btn-action" id="btnStart">▶️ ចាប់ផ្តើមបាញ់ចំហាយទឹក</button>
+        <button class="btn-reset" id="btnReset">🔄 រៀបចំសារជាថ្មី</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="iceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#e0f7fa"/>
+                    <stop offset="100%" stop-color="#80deea"/>
+                </linearGradient>
+                <linearGradient id="pipeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#90a4ae"/>
+                    <stop offset="100%" stop-color="#455a64"/>
+                </linearGradient>
+            </defs>
+
+            <!-- បំពង់បញ្ចេញចំហាយទឹក (Steam Pipe) -->
+            <rect x="-20" y="80" width="220" height="60" fill="url(#pipeGrad)" stroke="#263238" stroke-width="4"/>
+            <path d="M 200 70 L 220 70 L 220 150 L 200 150 Z" fill="#cfd8dc" stroke="#263238" stroke-width="3"/>
+            <text x="80" y="115" font-family="Siemreap, Arial" font-weight="bold" font-size="18" fill="#fff">បំពង់ចំហាយទឹក 100°C</text>
+
+            <!-- ដុំទឹកកក (Ice Block) -->
+            <path d="M 450 380 L 700 380 L 680 150 L 470 150 Z" fill="url(#iceGrad)" stroke="#4dd0e1" stroke-width="4" opacity="0.9"/>
+            <text x="575" y="270" text-anchor="middle" font-family="Siemreap, Arial" font-weight="bold" font-size="24" fill="#006064">ដុំទឹកកក 0°C</text>
+
+            <!-- ភាគល្អិតចំហាយ & ទឹក (Particles generated by JS) -->
+            <g id="particleGroup"></g>
+
+            <!-- តំបន់សីតុណ្ហភាព (Labels) -->
+            <rect x="250" y="80" width="120" height="30" rx="4" fill="#ffcc80" opacity="0.8"/>
+            <text x="310" y="100" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#e65100">Steam (ឧស្ម័ន)</text>
+
+            <rect x="350" y="300" width="120" height="30" rx="4" fill="#81d4fa" opacity="0.8"/>
+            <text x="410" y="320" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#0277bd">Water (រាវ)</text>
+            
+            <text id="statusText" x="400" y="420" text-anchor="middle" font-family="Siemreap, Arial" font-weight="bold" font-size="18" fill="#00e676"></text>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            ម៉ាសចំហាយទឹកដែលកក $m$ (kg):<br>
+            <span id="valM" class="number-display" style="color: #d32f2f; font-size:24px;">0.40 kg</span>
+            <input type="range" id="sliderM" min="0.10" max="2.00" value="0.40" step="0.05">
+        </div>
+        <div class="slider-box" style="display: flex; flex-direction: column; justify-content: center;">
+            <div style="color: #546e7a; font-size: 14px; line-height: 1.5;">
+                * <strong>ដំណើរការពិសោធន៍៖</strong> ចំហាយទឹក 100°C ហោះចេញពីបំពង់។ ពេលវាប៉ះដុំទឹកកក វាកកក្លាយជាទឹករាវនៅ 100°C រួចធ្លាក់ចុះមកក្រោម។ នៅពេលវាធ្លាក់ដល់ដីក្បែរទឹកកក វានឹងបន្តចុះត្រជាក់ដល់ 0°C ហើយរក្សាភាពជាទឹករាវដដែល។
+            </div>
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #ff9800;">ក. កម្ដៅកំនក $Q_1$<br><span id="dashQ1" class="number-display">880 kJ</span></div>
+        <div class="data-box" style="border-top: 4px solid #0288d1;">ខ. កម្ដៅចុះត្រជាក់ $Q_2$<br><span id="dashQ2" class="number-display">168 kJ</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">ថាមពលសរុប $Q_{total}$<br><span id="dashTotal" class="number-display">1048 kJ</span></div>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box" id="solutionBox">
+        <h3 style="color: #d32f2f;">ដំណោះស្រាយលំហាត់</h3>
+        <div id="mathContainer">
+            <p><strong>បម្រាប់៖</strong></p>
+            <ul>
+                <li id="mathValM">\( m = 0.40 \text{ kg} \)</li>
+                <li>\( l_v = 2200 \text{ kJ/kg} = 22 \times 10^5 \text{ J/kg} \)</li>
+                <li>\( c = 4.2 \text{ kJ/kg}\cdot^\circ\text{C} = 4200 \text{ J/kg}\cdot^\circ\text{C} \)</li>
+            </ul>
+
+            <p><strong>ក. គណនាថាមពលកម្ដៅបញ្ចេញដោយចំហាយនៅ 100°C ដែលបង្រួញជាទឹកនៅ 100°C ៖</strong></p>
+            <p>ថាមពលកម្ដៅដែលបញ្ចេញដោយចំហាយស្មើនឹងថាមពលកម្ដៅបង្រួញ។ តាមរូបមន្ត $Q_1 = m \times l_v$</p>
+            <div id="mathLineA1">$$ Q_1 = 0.40 \text{ kg} \times 22 \times 10^5 \text{ J/kg} = 88 \times 10^4 \text{ J} $$</div>
+            <div id="mathLineA2" style="font-weight: bold; color: #ff9800; text-align: center; margin-bottom: 20px;">
+                Q_1 = 880 \text{ kJ} \
+            </div>
+
+            <p><strong>ខ. គណនាថាមពលកម្ដៅបញ្ចេញដោយទឹក ដើម្បីបញ្ចុះសីតុណ្ហភាពពី 100°C មក 0°C ៖</strong></p>
+            <p>តាមរូបមន្ត $Q_2 = m c \Delta T$ ដោយ $\Delta T = 100^\circ\text{C} - 0^\circ\text{C} = 100^\circ\text{C}$</p>
+            <div id="mathLineB1">$$ Q_2 = 0.40 \text{ kg} \times 4.2 \text{ kJ/kg}\cdot^\circ\text{C} \times 100^\circ\text{C} = 168 \text{ kJ} $$</div>
+            <div id="mathLineB2" style="font-weight: bold; color: #0288d1; text-align: center;">
+                Q_2 = 168 \text{ kJ} \
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > ក្នុងតក្កវិជ្ជា -->
+<script>
+    var sM = document.getElementById('sliderM');
+    var btnStart = document.getElementById('btnStart');
+    var btnReset = document.getElementById('btnReset');
+    var statusText = document.getElementById('statusText');
+    
+    var particleGroup = document.getElementById('particleGroup');
+
+    var l_v = 2200; // kJ/kg
+    var c_water = 4.2; // kJ/kg.C
+    var dt = 100; // 100 -> 0
+
+    // --- ប្រព័ន្ធភាគល្អិត (Particle System) ---
+    var numParticles = 80; // ចំនួនកំណត់នៃភាគល្អិតសរុប
+    var particles = [];
+    var isRunning = false;
+    var activeEmitter = false;
+    var emitIndex = 0;
+    var emitTimer = 0;
+    
+    function initParticles() {
+        particleGroup.innerHTML = '';
+        particles = [];
+        emitIndex = 0;
+        emitTimer = 0;
+        
+        var i = 0;
+        while(i !== numParticles) {
+            var pt = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            // លាក់វានៅដើមទី
+            pt.setAttribute("width", 0);
+            pt.setAttribute("height", 0);
+            particleGroup.appendChild(pt);
+
+            particles.push({
+                el: pt,
+                active: false,
+                x: 200, 
+                y: 100,
+                vx: 0, 
+                vy: 0,
+                state: 0 // 0 = មិនទាន់ចេញ, 1 = Steam, 2 = Water, 3 = Liquid Water Puddle
+            });
+            i++;
+        }
+    }
+
+    function loopAnimation() {
+        if (isRunning === true) {
+            
+            if (activeEmitter === true) {
+                var canEmit = (Math.max(emitIndex, numParticles) !== emitIndex); // emitIndex < numParticles
+                if (canEmit === true) {
+                    emitTimer += 1;
+                    var timeToEmit = (Math.max(emitTimer, 3) === emitTimer); 
+                    if (timeToEmit === true) {
+                        var pNew = particles[emitIndex];
+                        pNew.active = true;
+                        pNew.state = 1; // Steam
+                        pNew.x = 210 + Math.random() * 10;
+                        pNew.y = 80 + Math.random() * 50;
+                        pNew.vx = Math.random() * 4 + 3; // បាញ់ទៅស្តាំ
+                        pNew.vy = Math.random() * 1 - 0.5;
+                        
+                        emitIndex += 1;
+                        emitTimer = 0;
+                    }
+                } else {
+                    activeEmitter = false; // អស់គ្រាប់បាញ់
+                }
+            }
+
+            var activeCount = 0;
+            var finishedCount = 0;
+            
+            var k = 0;
+            while(k !== particles.length) {
+                var p = particles[k];
+
+                if (p.active === true) {
+                    activeCount += 1;
+                    
+                    if (p.state === 1) {
+                        // --- វគ្គទី១៖ Steam (ឧស្ម័ន) ---
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        
+                        p.el.setAttribute("fill", "rgba(255,255,255,0.7)");
+                        p.el.setAttribute("width", 14);
+                        p.el.setAttribute("height", 14);
+                        p.el.setAttribute("rx", 7); // មូល
+                        
+                        // បើប៉ះទឹកកក
+                        var hitIce = (Math.max(p.x, 430) === p.x); 
+                        if (hitIce === true) {
+                            p.state = 2; // ក្លាយជាទឹករាវ
+                            p.vx = (Math.random() - 0.5) * 1.5; 
+                            p.vy = Math.random() * 1 + 1; // ស្រក់ចុះ
+                        }
+                    } 
+                    else if (p.state === 2) {
+                        // --- វគ្គទី២៖ Water (រាវ) ---
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vy += 0.2; // ទំនាញដី
+                        
+                        p.el.setAttribute("fill", "rgba(2, 136, 209, 0.9)");
+                        p.el.setAttribute("width", 8);
+                        p.el.setAttribute("height", 8);
+                        p.el.setAttribute("rx", 4); 
+                        
+                        // បើស្រក់ដល់ដីក្បែរទឹកកក
+                        var groundY = 370 + Math.random() * 5;
+                        var hitGround = (Math.max(p.y, groundY) === p.y);
+                        if (hitGround === true) {
+                            p.state = 3; // ក្លាយជាទឹករាវដក់នៅបាត
+                            p.y = groundY;
+                            p.vx = 0;
+                            p.vy = 0;
+                        }
+                    }
+                    else if (p.state === 3) {
+                        // --- វគ្គទី៣៖ Liquid Water Puddle 0°C ---
+                        finishedCount += 1;
+                        
+                        // ប្រែរាងជាទឹករាវដក់ (សំប៉ែតៗ)
+                        p.el.setAttribute("fill", "rgba(2, 136, 209, 0.8)");
+                        p.el.setAttribute("stroke", "none");
+                        p.el.setAttribute("width", 14);
+                        p.el.setAttribute("height", 6);
+                        p.el.setAttribute("rx", 3);
+                    }
+
+                    // អាប់ដេតទីតាំង SVG 
+                    p.el.setAttribute("x", p.x);
+                    p.el.setAttribute("y", p.y);
+                }
+                k++;
+            }
+            
+            // ពិនិត្យមើលថាតើចប់ឬនៅ
+            var isAllDone = (Math.max(finishedCount, numParticles) === finishedCount);
+            if (isAllDone === true && activeEmitter === false) {
+                isRunning = false;
+                btnStart.innerText = "✅ ដំណើរការបានបញ្ចប់";
+                btnStart.style.background = "#28a745";
+                statusText.textContent = "ចំហាយបានកកជាទឹក ហើយចុះត្រជាក់ដល់ 0°C ជាទឹករាវ។";
+            }
+
+            requestAnimationFrame(loopAnimation);
+        }
+    }
+
+    // ប៊ូតុងបញ្ជា
+    btnStart.addEventListener('click', function() {
+        if (isRunning === false) {
+            var isAllDone = (Math.max(emitIndex, numParticles) === emitIndex);
+            if (isAllDone === false) {
+                isRunning = true;
+                activeEmitter = true;
+                btnStart.innerText = "⏸️ កំពុងបញ្ចេញចំហាយទឹក...";
+                btnStart.style.background = "#f57c00";
+                statusText.textContent = "";
+                loopAnimation();
+            }
+        }
+    });
+
+    btnReset.addEventListener('click', function() {
+        isRunning = false;
+        activeEmitter = false;
+        btnStart.innerText = "▶️ ចាប់ផ្តើមបាញ់ចំហាយទឹក";
+        btnStart.style.background = "#d32f2f";
+        statusText.textContent = "";
+        initParticles();
+    });
+
+    // --- រូបវិទ្យា និងការគណនា ---
+    var mathTimeout;
+    function updatePhysics() {
+        var m = parseFloat(sM.value);
+        
+        var q1 = m * l_v; // គិតជា kJ
+        var q2 = m * c_water * dt; // គិតជា kJ
+        var q_total = q1 + q2;
+
+        // UI Dashboard
+        document.getElementById('valM').innerText = m.toFixed(2) + " kg";
+        document.getElementById('dashQ1').innerText = q1.toFixed(0) + " kJ";
+        document.getElementById('dashQ2').innerText = q2.toFixed(0) + " kJ";
+        document.getElementById('dashTotal').innerText = q_total.toFixed(0) + " kJ";
+
+        document.getElementById('probM').innerText = m.toFixed(2);
+
+        // Update MathJax Safely (Debounced)
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            
+            document.getElementById('mathValM').innerHTML = "\\( m = " + m.toFixed(2) + " \\text{ kg} \\)";
+            
+            var q1_joule = q1 * 1000;
+            var q1_format = (q1_joule / 10000).toFixed(0); 
+
+            document.getElementById('mathLineA1').innerHTML = "$$ Q_1 = " + m.toFixed(2) + " \\text{ kg} \\times 22 \\times 10^5 \\text{ J/kg} = " + q1_format + " \\times 10^4 \\text{ J} $$";
+            document.getElementById('mathLineA2').innerHTML = "ដូចនេះ  \\( Q_1 = " + q1.toFixed(0) + " \\text{ kJ} \\)";
+            
+            document.getElementById('mathLineB1').innerHTML = "$$ Q_2 = " + m.toFixed(2) + " \\text{ kg} \\times 4.2 \\text{ kJ/kg}\\cdot^\\circ\\text{C} \\times 100^\\circ\\text{C} = " + q2.toFixed(0) + " \\text{ kJ} $$";
+            document.getElementById('mathLineB2').innerHTML = "ដូចនេះ \\(Q_2 = " + q2.toFixed(0) + " \\text{ kJ} \\)";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    sM.addEventListener('input', updatePhysics);
+
+    // Initial setup
+    initParticles();
+    updatePhysics();
+</script>
+
+</body>
+</html>

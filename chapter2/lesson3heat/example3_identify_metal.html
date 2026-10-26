@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់៖ កម្ដៅម៉ាសនៃដុំលោហៈ</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block; padding-top: 20px;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 450px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .controls-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 500px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .btn-group {
+            display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;
+        }
+        button {
+            color: white; padding: 12px 20px; font-size: 16px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s, transform 0.1s;
+        }
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: scale(0.98); }
+        
+        .btn-action { background: #d32f2f; font-size: 18px; padding: 15px 30px; }
+        .btn-reset { background: #546e7a; }
+        .btn-sol { background: #17a2b8; width: 100%; margin-bottom: 20px; font-size: 18px; padding: 15px;}
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .dashboard { grid-template-columns: 1fr 1fr; }
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 14px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 10px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 20px; }
+        
+        .note-box { 
+            background: #e8f5e9; border-left: 6px solid #28a745; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #1b5e20; 
+        }
+
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ប្រធានលំហាត់ (Dynamic Text) -->
+    <div class="problem-statement">
+        <strong>លំហាត់គំរូ៖</strong> ឧបករណ៍បំពាយកម្ដៅអគ្គិសនីមួយបានផ្ដល់អានុភាព <span id="probP">50</span> W ឱ្យដុំលោហៈ ដែលមានម៉ាស <span id="probM">0.50</span> kg ដើម្បីដំឡើងសីតុណ្ហភាពពី <span id="probT1">20</span> °C ទៅ <span id="probT2">45</span> °C ក្នុងរយៈពេល <span id="probTime">90</span> s ។ គណនាកម្ដៅម៉ាសរបស់ដុំលោហៈនោះ ។ តើលោហៈនោះអាចជាអ្វី?
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="btn-group">
+        <button class="btn-action" id="btnHeat">🔥 បើកឧបករណ៍ផ្តល់កម្ដៅ</button>
+        <button class="btn-reset" id="btnReset">🔄 ចាប់ផ្តើមឡើងវិញ</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <!-- ពណ៌ដុំលោហៈ ពេលត្រជាក់ -->
+                <linearGradient id="metalGradCold" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#b0bec5"/>
+                    <stop offset="100%" stop-color="#546e7a"/>
+                </linearGradient>
+                <!-- ពណ៌ដុំលោហៈ ពេលក្ដៅ -->
+                <linearGradient id="metalGradHot" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ffcc80"/>
+                    <stop offset="100%" stop-color="#ef6c00"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ឧបករណ៍ផ្តល់កម្ដៅអគ្គិសនី (Heater Plate) -->
+            <rect x="250" y="320" width="300" height="30" rx="4" fill="#37474f" stroke="#263238" stroke-width="4"/>
+            <rect id="heatingCoil" x="270" y="315" width="260" height="8" rx="4" fill="#546e7a"/>
+            
+            <!-- ខ្សែភ្លើង -->
+            <path d="M 550 335 L 620 335 Q 650 335 650 365 L 650 400" fill="none" stroke="#455a64" stroke-width="6"/>
+            <rect x="615" y="400" width="70" height="25" rx="3" fill="#ffb74d" stroke="#e65100" stroke-width="2"/>
+            <text id="lblPowerBox" x="650" y="417" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#e65100">P = 50 W</text>
+
+            <!-- ដុំលោហៈ (Metal Block) -->
+            <rect x="300" y="165" width="200" height="150" rx="8" fill="url(#metalGradCold)" stroke="#263238" stroke-width="4"/>
+            <rect id="metalHot" x="300" y="165" width="200" height="150" rx="8" fill="url(#metalGradHot)" stroke="#e65100" stroke-width="4" opacity="0"/>
+            
+            <text x="400" y="245" text-anchor="middle" font-family="Siemreap, Arial" font-weight="bold" font-size="22" fill="#fff">ដុំលោហៈ</text>
+
+            <!-- ទែម៉ូម៉ែត្រ -->
+            <rect x="520" y="50" width="16" height="260" rx="8" fill="#ffffff" stroke="#546e7a" stroke-width="3"/>
+            <circle cx="528" cy="305" r="14" fill="#d32f2f"/>
+            <rect id="thermoLiq" x="524" y="240" width="8" height="65" fill="#d32f2f"/>
+            
+            <!-- គំនូសមាត្រដ្ឋានទែម៉ូម៉ែត្រ -->
+            <line x1="505" y1="260" x2="520" y2="260" stroke="#111" stroke-width="2"/>
+            <text x="480" y="265" font-family="Arial" font-weight="bold" font-size="14" fill="#111">0 °C</text>
+            <line x1="505" y1="60" x2="520" y2="60" stroke="#111" stroke-width="2"/>
+            <text x="465" y="65" font-family="Arial" font-weight="bold" font-size="14" fill="#111">100 °C</text>
+            
+            <!-- តម្លៃសីតុណ្ហភាពបច្ចុប្បន្ន -->
+            <rect id="lblTempBg" x="550" y="230" width="60" height="24" rx="4" fill="#d32f2f"/>
+            <text id="lblTempLive" x="580" y="247" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#fff">20.0 °C</text>
+
+            <!-- នាឡិកាវាស់ពេល (Timer) -->
+            <g transform="translate(150, 120)">
+                <circle cx="0" cy="0" r="45" fill="#eceff1" stroke="#37474f" stroke-width="4"/>
+                <circle cx="0" cy="0" r="35" fill="#ffffff" stroke="#ccc" stroke-width="1"/>
+                <!-- គំនូសម៉ោង -->
+                <line x1="0" y1="-35" x2="0" y2="-28" stroke="#111" stroke-width="2"/>
+                <line x1="0" y1="35" x2="0" y2="28" stroke="#111" stroke-width="2"/>
+                <line x1="-35" y1="0" x2="-28" y2="0" stroke="#111" stroke-width="2"/>
+                <line x1="35" y1="0" x2="28" y2="0" stroke="#111" stroke-width="2"/>
+                
+                <line id="timerNeedle" x1="0" y1="0" x2="0" y2="-25" stroke="#d32f2f" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="0" cy="0" r="4" fill="#111"/>
+                
+                <rect x="-35" y="55" width="70" height="25" rx="4" fill="#212121"/>
+                <text id="lblTimer" x="0" y="73" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#00e676">0.0 s</text>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            អានុភាពអគ្គិសនី $P$ (W):<br>
+            <span id="valP" class="number-display" style="color: #e65100; font-size:22px;">50 W</span>
+            <input type="range" id="sliderP" min="10" max="200" value="50" step="5">
+        </div>
+        <div class="slider-box">
+            ម៉ាសដុំលោហៈ $m$ (kg):<br>
+            <span id="valM" class="number-display" style="color: #0288d1; font-size:22px;">0.50 kg</span>
+            <input type="range" id="sliderM" min="0.10" max="2.00" value="0.50" step="0.05">
+        </div>
+        <div class="slider-box">
+            រយៈពេល $t$ (s):<br>
+            <span id="valTime" class="number-display" style="color: #28a745; font-size:22px;">90 s</span>
+            <input type="range" id="sliderTime" min="10" max="300" value="90" step="10">
+        </div>
+        <div class="slider-box">
+            សីតុណ្ហភាពដើម $T_1$ (°C):<br>
+            <span id="valT1" class="number-display" style="color: #546e7a; font-size:22px;">20 °C</span>
+            <input type="range" id="sliderT1" min="0" max="40" value="20" step="1">
+        </div>
+        <div class="slider-box">
+            សីតុណ្ហភាពស្រេច $T_2$ (°C):<br>
+            <span id="valT2" class="number-display" style="color: #d32f2f; font-size:22px;">45 °C</span>
+            <input type="range" id="sliderT2" min="41" max="100" value="45" step="1">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #e65100;">ថាមពលសរុប $Q$<br><span id="dashTotalQ" class="number-display">4500 J</span></div>
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">បម្រែបម្រួល $\Delta T$<br><span id="dashDt" class="number-display">25 °C</span></div>
+        <div class="data-box" style="border-top: 4px solid #0288d1;">ចំណុះកម្ដៅម៉ាស $c$<br><span id="dashC" class="number-display">360 J/kg·°C</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">ប្រភេទលោហៈ<br><span id="dashMetal" style="font-family: 'Siemreap', sans-serif; color: #28a745; font-size:18px;">ស្ពាន់លាយ (Brass)</span></div>
+    </div>
+
+    <button id="btnToggleSolution" class="btn-sol">📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ (Dynamic Texts) -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box">
+            💡 <strong>រូបមន្តសំខាន់៖</strong> <br>
+            • ថាមពលកម្ដៅផ្ដល់ដោយអគ្គិសនី៖ $Q = P \times t$ <br>
+            • កម្ដៅម៉ាសរបស់លោហៈ៖ $c = \frac{Q}{m \cdot \Delta T}$ ដោយ $\Delta T = T_2 - T_1$
+        </div>
+
+        <h3>ដំណោះស្រាយលំហាត់គំរូ</h3>
+        
+        <div id="mathContainer">
+            <p><strong>១. រកថាមពលកម្ដៅសរុប ($Q$) ៖</strong></p>
+            <p id="descQ">តាមបម្រាប់ អានុភាព $P = 50 \text{ W}$ និងរយៈពេល $t = 90 \text{ s}$ ៖</p>
+            <div id="mathLineQ">$$ Q = P \times t = 50 \times 90 = 4500 \text{ J} $$</div>
+            
+            <p><strong>២. រកកម្ដៅម៉ាសរបស់ដុំលោហៈ ($c$) ៖</strong></p>
+            <p id="descDt">បម្រែបម្រួលសីតុណ្ហភាព $\Delta T = 45^\circ\text{C} - 20^\circ\text{C} = 25^\circ\text{C}$ ។ ម៉ាស $m = 0.50 \text{ kg}$</p>
+            <div id="mathLineC">$$ c = \frac{Q}{m \cdot \Delta T} = \frac{4500}{0.50 \times 25} = 360 \text{ J/(kg}\cdot^\circ\text{C)} $$</div>
+            
+            <div id="metalConclusion" style="background: #fff3e0; padding: 15px; border-left: 4px solid #ff9800; margin-top: 15px; border-radius: 4px;">
+                <strong>តើលោហៈនោះអាចជាអ្វី?</strong><br>
+                តម្លៃ $c = 360 \text{ J/(kg}\cdot^\circ\text{C)}$ គឺប្រហាក់ប្រហែលនឹងកម្ដៅម៉ាសនៃ <strong>ស្ពាន់លាយ (Brass)</strong> ឬ <strong>ទង់ដែង/ស្ពាន់ (Copper)</strong> ដែលមានតម្លៃនៅក្នុងតារាងរូបវិទ្យាប្រមាណ $380 - 390 \text{ J/(kg}\cdot^\circ\text{C)}$ ។
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > ក្នុងតក្កវិជ្ជា -->
+<script>
+    var sP = document.getElementById('sliderP');
+    var sM = document.getElementById('sliderM');
+    var sTime = document.getElementById('sliderTime');
+    var sT1 = document.getElementById('sliderT1');
+    var sT2 = document.getElementById('sliderT2');
+
+    var btnHeat = document.getElementById('btnHeat');
+    var btnReset = document.getElementById('btnReset');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    var heatingCoil = document.getElementById('heatingCoil');
+    var metalHot = document.getElementById('metalHot');
+    var thermoLiq = document.getElementById('thermoLiq');
+    var lblTempScale = document.getElementById('lblTempScale');
+    var lblTempLive = document.getElementById('lblTempLive');
+    var lblTempBg = document.getElementById('lblTempBg');
+    var timerNeedle = document.getElementById('timerNeedle');
+    var lblTimer = document.getElementById('lblTimer');
+    var lblPowerBox = document.getElementById('lblPowerBox');
+    
+    var targetProgress = 0; 
+    var currentProgress = 0;
+    var isHeating = false;
+    
+    // ល្បឿនអាប់ដេតថេរ (Linear progression step)
+    var stepProgress = 0.003; 
+
+    btnToggleSolution.addEventListener('click', function() {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    sT1.addEventListener('input', function() {
+        var t1 = parseFloat(sT1.value);
+        var t2 = parseFloat(sT2.value);
+        var isValid = (Math.max(t2, t1) === t2 && t1 !== t2);
+        if (isValid === false) {
+            sT2.value = t1 + 1;
+        }
+        resetSim();
+    });
+
+    sT2.addEventListener('input', function() {
+        var t1 = parseFloat(sT1.value);
+        var t2 = parseFloat(sT2.value);
+        var isValid = (Math.max(t2, t1) === t2 && t1 !== t2);
+        if (isValid === false) {
+            sT1.value = t2 - 1;
+        }
+        resetSim();
+    });
+
+    sP.addEventListener('input', resetSim);
+    sM.addEventListener('input', resetSim);
+    sTime.addEventListener('input', resetSim);
+
+    function resetSim() {
+        targetProgress = 0;
+        currentProgress = 0;
+        isHeating = false;
+        btnHeat.innerText = "🔥 បើកឧបករណ៍ផ្តល់កម្ដៅ";
+        btnHeat.style.background = "#d32f2f";
+        updatePhysics();
+    }
+
+    btnReset.addEventListener('click', resetSim);
+
+    btnHeat.addEventListener('click', function() {
+        if (targetProgress === 0) {
+            targetProgress = 1; 
+            btnHeat.innerText = "⏸️ បញ្ឈប់ការផ្ដល់កម្ដៅ";
+            btnHeat.style.background = "#f57c00";
+        } else {
+            targetProgress = 0; 
+            btnHeat.innerText = "🔥 បន្តផ្ដល់កម្ដៅ";
+            btnHeat.style.background = "#d32f2f";
+        }
+        
+        if (isHeating === false) {
+            isHeating = true;
+            loopAnimation();
+        }
+    });
+
+    function loopAnimation() {
+        var diff = targetProgress - currentProgress;
+        var isZero = (diff === 0);
+
+        if (isZero === false) {
+            // កំណត់ទិសដៅនៃ progress ដោយសុវត្ថិភាព
+            var isPos = (Math.max(diff, 0) === diff);
+            if (isPos === true) {
+                currentProgress += stepProgress; // ល្បឿនថេរទៅមុខ
+                // Clamp to 1
+                var isOver = (Math.max(currentProgress, targetProgress) === currentProgress);
+                if (isOver === true) currentProgress = targetProgress;
+            } else {
+                currentProgress -= stepProgress; // ល្បឿនថេរថយក្រោយ
+                // Clamp to 0
+                var isUnder = (Math.min(currentProgress, targetProgress) === currentProgress);
+                if (isUnder === true) currentProgress = targetProgress;
+            }
+            
+            drawGraphics();
+            requestAnimationFrame(loopAnimation);
+        } else {
+            drawGraphics();
+            isHeating = false;
+            var isDone = (targetProgress === 1);
+            if(isDone === true) {
+                btnHeat.innerText = "✅ សម្រេចគោលដៅ";
+                btnHeat.style.background = "#28a745";
+            }
+        }
+    }
+
+    function drawGraphics() {
+        var p = parseFloat(sP.value);
+        var t_total = parseFloat(sTime.value);
+        var t1 = parseFloat(sT1.value);
+        var t2 = parseFloat(sT2.value);
+        var dt = t2 - t1;
+
+        var currentT = t1 + (dt * currentProgress);
+        var currentTime = t_total * currentProgress;
+
+        lblPowerBox.textContent = "P = " + p + " W";
+        lblTempLive.textContent = currentT.toFixed(1) + " °C";
+        lblTimer.textContent = currentTime.toFixed(1) + " s";
+
+        // ប្តូរពណ៌ចង្ក្រាន
+        var diff = targetProgress - currentProgress;
+        var isProgressing = (Math.abs(diff).toFixed(3) !== "0.000" && targetProgress === 1);
+        if (isProgressing === true) {
+            heatingCoil.setAttribute("fill", "#ff1744"); 
+        } else {
+            heatingCoil.setAttribute("fill", "#546e7a"); 
+        }
+
+        // ដុំលោហៈប្រែពណ៌ក្រហមក្ដៅ
+        metalHot.setAttribute("opacity", currentProgress * 0.9);
+
+        // កម្ពស់ទែម៉ូម៉ែត្រ (0°C = y:260, 100°C = y:60 -> 1°C = -2px)
+        var thermoY = 260 - (currentT * 2);
+        thermoY = Math.max(60, Math.min(thermoY, 260));
+        thermoLiq.setAttribute("y", thermoY);
+        thermoLiq.setAttribute("height", 300 - thermoY);
+        
+        lblTempBg.setAttribute("y", thermoY - 12);
+        lblTempLive.setAttribute("y", thermoY + 5);
+
+        // បង្វិលទ្រនិចនាឡិកា (1 វិនាទី = 6 ដឺក្រេ វិលដូចនាឡិកាពិត)
+        var timerAngle = (currentTime * 6) % 360;
+        timerNeedle.setAttribute("transform", "rotate(" + timerAngle + ")");
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var p = parseFloat(sP.value);
+        var m = parseFloat(sM.value);
+        var t_total = parseFloat(sTime.value);
+        var t1 = parseFloat(sT1.value);
+        var t2 = parseFloat(sT2.value);
+        
+        var q_total = p * t_total;
+        var dt = t2 - t1;
+        var c = q_total / (m * dt);
+
+        // UI Dashboard & Sliders
+        document.getElementById('valP').innerText = p + " W";
+        document.getElementById('valM').innerText = m.toFixed(2) + " kg";
+        document.getElementById('valTime').innerText = t_total + " s";
+        document.getElementById('valT1').innerText = t1 + " °C";
+        document.getElementById('valT2').innerText = t2 + " °C";
+
+        document.getElementById('dashTotalQ').innerText = q_total.toLocaleString() + " J";
+        document.getElementById('dashDt').innerText = dt + " °C";
+        document.getElementById('dashC').innerText = c.toFixed(1) + " J/kg·°C";
+
+        // ប៉ាន់ស្មានប្រភេទលោហៈ
+        var metalName = "មិនស្គាល់";
+        var isBrass = (Math.min(c, 400) === c && Math.max(c, 300) === c);
+        var isFe = (Math.min(c, 500) === c && Math.max(c, 400) === c);
+        var isAl = (Math.min(c, 1000) === c && Math.max(c, 800) === c);
+        
+        if (isBrass === true) metalName = "ស្ពាន់លាយ/ស្ពាន់";
+        else if (isFe === true) metalName = "ដែក (Iron)";
+        else if (isAl === true) metalName = "អាលុយមីញ៉ូម";
+        else metalName = "លោហៈផ្សេង";
+        
+        document.getElementById('dashMetal').innerText = metalName;
+
+        // UI Problem Statement Texts
+        document.getElementById('probP').innerText = p;
+        document.getElementById('probM').innerText = m.toFixed(2);
+        document.getElementById('probTime').innerText = t_total;
+        document.getElementById('probT1').innerText = t1;
+        document.getElementById('probT2').innerText = t2;
+
+        if (isHeating === false) {
+            drawGraphics();
+        }
+
+        // Update MathJax Safely (Debounced)
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            
+            document.getElementById('descQ').innerHTML = "តាមបម្រាប់ អានុភាព \\( P = " + p + " \\text{ W} \\) និងរយៈពេល \\( t = " + t_total + " \\text{ s} \\) ៖";
+            document.getElementById('mathLineQ').innerHTML = "$$ Q = P \\times t = " + p + " \\times " + t_total + " = " + q_total + " \\text{ J} $$";
+            
+            document.getElementById('descDt').innerHTML = "បម្រែបម្រួលសីតុណ្ហភាព \\( \\Delta T = " + t2 + "^\\circ\\text{C} - " + t1 + "^\\circ\\text{C} = " + dt + "^\\circ\\text{C} \\) ។ ម៉ាស \\( m = " + m.toFixed(2) + " \\text{ kg} \\)";
+            
+            document.getElementById('mathLineC').innerHTML = "$$ c = \\frac{Q}{m \\cdot \\Delta T} = \\frac{" + q_total + "}{" + m.toFixed(2) + " \\times " + dt + "} = " + c.toFixed(1) + " \\text{ J/(kg}\\cdot^\\circ\\text{C)} $$";
+            
+            document.getElementById('metalConclusion').innerHTML = "<strong>តើលោហៈនោះអាចជាអ្វី?</strong><br>តម្លៃ \\( c = " + c.toFixed(1) + " \\text{ J/(kg}\\cdot^\\circ\\text{C)} \\) គឺប្រហាក់ប្រហែលនឹងកម្ដៅម៉ាសនៃ <strong>" + metalName + "</strong>។";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    // Initial run
+    updatePhysics();
+</script>
+
+</body>
+</html>

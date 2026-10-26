@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ១០ទំព័រ១១៩</title>
+
+    <!-- បញ្ចូល MathJax សម្រាប់រូបមន្តគណិតវិទ្យា -->
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; height: auto;
+            background: #ffffff; border: 2px solid #b0bec5;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block; padding-top: 20px; padding-bottom: 20px;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            max-height: 450px; margin: 0 auto;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        
+        .btn-group {
+            display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;
+        }
+        button {
+            color: white; padding: 12px 20px; font-size: 16px; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            font-family: inherit; transition: background 0.3s, transform 0.1s;
+        }
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: scale(0.98); }
+        
+        .btn-action { background: #d32f2f; font-size: 18px; padding: 15px 30px; }
+        .btn-reset { background: #546e7a; }
+        .btn-sol { background: #17a2b8; width: 100%; margin-bottom: 20px; font-size: 18px; padding: 15px;}
+
+        .dashboard {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+        .data-box {
+            background: white; padding: 20px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 16px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 26px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif;
+        }
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 10px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 20px; }
+        
+        .number-display { font-family: 'Arial', sans-serif; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ប្រធានលំហាត់ (Dynamic Text) -->
+    <div class="problem-statement">
+        <strong>១០.</strong> កំណត់ថាមពលកម្ដៅដែលត្រូវផ្តល់ទៅឱ្យអង្គធាតុមូយដែលមានម៉ាស <span id="probM" style="color:#0288d1;">1.00</span> kg ដើម្បីដំឡើងសីតុណ្ហភាពពី <span id="probT1" style="color:#546e7a;">25.0</span> °C ទៅដល់ចំណុចរលាយរបស់វា ក្នុងករណីអង្គធាតុនោះជា៖<br>
+        ក. ឆ្នាំងអាលុយមីញ៉ូម និងចំណុចរលាយរបស់វាគឺ 660°C ។<br>
+        ខ. ដុំសំណ និងចំណុចរលាយរបស់វាគឺ 327°C ។<br>
+        <em>(គេឱ្យកម្ដៅម៉ាសអាលុយមីញ៉ូមគឺ 900 J/kg·°C និងកម្ដៅម៉ាសសំណគឺ 128 J/kg·°C)</em>
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="btn-group">
+        <button class="btn-action" id="btnHeat">🔥 បើកឡកម្ដៅ (ដុតព្រមគ្នា)</button>
+        <button class="btn-reset" id="btnReset">🔄 ចាប់ផ្តើមឡើងវិញ</button>
+    </div>
+
+    <!-- ផ្ទាំង Simulator 2D SVG -->
+    <div class="sim-area">
+        <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="hotPlateGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#cfd8dc"/>
+                    <stop offset="100%" stop-color="#78909c"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ចង្ក្រានឡកម្ដៅអគ្គិសនី (Furnaces) -->
+            <rect x="100" y="340" width="250" height="40" rx="8" fill="url(#hotPlateGrad)" stroke="#455a64" stroke-width="4"/>
+            <rect id="heatingCoil1" x="120" y="335" width="210" height="10" rx="5" fill="#37474f"/>
+            <text x="225" y="365" text-anchor="middle" font-family="Siemreap, Arial" font-size="16" font-weight="bold" fill="#37474f">ឡកម្ដៅទី១</text>
+
+            <rect x="450" y="340" width="250" height="40" rx="8" fill="url(#hotPlateGrad)" stroke="#455a64" stroke-width="4"/>
+            <rect id="heatingCoil2" x="470" y="335" width="210" height="10" rx="5" fill="#37474f"/>
+            <text x="575" y="365" text-anchor="middle" font-family="Siemreap, Arial" font-size="16" font-weight="bold" fill="#37474f">ឡកម្ដៅទី២</text>
+
+            <!-- ================= ក. ឆ្នាំងអាលុយមីញ៉ូម (Aluminum) ================= -->
+            <g id="blockAl" transform="translate(175, 235)">
+                <path d="M 0 0 L 100 0 L 90 100 L 10 100 Z" fill="#b0bec5" stroke="#78909c" stroke-width="4"/>
+                <text x="50" y="55" text-anchor="middle" font-family="Siemreap, Arial" font-weight="bold" font-size="20" fill="#fff">អាលុយមីញ៉ូម</text>
+            </g>
+
+            <!-- ទែម៉ូម៉ែត្រ អាលុយមីញ៉ូម -->
+            <rect x="130" y="40" width="16" height="290" rx="8" fill="#ffffff" stroke="#546e7a" stroke-width="3"/>
+            <circle cx="138" cy="320" r="14" fill="#d32f2f"/>
+            <rect id="thermoAl" x="134" y="295" width="8" height="25" fill="#d32f2f"/>
+            
+            <rect id="lblTempAlBg" x="60" y="283" width="60" height="24" rx="4" fill="#d32f2f"/>
+            <text id="lblTempAl" x="90" y="300" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#fff">25 °C</text>
+            
+            <line x1="145" y1="50" x2="160" y2="50" stroke="#111" stroke-width="2"/>
+            <text x="165" y="55" font-family="Arial" font-weight="bold" font-size="14" fill="#111">660°C</text>
+
+
+            <!-- ================= ខ. ដុំសំណ (Lead) ================= -->
+            <g id="blockPb" transform="translate(525, 235)">
+                <rect x="0" y="20" width="100" height="80" rx="4" fill="#78909c" stroke="#455a64" stroke-width="4"/>
+                <text x="50" y="65" text-anchor="middle" font-family="Siemreap, Arial" font-weight="bold" font-size="20" fill="#fff">សំណ</text>
+            </g>
+
+            <!-- ទែម៉ូម៉ែត្រ សំណ -->
+            <rect x="480" y="100" width="16" height="230" rx="8" fill="#ffffff" stroke="#546e7a" stroke-width="3"/>
+            <circle cx="488" cy="320" r="14" fill="#d32f2f"/>
+            <rect id="thermoPb" x="484" y="295" width="8" height="25" fill="#d32f2f"/>
+            
+            <rect id="lblTempPbBg" x="410" y="283" width="60" height="24" rx="4" fill="#d32f2f"/>
+            <text id="lblTempPb" x="440" y="300" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#fff">25 °C</text>
+
+            <line x1="495" y1="110" x2="510" y2="110" stroke="#111" stroke-width="2"/>
+            <text x="515" y="115" font-family="Arial" font-weight="bold" font-size="14" fill="#111">327°C</text>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            ម៉ាសអង្គធាតុ $m$ (kg):<br>
+            <span id="valM" class="number-display" style="color: #0288d1; font-size:24px;">1.00 kg</span>
+            <input type="range" id="sliderM" min="0.50" max="5.00" value="1.00" step="0.50">
+        </div>
+        <div class="slider-box">
+            សីតុណ្ហភាពដើម $T_1$ (°C):<br>
+            <span id="valT1" class="number-display" style="color: #546e7a; font-size:24px;">25.0 °C</span>
+            <input type="range" id="sliderT1" min="0" max="100" value="25" step="1">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Dashboard) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #f44336;">ក. កម្ដៅសម្រាប់អាលុយមីញ៉ូម $Q_a$<br>
+            <span id="dashQa" class="number-display">5.72 × 10⁵ J</span>
+            <div style="font-size:14px; font-weight:normal; margin-top:5px; color:#555;" id="dashQaRaw">(571,500 J)</div>
+        </div>
+        <div class="data-box" style="border-top: 4px solid #ff9800;">ខ. កម្ដៅសម្រាប់សំណ $Q_b$<br>
+            <span id="dashQb" class="number-display">3.87 × 10⁴ J</span>
+            <div style="font-size:14px; font-weight:normal; margin-top:5px; color:#555;" id="dashQbRaw">(38,656 J)</div>
+        </div>
+    </div>
+
+    <button id="btnToggleSolution" class="btn-sol">📖 បង្ហាញ / លាក់ដំណោះស្រាយលម្អិត</button>
+
+    <!-- ប្រអប់ដំណោះស្រាយ (ទម្រង់ MathJax បានកែសម្រួលរួច) -->
+    <div class="solution-box" id="solutionBox" style="display: none;">
+        <div class="note-box">
+            💡 <strong>រូបមន្តសំខាន់៖</strong> <br>
+            ថាមពលកម្ដៅដើម្បីដំឡើងសីតុណ្ហភាពដោយមិនប្តូរភាពរូប គឺ $Q = m \cdot c \cdot \Delta T$ ដោយ $\Delta T = T_2 - T_1$ ។
+        </div>
+
+        <h3>ដំណោះស្រាយលំហាត់</h3>
+        
+        <div id="mathContainer">
+            <p><strong>បម្រាប់៖</strong></p>
+            <ul>
+                <li id="mathValM">ម៉ាស៖ \( m = 1.00 \text{ kg} \)</li>
+                <li id="mathValT1">សីតុណ្ហភាពដើម៖ \( T_1 = 25.0^{\circ}\text{C} \)</li>
+            </ul>
+
+            <p><strong>ក. ចំពោះឆ្នាំងអាលុយមីញ៉ូម ៖</strong></p>
+            <ul>
+                <li>សីតុណ្ហភាពស្រេច (ចំណុចរលាយ)៖ \( T_{2a} = 660^{\circ}\text{C} \)</li>
+                <li>កម្ដៅម៉ាសអាលុយមីញ៉ូម៖ \( c_a = 900 \text{ J/kg} \cdot ^{\circ}\text{C} \)</li>
+            </ul>
+            <div id="mathLineDta">$$ \Delta T_a = 660 - 25.0 = 635^{\circ}\text{C} $$</div>
+            <p>តាមរូបមន្ត \( Q_a = m \cdot c_a \cdot \Delta T_a \)</p>
+            <div id="mathLineQa">$$ Q_a = 1.00 \times 900 \times 635 = 571500 \text{ J} $$</div>
+            <div id="mathLineFinalQa" style="font-weight: bold; color: #d32f2f; text-align: center; margin-top: 10px; font-size: 1.2em;">
+                $$ Q_a \approx 5.72 \times 10^5 \text{ J} $$
+            </div>
+
+            <br>
+            <p><strong>ខ. ចំពោះដុំសំណ ៖</strong></p>
+            <ul>
+                <li>សីតុណ្ហភាពស្រេច (ចំណុចរលាយ)៖ \( T_{2b} = 327^{\circ}\text{C} \)</li>
+                <li>កម្ដៅម៉ាសសំណ៖ \( c_b = 128 \text{ J/kg} \cdot ^{\circ}\text{C} \)</li>
+            </ul>
+            <div id="mathLineDtb">$$ \Delta T_b = 327 - 25.0 = 302^{\circ}\text{C} $$</div>
+            <p>តាមរូបមន្ត \( Q_b = m \cdot c_b \cdot \Delta T_b \)</p>
+            <div id="mathLineQb">$$ Q_b = 1.00 \times 128 \times 302 = 38656 \text{ J} $$</div>
+            <div id="mathLineFinalQb" style="font-weight: bold; color: #d32f2f; text-align: center; margin-top: 10px; font-size: 1.2em;">
+                $$ Q_b \approx 3.87 \times 10^4 \text{ J} $$
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript កូដសុវត្ថិភាពខ្ពស់ គ្មានសញ្ញា < ឬ > ក្នុងតក្កវិជ្ជា -->
+<script>
+    var sM = document.getElementById('sliderM');
+    var sT1 = document.getElementById('sliderT1');
+
+    var btnHeat = document.getElementById('btnHeat');
+    var btnReset = document.getElementById('btnReset');
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+
+    var heatingCoil1 = document.getElementById('heatingCoil1');
+    var heatingCoil2 = document.getElementById('heatingCoil2');
+    var blockAl = document.getElementById('blockAl').firstElementChild;
+    var blockPb = document.getElementById('blockPb').firstElementChild;
+    
+    var thermoAl = document.getElementById('thermoAl');
+    var thermoPb = document.getElementById('thermoPb');
+    var lblTempAl = document.getElementById('lblTempAl');
+    var lblTempAlBg = document.getElementById('lblTempAlBg');
+    var lblTempPb = document.getElementById('lblTempPb');
+    var lblTempPbBg = document.getElementById('lblTempPbBg');
+    
+    var c_al = 900;
+    var t2_al = 660;
+    var c_pb = 128;
+    var t2_pb = 327;
+
+    var targetProgress = 0; 
+    var currentProgress = 0;
+    var isHeating = false;
+
+    btnToggleSolution.addEventListener('click', function() {
+        var isHidden = (solutionBox.style.display === 'none');
+        if (isHidden === true) {
+            solutionBox.style.display = 'block';
+        } else {
+            solutionBox.style.display = 'none';
+        }
+    });
+
+    sM.addEventListener('input', resetSim);
+    sT1.addEventListener('input', resetSim);
+
+    function resetSim() {
+        targetProgress = 0;
+        currentProgress = 0;
+        isHeating = false;
+        btnHeat.innerText = "🔥 បើកឡកម្ដៅ (ដុតព្រមគ្នា)";
+        btnHeat.style.background = "#d32f2f";
+        updatePhysics();
+    }
+
+    btnReset.addEventListener('click', resetSim);
+
+    btnHeat.addEventListener('click', function() {
+        var isZero = (targetProgress === 0);
+        if (isZero === true) {
+            targetProgress = 1; 
+            btnHeat.innerText = "⏸️ បញ្ឈប់ការផ្ដល់កម្ដៅ";
+            btnHeat.style.background = "#f57c00";
+        } else {
+            targetProgress = 0; 
+            btnHeat.innerText = "🔥 បន្តផ្ដល់កម្ដៅ";
+            btnHeat.style.background = "#d32f2f";
+        }
+        
+        if (isHeating === false) {
+            isHeating = true;
+            loopAnimation();
+        }
+    });
+
+    function loopAnimation() {
+        var diff = targetProgress - currentProgress;
+        var isDiff = (Math.abs(diff).toFixed(3) !== "0.000");
+
+        if (isDiff === true) {
+            var isPos = (Math.max(diff, 0) === diff);
+            if (isPos === true) {
+                currentProgress += 0.003; 
+                var isOver = (Math.max(currentProgress, targetProgress) === currentProgress);
+                if (isOver === true) currentProgress = targetProgress;
+            } else {
+                currentProgress -= 0.003;
+                var isUnder = (Math.min(currentProgress, targetProgress) === currentProgress);
+                if (isUnder === true) currentProgress = targetProgress;
+            }
+            
+            drawGraphics();
+            requestAnimationFrame(loopAnimation);
+        } else {
+            drawGraphics();
+            isHeating = false;
+            var isDone = (targetProgress === 1);
+            if(isDone === true) {
+                btnHeat.innerText = "✅ ឈានដល់ចំណុចរលាយ";
+                btnHeat.style.background = "#28a745";
+            }
+        }
+    }
+
+    function formatSciDisplay(num) {
+        if (num === 0) return "0";
+        var exp = Math.floor(Math.log10(num));
+        var base = (Math.round((num / Math.pow(10, exp)) * 100) / 100).toFixed(2); 
+        
+        var expStr = exp.toString();
+        var superMap = {'0':'⁰', '1':'¹', '2':'²', '3':'³', '4':'⁴', '5':'⁵', '6':'⁶', '7':'⁷', '8':'⁸', '9':'⁹'};
+        var finalExp = "";
+        var k = 0;
+        while(k !== expStr.length) {
+            finalExp += superMap[expStr[k]];
+            k++;
+        }
+        return base + " × 10" + finalExp;
+    }
+
+    function drawGraphics() {
+        var t1 = parseFloat(sT1.value);
+        
+        var current_t_al = t1 + ((t2_al - t1) * currentProgress);
+        var current_t_pb = t1 + ((t2_pb - t1) * currentProgress);
+
+        lblTempAl.textContent = Math.round(current_t_al) + " °C";
+        lblTempPb.textContent = Math.round(current_t_pb) + " °C";
+
+        var diff = targetProgress - currentProgress;
+        var isProgressing = (Math.abs(diff).toFixed(3) !== "0.000" && targetProgress === 1);
+        if (isProgressing === true) {
+            heatingCoil1.setAttribute("fill", "#ff9800"); 
+            heatingCoil2.setAttribute("fill", "#ff9800"); 
+        } else {
+            heatingCoil1.setAttribute("fill", "#37474f"); 
+            heatingCoil2.setAttribute("fill", "#37474f"); 
+        }
+
+        var alRed = Math.round(176 + (79 * currentProgress)); 
+        var alGreen = Math.round(190 - (108 * currentProgress)); 
+        var alBlue = Math.round(197 - (115 * currentProgress)); 
+        blockAl.setAttribute("fill", "rgb(" + alRed + "," + alGreen + "," + alBlue + ")");
+
+        var pbRed = Math.round(120 + (135 * currentProgress)); 
+        var pbGreen = Math.round(144 + (8 * currentProgress)); 
+        var pbBlue = Math.round(156 - (156 * currentProgress)); 
+        blockPb.setAttribute("fill", "rgb(" + pbRed + "," + pbGreen + "," + pbBlue + ")");
+
+        var thermYAl = 295 - (current_t_al * 0.37);
+        thermYAl = Math.max(50, Math.min(thermYAl, 295));
+        thermoAl.setAttribute("y", thermYAl);
+        thermoAl.setAttribute("height", 320 - thermYAl);
+        lblTempAlBg.setAttribute("y", thermYAl - 12);
+        lblTempAl.setAttribute("y", thermYAl + 5);
+
+        var thermYPb = 295 - (current_t_pb * 0.56);
+        thermYPb = Math.max(110, Math.min(thermYPb, 295));
+        thermoPb.setAttribute("y", thermYPb);
+        thermoPb.setAttribute("height", 320 - thermYPb);
+        lblTempPbBg.setAttribute("y", thermYPb - 12);
+        lblTempPb.setAttribute("y", thermYPb + 5);
+    }
+
+    var mathTimeout;
+    function updatePhysics() {
+        var m_kg = parseFloat(sM.value);
+        var t1 = parseFloat(sT1.value);
+        
+        var dt_al = t2_al - t1;
+        var q_al = m_kg * c_al * dt_al;
+        
+        var dt_pb = t2_pb - t1;
+        var q_pb = m_kg * c_pb * dt_pb;
+
+        document.getElementById('valM').innerText = m_kg.toFixed(2) + " kg";
+        document.getElementById('valT1').innerText = t1.toFixed(1) + " °C";
+        
+        document.getElementById('dashQa').innerText = formatSciDisplay(q_al) + " J";
+        document.getElementById('dashQaRaw').innerText = "(" + q_al.toLocaleString() + " J)";
+        
+        document.getElementById('dashQb').innerText = formatSciDisplay(q_pb) + " J";
+        document.getElementById('dashQbRaw').innerText = "(" + q_pb.toLocaleString() + " J)";
+
+        document.getElementById('probM').innerText = m_kg.toFixed(2);
+        document.getElementById('probT1').innerText = t1.toFixed(1);
+
+        if (isHeating === false) {
+            drawGraphics();
+        }
+
+        clearTimeout(mathTimeout);
+        mathTimeout = setTimeout(function() {
+            
+            document.getElementById('mathValM').innerHTML = "ម៉ាស៖ \\( m = " + m_kg.toFixed(2) + " \\text{ kg} \\)";
+            document.getElementById('mathValT1').innerHTML = "សីតុណ្ហភាពដើម៖ \\( T_1 = " + t1.toFixed(1) + "^{\\circ}\\text{C} \\)";
+            
+            document.getElementById('mathLineDta').innerHTML = "$$ \\Delta T_a = 660 - " + t1.toFixed(1) + " = " + dt_al.toFixed(1) + "^{\\circ}\\text{C} $$";
+            document.getElementById('mathLineQa').innerHTML = "$$ Q_a = " + m_kg.toFixed(2) + " \\times 900 \\times " + dt_al.toFixed(1) + " = " + q_al.toFixed(0) + " \\text{ J} $$";
+            
+            var expQa = Math.floor(Math.log10(q_al));
+            var baseQa = (Math.round((q_al / Math.pow(10, expQa)) * 100) / 100).toFixed(2);
+            document.getElementById('mathLineFinalQa').innerHTML = "$$ Q_a \\approx " + baseQa + " \\times 10^{" + expQa + "} \\text{ J} $$";
+
+            document.getElementById('mathLineDtb').innerHTML = "$$ \\Delta T_b = 327 - " + t1.toFixed(1) + " = " + dt_pb.toFixed(1) + "^{\\circ}\\text{C} $$";
+            document.getElementById('mathLineQb').innerHTML = "$$ Q_b = " + m_kg.toFixed(2) + " \\times 128 \\times " + dt_pb.toFixed(1) + " = " + q_pb.toFixed(0) + " \\text{ J} $$";
+            
+            var expQb = Math.floor(Math.log10(q_pb));
+            var baseQb = (Math.round((q_pb / Math.pow(10, expQb)) * 100) / 100).toFixed(2);
+            document.getElementById('mathLineFinalQb').innerHTML = "$$ Q_b \\approx " + baseQb + " \\times 10^{" + expQb + "} \\text{ J} $$";
+
+            if (typeof MathJax !== "undefined") {
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
+            }
+        }, 300);
+    }
+
+    updatePhysics();
+</script>
+
+</body>
+</html>

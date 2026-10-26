@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ១១ទំព័រ១១៩</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        .math-font {
+            font-family: 'Lora', serif;
+        }
+        .math-var {
+            font-family: 'Lora', serif;
+            font-style: italic;
+        }
+        .solution-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 0;
+        }
+        .solution-content.open {
+            max-height: 3000px;
+            opacity: 1;
+        }
+
+        /* --- Custom CSS for Simulator Elements --- */
+        .beaker-container {
+            position: relative;
+            width: 180px;
+            height: 220px;
+            margin: 0 auto;
+        }
+        
+        .beaker-glass {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            border: 4px solid #94a3b8; /* slate-400 */
+            border-top: none;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.4);
+            z-index: 10;
+            /* Top rim */
+            &::before {
+                content: '';
+                position: absolute;
+                top: -10px;
+                left: -10px;
+                right: -10px;
+                height: 20px;
+                border: 4px solid #94a3b8;
+                border-radius: 50%;
+                z-index: 11;
+            }
+        }
+
+        .water-body {
+            position: absolute;
+            bottom: 4px; /* Inside border */
+            left: 4px;
+            right: 4px;
+            height: 0%; /* Dynamic */
+            background: linear-gradient(180deg, rgba(125,211,252,0.6) 0%, rgba(56,189,248,0.8) 100%);
+            border-bottom-left-radius: 14px;
+            border-bottom-right-radius: 14px;
+            z-index: 5;
+            transition: height 0.1s linear;
+        }
+
+        .ice-cubes {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 100px;
+            z-index: 6;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-content: flex-end;
+            gap: 4px;
+            transition: opacity 0.1s linear, bottom 0.1s linear;
+        }
+
+        .cube {
+            width: 35px;
+            height: 35px;
+            background: rgba(224, 242, 254, 0.8);
+            border: 2px solid rgba(255,255,255,0.9);
+            border-radius: 6px;
+            box-shadow: inset 2px 2px 5px rgba(255,255,255,0.8), inset -2px -2px 5px rgba(186, 230, 253, 0.5);
+            transform: rotate(calc(var(--r) * 1deg));
+        }
+
+        .hotplate {
+            width: 260px;
+            height: 60px;
+            background: #e2e8f0;
+            border: 3px solid #64748b;
+            border-radius: 12px;
+            position: relative;
+            margin: 0 auto;
+            margin-top: -5px; /* Overlap slightly with beaker */
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            z-index: 2;
+        }
+
+        .hotplate-top {
+            width: 80%;
+            height: 12px;
+            background: #334155;
+            border-radius: 50%;
+            position: absolute;
+            top: -6px;
+            left: 10%;
+        }
+
+        .indicator-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #94a3b8; /* Off */
+            position: absolute;
+            bottom: 15px;
+            left: 20px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+            transition: background-color 0.3s;
+        }
+        
+        .indicator-light.active {
+            background-color: #ef4444; /* On - Red */
+            box-shadow: 0 0 8px #ef4444, inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Thermometer */
+        .thermometer {
+            position: absolute;
+            top: -40px;
+            right: 20px;
+            width: 14px;
+            height: 200px;
+            background: rgba(255,255,255,0.8);
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            z-index: 15;
+            display: flex;
+            justify-content: center;
+        }
+        .thermo-bulb {
+            position: absolute;
+            bottom: -10px;
+            left: -5px;
+            width: 24px;
+            height: 24px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+        }
+        .thermo-liquid {
+            position: absolute;
+            bottom: 10px;
+            width: 6px;
+            height: 20%; /* dynamic */
+            background: #ef4444;
+            border-radius: 3px;
+            transition: height 0.1s linear;
+        }
+        .thermo-reading {
+            position: absolute;
+            top: -30px;
+            right: -40px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-family: 'Lora', serif;
+            font-weight: bold;
+            color: #334155;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Steam particles */
+        .steam-container {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            z-index: 20;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .steam-cloud {
+            position: absolute;
+            background: rgba(255,255,255,0.7);
+            border-radius: 50%;
+            filter: blur(8px);
+            animation: floatUp 2s infinite ease-in;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 0.8; }
+            100% { transform: translateY(-50px) scale(2); opacity: 0; }
+        }
+
+        /* Bubbles */
+        .bubbles {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 8;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .bubble {
+            position: absolute;
+            bottom: 0;
+            background: rgba(255,255,255,0.6);
+            border-radius: 50%;
+            animation: rise 1s infinite ease-in;
+        }
+        @keyframes rise {
+            0% { transform: translateY(0) translateX(0) scale(0.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-150px) translateX(var(--tx)) scale(1.2); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center">
+
+    <div class="max-w-6xl w-full">
+        
+        <!-- --- Problem Statement Card --- -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+            <div class="p-6 md:p-8 bg-slate-50">
+                <p class="text-slate-800 leading-loose text-lg md:text-xl text-justify">
+                    <span class="math-font font-bold">១១.</span> គណនាថាមពលកម្ដៅដែលផ្តល់ដុំទឹកកក <span class="math-font font-semibold text-slate-900">50.0 g</span> ដើម្បីឱ្យមានបម្រែបម្រួលសីតុណ្ហភាពពី <span class="math-font font-semibold text-slate-900">-5.00 °C</span> ទៅចំហាយនៅសីតុណ្ហភាព <span class="math-font font-semibold text-slate-900">110 °C</span> ។ គេឱ្យកម្ដៅម៉ាសទឹកកក <span class="math-font">2090 J/kg·°C</span>, កម្ដៅម៉ាសទឹក <span class="math-font">4186 J/kg·°C</span>, កម្ដៅឡាតង់រលាយទឹកកក <span class="math-font">3.33 × 10<sup>5</sup> J/kg</span>, កម្ដៅឡាតង់រំហួតទឹក <span class="math-font">2.26 × 10<sup>6</sup> J/kg</span> និងកម្ដៅម៉ាសចំហាយទឹក <span class="math-font">2010 J/kg·°C</span> ។
+                </p>
+                <div class="mt-4 flex flex-wrap gap-4 items-center">
+                    <span class="math-font font-bold text-lg">ចម្លើយ៖ <span class="math-var">Q</span> = 1.52 × 10<sup>5</sup> J</span>
+                    
+                    <button id="toggleSolutionBtn" class="ml-auto flex items-center gap-2 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg transition text-sm font-semibold">
+                        <span>បង្ហាញដំណោះស្រាយលម្អិត</span>
+                        <svg id="chevron" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- --- Hidden Solution --- -->
+            <div id="solutionContent" class="solution-content border-t border-slate-200">
+                <div class="p-6 md:p-8 text-slate-700 text-lg space-y-4 bg-white">
+                    <p class="font-bold">ដំណោះស្រាយ៖</p>
+                    <div class="math-font bg-slate-50 p-4 rounded-lg inline-block text-base border border-slate-200 mb-4">
+                        <span class="math-var">m</span> = 50.0 g = 0.05 kg <br>
+                        <span class="math-var">Q<sub>total</sub></span> = <span class="math-var">Q<sub>1</sub></span> + <span class="math-var">Q<sub>2</sub></span> + <span class="math-var">Q<sub>3</sub></span> + <span class="math-var">Q<sub>4</sub></span> + <span class="math-var">Q<sub>5</sub></span>
+                    </div>
+                    
+                    <ul class="space-y-3 math-font text-base">
+                        <li><strong>Q₁ (ដំឡើង T ទឹកកក):</strong> <span class="math-var">mc<sub>ice</sub>ΔT</span> = 0.05 × 2090 × (0 - (-5)) = <strong class="text-slate-900">522.5 J</strong></li>
+                        <li><strong>Q₂ (រំលាយទឹកកក):</strong> <span class="math-var">mL<sub>f</sub></span> = 0.05 × (3.33 × 10<sup>5</sup>) = <strong class="text-slate-900">16,650 J</strong></li>
+                        <li><strong>Q₃ (ដំឡើង T ទឹក):</strong> <span class="math-var">mc<sub>water</sub>ΔT</span> = 0.05 × 4186 × (100 - 0) = <strong class="text-slate-900">20,930 J</strong></li>
+                        <li><strong>Q₄ (រំហួតទឹក):</strong> <span class="math-var">mL<sub>v</sub></span> = 0.05 × (2.26 × 10<sup>6</sup>) = <strong class="text-slate-900">113,000 J</strong></li>
+                        <li><strong>Q₅ (ដំឡើង T ចំហាយ):</strong> <span class="math-var">mc<sub>steam</sub>ΔT</span> = 0.05 × 2010 × (110 - 100) = <strong class="text-slate-900">1,005 J</strong></li>
+                    </ul>
+                    
+                    <div class="mt-4 pt-4 border-t border-slate-200 font-bold text-xl math-font text-center text-slate-800">
+                        <span class="math-var">Q</span> = 522.5 + 16650 + 20930 + 113000 + 1005 = 152,107.5 J ≈ 1.52 × 10<sup>5</sup> J
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- --- Simulator Section --- -->
+        <div class="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden p-6 md:p-8">
+            <h2 class="text-center text-2xl font-bold text-slate-800 mb-8">កម្មវិធីពិសោធន៍៖ ខ្សែកោងកម្ដៅនៃទឹក <span class="math-font text-lg font-normal text-slate-500">(Heating Curve of Water)</span></h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+                
+                <!-- Left: Experimental Setup -->
+                <div class="flex flex-col relative h-[450px]">
+                    <h3 class="text-center font-bold text-lg mb-6 text-slate-700">ការរៀបចំពិសោធន៍ <span class="text-sm font-normal text-slate-500">(Experimental Setup)</span></h3>
+                    
+                    <!-- Floating Label -->
+                    <div class="absolute top-12 left-0 bg-white shadow-md border border-slate-200 px-4 py-2 rounded-xl text-slate-800 font-bold z-30 flex items-center gap-2">
+                        <span>ម៉ាសទឹកកក:</span> <span class="math-font text-xl">50 g</span>
+                    </div>
+
+                    <!-- Setup Container -->
+                    <div class="flex-grow flex flex-col justify-end items-center pb-4 relative">
+                        
+                        <!-- Steam Animation -->
+                        <div class="steam-container" id="steamVisual">
+                            <div class="steam-cloud w-12 h-12 left-2 top-4" style="animation-delay: 0s;"></div>
+                            <div class="steam-cloud w-16 h-16 left-8 top-0" style="animation-delay: 0.5s;"></div>
+                            <div class="steam-cloud w-10 h-10 left-16 top-6" style="animation-delay: 1s;"></div>
+                        </div>
+
+                        <!-- Beaker -->
+                        <div class="beaker-container">
+                            <!-- Thermometer -->
+                            <div class="thermometer">
+                                <div class="thermo-reading" id="tempText">-5.0 °C</div>
+                                <div class="thermo-liquid" id="thermoLiquid" style="height: 10%;"></div>
+                                <div class="thermo-bulb"></div>
+                            </div>
+
+                            <div class="beaker-glass"></div>
+                            
+                            <!-- Water -->
+                            <div class="water-body" id="waterVisual"></div>
+                            
+                            <!-- Bubbles -->
+                            <div class="bubbles" id="bubblesVisual">
+                                <div class="bubble w-2 h-2 left-[20%]" style="--tx: -10px; animation-duration: 0.8s;"></div>
+                                <div class="bubble w-3 h-3 left-[50%]" style="--tx: 5px; animation-duration: 1.2s; animation-delay: 0.2s;"></div>
+                                <div class="bubble w-2 h-2 left-[70%]" style="--tx: -5px; animation-duration: 0.9s; animation-delay: 0.5s;"></div>
+                                <div class="bubble w-4 h-4 left-[40%]" style="--tx: 15px; animation-duration: 1.5s; animation-delay: 0.1s;"></div>
+                            </div>
+
+                            <!-- Ice -->
+                            <div class="ice-cubes" id="iceVisual">
+                                <div class="cube" style="--r: -5"></div>
+                                <div class="cube" style="--r: 10"></div>
+                                <div class="cube" style="--r: -15; margin-top: -10px;"></div>
+                                <div class="cube" style="--r: 5"></div>
+                                <div class="cube" style="--r: -8; margin-top: -15px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Hotplate -->
+                        <div class="hotplate">
+                            <div class="hotplate-top"></div>
+                            <div class="indicator-light" id="heatIndicator"></div>
+                            <!-- Fake buttons for visuals -->
+                            <div class="absolute bottom-3 right-4 w-6 h-6 rounded-full bg-slate-800 border-2 border-slate-600"></div>
+                            <div class="absolute bottom-4 right-12 w-8 h-4 rounded bg-slate-800"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Graph -->
+                <div class="flex flex-col h-[450px]">
+                    <h3 class="text-center font-bold text-lg mb-2 text-slate-700">ក្រាហ្វកម្ដៅ <span class="text-sm font-normal text-slate-500">(Heating Graph)</span></h3>
+                    <div class="flex-grow relative w-full h-full border border-slate-200 rounded-xl bg-white p-2 shadow-inner">
+                        <canvas id="heatingChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Action -->
+            <div class="mt-10 flex justify-center pb-2">
+                <button id="startBtn" class="bg-[#4ade80] hover:bg-[#22c55e] text-white font-bold text-xl px-10 py-4 rounded-full shadow-lg shadow-green-200 transition-all transform hover:scale-105 active:scale-95 flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>ចាប់ផ្ដើមពិសោធន៍</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- UI Interaction: Toggle Solution ---
+        const btnToggle = document.getElementById('toggleSolutionBtn');
+        const solContent = document.getElementById('solutionContent');
+        const chevron = document.getElementById('chevron');
+
+        btnToggle.addEventListener('click', () => {
+            solContent.classList.toggle('open');
+            chevron.classList.toggle('rotate-180');
+            const span = btnToggle.querySelector('span');
+            span.textContent = solContent.classList.contains('open') ? 'លាក់ដំណោះស្រាយ' : 'បង្ហាញដំណោះស្រាយលម្អិត';
+        });
+
+        // --- Physics Data & Milestones ---
+        // Pre-calculated cumulative Q values from the solution
+        const milestones = [
+            { q: 0, t: -5 },
+            { q: 522.5, t: 0 },         // End heating ice
+            { q: 17172.5, t: 0 },       // End melting
+            { q: 38102.5, t: 100 },     // End heating water
+            { q: 151102.5, t: 100 },    // End boiling
+            { q: 152107.5, t: 110 }     // End heating steam
+        ];
+        const MAX_Q = milestones[5].q;
+        const MIN_T = -10;
+        const MAX_T = 120;
+
+        // --- Chart.js Setup ---
+        const ctx = document.getElementById('heatingChart').getContext('2d');
+        
+        // Define the full path for background
+        const backgroundData = milestones.map(m => ({ x: m.q, y: m.t }));
+        
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: 'Path',
+                        data: backgroundData,
+                        borderColor: '#e2e8f0', // Light grey path
+                        borderWidth: 4,
+                        fill: false,
+                        pointRadius: 0,
+                        tension: 0 // Straight lines
+                    },
+                    {
+                        label: 'Current Temp',
+                        data: [{ x: 0, y: -5 }], // Starts here
+                        borderColor: '#38bdf8', // Blue line
+                        backgroundColor: '#38bdf8',
+                        borderWidth: 4,
+                        fill: false,
+                        pointRadius: 6,
+                        pointBackgroundColor: 'white',
+                        pointBorderWidth: 3,
+                        tension: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false, // Turn off default animations for manual loop
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        min: 0,
+                        max: 160000,
+                        title: { display: true, text: 'កម្ដៅ (Heat Q - Joules)', font: { family: 'Kantumruy Pro', weight: 'bold' } },
+                        ticks: {
+                            callback: value => value === 0 ? 0 : (value/1000) + 'k',
+                            font: { family: 'Lora' }
+                        },
+                        grid: { color: '#f1f5f9' }
+                    },
+                    y: {
+                        min: -10,
+                        max: 120,
+                        title: { display: true, text: 'សីតុណ្ហភាព (Temp °C)', font: { family: 'Kantumruy Pro', weight: 'bold' } },
+                        ticks: {
+                            stepSize: 50,
+                            callback: value => value + '°C',
+                            font: { family: 'Lora' }
+                        },
+                        grid: { color: '#f1f5f9' }
+                    }
+                }
+            }
+        });
+
+        // --- Visual Elements ---
+        const els = {
+            tempText: document.getElementById('tempText'),
+            thermoLiquid: document.getElementById('thermoLiquid'),
+            ice: document.getElementById('iceVisual'),
+            water: document.getElementById('waterVisual'),
+            steam: document.getElementById('steamVisual'),
+            bubbles: document.getElementById('bubblesVisual'),
+            indicator: document.getElementById('heatIndicator'),
+            startBtn: document.getElementById('startBtn')
+        };
+
+        // --- Simulation Logic ---
+        let isRunning = false;
+        let animId;
+        let startTime = null;
+        
+        // Settings: how long the animation takes.
+        // Boiling (Q4) is physically very long. We use a non-linear time mapping
+        // just to make the simulation watchable in a reasonable time.
+        const SIM_DURATION_MS = 15000; // 15 seconds
+
+        function getTempFromQ(q) {
+            if (q <= milestones[1].q) {
+                // Heating Ice
+                const p = q / milestones[1].q;
+                return milestones[0].t + p * (milestones[1].t - milestones[0].t);
+            } else if (q <= milestones[2].q) {
+                return 0; // Melting
+            } else if (q <= milestones[3].q) {
+                // Heating Water
+                const p = (q - milestones[2].q) / (milestones[3].q - milestones[2].q);
+                return milestones[2].t + p * (milestones[3].t - milestones[2].t);
+            } else if (q <= milestones[4].q) {
+                return 100; // Boiling
+            } else {
+                // Heating Steam
+                const p = (q - milestones[4].q) / (milestones[5].q - milestones[4].q);
+                return milestones[4].t + p * (milestones[5].t - milestones[4].t);
+            }
+        }
+
+        function updateVisuals(q, t) {
+            // Update Text & Thermometer UI
+            els.tempText.textContent = t.toFixed(1) + ' °C';
+            // map T(-10 to 120) to height (10% to 90%)
+            const thHeight = 10 + ((t - MIN_T) / (MAX_T - MIN_T)) * 80;
+            els.thermoLiquid.style.height = `${thHeight}%`;
+
+            // State specific visuals
+            if (q <= milestones[1].q) {
+                // Phase 1: Solid Ice
+                els.ice.style.opacity = 1;
+                els.water.style.height = '0%';
+                els.steam.style.opacity = 0;
+                els.bubbles.style.opacity = 0;
+                chart.data.datasets[1].borderColor = '#38bdf8'; // Blue for ice
+                
+            } else if (q <= milestones[2].q) {
+                // Phase 2: Melting (0°C)
+                const p = (q - milestones[1].q) / (milestones[2].q - milestones[1].q);
+                els.ice.style.opacity = 1 - p;
+                // As ice melts, it takes up less volume, but becomes water.
+                // Let's say max water height is 70% of beaker.
+                els.water.style.height = `${p * 70}%`;
+                // Ice sinks slightly
+                els.ice.style.bottom = `${10 - (p * 5)}px`;
+                chart.data.datasets[1].borderColor = '#3b82f6';
+                
+            } else if (q <= milestones[3].q) {
+                // Phase 3: Heating Water
+                els.ice.style.opacity = 0;
+                els.water.style.height = '70%';
+                
+                // Start tiny bubbles near 100°C
+                if (t > 80) {
+                    els.bubbles.style.opacity = (t - 80) / 20;
+                } else {
+                    els.bubbles.style.opacity = 0;
+                }
+                chart.data.datasets[1].borderColor = '#10b981'; // Green for water
+                
+            } else if (q <= milestones[4].q) {
+                // Phase 4: Boiling (100°C)
+                const p = (q - milestones[3].q) / (milestones[4].q - milestones[3].q);
+                els.bubbles.style.opacity = 1;
+                // Water turns to steam, level drops
+                els.water.style.height = `${70 * (1 - p)}%`;
+                // Steam appears
+                els.steam.style.opacity = Math.min(p * 3, 1); // Ramp up fast
+                chart.data.datasets[1].borderColor = '#f59e0b'; // Orange for boiling
+                
+            } else {
+                // Phase 5: Steam heating
+                els.water.style.height = '0%';
+                els.bubbles.style.opacity = 0;
+                els.steam.style.opacity = 1;
+                chart.data.datasets[1].borderColor = '#ef4444'; // Red for steam
+            }
+        }
+
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            
+            // Calculate progress (0 to 1)
+            let rawProgress = (timestamp - startTime) / SIM_DURATION_MS;
+            if (rawProgress > 1) rawProgress = 1;
+
+            // Optional: Map time progress to Q non-linearly so boiling doesn't take 80% of the visual time
+            // For educational clarity, showing boiling taking a long time IS accurate.
+            // We'll stick to linear mapping: progress = proportion of Total Q.
+            let currentQ = rawProgress * MAX_Q;
+            let currentT = getTempFromQ(currentQ);
+
+            // Update Chart
+            // Build the active dataset dynamically
+            let activeData = [];
+            for(let i=0; i<milestones.length; i++) {
+                if(currentQ >= milestones[i].q) {
+                    activeData.push({x: milestones[i].q, y: milestones[i].t});
+                } else {
+                    break;
+                }
+            }
+            activeData.push({x: currentQ, y: currentT});
+            chart.data.datasets[1].data = activeData;
+            chart.update();
+
+            // Update DOM visuals
+            updateVisuals(currentQ, currentT);
+
+            if (rawProgress < 1 && isRunning) {
+                animId = requestAnimationFrame(step);
+            } else {
+                endSimulation();
+            }
+        }
+
+        function resetSimulation() {
+            cancelAnimationFrame(animId);
+            isRunning = false;
+            startTime = null;
+            els.indicator.classList.remove('active');
+            
+            // Reset button
+            els.startBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>ចាប់ផ្ដើមពិសោធន៍</span>`;
+            els.startBtn.classList.replace('bg-rose-500', 'bg-[#4ade80]');
+            els.startBtn.classList.replace('hover:bg-rose-600', 'hover:bg-[#22c55e]');
+            els.startBtn.classList.replace('shadow-rose-200', 'shadow-green-200');
+
+            // Reset Visuals
+            updateVisuals(0, -5);
+            chart.data.datasets[1].data = [{x: 0, y: -5}];
+            chart.update();
+        }
+
+        function endSimulation() {
+            isRunning = false;
+            els.indicator.classList.remove('active');
+            els.startBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>ធ្វើឡើងវិញ (Reset)</span>`;
+        }
+
+        // --- Event Listeners ---
+        els.startBtn.addEventListener('click', () => {
+            if (isRunning) {
+                // Pause/Reset logic if needed. Let's just make it a Reset button when running.
+                resetSimulation();
+            } else {
+                if(chart.data.datasets[1].data.length > 1) {
+                    // It finished, need to reset first
+                    resetSimulation();
+                    // Slight delay before auto-starting again for visual feedback
+                    setTimeout(() => { els.startBtn.click(); }, 100);
+                    return;
+                }
+
+                // Start
+                isRunning = true;
+                els.indicator.classList.add('active');
+                
+                // Change button to Stop/Reset style
+                els.startBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                    </svg>
+                    <span>បញ្ឈប់ (Stop)</span>`;
+                els.startBtn.classList.replace('bg-[#4ade80]', 'bg-rose-500');
+                els.startBtn.classList.replace('hover:bg-[#22c55e]', 'hover:bg-rose-600');
+                els.startBtn.classList.replace('shadow-green-200', 'shadow-rose-200');
+
+                animId = requestAnimationFrame(step);
+            }
+        });
+
+        // Initialize default view
+        updateVisuals(0, -5);
+    </script>
+</body>
+</html>
