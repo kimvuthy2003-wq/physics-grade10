@@ -1,0 +1,13 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Phy_simulatorG10",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "PhysicsG10",
+  "start_url": "/",
+  "theme_color": "#2714f2",
+  "description": "កម្មវិធីនេះបង្កើតឡើងដើម្បីជួយសិស្ស និងគ្រូក្នុងការសិក្សាពីបាតុភូតរូបវិទ្យាថ្នាក់ទី១០ ស្របតាមសៀវភៅសិក្សាគោលថ្មី។",
+  "id": "PhysicsG10"
+}
