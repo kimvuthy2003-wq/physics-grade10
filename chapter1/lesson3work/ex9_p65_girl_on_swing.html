@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់លេខ៩ - ថាមពលប៉ូតង់ស្យែលនៃទោង</title>
+    
+    <!-- បញ្ចូល MathJax សម្រាប់សរសេររូបមន្តរូបវិទ្យា -->
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Hanuman', 'Siemreap', 'Khmer OS Battambang', Arial, sans-serif;
+            background-color: #f4f6f9;
+            padding: 12px;
+            margin: 0;
+            color: #111;
+            text-align: center;
+        }
+        .container { 
+            max-width: 650px; 
+            margin: 0 auto; 
+        }
+        
+        /* ប្រធានលំហាត់ */
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 14px 18px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 14px;
+            font-size: 15.5px; font-weight: bold; line-height: 1.65;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        /* ផ្ទាំងបម្រាប់ */
+        .info-panel {
+            background: #fff; padding: 10px 14px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08); margin-bottom: 14px;
+            display: flex; justify-content: space-around; flex-wrap: wrap;
+            gap: 8px;
+            border-left: 6px solid #28a745; font-size: 15px;
+        }
+        .info-panel strong { color: #d32f2f; font-size: 17px; }
+        
+        /* ផ្ទាំង Simulator (រចនាឱ្យត្រូវនឹងអេក្រង់ទូរសព្ទ មិនធំពេក) */
+        .sim-area {
+            position: relative; width: 100%; height: 240px;
+            background: linear-gradient(to bottom, #e0f6ff 0%, #f0f9ff 100%); 
+            border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); margin: 0 auto;
+        }
+        
+        /* គំនូសខ្សែឈរ (Vertical Reference) */
+        .vertical-line {
+            position: absolute; top: 20px; left: 50%;
+            width: 2px; height: 180px;
+            background: repeating-linear-gradient(to bottom, #999 0, #999 8px, transparent 8px, transparent 16px);
+            transform: translateX(-50%); z-index: 1;
+        }
+
+        /* បន្ទាត់រង្វាស់កម្ពស់ (h=0) */
+        .bottom-line {
+            position: absolute; top: 190px;
+            left: 10%; width: 80%; height: 2px;
+            background: #28a745; z-index: 1;
+        }
+        .h0-text {
+            position: absolute; top: 195px; left: 15px;
+            color: #28a745; font-weight: bold; font-size: 12.5px;
+        }
+
+        /* ទោង និងកុមារី (បង្រួមទំហំឱ្យសមល្មមក្នុងប្រអប់ទូរសព្ទ) */
+        .pivot {
+            position: absolute; top: 25px; left: calc(50% - 4px);
+            width: 8px; height: 8px; background: #333;
+            border-radius: 50%; z-index: 4;
+        }
+        .swing-container {
+            position: absolute; top: 29px; left: 50%;
+            width: 2px; height: 160px; /* ប្រវែងខ្សែសមល្មម មិនហួសប្រអប់ */
+            background: #444; transform-origin: top center;
+            transform: rotate(0deg); 
+            z-index: 3;
+        }
+        .girl-emoji {
+            position: absolute; bottom: -16px; left: -16px;
+            font-size: 32px; width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* បន្ទាត់កម្ពស់ជាក់ស្តែង (Dynamic H Line) */
+        .h-line-dynamic {
+            position: absolute; left: 50%; width: 32%; height: 2px;
+            background: #d32f2f; border-top: 2px dashed #d32f2f;
+            z-index: 2;
+        }
+        
+        /* របារអូស (Slider) */
+        .slider-container {
+            margin: 12px auto; padding: 12px 15px; background: white;
+            border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            font-size: 15px; font-weight: bold;
+        }
+        input[type=range] { width: 100%; margin-top: 8px; cursor: pointer; }
+
+        /* ប៊ូតុងបញ្ជា (ដាក់នៅក្បែរក្រោមរូបភាពពិសោធន៍និង Slider ផ្ទាល់) */
+        .controls {
+            margin-bottom: 14px; display: flex; justify-content: center;
+            gap: 8px; flex-wrap: wrap; align-items: center;
+        }
+        button {
+            padding: 8px 14px; font-size: 14px; font-weight: bold;
+            font-family: inherit; cursor: pointer; border: none;
+            border-radius: 6px; color: white; transition: 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        .btn-play { background: #28a745; }
+        .btn-play:hover { background: #218838; }
+        .btn-pause { background: #ffc107; color: black; }
+        .btn-pause:hover { background: #e0a800; }
+        
+        .btn-q { background: #6f42c1; font-size: 13px; padding: 6px 10px; }
+        .btn-q:hover { background: #5a32a3; }
+        #solutionBtn { background: #17a2b8; }
+        #solutionBtn:hover { background: #138496; }
+
+        /* ទិន្នន័យ Live Data */
+        .live-data {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 10px; margin-top: 10px;
+        }
+        .data-box {
+            background: white; padding: 12px 8px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 14px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 22px; 
+            display: inline-block; margin-top: 5px;
+        }
+        
+        #liveAngle { color: #0056b3; } 
+        #liveHeight { color: #17a2b8; } 
+        #liveU { color: #d32f2f; } 
+
+        /* ដំណោះស្រាយ */
+        .solution-box {
+            background: #ffffff; padding: 20px 22px; border-radius: 8px;
+            text-align: left; margin-top: 18px; border-left: 6px solid #17a2b8;
+            font-size: 15px; line-height: 1.7; box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        .solution-box h3 {
+            margin-top: 0; color: #0f6674; border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px; font-size: 18px;
+        }
+        .solution-box ul { padding-left: 24px; margin-top: 4px; }
+        .highlight-red { color: #d32f2f; font-weight: bold; }
+
+        @media (max-width: 480px) {
+            .problem-statement { font-size: 14px; padding: 12px; }
+            .info-panel { font-size: 13.5px; }
+            .sim-area { height: 210px; }
+            .vertical-line { height: 155px; }
+            .bottom-line { top: 165px; }
+            .h0-text { top: 170px; font-size: 11px; }
+            .pivot { top: 20px; }
+            .swing-container { top: 24px; height: 135px; }
+            .data-box { font-size: 12px; padding: 10px 4px; }
+            .data-box span { font-size: 18px; }
+            button { font-size: 13px; padding: 7px 11px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ប្រធានលំហាត់ -->
+    <div class="problem-statement">
+        <strong>លំហាត់លេខ ៩ ៖</strong> កុមារីម្នាក់មានម៉ាស $30.0 \text{ kg}$ ជិះទោងក្នុងបរិវេណនៃសាលារៀនមួយ។ ខ្សែទោងនីមួយៗ មានប្រវែង $2.00 \text{ m}$។ កំណត់ថាមពលប៉ូតង់ស្យែលទំនាញផែនដីនៃប្រព័ន្ធកុមារី-ផែនដីធៀបនឹងទីតាំងទាបបំផុតនៃកុមារី ៖<br>
+        <strong>ក.</strong> កាលណាខ្សែទោងដេកសន្ធឹងត្រង់ ($90^\circ$)<br>
+        <strong>ខ.</strong> កាលណាខ្សែទោងបង្កើតបានមុំ $60.0^\circ$ ធៀបនឹងខ្សែឈរ<br>
+        <strong>គ.</strong> កាលណាខ្សែទោងបង្កើតបានមុំ $30.0^\circ$ ធៀបនឹងខ្សែឈរ<br>
+        <strong>ឃ.</strong> កាលណាខ្សែទោងឈរសន្ធឹងត្រង់ចុះក្រោម ($0^\circ$)
+    </div>
+    
+    <!-- បម្រាប់ -->
+    <div class="info-panel">
+        <div>ម៉ាស ($m$) = <strong>30.0 kg</strong></div>
+        <div>ប្រវែងខ្សែ ($L$) = <strong>2.00 m</strong></div>
+        <div>សន្ទុះ ($g$) = <strong>9.8 m/s²</strong></div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator (Responsive & Compact) -->
+    <div class="sim-area">
+        <div class="vertical-line"></div>
+        <div class="pivot"></div>
+        
+        <div class="swing-container" id="swing">
+            <div class="girl-emoji">👧</div>
+        </div>
+
+        <div class="bottom-line"></div>
+        <div class="h0-text">ទីតាំងទាបបំផុត ($h = 0 \text{ m}$)</div>
+        
+        <div class="h-line-dynamic" id="hLine"></div>
+    </div>
+
+    <!-- Slider បង្ហាញមុំ -->
+    <div class="slider-container">
+        បញ្ជាទោងដោយអូសប្តូរមុំ ($\theta$): <span id="sliderValue" style="color: #0056b3;">0</span>&deg;
+        <input type="range" id="angleSlider" min="-90" max="90" value="0" step="1">
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា (ដាក់នៅក្បែរក្រោមរូបភាពពិសោធន៍និង Slider ផ្ទាល់) -->
+    <div class="controls">
+        <button class="btn-play" id="playBtn">▶ លេង</button>
+        <button class="btn-pause" id="pauseBtn">⏸ ផ្អាក</button>
+        <button class="btn-q" onclick="setAngle(90)">ក. $90^\circ$</button>
+        <button class="btn-q" onclick="setAngle(60)">ខ. $60^\circ$</button>
+        <button class="btn-q" onclick="setAngle(30)">គ. $30^\circ$</button>
+        <button class="btn-q" onclick="setAngle(0)">ឃ. $0^\circ$</button>
+        <button id="solutionBtn">📖 ដំណោះស្រាយ</button>
+    </div>
+
+    <!-- ប្រអប់តម្លៃលេខ Live -->
+    <div class="live-data">
+        <div class="data-box" style="border-top: 5px solid #0056b3;">មុំធៀបខ្សែឈរ ($\theta$)<br><span id="liveAngle">0.0</span> &deg;</div>
+        <div class="data-box" style="border-top: 5px solid #17a2b8;">កម្ពស់ ($h = L - L\cos\theta$)<br><span id="liveHeight">0.000</span> m</div>
+        <div class="data-box" style="border-top: 5px solid #d32f2f;">ថាមពលប៉ូតង់ស្យែល ($U$)<br><span id="liveU">0.0</span> J</div>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div id="solutionBox" class="solution-box" style="display: none;">
+        <h3>📝 ដំណោះស្រាយលម្អិត</h3>
+        <p style="margin-top:0;"><strong>បម្រាប់៖</strong> $m = 30.0 \text{ kg}$, $L = 2.00 \text{ m}$, $g = 9.8 \text{ m/s}^2$។ ទីតាំងទាបបំផុតជាកម្រិតសូន្យ ($h=0$)។<br>
+        រូបមន្តកម្ពស់៖ $h = L(1 - \cos\theta)$ និងថាមពលប៉ូតង់ស្យែល៖ <strong>$U = mgh = mgL(1 - \cos\theta)$</strong></p>
+        
+        <p><strong>ក. ពេលខ្សែទោងដេកសន្ធឹងត្រង់ ($\theta = 90^\circ$)៖</strong></p>
+        <ul>
+            <li>$h = 2.00(1 - \cos 90^\circ) = 2.00(1 - 0) = 2.00 \text{ m}$</li>
+            <li>$U = 30.0 \times 9.8 \times 2.00$ = <span class="highlight-red">588 J</span></li>
+        </ul>
+
+        <p><strong>ខ. ពេលខ្សែទោងបង្កើតបានមុំ $\theta = 60.0^\circ$៖</strong></p>
+        <ul>
+            <li>$h = 2.00(1 - \cos 60^\circ) = 2.00(1 - 0.5) = 1.00 \text{ m}$</li>
+            <li>$U = 30.0 \times 9.8 \times 1.00$ = <span class="highlight-red">294 J</span></li>
+        </ul>
+
+        <p><strong>គ. ពេលខ្សែទោងបង្កើតបានមុំ $\theta = 30.0^\circ$៖</strong></p>
+        <ul>
+            <li>$h = 2.00(1 - \cos 30^\circ) = 2.00(1 - 0.866) = 0.268 \text{ m}$</li>
+            <li>$U = 30.0 \times 9.8 \times 0.268$ = <span class="highlight-red">78.8 J</span></li>
+        </ul>
+
+        <p><strong>ឃ. ពេលខ្សែទោងឈរសន្ធឹងត្រង់ចុះក្រោម ($\theta = 0^\circ$)៖</strong></p>
+        <ul>
+            <li>$h = 2.00(1 - \cos 0^\circ) = 2.00(1 - 1) = 0 \text{ m}$</li>
+            <li>$U = 30.0 \times 9.8 \times 0$ = <span class="highlight-red">0 J</span></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const m = 30.0; // kg
+    const L = 2.00; // m
+    const g = 9.8; // m/s^2
+    
+    const pivotY = 25; 
+    const L_px = 160; // កែសម្រួលប្រវែងភីកសែលឱ្យសមល្មមជាមួយប្រអប់ទូរសព្ទ
+    
+    const swingEl = document.getElementById('swing');
+    const hLine = document.getElementById('hLine');
+    const slider = document.getElementById('angleSlider');
+    const sliderValDisp = document.getElementById('sliderValue');
+    
+    const angleDisp = document.getElementById('liveAngle');
+    const heightDisp = document.getElementById('liveHeight');
+    const uDisp = document.getElementById('liveU');
+    const solutionBtn = document.getElementById('solutionBtn');
+    const solutionBox = document.getElementById('solutionBox');
+
+    let isPlaying = false;
+    let animationFrameId;
+    let lastTime = 0;
+    let currentAngle = 0; 
+    let omega = 0; 
+
+    function updatePhysicsUI(angleDeg) {
+        const absAngle = Math.abs(angleDeg); 
+        const rad = angleDeg * Math.PI / 180;
+        const h = L * (1 - Math.cos(rad));
+        const U = m * g * h;
+
+        slider.value = angleDeg;
+        sliderValDisp.innerText = absAngle.toFixed(0);
+        angleDisp.innerText = absAngle.toFixed(1);
+        heightDisp.innerText = h.toFixed(3);
+        uDisp.innerText = U.toFixed(1);
+
+        swingEl.style.transform = `rotate(${angleDeg}deg)`;
+        
+        const currentY_px = pivotY + L_px * Math.cos(rad);
+        hLine.style.top = `${currentY_px}px`;
+    }
+
+    function animate(timestamp) {
+        if (!lastTime) lastTime = timestamp;
+        let dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+
+        if (dt > 0.1) dt = 0.1; 
+
+        if (isPlaying) {
+            let theta_rad = currentAngle * Math.PI / 180;
+            let alpha = -(g / L) * Math.sin(theta_rad); 
+            omega += alpha * dt;
+            theta_rad += omega * dt;
+            currentAngle = theta_rad * 180 / Math.PI;
+
+            updatePhysicsUI(currentAngle);
+            animationFrameId = requestAnimationFrame(animate);
+        }
+    }
+
+    document.getElementById('playBtn').addEventListener('click', () => {
+        if (!isPlaying) {
+            if (Math.abs(currentAngle) < 0.1 && Math.abs(omega) < 0.1) {
+                currentAngle = 90;
+            }
+            isPlaying = true;
+            lastTime = performance.now();
+            animationFrameId = requestAnimationFrame(animate);
+        }
+    });
+
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+        isPlaying = false;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    });
+
+    slider.addEventListener('input', function() {
+        isPlaying = false;
+        omega = 0; 
+        currentAngle = parseFloat(this.value);
+        updatePhysicsUI(currentAngle);
+    });
+
+    window.setAngle = function(angle) {
+        isPlaying = false;
+        omega = 0; 
+        currentAngle = angle;
+        updatePhysicsUI(angleDeg = angle);
+    };
+
+    solutionBtn.addEventListener('click', () => {
+        if (solutionBox.style.display === 'none') {
+            solutionBox.style.display = 'block';
+            solutionBtn.innerHTML = '📖 លាក់ដំណោះស្រាយ';
+        } else {
+            solutionBox.style.display = 'none';
+            solutionBtn.innerHTML = '📖 ដំណោះស្រាយ';
+        }
+    });
+
+    updatePhysicsUI(0);
+</script>
+
+</body>
+</html>
