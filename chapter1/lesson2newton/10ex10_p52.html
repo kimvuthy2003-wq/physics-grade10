@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់ទី១០ ទំព័រ៥២ - ដុំឈើរអិលលើប្លង់ទេរ</title>
+    <!-- Google Fonts for Khmer -->
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Three.js & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: rgba(18, 26, 36, 0.92);
+            --border-green: #2ecc71;
+            --accent-blue: #3498db;
+            --accent-orange: #f39c12;
+            --accent-purple: #9b59b6;
+            --accent-red: #e74c3c;
+            --text-light: #ecf0f1;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Khmer OS Battambang', 'Kantumruy Pro', sans-serif;
+            background-color: #1e293b;
+            color: var(--text-light);
+        }
+
+        /* ផ្ទាំងបង្ហាញស្លាកវ៉ិចទ័រកម្លាំង 2D Overlay */
+        #labels-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            overflow: hidden;
+        }
+
+        .vector-label {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 13px;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        /* ប៊ូតុងបើកផ្ទាំងលំហាត់ពេលត្រូវបានលាក់ */
+        #showProblemBtn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 25;
+            background: #27ae60;
+            color: white;
+            border: 2px solid #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ១. ផ្ទាំងប្រធានលំហាត់ និងទិន្នន័យ (ខាងឆ្វេងផ្នែកខាងលើ) */
+        #info-panel {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 420px;
+            max-width: calc(100vw - 30px);
+            max-height: calc(100vh - 140px);
+            background: var(--bg-dark);
+            border: 2px solid var(--border-green);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            z-index: 20;
+            overflow-y: auto;
+            backdrop-filter: blur(8px);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        #info-panel.hidden {
+            transform: translateX(-110%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        .panel-header h3 {
+            margin: 0;
+            color: var(--border-green);
+            font-size: 16px;
+        }
+
+        .hide-btn {
+            background: rgba(231, 76, 60, 0.25);
+            color: #ff7675;
+            border: 1px solid #e74c3c;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .hide-btn:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .problem-text {
+            color: #e2e8f0;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--border-green);
+            padding-left: 10px;
+            font-size: 13.5px;
+            line-height: 1.65;
+            background: rgba(255,255,255,0.03);
+            padding: 8px 10px;
+            border-radius: 0 6px 6px 0;
+        }
+
+        /* ប្រអប់ទិន្នន័យជាក់ស្តែង */
+        .live-data-box {
+            background: rgba(0, 0, 0, 0.45);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13.5px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 12px;
+            margin-top: 6px;
+        }
+
+        .live-val {
+            color: #f1c40f;
+            font-weight: bold;
+        }
+
+        /* ប្រអប់ពន្យល់ជំហានគូសវ៉ិចទ័រកម្លាំង (សំណួរ ក) */
+        #force-step-box {
+            margin-top: 10px;
+            background: rgba(243, 156, 18, 0.12);
+            border: 1px solid #f39c12;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .step-badge {
+            display: inline-block;
+            background: #f39c12;
+            color: #000;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            font-size: 12px;
+            flex-wrap: wrap;
+            padding-top: 6px;
+            border-top: 1px dashed rgba(255,255,255,0.15);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        /* ២. ផ្ទាំងបង្ហាញដំណោះស្រាយលម្អិត (ខាងស្តាំ) */
+        #solution-panel {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 460px;
+            max-width: calc(100vw - 30px);
+            max-height: calc(100vh - 140px);
+            background: var(--bg-dark);
+            border: 2px solid var(--accent-blue);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.65);
+            z-index: 20;
+            overflow-y: auto;
+            backdrop-filter: blur(8px);
+            display: none;
+            line-height: 1.65;
+            font-size: 14px;
+        }
+
+        .sol-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .sol-tab {
+            flex: 1;
+            padding: 7px 6px;
+            font-size: 13px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .sol-tab.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: #fff;
+        }
+
+        .sol-content {
+            display: none;
+            background: rgba(0,0,0,0.35);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .sol-content.active {
+            display: block;
+        }
+
+        .formula-box {
+            background: rgba(46, 204, 113, 0.12);
+            border-left: 3px solid #2ecc71;
+            padding: 6px 10px;
+            margin: 6px 0;
+            font-family: 'Cambria Math', 'Times New Roman', serif, 'Khmer OS Battambang';
+            font-size: 15px;
+            color: #fff;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .ans-highlight {
+            background: rgba(241, 196, 15, 0.2);
+            border: 1px solid #f1c40f;
+            color: #f1c40f;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        /* ៣. របារបញ្ជាខាងក្រោម (Bottom Controls) - រៀបមិនឱ្យជាន់គ្នា */
+        #bottom-bar {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 96%;
+            max-width: 1050px;
+            pointer-events: none;
+        }
+
+        .instruction-banner {
+            background: rgba(15, 23, 42, 0.85);
+            color: #38bdf8;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            pointer-events: auto;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+
+        #controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+            pointer-events: auto;
+        }
+
+        button.ctrl-btn {
+            padding: 9px 15px;
+            font-size: 13.5px;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            transition: all 0.2s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        button.ctrl-btn:hover {
+            filter: brightness(1.12);
+            transform: translateY(-1px);
+        }
+
+        button.ctrl-btn:active {
+            transform: translateY(1px);
+        }
+
+        #startBtn { background-color: #27ae60; }
+        #resetBtn { background-color: #c0392b; }
+        #frictionBtn { background-color: #8e44ad; }
+        #stepForceBtn { background-color: #d35400; border: 1px solid #f39c12; }
+        #viewBtn { background-color: #2980b9; }
+        #solutionBtn { background-color: #16a085; border: 1px solid #1abc9c; }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: #2ecc71; border-radius: 4px; }
+
+        @media (max-width: 768px) {
+            #info-panel, #solution-panel {
+                width: calc(100vw - 24px);
+                left: 12px;
+                right: 12px;
+                max-height: 48vh;
+            }
+            button.ctrl-btn {
+                padding: 7px 11px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ស្លាកឈ្មោះវ៉ិចទ័រកម្លាំងលើអេក្រង់ (2D Floating Labels) -->
+    <div id="labels-container">
+        <div id="lbl-W" class="vector-label" style="background: rgba(231, 76, 60, 0.9); color: #fff; display: none;">
+            ទម្ងន់ P⃗ (ឬ W⃗ = mg⃗)
+        </div>
+        <div id="lbl-Wx" class="vector-label" style="background: rgba(243, 156, 18, 0.92); color: #000; display: none;">
+            Wₓ = mg sin(20°)
+        </div>
+        <div id="lbl-Wy" class="vector-label" style="background: rgba(241, 196, 15, 0.92); color: #000; display: none;">
+            Wᵧ = mg cos(20°)
+        </div>
+        <div id="lbl-N" class="vector-label" style="background: rgba(46, 204, 113, 0.92); color: #000; display: none;">
+            ប្រតិកម្មកែង N⃗
+        </div>
+        <div id="lbl-fk" class="vector-label" style="background: rgba(155, 89, 182, 0.92); color: #fff; display: none;">
+            កម្លាំងកកិត f⃗ₖ
+        </div>
+        <div id="lbl-angle" class="vector-label" style="background: rgba(52, 73, 94, 0.85); color: #38bdf8; border: 1px solid #38bdf8;">
+            θ = 20.0°
+        </div>
+    </div>
+
+    <!-- ប៊ូតុងសម្រាប់បើកផ្ទាំងលំហាត់ទី១០មកវិញ ពេលសិស្សចុចលាក់ -->
+    <button id="showProblemBtn" title="បង្ហាញផ្ទាំងលំហាត់ទី១០ឡើងវិញ">
+        📖 បង្ហាញប្រធានលំហាត់ទី១០
+    </button>
+
+    <!-- ១. ផ្ទាំងលំហាត់ទី១០ និងទិន្នន័យ (អាចចុចលាក់បាន) -->
+    <div id="info-panel">
+        <div class="panel-header">
+            <h3>📘 លំហាត់ទី១០ (ទំព័រ៥២)៖ ដុំឈើរអិលលើប្លង់ទេរ</h3>
+            <button class="hide-btn" id="hideProblemBtn" title="លាក់ផ្ទាំងនេះកុំឱ្យបាំងផ្ទៃពិសោធន៍">✕ លាក់ផ្ទាំងនេះ</button>
+        </div>
+
+        <div class="problem-text">
+            <b>១០.</b> ដុំឈើមួយរអិលដោយគ្មានកកិតចុះតាមប្លង់ទេរដែលមុំនៃប្លង់ទេរគឺ <b>20.0°</b> ។ ដុំឈើចាប់ផ្ដើមរអិលពីកំពូលនៃប្លង់ទេរដោយគ្មានល្បឿនដើម និងប្រវែងនៃប្លង់ទេរគឺ <b>1.0 m</b> ។<br>
+            <b>ក.</b> គូសដ្យាក្រាមនៃកម្លាំងលើដុំឈើនេះ ។<br>
+            <b>ខ.</b> កំណត់សំទុះ និងល្បឿននៃដុំឈើ កាលណាវាមកដល់បាតនៃប្លង់ទេរ ។<br>
+            <b>គ.</b> ធ្វើសំណួរ(ខ)ឡើងវិញ ក្នុងករណីគិតកកិត និងគេឱ្យមេគុណកកិត <b>μₖ = 0.2</b> ។
+        </div>
+
+        <div class="live-data-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <b>📊 ទិន្នន័យពិសោធន៍ជាក់ស្តែង (Live Data):</b>
+                <span id="txt-mode" style="background:#27ae60; color:#fff; padding:1px 8px; border-radius:4px; font-size:11.5px;">គ្មានកកិត (μₖ = 0)</span>
+            </div>
+            <div class="data-grid">
+                <div>⏱️ ពេលវេលា (t): <span class="live-val" id="txt-time">0.00 s</span></div>
+                <div>🚀 ល្បឿន (v): <span class="live-val" id="txt-vel">0.00 m/s</span></div>
+                <div>⚡ សំទុះ (a): <span class="live-val" id="txt-acc">3.35 m/s²</span></div>
+                <div>📏 ចម្ងាយចរ (d): <span class="live-val" id="txt-dist">0.00 m</span> / 1.00 m</div>
+            </div>
+
+            <!-- ប្រអប់បង្ហាញជំហានគូសវ៉ិចទ័រកម្លាំងម្តងមួយៗ -->
+            <div id="force-step-box">
+                <span class="step-badge" id="step-title">ជំហានទី ១/៤</span>
+                <div id="step-desc" style="color: #f8fafc; line-height: 1.5;"></div>
+                <div class="legend">
+                    <div class="legend-item"><span class="color-box" style="background:#e74c3c;"></span> ទម្ងន់ (W⃗)</div>
+                    <div class="legend-item"><span class="color-box" style="background:#f39c12;"></span> W⃗ₓ , W⃗ᵧ</div>
+                    <div class="legend-item"><span class="color-box" style="background:#2ecc71;"></span> ប្រតិកម្មកែង (N⃗)</div>
+                    <div class="legend-item"><span class="color-box" style="background:#9b59b6;"></span> កកិត (f⃗ₖ)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ២. ផ្ទាំងដំណោះស្រាយលម្អិត (ក, ខ, គ) -->
+    <div id="solution-panel">
+        <div class="panel-header">
+            <h3 style="color: #38bdf8;">📝 ដំណោះស្រាយលំហាត់ទី១០ ទំព័រ៥២</h3>
+            <button class="hide-btn" id="closeSolutionBtn">✕ បិទ</button>
+        </div>
+
+        <!-- Tabs សម្រាប់ជ្រើសរើសសំណួរ ក, ខ, គ -->
+        <div class="sol-tabs">
+            <button class="sol-tab active" data-tab="sol-a">សំណួរ ក (ដ្យាក្រាម)</button>
+            <button class="sol-tab" data-tab="sol-b">សំណួរ ខ (គ្មានកកិត)</button>
+            <button class="sol-tab" data-tab="sol-c">សំណួរ គ (មានកកិត)</button>
+        </div>
+
+        <!-- មាតិកា សំណួរ ក -->
+        <div class="sol-content active" id="sol-a">
+            <b style="color:#2ecc71;">ក. គូសដ្យាក្រាមនៃកម្លាំងលើដុំឈើ៖</b>
+            <p style="margin: 6px 0;">ដើម្បីគូសដ្យាក្រាមកម្លាំង (Free-Body Diagram) សូមចុចប៊ូតុង <b style="color:#f39c12;">«គូសវ៉ិចទ័រកម្លាំងម្តងមួយៗ»</b> នៅខាងក្រោម ដើម្បីមើលវ៉ិចទ័រចេញម្តងមួយៗ៖</p>
+            <ol style="padding-left: 20px; margin: 6px 0;">
+                <li><b style="color:#e74c3c;">ទម្ងន់ (W⃗ ឬ P⃗ = mg⃗)៖</b> មានចំណុចចាប់នៅទីប្រជុំទម្ងន់ដុំឈើ ទិសឈរ និងទិសដៅចុះក្រោម។</li>
+                <li><b style="color:#f39c12;">បំបែកទម្ងន់ W⃗ តាមអ័ក្ស Ox និង Oy៖</b>
+                    <br>• តាមអ័ក្ស Ox (ស្របប្លង់ទេរចុះក្រោម)៖ <b>Wₓ = mg sin θ</b>
+                    <br>• តាមអ័ក្ស Oy (កែងនឹងប្លង់ទេរ)៖ <b>Wᵧ = mg cos θ</b>
+                </li>
+                <li><b style="color:#2ecc71;">កម្លាំងប្រតិកម្មកែង (N⃗)៖</b> មានទិសកែងនឹងផ្ទៃប្លង់ទេរ និងទិសដៅឡើងលើ (N = Wᵧ = mg cos θ)។</li>
+                <li><b style="color:#c084fc;">កម្លាំងកកិតស៊ីនេទិច (f⃗ₖ)៖</b> <i>(សម្រាប់សំណួរ គ)</i> មានទិសស្របនឹងប្លង់ទេរ និងទិសដៅផ្ទុយពីចលនា (ឡើងលើ)។</li>
+            </ol>
+        </div>
+
+        <!-- មាតិកា សំណួរ ខ -->
+        <div class="sol-content" id="sol-b">
+            <b style="color:#2ecc71;">ខ. កំណត់សំទុះ (a) និងល្បឿន (v) នៅបាតប្លង់ទេរ (គ្មានកកិត)៖</b>
+            <p style="margin: 4px 0;">បម្រាប់៖ មុំ θ = 20.0° , ល្បឿនដើម v₀ = 0 , ប្រវែងប្លង់ទេរ d = 1.0 m , g = 9.80 m/s²</p>
+            
+            <b>១. រកសំទុះនៃដុំឈើ (a)៖</b><br>
+            តាមច្បាប់ទី២ញូតុន តាមអ័ក្ស Ox (ស្របប្លង់ទេរ)៖
+            <div class="formula-box">
+                ∑Fₓ = m·a <br>
+                mg·sin θ = m·a  ⇒  a = g·sin θ
+            </div>
+            ដោយជំនួសលេខ៖
+            <div class="formula-box">
+                a = 9.80 × sin(20.0°) = 9.80 × 0.3420 ≈ <b>3.35 m/s²</b>
+            </div>
+
+            <b>២. រកល្បឿនដុំឈើពេលដល់បាតប្លង់ទេរ (v)៖</b><br>
+            តាមរូបមន្តចលនាត្រង់ប្រែប្រួលស្មើ (គ្មានពេលវេលា)៖
+            <div class="formula-box">
+                v² - v₀² = 2·a·d  (ដោយ v₀ = 0)<br>
+                v = √(2·a·d) = √(2 × 3.35 × 1.0) = √6.70
+            </div>
+            <div class="ans-highlight">ដូចនេះ a = 3.35 m/s² និង v = 2.59 m/s</div>
+        </div>
+
+        <!-- មាតិកា សំណួរ គ -->
+        <div class="sol-content" id="sol-c">
+            <b style="color:#2ecc71;">គ. ករណីគិតកកិត (មេគុណកកិតស៊ីនេទិច μₖ = 0.2)៖</b>
+            
+            <b>១. រកសំទុះថ្មីនៃដុំឈើ (a')៖</b><br>
+            តាមអ័ក្ស Oy៖ N - mg·cos θ = 0 ⇒ <b>N = mg·cos θ</b><br>
+            កម្លាំងកកិតស៊ីនេទិច៖ <b>fₖ = μₖ·N = μₖ·mg·cos θ</b><br>
+            តាមច្បាប់ទី២ញូតុនលើអ័ក្ស Ox៖
+            <div class="formula-box">
+                ∑Fₓ = m·a' <br>
+                mg·sin θ - fₖ = m·a' <br>
+                mg·sin θ - μₖ·mg·cos θ = m·a' <br>
+                a' = g·(sin θ - μₖ·cos θ)
+            </div>
+            ដោយជំនួសលេខ៖
+            <div class="formula-box">
+                a' = 9.80 × [sin(20.0°) - 0.2 × cos(20.0°)] <br>
+                a' = 9.80 × [0.3420 - 0.2 × 0.9397] <br>
+                a' = 9.80 × 0.1541 ≈ <b>1.51 m/s²</b>
+            </div>
+
+            <b>២. រកល្បឿននៅបាតប្លង់ទេរ (v')៖</b>
+            <div class="formula-box">
+                v' = √(2·a'·d) = √(2 × 1.51 × 1.0) = √3.02
+            </div>
+            <div class="ans-highlight">ដូចនេះ a' = 1.51 m/s² និង v' = 1.74 m/s</div>
+        </div>
+    </div>
+
+    <!-- ៣. របារបញ្ជាខាងក្រោម (Bottom Controls) -->
+    <div id="bottom-bar">
+        <div class="instruction-banner" id="instruction-txt">
+            💡 <b>របៀប 2D៖</b> ចុចប៊ូតុង «គូសវ៉ិចទ័រកម្លាំងម្តងមួយៗ» ដើម្បីឱ្យសិស្សសង្កេត និងគូសដ្យាក្រាមកម្លាំងតាមលំដាប់លំដោយ
+        </div>
+        <div id="controls">
+            <button class="ctrl-btn" id="startBtn">▶ ចាប់ផ្តើមរអិល</button>
+            <button class="ctrl-btn" id="resetBtn">🔄 កំណត់ឡើងវិញ</button>
+            <button class="ctrl-btn" id="frictionBtn">🟣 របៀប៖ គ្មានកកិត</button>
+            <button class="ctrl-btn" id="stepForceBtn">✏️ គូសវ៉ិចទ័រកម្លាំងម្តងមួយៗ (0/4)</button>
+            <button class="ctrl-btn" id="viewBtn">📐 ទិដ្ឋភាព៖ 2D (ចំហៀង)</button>
+            <button class="ctrl-btn" id="solutionBtn">📝 បង្ហាញដំណោះស្រាយ</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // ១. ការរៀបចំឆាក Three.js (Scene & Cameras)
+        // ==========================================
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1e293b);
+
+        const aspect = window.innerWidth / window.innerHeight;
+
+        // 3D Camera
+        const camera3D = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
+        camera3D.position.set(6, 9, 24);
+
+        // 2D Orthographic Camera (រៀបចំឱ្យប្លង់ទេរនៅចំកណ្តាលអេក្រង់ស្អាត)
+        const viewSize = 18;
+        const camera2D = new THREE.OrthographicCamera(
+            -viewSize * aspect / 2, viewSize * aspect / 2,
+            viewSize / 2, -viewSize / 2,
+            0.1, 1000
+        );
+        camera2D.position.set(6.5, 2.5, 20);
+        camera2D.lookAt(6.5, 2.5, 0);
+
+        let is2DMode = true;
+        let activeCamera = camera2D;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera3D, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enabled = false;
+        controls.target.set(6.5, 2.5, 0);
+
+        // ភ្លើងបំភ្លឺ (Lights)
+        scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+        dirLight.position.set(12, 22, 16);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // ==========================================
+        // ២. ថេររូបវិទ្យា និងការសាងសង់ប្លង់ទេរ + ដុំឈើ
+        // ==========================================
+        const theta_deg = 20.0;
+        const theta = theta_deg * Math.PI / 180;
+        const g = 9.80;
+        const mu_k = 0.2;
+        const realLength = 1.0; // 1.0 m
+
+        // មាត្រដ្ឋានបង្ហាញលើអេក្រង់ (1m = 14 units)
+        const scale = 14.0;
+        const visLength = realLength * scale;
+        const wedgeHeight = visLength * Math.sin(theta);
+        const wedgeBase = visLength * Math.cos(theta);
+
+        // ប្លង់ទេរ (Wedge)
+        const wedgeShape = new THREE.Shape();
+        wedgeShape.moveTo(0, wedgeHeight);
+        wedgeShape.lineTo(0, 0);
+        wedgeShape.lineTo(wedgeBase, 0);
+        wedgeShape.lineTo(0, wedgeHeight);
+
+        const wedgeGeo = new THREE.ExtrudeGeometry(wedgeShape, { depth: 3.2, bevelEnabled: false });
+        const wedgeMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.7 });
+        const wedge = new THREE.Mesh(wedgeGeo, wedgeMat);
+        wedge.position.z = -1.6;
+        wedge.receiveShadow = true;
+        scene.add(wedge);
+
+        // បន្ទាត់គែមប្លង់ទេរឱ្យច្បាស់ក្នុង 2D
+        const edgesGeo = new THREE.EdgesGeometry(wedgeGeo);
+        const edgesMat = new THREE.LineBasicMaterial({ color: 0x94a3b8 });
+        const wedgeEdges = new THREE.LineSegments(edgesGeo, edgesMat);
+        wedge.add(wedgeEdges);
+
+        // ធ្នូបង្ហាញមុំ 20.0° នៅបាតប្លង់ទេរ
+        const arcCurve = new THREE.EllipseCurve(
+            wedgeBase, 0,
+            2.4, 2.4,
+            Math.PI - theta, Math.PI,
+            false, 0
+        );
+        const arcPoints = arcCurve.getPoints(24).map(p => new THREE.Vector3(p.x, p.y, 1.65));
+        const arcGeo = new THREE.BufferGeometry().setFromPoints(arcPoints);
+        const arcLine = new THREE.Line(arcGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2 }));
+        scene.add(arcLine);
+
+        // ដុំឈើ (Block)
+        const blockSize = 1.5;
+        const blockGeo = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
+        const blockMat = new THREE.MeshStandardMaterial({ color: 0xe67e22, roughness: 0.45 });
+        const block = new THREE.Mesh(blockGeo, blockMat);
+        block.castShadow = true;
+        scene.add(block);
+
+        const blockEdges = new THREE.LineSegments(
+            new THREE.EdgesGeometry(blockGeo),
+            new THREE.LineBasicMaterial({ color: 0xffffff })
+        );
+        block.add(blockEdges);
+
+        // ==========================================
+        // ៣. ការបង្កើតវ៉ិចទ័រកម្លាំងម្តងមួយៗ (សំណួរ ក)
+        // ==========================================
+        const forceGroup = new THREE.Group();
+        scene.add(forceGroup);
+
+        function setAlwaysOnTop(obj) {
+            obj.traverse(child => {
+                if (child.material) {
+                    child.material.depthTest = false;
+                    child.renderOrder = 999;
+                }
+            });
+        }
+
+        // ប្រវែងវ៉ិចទ័រតាមសមាមាត្ររូបវិទ្យា
+        const lenW = 4.2;
+        const lenWx = lenW * Math.sin(theta); // ~1.44
+        const lenWy = lenW * Math.cos(theta); // ~3.95
+        const lenN = lenWy;
+        const lenFk = 1.6;
+
+        // ទិសដៅឯកតា
+        const dirDown = new THREE.Vector3(0, -1, 0);
+        const dirAlongDown = new THREE.Vector3(Math.cos(theta), -Math.sin(theta), 0);
+        const dirAlongUp = new THREE.Vector3(-Math.cos(theta), Math.sin(theta), 0);
+        const dirPerpDown = new THREE.Vector3(-Math.sin(theta), -Math.cos(theta), 0);
+        const dirPerpUp = new THREE.Vector3(Math.sin(theta), Math.cos(theta), 0);
+
+        // 1. វ៉ិចទ័រទម្ងន់ W
+        const arrowW = new THREE.ArrowHelper(dirDown, new THREE.Vector3(), lenW, 0xe74c3c, 0.55, 0.32);
+
+        // 2. វ៉ិចទ័រសមាសភាគ Wx និង Wy + បន្ទាត់ដាច់ៗចំណោលកែង
+        const arrowWx = new THREE.ArrowHelper(dirAlongDown, new THREE.Vector3(), lenWx, 0xf39c12, 0.45, 0.26);
+        const arrowWy = new THREE.ArrowHelper(dirPerpDown, new THREE.Vector3(), lenWy, 0xf1c40f, 0.5, 0.28);
+
+        const projMat = new THREE.LineDashedMaterial({ color: 0xfef08a, dashSize: 0.2, gapSize: 0.12, depthTest: false });
+        const projGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()]);
+        const projLines = new THREE.Line(projGeo, projMat);
+        projLines.renderOrder = 998;
+
+        // អ័ក្សកូអរដោនេ Ox និង Oy (បន្ទាត់ដាច់ៗស្រាលៗ)
+        const axesGroup = new THREE.Group();
+        const axisMat = new THREE.LineDashedMaterial({ color: 0x94a3b8, dashSize: 0.25, gapSize: 0.15, depthTest: false });
+        const oxGeo = new THREE.BufferGeometry().setFromPoints([
+            dirAlongUp.clone().multiplyScalar(2.5),
+            dirAlongDown.clone().multiplyScalar(3.5)
+        ]);
+        const oyGeo = new THREE.BufferGeometry().setFromPoints([
+            dirPerpDown.clone().multiplyScalar(4.6),
+            dirPerpUp.clone().multiplyScalar(4.6)
+        ]);
+        const oxLine = new THREE.Line(oxGeo, axisMat);
+        const oyLine = new THREE.Line(oyGeo, axisMat);
+        oxLine.computeLineDistances();
+        oyLine.computeLineDistances();
+        axesGroup.add(oxLine, oyLine);
+
+        // 3. វ៉ិចទ័រប្រតិកម្មកែង N
+        const arrowN = new THREE.ArrowHelper(dirPerpUp, new THREE.Vector3(), lenN, 0x2ecc71, 0.55, 0.32);
+
+        // 4. វ៉ិចទ័រកម្លាំងកកិត fk
+        const arrowFric = new THREE.ArrowHelper(dirAlongUp, new THREE.Vector3(), lenFk, 0x9b59b6, 0.48, 0.28);
+
+        // ចំណុចទីប្រជុំទម្ងន់ពណ៌សនៅចំកណ្តាលដុំឈើ
+        const centerDot = new THREE.Mesh(
+            new THREE.SphereGeometry(0.14, 16, 16),
+            new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: false })
+        );
+        centerDot.renderOrder = 1000;
+
+        setAlwaysOnTop(arrowW);
+        setAlwaysOnTop(arrowWx);
+        setAlwaysOnTop(arrowWy);
+        setAlwaysOnTop(arrowN);
+        setAlwaysOnTop(arrowFric);
+
+        forceGroup.add(axesGroup, projLines, arrowW, arrowWx, arrowWy, arrowN, arrowFric, centerDot);
+
+        // ស្ថានភាពជំហាននៃការគូសវ៉ិចទ័រកម្លាំង (0 ដល់ 4)
+        let forceStep = 0;
+
+        const stepDescriptions = [
+            "",
+            "<b>ជំហានទី ១៖ គូសវ៉ិចទ័រទម្ងន់ (W⃗ ឬ P⃗ = mg⃗)</b><br>មានចំណុចចាប់នៅចំទីប្រជុំទម្ងន់នៃដុំឈើ ទិសឈរ និងទិសដៅចុះក្រោមជានិច្ច។",
+            "<b>ជំហានទី ២៖ បំបែកទម្ងន់ W⃗ តាមអ័ក្ស Ox និង Oy</b><br>• <b>Wₓ = mg sin(20°)</b> ស្របនឹងប្លង់ទេរ (ទាញដុំឈើឱ្យរអិលចុះ)<br>• <b>Wᵧ = mg cos(20°)</b> កែងនឹងផ្ទៃប្លង់ទេរ",
+            "<b>ជំហានទី ៣៖ គូសវ៉ិចទ័រប្រតិកម្មកែង (N⃗)</b><br>ផ្ទៃប្លង់ទេរទប់ដុំឈើវិញដោយកម្លាំងកែង <b>N⃗</b> ទិសដៅឡើងលើ មានតម្លៃស្មើនឹង Wᵧ (N = mg cos 20°)។",
+            "<b>ជំហានទី ៤៖ គូសវ៉ិចទ័រកម្លាំងកកិត (f⃗ₖ) និងដ្យាក្រាមពេញលេញ</b><br>• ក្នុងករណីគ្មានកកិត (សំណួរ ខ)៖ មានតែកម្លាំង <b>W⃗</b> និង <b>N⃗</b> ប៉ុណ្ណោះ។<br>• ក្នុងករណីមានកកិត (សំណួរ គ)៖ មានបន្ថែមកម្លាំងកកិត <b>f⃗ₖ</b> ទិសដៅឡើងលើផ្ទុយពីចលនា។"
+        ];
+
+        function updateForceVisibility() {
+            const stepBox = document.getElementById('force-step-box');
+            const stepTitle = document.getElementById('step-title');
+            const stepDesc = document.getElementById('step-desc');
+            const stepBtn = document.getElementById('stepForceBtn');
+
+            stepBtn.innerText = `✏️ គូសវ៉ិចទ័រកម្លាំងម្តងមួយៗ (${forceStep}/4)`;
+
+            if (forceStep === 0) {
+                forceGroup.visible = false;
+                stepBox.style.display = 'none';
+            } else {
+                forceGroup.visible = true;
+                stepBox.style.display = 'block';
+                stepTitle.innerText = `សំណួរ ក៖ ជំហានទី ${forceStep}/4`;
+                stepDesc.innerHTML = stepDescriptions[forceStep];
+
+                centerDot.visible = true;
+                arrowW.visible = (forceStep >= 1);
+                axesGroup.visible = (forceStep >= 2);
+                arrowWx.visible = (forceStep >= 2);
+                arrowWy.visible = (forceStep >= 2);
+                projLines.visible = (forceStep >= 2);
+                arrowN.visible = (forceStep >= 3);
+                arrowFric.visible = (forceStep >= 4);
+            }
+            updateFloatingLabels();
+        }
+
+        // ==========================================
+        // ៤. ការគណនាចលនា និងធ្វើបច្ចុប្បន្នភាពទីតាំង
+        // ==========================================
+        let time = 0;
+        let s_real = 0;
+        let v_real = 0;
+
+        const a_no_fric = g * Math.sin(theta); // ~3.3518 m/s²
+        const a_fric = g * (Math.sin(theta) - mu_k * Math.cos(theta)); // ~1.5100 m/s²
+
+        let hasFriction = false;
+        let current_a = a_no_fric;
+        let isRunning = false;
+        const clock = new THREE.Clock();
+
+        // បំប្លែងកូអរដោនេ 3D ទៅជាកូអរដោនេ 2D លើអេក្រង់សម្រាប់ដាក់អក្សរវ៉ិចទ័រ
+        function toScreenPosition(vec3) {
+            const v = vec3.clone().project(activeCamera);
+            const x = (v.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-(v.y * 0.5) + 0.5) * window.innerHeight;
+            return { x, y };
+        }
+
+        function setLabelPos(id, worldPos, visible) {
+            const el = document.getElementById(id);
+            if (!visible) {
+                el.style.display = 'none';
+                return;
+            }
+            const pos = toScreenPosition(worldPos);
+            el.style.display = 'block';
+            el.style.left = `${pos.x}px`;
+            el.style.top = `${pos.y}px`;
+        }
+
+        function updateFloatingLabels() {
+            const cPos = new THREE.Vector3(block.position.x, block.position.y, 1.65);
+
+            // ស្លាកមុំ 20°
+            const angleWorldPos = new THREE.Vector3(wedgeBase - 3.3, 0.55, 1.65);
+            setLabelPos('lbl-angle', angleWorldPos, true);
+
+            if (forceStep === 0) {
+                setLabelPos('lbl-W', cPos, false);
+                setLabelPos('lbl-Wx', cPos, false);
+                setLabelPos('lbl-Wy', cPos, false);
+                setLabelPos('lbl-N', cPos, false);
+                setLabelPos('lbl-fk', cPos, false);
+                return;
+            }
+
+            // ទីតាំងចុងព្រួញនីមួយៗ
+            const tipW = cPos.clone().add(dirDown.clone().multiplyScalar(lenW + 0.55));
+            const tipWx = cPos.clone().add(dirAlongDown.clone().multiplyScalar(lenWx + 1.1));
+            const tipWy = cPos.clone().add(dirPerpDown.clone().multiplyScalar(lenWy + 0.65));
+            const tipN = cPos.clone().add(dirPerpUp.clone().multiplyScalar(lenN + 0.6));
+
+            const surfacePos = cPos.clone().add(dirPerpDown.clone().multiplyScalar(blockSize / 2));
+            const tipFk = surfacePos.clone().add(dirAlongUp.clone().multiplyScalar(lenFk + 0.9));
+
+            setLabelPos('lbl-W', tipW, forceStep >= 1);
+            setLabelPos('lbl-Wx', tipWx, forceStep >= 2);
+            setLabelPos('lbl-Wy', tipWy, forceStep >= 2);
+            setLabelPos('lbl-N', tipN, forceStep >= 3);
+            setLabelPos('lbl-fk', tipFk, forceStep >= 4);
+        }
+
+        function updatePositions() {
+            const s_vis = s_real * scale;
+            const bX = s_vis * Math.cos(theta);
+            const bY = wedgeHeight - s_vis * Math.sin(theta);
+
+            // ដាក់ដុំឈើឱ្យស្ថិតនៅលើផ្ទៃប្លង់ទេរ
+            const offsetX = (blockSize / 2) * Math.sin(theta);
+            const offsetY = (blockSize / 2) * Math.cos(theta);
+
+            block.position.set(bX + offsetX, bY + offsetY, 0);
+            block.rotation.z = -theta;
+
+            // កូអរដោនេចំណុចកណ្តាលដុំឈើសម្រាប់គូសវ៉ិចទ័រ
+            const forcePos = new THREE.Vector3(block.position.x, block.position.y, 1.65);
+
+            centerDot.position.copy(forcePos);
+            axesGroup.position.copy(forcePos);
+            arrowW.position.copy(forcePos);
+            arrowWx.position.copy(forcePos);
+            arrowWy.position.copy(forcePos);
+            arrowN.position.copy(forcePos);
+
+            // បន្ទាត់ដាច់ៗភ្ជាប់ពីចុង Wx -> ចុង W -> ចុង Wy
+            const pWx = forcePos.clone().add(dirAlongDown.clone().multiplyScalar(lenWx));
+            const pW = forcePos.clone().add(dirDown.clone().multiplyScalar(lenW));
+            const pWy = forcePos.clone().add(dirPerpDown.clone().multiplyScalar(lenWy));
+            projLines.geometry.setFromPoints([pWx, pW, pWy]);
+            projLines.computeLineDistances();
+
+            // កម្លាំងកកិតនៅលើផ្ទៃប៉ះរវាងដុំឈើ និងប្លង់ទេរ
+            const fricOrigin = forcePos.clone().add(dirPerpDown.clone().multiplyScalar(blockSize / 2));
+            arrowFric.position.copy(fricOrigin);
+
+            // ធ្វើបច្ចុប្បន្នភាពទិន្នន័យលើផ្ទាំង
+            document.getElementById('txt-time').innerText = time.toFixed(2) + " s";
+            document.getElementById('txt-vel').innerText = v_real.toFixed(2) + " m/s";
+            document.getElementById('txt-dist').innerText = s_real.toFixed(2) + " m";
+
+            updateFloatingLabels();
+        }
+
+        // ==========================================
+        // ៥. ការភ្ជាប់ព្រឹត្តិការណ៍ប៊ូតុងបញ្ជា (Event Listeners)
+        // ==========================================
+        // ប៊ូតុងលាក់ និងបង្ហាញផ្ទាំងលំហាត់ទី១០
+        const infoPanel = document.getElementById('info-panel');
+        const showProblemBtn = document.getElementById('showProblemBtn');
+        const hideProblemBtn = document.getElementById('hideProblemBtn');
+
+        hideProblemBtn.addEventListener('click', () => {
+            infoPanel.classList.add('hidden');
+            showProblemBtn.style.display = 'flex';
+        });
+
+        showProblemBtn.addEventListener('click', () => {
+            infoPanel.classList.remove('hidden');
+            showProblemBtn.style.display = 'none';
+        });
+
+        // ប៊ូតុងបង្ហាញ/លាក់ផ្ទាំងដំណោះស្រាយ
+        const solutionPanel = document.getElementById('solution-panel');
+        const solutionBtn = document.getElementById('solutionBtn');
+        const closeSolutionBtn = document.getElementById('closeSolutionBtn');
+
+        function toggleSolution() {
+            const isHidden = (solutionPanel.style.display === 'none' || solutionPanel.style.display === '');
+            solutionPanel.style.display = isHidden ? 'block' : 'none';
+            solutionBtn.innerText = isHidden ? '✕ លាក់ដំណោះស្រាយ' : '📝 បង្ហាញដំណោះស្រាយ';
+        }
+
+        solutionBtn.addEventListener('click', toggleSolution);
+        closeSolutionBtn.addEventListener('click', toggleSolution);
+
+        // ផ្ទាំង Tabs ក្នុងដំណោះស្រាយ (ក, ខ, គ)
+        document.querySelectorAll('.sol-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.sol-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.sol-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ប៊ូតុងចាប់ផ្តើមរអិល និងកំណត់ឡើងវិញ
+        const startBtn = document.getElementById('startBtn');
+        startBtn.addEventListener('click', () => {
+            if (s_real >= realLength) {
+                time = 0; s_real = 0; v_real = 0;
+            }
+            isRunning = !isRunning;
+            if (isRunning) {
+                clock.getDelta();
+                startBtn.innerText = "⏸ ផ្អាក";
+                startBtn.style.backgroundColor = "#e67e22";
+            } else {
+                startBtn.innerText = "▶ បន្តរអិល";
+                startBtn.style.backgroundColor = "#27ae60";
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            isRunning = false;
+            time = 0; s_real = 0; v_real = 0;
+            startBtn.innerText = "▶ ចាប់ផ្តើមរអិល";
+            startBtn.style.backgroundColor = "#27ae60";
+            updatePositions();
+        });
+
+        // ប៊ូតុងប្តូររបៀបកកិត (គ្មានកកិត / មានកកិត μk = 0.2)
+        const fricBtn = document.getElementById('frictionBtn');
+        const txtMode = document.getElementById('txt-mode');
+        fricBtn.addEventListener('click', () => {
+            hasFriction = !hasFriction;
+            current_a = hasFriction ? a_fric : a_no_fric;
+
+            fricBtn.innerText = hasFriction ? "🟣 របៀប៖ មានកកិត (μₖ = 0.2)" : "🟣 របៀប៖ គ្មានកកិត";
+            document.getElementById('txt-acc').innerText = current_a.toFixed(2) + " m/s²";
+
+            txtMode.innerText = hasFriction ? "មានកកិត (μₖ = 0.2)" : "គ្មានកកិត (μₖ = 0)";
+            txtMode.style.background = hasFriction ? "#8e44ad" : "#27ae60";
+
+            document.getElementById('resetBtn').click();
+        });
+
+        // ប៊ូតុងគូសវ៉ិចទ័រកម្លាំងម្តងមួយៗ (សំណួរ ក)
+        document.getElementById('stepForceBtn').addEventListener('click', () => {
+            forceStep = (forceStep + 1) % 5; // វិលជុំ 0 -> 1 -> 2 -> 3 -> 4 -> 0
+            // បើផ្ទាំងលំហាត់កំពុងលាក់ ហើយសិស្សចុចមើលជំហាន ឱ្យបង្ហាញផ្ទាំងពន្យល់មកវិញ
+            if (forceStep > 0 && infoPanel.classList.contains('hidden')) {
+                showProblemBtn.click();
+            }
+            updateForceVisibility();
+        });
+
+        // ប៊ូតុងប្តូរទិដ្ឋភាព 2D / 3D
+        const viewBtn = document.getElementById('viewBtn');
+        const instructionTxt = document.getElementById('instruction-txt');
+        viewBtn.addEventListener('click', () => {
+            is2DMode = !is2DMode;
+            if (is2DMode) {
+                activeCamera = camera2D;
+                controls.enabled = false;
+                viewBtn.innerText = "📐 ទិដ្ឋភាព៖ 2D (ចំហៀង)";
+                viewBtn.style.backgroundColor = "#2980b9";
+                instructionTxt.innerHTML = "💡 <b>របៀប 2D៖</b> ចុចប៊ូតុង «គូសវ៉ិចទ័រកម្លាំងម្តងមួយៗ» ដើម្បីឱ្យសិស្សសង្កេត និងគូសដ្យាក្រាមកម្លាំងតាមលំដាប់លំដោយ";
+            } else {
+                activeCamera = camera3D;
+                controls.enabled = true;
+                viewBtn.innerText = "🧊 ទិដ្ឋភាព៖ 3D (បង្វិលបាន)";
+                viewBtn.style.backgroundColor = "#0284c7";
+                instructionTxt.innerHTML = "💡 <b>របៀប 3D៖</b> ចុច Mouse ឆ្វេងអូសដើម្បីបង្វិល | ចុច Mouse ស្តាំអូសដើម្បីរំកិល | ស្ក្រូលដើម្បីពង្រីក/បង្រួម";
+            }
+            updateFloatingLabels();
+        });
+
+        // ==========================================
+        // ៦. Animation Loop & Resize
+        // ==========================================
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (isRunning) {
+                const dt = clock.getDelta();
+                time += dt;
+                v_real = current_a * time;
+                s_real = 0.5 * current_a * time * time;
+
+                if (s_real >= realLength) {
+                    s_real = realLength;
+                    v_real = Math.sqrt(2 * current_a * realLength);
+                    time = v_real / current_a;
+                    isRunning = false;
+                    startBtn.innerText = "▶ ចាប់ផ្តើមម្តងទៀត";
+                    startBtn.style.backgroundColor = "#27ae60";
+                }
+                updatePositions();
+            }
+
+            if (!is2DMode) {
+                controls.update();
+                updateFloatingLabels();
+            }
+
+            renderer.render(scene, activeCamera);
+        }
+
+        window.addEventListener('resize', () => {
+            const aspect = window.innerWidth / window.innerHeight;
+            camera3D.aspect = aspect;
+            camera3D.updateProjectionMatrix();
+
+            camera2D.left = -viewSize * aspect / 2;
+            camera2D.right = viewSize * aspect / 2;
+            camera2D.top = viewSize / 2;
+            camera2D.bottom = -viewSize / 2;
+            camera2D.updateProjectionMatrix();
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            updateFloatingLabels();
+        });
+
+        // ចាប់ផ្តើមដំណើរការដំបូង
+        window.onload = function () {
+            updatePositions();
+            updateForceVisibility();
+            animate();
+        };
+    </script>
+</body>
+</html>
