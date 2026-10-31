@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <title>មេរៀនទី២លំហាត់លេខ១៣</title>
+    <style>
+        body { font-family: 'Khmer OS Battambang', sans-serif; text-align: center; background-color: #f4f7fb; color: #333; margin: 0; padding: 20px; }
+        .problem-statement { background: #fff; padding: 20px 30px; margin: 0 auto 20px auto; max-width: 1150px; border-left: 5px solid #007bff; border-radius: 8px; text-align: left; box-shadow: 0 2px 6px rgba(0,0,0,0.08); line-height: 1.8; font-size: 16px;}
+        
+        .container { display: flex; justify-content: center; gap: 20px; max-width: 1210px; margin: 0 auto; flex-wrap: wrap; align-items: flex-start; }
+        
+        .panel { padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); text-align: left; width: 360px; }
+        .control-group { margin: 15px 0; display: flex; align-items: center; justify-content: space-between; }
+        input[type=range] { width: 140px; cursor: pointer; }
+        span.val-display { font-weight: bold; color: #007bff; width: 80px; text-align: right; }
+        .auto-text { color: #d9534f; font-weight: bold; font-size: 15px; }
+
+        .result-box { margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #28a745; }
+        .result-box h4 { margin: 0 0 10px 0; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px;}
+        .result-box p { margin: 6px 0; font-size: 15px; }
+        .bold-blue { color: #0275d8; font-weight: bold; }
+        .bold-green { color: #1e7e34; font-weight: bold; }
+
+        .btn-toggle {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Khmer OS Battambang', sans-serif;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 2px 5px rgba(0,123,255,0.3);
+        }
+        .btn-toggle:hover { background-color: #0056b3; }
+        .btn-toggle:active { transform: scale(0.99); }
+
+        .solution-section {
+            display: none;
+            max-width: 1150px;
+            margin: 20px auto 0 auto;
+            background: #ffffff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: left;
+            border-top: 4px solid #007bff;
+            line-height: 1.9;
+        }
+        .solution-section.show { display: block; }
+        .solution-section h3 { margin-top: 0; color: #007bff; border-bottom: 2px solid #e9ecef; padding-bottom: 8px; }
+        .step-box { background: #f8fbff; border: 1px solid #d0e3ff; border-radius: 6px; padding: 15px 20px; margin-bottom: 15px; }
+        .step-title { font-weight: bold; color: #0056b3; font-size: 16px; margin-bottom: 8px; display: block; }
+        .math-expr { font-family: 'Cambria Math', 'Times New Roman', serif; font-size: 17px; background: #fff; padding: 4px 10px; border-radius: 4px; border: 1px solid #e2e8f0; display: inline-block; margin: 4px 0; }
+        .highlight-ans { background: #d4edda; color: #155724; font-weight: bold; padding: 6px 14px; border-radius: 5px; border-left: 4px solid #28a745; display: inline-block; margin-top: 6px; }
+
+        canvas { background-color: #ffffff; border: 1px solid #dce1e7; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.06); }
+    </style>
+</head>
+<body>
+
+    <h2 style="color: #0056b3; margin-bottom: 15px;">វ៉ិចទ័រកម្លាំងលើតំណឹងខ្សែ និងដំណោះស្រាយលម្អិត</h2>
+    
+    <div class="problem-statement">
+        ១៣. ចម្ងាយរវាងបង្គោលខ្សែទូរសព្ទគឺ 50.0 m ។ ពេលបក្សីមានម៉ាស <span id="text-m" style="color:red; font-weight:bold;">1.00</span> kg ទំលើខ្សែត្រង់<span id="text-pos" style="color:blue; font-weight:bold;">ពាក់កណ្តាល</span> ខ្សែយារធ្លាក់ចុះក្រោម <span id="text-h" style="color:#d9534f; font-weight:bold;">0.200</span> m ។<br>
+        ក. គូសដ្យាក្រាមនៃកម្លាំងលើបក្សី ។<br>
+        ខ. គណនាតំណឹងខ្សែដែលបក្សីទំលើ ។ គេមិនគិតម៉ាសរបស់ខ្សែ ។ <span style="font-size: 14px; color: #666;">(យក g = 9.8 m/s<sup>2</sup>)</span>
+    </div>
+    
+    <div class="container">
+        <div class="panel">
+            <h3 style="margin-top:0; color:#0056b3; border-bottom: 1px solid #ccc; padding-bottom: 10px;">កំណត់ទិន្នន័យ</h3>
+            <div class="control-group">
+                <label>ម៉ាសបក្សី m (kg): </label>
+                <input type="range" id="mass" min="0.1" max="5.0" step="0.1" value="1.0" oninput="drawSimulation()">
+                <span class="val-display" id="mass-val">1.00 kg</span>
+            </div>
+            <div class="control-group">
+                <label>ទីតាំងបក្សី x (m): </label>
+                <input type="range" id="position" min="5" max="45" step="0.5" value="25" oninput="drawSimulation()">
+                <span class="val-display" id="pos-val">25.0 m</span>
+            </div>
+            <div class="control-group">
+                <label>ជម្រៅខ្សែយារ h: </label>
+                <span class="auto-text" id="sag-val">0.200 m</span>
+            </div>
+
+            <div class="result-box">
+                <h4>សង្ខេបលទ្ធផលគណនា៖</h4>
+                <p>• ទម្ងន់បក្សី៖ <strong>P = <span id="res-w">9.80</span> N</strong></p>
+                
+                <p class="bold-blue" style="margin-top:10px;">• តំណឹងខ្សែឆ្វេង៖ T<sub>1</sub> = <span id="res-t1">0.00</span> N</p>
+                <p style="padding-left: 15px; font-size: 13.5px; color:#444;">
+                    តាមទិសដេក T<sub>1x</sub> = <span id="res-t1x">0.00</span> N<br>
+                    តាមទិសឈរ T<sub>1y</sub> = <span id="res-t1y">0.00</span> N
+                </p>
+                
+                <p class="bold-green" style="margin-top:10px;">• តំណឹងខ្សែស្តាំ៖ T<sub>2</sub> = <span id="res-t2">0.00</span> N</p>
+                <p style="padding-left: 15px; font-size: 13.5px; color:#444;">
+                    តាមទិសដេក T<sub>2x</sub> = <span id="res-t2x">0.00</span> N<br>
+                    តាមទិសឈរ T<sub>2y</sub> = <span id="res-t2y">0.00</span> N
+                </p>
+            </div>
+
+            <button class="btn-toggle" id="toggleSolBtn" onclick="toggleSolution()">📖 បង្ហាញដំណោះស្រាយលម្អិត</button>
+        </div>
+
+        <div>
+            <canvas id="simCanvas" width="800" height="520"></canvas>
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងដំណោះស្រាយលម្អិត -->
+    <div class="solution-section" id="solutionBox">
+        <h3>ដំណោះស្រាយលំហាត់លម្អិត (Step-by-Step Solution)</h3>
+        <div id="detailed-steps"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function toggleSolution() {
+            const box = document.getElementById('solutionBox');
+            const btn = document.getElementById('toggleSolBtn');
+            box.classList.toggle('show');
+            if (box.classList.contains('show')) {
+                btn.innerText = "🔼 លាក់ដំណោះស្រាយលម្អិត";
+                btn.style.backgroundColor = "#28a745";
+                box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                btn.innerText = "📖 បង្ហាញដំណោះស្រាយលម្អិត";
+                btn.style.backgroundColor = "#007bff";
+            }
+        }
+
+        // អនុគមន៍គូសព្រួញវ៉ិចទ័រ និងសរសេរនិមិត្តសញ្ញាវ៉ិចទ័រឱ្យច្បាស់
+        function drawVectorArrow(fromX, fromY, toX, toY, color, baseText, subText, labelX, labelY, isComponent = false) {
+            const headlen = isComponent ? 9 : 11;
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            
+            ctx.save();
+            ctx.beginPath();
+            if (isComponent) {
+                ctx.setLineDash([5, 3]);
+                ctx.lineWidth = 2.2;
+            } else {
+                ctx.setLineDash([]);
+                ctx.lineWidth = 3.2;
+            }
+            
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+
+            // គូសក្បាលព្រួញពេញ (Filled Arrowhead)
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+
+            // គូសស្លាកឈ្មោះវ៉ិចទ័រ (មានផ្ទៃសស្រាលពីក្រោយដើម្បីកុំឱ្យជាន់បន្ទាត់)
+            if (baseText) {
+                ctx.font = "bold 16px 'Times New Roman', serif";
+                const wBase = ctx.measureText(baseText).width;
+                ctx.font = "bold 12px 'Times New Roman', serif";
+                const wSub = subText ? ctx.measureText(subText).width : 0;
+                const totalW = wBase + wSub + 8;
+
+                // ផ្ទៃខាងក្រោយស្លាក
+                ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+                ctx.fillRect(labelX - 3, labelY - 18, totalW, 24);
+
+                // អក្សរមេ
+                ctx.fillStyle = color;
+                ctx.font = "italic bold 16px 'Times New Roman', serif";
+                ctx.fillText(baseText, labelX, labelY);
+
+                // សញ្ញាព្រួញវ៉ិចទ័រខាងលើអក្សរ
+                ctx.beginPath();
+                ctx.lineWidth = 1.3;
+                ctx.moveTo(labelX, labelY - 14);
+                ctx.lineTo(labelX + wBase + 2, labelY - 14);
+                ctx.lineTo(labelX + wBase - 2, labelY - 17);
+                ctx.stroke();
+
+                // សន្ទស្សន៍ (Subscript)
+                if (subText) {
+                    ctx.font = "bold 12px Arial";
+                    ctx.fillText(subText, labelX + wBase + 1, labelY + 4);
+                }
+            }
+            ctx.restore();
+        }
+
+        function drawSimulation() {
+            const m = parseFloat(document.getElementById('mass').value);
+            const x = parseFloat(document.getElementById('position').value);
+            const L = 50.0; 
+            const g = 9.8;
+
+            // កំណត់ឱ្យជម្រៅខ្សែយារ h = 0.200m នៅពេល m = 1.00kg
+            const h = 0.05 + m * 0.15; 
+            const rightDist = L - x;
+
+            document.getElementById('mass-val').innerText = m.toFixed(2) + " kg";
+            document.getElementById('pos-val').innerText = x.toFixed(1) + " m";
+            document.getElementById('sag-val').innerText = h.toFixed(3) + " m";
+            
+            document.getElementById('text-m').innerText = m.toFixed(2);
+            document.getElementById('text-h').innerText = h.toFixed(3);
+            
+            if (Math.abs(x - 25.0) < 0.01) {
+                document.getElementById('text-pos').innerText = "ពាក់កណ្តាល (25.0 m)";
+            } else {
+                document.getElementById('text-pos').innerText = "ចម្ងាយ " + x.toFixed(1) + " m ពីបង្គោលឆ្វេង";
+            }
+
+            // គណនារូបវិទ្យា
+            const weight = m * g;
+            const theta1 = Math.atan2(h, x); 
+            const theta2 = Math.atan2(h, rightDist); 
+            const deg1 = theta1 * 180 / Math.PI;
+            const deg2 = theta2 * 180 / Math.PI;
+
+            const tension1 = (weight * Math.cos(theta2)) / Math.sin(theta1 + theta2);
+            const tension2 = (weight * Math.cos(theta1)) / Math.sin(theta1 + theta2);
+
+            const T1x = tension1 * Math.cos(theta1);
+            const T1y = tension1 * Math.sin(theta1);
+            const T2x = tension2 * Math.cos(theta2);
+            const T2y = tension2 * Math.sin(theta2);
+
+            document.getElementById('res-w').innerText = weight.toFixed(2);
+            document.getElementById('res-t1').innerText = tension1.toFixed(2);
+            document.getElementById('res-t1x').innerText = T1x.toFixed(2);
+            document.getElementById('res-t1y').innerText = T1y.toFixed(2);
+            document.getElementById('res-t2').innerText = tension2.toFixed(2);
+            document.getElementById('res-t2x').innerText = T2x.toFixed(2);
+            document.getElementById('res-t2y').innerText = T2y.toFixed(2);
+
+            // ================= គូសដ្យាក្រាមលើ Canvas =================
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const poleLeftX = 85;
+            const poleRightX = 715;
+            const poleYTop = 95;
+            
+            const birdX = poleLeftX + (x / L) * (poleRightX - poleLeftX);
+            // ពង្រីកមុំនៅលើរូបភាពឱ្យធំល្មមដើម្បីឱ្យសិស្សមើលឃើញកម្លាំងតាមទិសឈរ និងទិសដេកដាច់ពីគ្នាច្បាស់
+            const visualSag = 85 + (h * 110); 
+            const birdY = poleYTop + visualSag; 
+
+            // ចំណងជើងដ្យាក្រាម
+            ctx.fillStyle = "#0056b3";
+            ctx.font = "bold 18px 'Khmer OS Battambang', sans-serif";
+            ctx.fillText("ក. ដ្យាក្រាមវ៉ិចទ័រកម្លាំងលើបក្សី (បំបែកតាមអ័ក្សដេក Ox និងអ័ក្សឈរ Oy)", 20, 32);
+            ctx.fillStyle = "#666";
+            ctx.font = "13px 'Khmer OS Battambang', sans-serif";
+            ctx.fillText("* កំណត់សម្គាល់៖ ជម្រៅខ្សែយារ (h) និងវ៉ិចទ័រកម្លាំងតាមទិសឈរត្រូវបានពង្រីកមាត្រដ្ឋានដើម្បីឱ្យងាយស្រួលមើល", 20, 54);
+
+            // គូសបង្គោលទូរសព្ទទាំងពីរ
+            ctx.fillStyle = "#7f8c8d";
+            ctx.fillRect(poleLeftX - 8, poleYTop, 16, 400);
+            ctx.fillRect(poleRightX - 8, poleYTop, 16, 400);
+
+            // បន្ទាត់ដេកយោងខាងលើ (រវាងកំពូលបង្គោល)
+            ctx.beginPath();
+            ctx.setLineDash([6, 4]);
+            ctx.strokeStyle = "#adb5bd";
+            ctx.lineWidth = 1.5;
+            ctx.moveTo(poleLeftX, poleYTop);
+            ctx.lineTo(poleRightX, poleYTop);
+            ctx.stroke();
+
+            // គូសរង្វាស់ចម្ងាយ x និង L - x និងជម្រៅ h
+            ctx.fillStyle = "#333";
+            ctx.font = "bold 13px Arial";
+            ctx.fillText(`x = ${x.toFixed(1)} m`, (poleLeftX + birdX) / 2 - 30, poleYTop - 10);
+            ctx.fillText(`L - x = ${rightDist.toFixed(1)} m`, (birdX + poleRightX) / 2 - 40, poleYTop - 10);
+
+            // បន្ទាត់បង្ហាញជម្រៅខ្សែយារ h
+            ctx.beginPath();
+            ctx.setLineDash([3, 3]);
+            ctx.strokeStyle = "#d9534f";
+            ctx.moveTo(birdX, poleYTop);
+            ctx.lineTo(birdX, birdY);
+            ctx.stroke();
+            ctx.fillStyle = "#d9534f";
+            ctx.fillText(`h = ${h.toFixed(3)} m`, birdX + 6, (poleYTop + birdY) / 2);
+
+            // គូសអ័ក្សកូអរដោនេដេក (Ox) និងឈរ (Oy) កាត់តាមចំណុចបក្សីទំ
+            ctx.beginPath();
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = "#ced4da";
+            ctx.lineWidth = 1.5;
+            ctx.moveTo(poleLeftX + 20, birdY);
+            ctx.lineTo(poleRightX - 20, birdY);
+            ctx.moveTo(birdX, poleYTop - 15);
+            ctx.lineTo(birdX, birdY + 170);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = "#6c757d";
+            ctx.font = "italic bold 14px 'Times New Roman'";
+            ctx.fillText("x'", poleLeftX + 25, birdY + 16);
+            ctx.fillText("x", poleRightX - 30, birdY + 16);
+            ctx.fillText("y", birdX - 15, poleYTop - 5);
+
+            // គូសខ្សែទូរសព្ទ
+            ctx.beginPath();
+            ctx.strokeStyle = "#555";
+            ctx.lineWidth = 2.5;
+            ctx.moveTo(poleLeftX, poleYTop);
+            ctx.lineTo(birdX, birdY);
+            ctx.lineTo(poleRightX, poleYTop);
+            ctx.stroke();
+
+            // គណនាប្រវែងវ៉ិចទ័រសម្រាប់គូសលើដ្យាក្រាមឱ្យសមាមាត្រនិងច្បាស់លាស់
+            const drawAngle1 = Math.atan2(poleYTop - birdY, poleLeftX - birdX); // មុំទៅឆ្វេងលើ
+            const drawAngle2 = Math.atan2(poleYTop - birdY, poleRightX - birdX); // មុំទៅស្តាំលើ
+
+            const baseLen = 165;
+            const maxT = Math.max(tension1, tension2);
+            const vLen1 = Math.max(105, (tension1 / maxT) * baseLen);
+            const vLen2 = Math.max(105, (tension2 / maxT) * baseLen);
+
+            const t1EndX = birdX + vLen1 * Math.cos(drawAngle1);
+            const t1EndY = birdY + vLen1 * Math.sin(drawAngle1);
+
+            const t2EndX = birdX + vLen2 * Math.cos(drawAngle2);
+            const t2EndY = birdY + vLen2 * Math.sin(drawAngle2);
+
+            // ប្រវែងទម្ងន់ P ស្មើនឹងផលបូកប្រវែងឈរ T1y + T2y នៅលើរូប ដើម្បីឱ្យសិស្សឃើញតុល្យភាពតាមទិសឈរ
+            const vLenW = Math.min(145, Math.max(75, (birdY - t1EndY) + (birdY - t2EndY)));
+
+            // ១. គូសបន្ទាត់ចំណោលកែង (ប្រអប់ចតុកោណកែងនៃការបំបែកកម្លាំង T1 និង T2)
+            ctx.save();
+            ctx.beginPath();
+            ctx.setLineDash([2, 3]);
+            ctx.lineWidth = 1.2;
+            // ចំណោលកែងរបស់ T1
+            ctx.strokeStyle = "#0275d8";
+            ctx.moveTo(t1EndX, t1EndY);
+            ctx.lineTo(t1EndX, birdY);
+            ctx.moveTo(t1EndX, t1EndY);
+            ctx.lineTo(birdX, t1EndY);
+            ctx.stroke();
+
+            // ចំណោលកែងរបស់ T2
+            ctx.beginPath();
+            ctx.strokeStyle = "#28a745";
+            ctx.moveTo(t2EndX, t2EndY);
+            ctx.lineTo(t2EndX, birdY);
+            ctx.moveTo(t2EndX, t2EndY);
+            ctx.lineTo(birdX, t2EndY);
+            ctx.stroke();
+            ctx.restore();
+
+            // ២. គូសធ្នូមុំ θ1 និង θ2
+            ctx.save();
+            ctx.lineWidth = 1.5;
+            // មុំ θ1 (ឆ្វេង)
+            ctx.strokeStyle = "#0275d8";
+            ctx.beginPath();
+            ctx.arc(birdX, birdY, 45, Math.PI, drawAngle1, false);
+            ctx.stroke();
+            ctx.fillStyle = "#0275d8";
+            ctx.font = "bold 14px 'Times New Roman'";
+            ctx.fillText("θ₁", birdX - 62, birdY - 8);
+
+            // មុំ θ2 (ស្តាំ)
+            ctx.strokeStyle = "#28a745";
+            ctx.beginPath();
+            ctx.arc(birdX, birdY, 45, drawAngle2, 0, false);
+            ctx.stroke();
+            ctx.fillStyle = "#28a745";
+            ctx.fillText("θ₂", birdX + 50, birdY - 8);
+            ctx.restore();
+
+            // ៣. គូសវ៉ិចទ័រកម្លាំងផ្គុំតាមទិសដេក (T1x និង T2x) ចេញពីចំណុចបក្សី O
+            drawVectorArrow(birdX, birdY, t1EndX, birdY, "#0088cc", "T", "1x", (birdX + t1EndX) / 2 - 12, birdY + 22, true);
+            drawVectorArrow(birdX, birdY, t2EndX, birdY, "#208030", "T", "2x", (birdX + t2EndX) / 2 - 10, birdY + 22, true);
+
+            // ៤. គូសវ៉ិចទ័រកម្លាំងផ្គុំតាមទិសឈរ (T1y និង T2y) ចេញពីចំណុចបក្សី O (បំបែកគម្លាតបន្តិចដើម្បីឃើញព្រួញទាំងពីរច្បាស់)
+            drawVectorArrow(birdX - 4, birdY, birdX - 4, t1EndY, "#0088cc", "T", "1y", birdX - 38, t1EndY + 12, true);
+            drawVectorArrow(birdX + 4, birdY, birdX + 4, t2EndY, "#208030", "T", "2y", birdX + 12, t2EndY + 12, true);
+
+            // ៥. គូសវ៉ិចទ័រកម្លាំងតំណឹងខ្សែមេ T1, T2 និងទម្ងន់ P
+            drawVectorArrow(birdX, birdY, t1EndX, t1EndY, "#0056b3", "T", "1", t1EndX - 28, t1EndY - 8, false);
+            drawVectorArrow(birdX, birdY, t2EndX, t2EndY, "#1e7e34", "T", "2", t2EndX + 10, t2EndY - 8, false);
+            drawVectorArrow(birdX, birdY, birdX, birdY + vLenW, "#d9534f", "P", "", birdX + 12, birdY + vLenW - 5, false);
+
+            // គូសចំណុចបក្សីទំ (ចំណុច O)
+            ctx.beginPath();
+            ctx.arc(birdX, birdY, 7, 0, 2 * Math.PI);
+            ctx.fillStyle = "#d9534f";
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#fff";
+            ctx.stroke();
+
+            // តារាងសម្គាល់និមិត្តសញ្ញានៅជ្រុងខាងក្រោមនៃដ្យាក្រាម
+            ctx.fillStyle = "rgba(248, 249, 250, 0.95)";
+            ctx.strokeStyle = "#dee2e6";
+            ctx.lineWidth = 1;
+            ctx.fillRect(15, 435, 770, 72);
+            ctx.strokeRect(15, 435, 770, 72);
+
+            ctx.font = "13.5px 'Khmer OS Battambang', sans-serif";
+            ctx.fillStyle = "#333";
+            ctx.fillText("• ទិសដេក (Ox)៖ កម្លាំងទាញទៅឆ្វេង T₁ₓ = T₁ cos θ₁ និងកម្លាំងទាញទៅស្តាំ T₂ₓ = T₂ cos θ₂ មានតម្លៃស្មើគ្នា (T₁ₓ = T₂ₓ) ទើបបក្សីមិនរអិល។", 25, 460);
+            ctx.fillText("• ទិសឈរ (Oy)៖ ផលបូកកម្លាំងទាញឡើងលើទាំងពីរ (T₁ᵧ + T₂ᵧ) ទប់ទល់នឹងទម្ងន់បក្សី P ចុះក្រោម (T₁ sin θ₁ + T₂ sin θ₂ = P)។", 25, 490);
+
+            // ធ្វើបច្ចុប្បន្នភាពអត្ថបទដំណោះស្រាយលម្អិត
+            updateDetailedSolution(m, x, L, rightDist, h, g, weight, theta1, theta2, deg1, deg2, tension1, tension2, T1x, T1y, T2x, T2y);
+        }
+
+        function updateDetailedSolution(m, x, L, rightDist, h, g, weight, theta1, theta2, deg1, deg2, tension1, tension2, T1x, T1y, T2x, T2y) {
+            const container = document.getElementById('detailed-steps');
+            const isMidpoint = Math.abs(x - 25.0) < 0.01;
+
+            let html = `
+                <div class="step-box">
+                    <span class="step-title">ក. ការសិក្សាដ្យាក្រាមនៃកម្លាំងលើបក្សី៖</span>
+                    ពេលបក្សីទំនៅស្ងៀមលើខ្សែទូរសព្ទ វាស្ថិតក្នុងភាពលំនឹងក្រោមអំពើនៃកម្លាំងចំនួន ៣ គឺ៖
+                    <ul style="margin: 5px 0 0 0;">
+                        <li><strong>ទម្ងន់របស់បក្សី (<span style="color:#d9534f;">P&#8407;</span>)៖</strong> មានទិសឈរ និងទិសដៅចុះក្រោម ដោយ <span class="math-expr">P = m × g = ${m.toFixed(2)} × ${g} = <b>${weight.toFixed(2)} N</b></span></li>
+                        <li><strong>កម្លាំងតំណឹងខ្សែខាងឆ្វេង (<span style="color:#0056b3;">T&#8407;<sub>1</sub></span>)៖</strong> មានទិសតាមបណ្តោយខ្សែខាងឆ្វេង ទិសដៅទាញឡើងលើ បង្កើតបានមុំ <b>θ<sub>1</sub></b> ធៀបនឹងទិសដេក។</li>
+                        <li><strong>កម្លាំងតំណឹងខ្សែខាងស្តាំ (<span style="color:#1e7e34;">T&#8407;<sub>2</sub></span>)៖</strong> មានទិសតាមបណ្តោយខ្សែខាងស្តាំ ទិសដៅទាញឡើងលើ បង្កើតបានមុំ <b>θ<sub>2</sub></b> ធៀបនឹងទិសដេក។</li>
+                    </ul>
+                </div>
+
+                <div class="step-box">
+                    <span class="step-title">ខ. គណនាកម្លាំងតំណឹងខ្សែដែលបក្សីទំលើ៖</span>
+                    <strong>ជំហានទី ១៖ បំបែកកម្លាំងតំណឹងខ្សែតាមអ័ក្សដេក (Ox) និងអ័ក្សឈរ (Oy)</strong><br>
+                    • កម្លាំងតំណឹងខ្សែឆ្វេង <b>T&#8407;<sub>1</sub></b> បំបែកជាពីរកម្លាំងផ្គុំ៖
+                    <span class="math-expr">T<sub>1x</sub> = T<sub>1</sub> cos θ<sub>1</sub> (ទាញទៅឆ្វេង)</span> និង <span class="math-expr">T<sub>1y</sub> = T<sub>1</sub> sin θ<sub>1</sub> (ទាញឡើងលើ)</span><br>
+                    • កម្លាំងតំណឹងខ្សែស្តាំ <b>T&#8407;<sub>2</sub></b> បំបែកជាពីរកម្លាំងផ្គុំ៖
+                    <span class="math-expr">T<sub>2x</sub> = T<sub>2</sub> cos θ<sub>2</sub> (ទាញទៅស្តាំ)</span> និង <span class="math-expr">T<sub>2y</sub> = T<sub>2</sub> sin θ<sub>2</sub> (ទាញឡើងលើ)</span>
+                </div>
+            `;
+
+            if (isMidpoint) {
+                const sinTheta = Math.sin(theta1);
+                const tanTheta = h / x;
+                html += `
+                    <div class="step-box">
+                        <span class="step-title">ជំហានទី ២៖ រកមុំលម្អៀងនៃខ្សែធៀបនឹងទិសដេក (ករណីបក្សីទំចំកណ្តាល x = 25.0 m)</span>
+                        ដោយបក្សីទំចំកណ្តាលខ្សែ នោះចម្ងាយពីបក្សីទៅបង្គោលសងខាងស្មើគ្នាគឺ <span class="math-expr">x = L / 2 = 50.0 / 2 = 25.0 m</span> ហើយមុំទាំងពីរស្មើគ្នា (<span class="math-expr">θ<sub>1</sub> = θ<sub>2</sub> = θ</span>)៖<br>
+                        តាមរូបមន្តត្រីកោណមាត្រក្នុងត្រីកោណកែង៖
+                        <br><span class="math-expr">tan θ = ជ្រុងឈម / ជ្រុងជាប់ = h / x = ${h.toFixed(3)} / ${x.toFixed(1)} = ${tanTheta.toFixed(5)}</span>
+                        <br>នាំឱ្យ៖ <span class="math-expr">θ = arctan(${tanTheta.toFixed(5)}) ≈ <b>${deg1.toFixed(3)}°</b></span> (មានតម្លៃ <span class="math-expr">sin θ ≈ ${sinTheta.toFixed(5)}</span>)
+                    </div>
+
+                    <div class="step-box">
+                        <span class="step-title">ជំហានទី ៣៖ អនុវត្តលក្ខខណ្ឌលំនឹងនៃកម្លាំងលើបក្សី (ច្បាប់ទី១ ញូតុន ∑F&#8407; = 0&#8407;)</span>
+                        <strong>១. តាមទិសដេក (Ox)៖</strong> ផលបូកកម្លាំងតាមទិសដេកស្មើសូន្យ៖
+                        <br><span class="math-expr">∑F<sub>x</sub> = 0  ⇒  T<sub>2x</sub> - T<sub>1x</sub> = 0  ⇒  T<sub>1</sub> cos θ = T<sub>2</sub> cos θ  ⇒  <b>T<sub>1</sub> = T<sub>2</sub> = T</b></span>
+                        <br><em>(មានន័យថាតំណឹងខ្សែទាំងសងខាងមានតម្លៃស្មើគ្នា)</em><br><br>
+                        
+                        <strong>២. តាមទិសឈរ (Oy)៖</strong> ផលបូកកម្លាំងទាញឡើងលើ ស្មើនឹងទម្ងន់ទាញចុះក្រោម៖
+                        <br><span class="math-expr">∑F<sub>y</sub> = 0  ⇒  T<sub>1y</sub> + T<sub>2y</sub> - P = 0</span>
+                        <br><span class="math-expr">T sin θ + T sin θ = P  ⇒  2T sin θ = m × g</span>
+                        <br>ទាញរកតំណឹងខ្សែ <b>T</b>៖
+                        <br><span class="math-expr">T = (m × g) / (2 × sin θ) = ${weight.toFixed(2)} / (2 × ${sinTheta.toFixed(5)}) = <b>${tension1.toFixed(2)} N</b></span><br>
+                        <div class="highlight-ans">ដូចនេះ តំណឹងខ្សែដែលបក្សីទំលើគឺ T<sub>1</sub> = T<sub>2</sub> ≈ ${tension1.toFixed(2)} N (ឬប្រហែល ${(tension1/100).toFixed(1)} × 10<sup>2</sup> N)</div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="step-box">
+                        <span class="step-title">ជំហានទី ២៖ រកមុំលម្អៀង θ<sub>1</sub> និង θ<sub>2</sub> (ករណីបក្សីទំមិនចំកណ្តាល)</span>
+                        • ចម្ងាយទៅបង្គោលឆ្វេង <span class="math-expr">x = ${x.toFixed(1)} m</span>៖
+                        <span class="math-expr">tan θ<sub>1</sub> = h / x = ${h.toFixed(3)} / ${x.toFixed(1)} ⇒ <b>θ<sub>1</sub> ≈ ${deg1.toFixed(3)}°</b></span><br>
+                        • ចម្ងាយទៅបង្គោលស្តាំ <span class="math-expr">L - x = ${rightDist.toFixed(1)} m</span>៖
+                        <span class="math-expr">tan θ<sub>2</sub> = h / (L - x) = ${h.toFixed(3)} / ${rightDist.toFixed(1)} ⇒ <b>θ<sub>2</sub> ≈ ${deg2.toFixed(3)}°</b></span>
+                    </div>
+
+                    <div class="step-box">
+                        <span class="step-title">ជំហានទី ៣៖ អនុវត្តលក្ខខណ្ឌលំនឹងនៃកម្លាំង (∑F&#8407; = 0&#8407;)</span>
+                        <strong>១. តាមទិសដេក (Ox)៖</strong>
+                        <br><span class="math-expr">∑F<sub>x</sub> = 0  ⇒  T<sub>1x</sub> = T<sub>2x</sub>  ⇒  T<sub>1</sub> cos θ<sub>1</sub> = T<sub>2</sub> cos θ<sub>2</sub>  ⇒  T<sub>2</sub> = T<sub>1</sub> (cos θ<sub>1</sub> / cos θ<sub>2</sub>)</span> (សមីការទី ១)<br><br>
+                        <strong>២. តាមទិសឈរ (Oy)៖</strong>
+                        <br><span class="math-expr">∑F<sub>y</sub> = 0  ⇒  T<sub>1y</sub> + T<sub>2y</sub> = P  ⇒  T<sub>1</sub> sin θ<sub>1</sub> + T<sub>2</sub> sin θ<sub>2</sub> = ${weight.toFixed(2)}</span> (សមីការទី ២)<br><br>
+                        ជំនួស (១) ចូលក្នុង (២) គេទាញបានរូបមន្តតំណឹងខ្សែទាំងពីរ៖
+                        <br>• <span class="math-expr">T<sub>1</sub> = (P × cos θ<sub>2</sub>) / sin(θ<sub>1</sub> + θ<sub>2</sub>) = <b>${tension1.toFixed(2)} N</b></span> (ដោយ <span class="math-expr">T<sub>1x</sub> = ${T1x.toFixed(2)} N, T<sub>1y</sub> = ${T1y.toFixed(2)} N</span>)
+                        <br>• <span class="math-expr">T<sub>2</sub> = (P × cos θ<sub>1</sub>) / sin(θ<sub>1</sub> + θ<sub>2</sub>) = <b>${tension2.toFixed(2)} N</b></span> (ដោយ <span class="math-expr">T<sub>2x</sub> = ${T2x.toFixed(2)} N, T<sub>2y</sub> = ${T2y.toFixed(2)} N</span>)<br>
+                        <div class="highlight-ans">ដូចនេះ តំណឹងខ្សែខាងឆ្វេង T<sub>1</sub> = ${tension1.toFixed(2)} N និងខាងស្តាំ T<sub>2</sub> = ${tension2.toFixed(2)} N</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        drawSimulation();
+    </script>
+</body>
+</html>
