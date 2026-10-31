@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>២.១ គោលការណ៍គ្រឹះអ៊ីដ្រូស្តាទិច និងការរកម៉ាសមាត</title>
+
+    <style>
+        body {
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            background-color: #f4f6f9; padding: 20px; color: #111; text-align: center;
+            margin: 0;
+        }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .problem-statement {
+            background: #fff3cd; color: #664d03; padding: 18px 25px;
+            border-radius: 8px; border-left: 6px solid #ffc107;
+            text-align: left; margin-bottom: 20px; font-size: 17px;
+            font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .sim-area {
+            position: relative; width: 100%; max-width: 500px; height: auto;
+            background: #e0f7fa; border: 2px solid #ced4da;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px;
+            display: block;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        svg {
+            display: block; width: 100%; height: auto;
+            touch-action: none;
+        }
+        #blockGroup {
+            cursor: grab;
+        }
+        #blockGroup:active {
+            cursor: grabbing;
+        }
+        .reset-land-btn {
+            position: absolute; top: 10px; right: 10px;
+            background: #0277bd; color: #fff; border: none;
+            padding: 6px 12px; border-radius: 6px; font-size: 13px;
+            font-family: 'Hanuman', 'Siemreap', Arial, sans-serif;
+            font-weight: bold; cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 5;
+        }
+        .reset-land-btn:hover { background: #01579b; }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        .slider-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold;
+        }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+
+        .dashboard {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .data-box {
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center;
+            font-size: 16px; font-weight: bold; color: #333;
+        }
+        .data-box span { 
+            font-weight: 900; font-size: 20px; display: block; margin-top: 8px;
+        }
+        
+        #liveP1 { color: #d32f2f; }
+        #liveP2 { color: #007bff; }
+        #liveH { color: #28a745; }
+        #liveRho { color: #e65100; font-size: 26px;}
+
+        .solution-box {
+            background: #e2e8f0; padding: 25px; border-radius: 8px;
+            text-align: left; margin-top: 25px; border-left: 6px solid #4a5568;
+            font-size: 17px; line-height: 1.8; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .solution-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; font-size: 22px; }
+        .solution-box ul { padding-left: 30px; margin-top: 5px; }
+        .highlight { font-weight: bold; color: #d32f2f; font-size: 19px; }
+        
+        .error-box { 
+            background: #ffebee; border-left: 6px solid #d32f2f; 
+            padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #b71c1c; 
+        }
+
+        /* រចនាប័ទ្មសម្រាប់រូបមន្តប្រភាគ HTML សុទ្ធ */
+        .math-bold { font-family: 'Times New Roman', serif; font-size: 110%; font-weight: bold; }
+        .math-italic { font-family: 'Times New Roman', serif; font-style: italic; }
+        .frac { display: inline-block; vertical-align: middle; text-align: center; padding: 0 5px; }
+        .frac span { display: block; }
+        .frac .num { border-bottom: 2px solid #000; padding-bottom: 2px; }
+        .frac .den { padding-top: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ការរំលេចកំហុសក្នុងសៀវភៅ -->
+    <div class="error-box">
+        <strong>⚠️ ការកែតម្រូវកំហុសក្នុងសៀវភៅពុម្ព៖</strong><br>
+        នៅក្នុងលំហាត់គំរូនៃសៀវភៅពុម្ព មានកំហុសវាយអត្ថបទ (Typo) ត្រង់ចម្លើយចុងក្រោយ។ <br>
+        ការគណនាពិតប្រាកដគឺ៖ (106800 - 105000) &divide; (9.80 &times; 0.200) = 1800 &divide; 1.96 = <strong>918.36 kg/m&sup3;</strong>។<br>
+        សៀវភៅបានសរសេរខុសទៅជា <strong>9.18 kg/m&sup3;</strong> (បាត់មេគុណ 10&sup2;)។ លោកគ្រូអាចប្រើប្រាស់ Simulator នេះដើម្បីបង្ហាញលេខត្រឹមត្រូវដល់សិស្ស!
+    </div>
+
+    <div class="problem-statement">
+        <strong>២.១ គោលការណ៍គ្រឹះអ៊ីដ្រូស្តាទិច ៖</strong> គេដាក់ប្រអប់មួយមានកម្ពស់ <i>h</i> ក្នុងអង្គធាតុរាវមានម៉ាសមាត &rho;។ 
+        គេដឹងថាសម្ពាធផ្នែកខាងលើមានតម្លៃ P<sub>1</sub> និងផ្នែកខាងក្រោម P<sub>2</sub>។ តាមគោលការណ៍គ្រឹះនៃអ៊ីដ្រូស្តាទិច ផលសងសម្ពាធរវាងពីរចំណុចក្នុងអង្គធាតុរាវស្មើនឹង៖<br><br>
+        <div style="text-align: center; font-size: 22px;">
+            <span class="math-bold">P<sub>2</sub> - P<sub>1</sub> = &rho; &middot; g &middot; h</span>
+        </div>
+    </div>
+
+    <!-- ផ្ទាំង Simulator SVG សុទ្ធ -->
+    <div class="sim-area" id="simContainer">
+        <button class="reset-land-btn" id="resetLandBtn" onclick="resetBoxToLand()">↺ ដាក់លើគោកវិញ</button>
+        <svg id="simSvg" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="liquidGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#81d4fa" stop-opacity="0.88"/>
+                    <stop offset="100%" stop-color="#0277bd" stop-opacity="0.95"/>
+                </linearGradient>
+                <linearGradient id="groundGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#8d6e63"/>
+                    <stop offset="100%" stop-color="#5d4037"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ដីគោក / ធ្នើរសម្រាប់ដាក់ប្រអប់ដំបូងនៅខាងឆ្វេងធុង -->
+            <rect x="5" y="160" width="95" height="310" rx="4" fill="url(#groundGrad)" stroke="#4e342e" stroke-width="3" />
+            <rect x="5" y="152" width="98" height="12" rx="3" fill="#66bb6a" stroke="#388e3c" stroke-width="2" />
+            <text x="52" y="190" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="13" fill="#fff">លើគោក</text>
+
+            <!-- ការណែនាំឱ្យសិស្សអូសប្រអប់ -->
+            <g id="dragHint">
+                <path d="M 95 75 Q 175 25 245 110" fill="none" stroke="#e65100" stroke-width="2.5" stroke-dasharray="6,4" />
+                <polygon points="240,113 250,115 248,104" fill="#e65100" />
+                <text x="190" y="45" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#d84315">👆 ចុចអូសប្រអប់ទម្លាក់ចូលទឹក</text>
+            </g>
+
+            <!-- ធុងទឹក -->
+            <path d="M 100 100 L 100 450 Q 100 470 120 470 L 380 470 Q 400 470 400 450 L 400 100" fill="none" stroke="#546e7a" stroke-width="6" />
+            
+            <!-- អង្គធាតុរាវ -->
+            <path id="liquidBody" d="M 103 200 L 103 450 Q 103 467 120 467 L 380 467 Q 397 467 397 450 L 397 200 Z" fill="url(#liquidGrad)" />
+
+            <!-- ប្រអប់ (Block) អាចចុចអូសបាន -->
+            <g id="blockGroup">
+                <rect id="blockObj" x="12" y="72" width="80" height="80" fill="#fff" stroke="#333" stroke-width="3" />
+                <text x="52" y="117" id="blockText" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="15" fill="#555" pointer-events="none">ប្រអប់</text>
+            </g>
+
+            <!-- ផ្ទៃទឹក និងរលកទឹក (គូសពីលើប្រអប់បន្តិចដើម្បីមើលទៅដូចប្រអប់លិចក្នុងទឹកពិតៗ) -->
+            <line id="waterLine" x1="103" y1="200" x2="397" y2="200" stroke="#0288d1" stroke-width="3" pointer-events="none" />
+            <path id="waterWave" d="M 120 200 Q 140 190 160 200 T 200 200 T 240 200 T 280 200 T 320 200 T 360 200 T 380 200" fill="none" stroke="#0277bd" stroke-width="2" opacity="0.6" pointer-events="none" />
+
+            <!-- ក្រុមព្រួញសម្ពាធ P1, P2 និងកម្ពស់ h (បង្ហាញពេលប្រអប់ចូលក្នុងទឹក) -->
+            <g id="vectorsGroup" opacity="0" pointer-events="none">
+                <!-- ព្រួញសម្ពាធ P1 (ចុះក្រោម) -->
+                <line id="lineP1" x1="250" y1="180" x2="250" y2="240" stroke="#d32f2f" stroke-width="4" />
+                <polygon id="polyP1" points="240,240 260,240 250,250" fill="#d32f2f" />
+                <text id="lblP1" x="250" y="170" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="20" fill="#d32f2f">P_1</text>
+
+                <!-- ព្រួញសម្ពាធ P2 (ឡើងលើ) -->
+                <line id="lineP2" x1="250" y1="420" x2="250" y2="360" stroke="#007bff" stroke-width="4" />
+                <polygon id="polyP2" points="240,360 260,360 250,350" fill="#007bff" />
+                <text id="lblP2" x="250" y="440" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="20" fill="#007bff">P_2</text>
+
+                <!-- បន្ទាត់វាស់កម្ពស់ h -->
+                <line id="hDashTop" x1="310" y1="250" x2="380" y2="250" stroke="#28a745" stroke-width="2" stroke-dasharray="5,5" />
+                <line id="hDashBot" x1="310" y1="350" x2="380" y2="350" stroke="#28a745" stroke-width="2" stroke-dasharray="5,5" />
+                <line id="hLineVert" x1="360" y1="250" x2="360" y2="350" stroke="#28a745" stroke-width="3" />
+                <polygon id="hArrTop" points="355,260 365,260 360,250" fill="#28a745" />
+                <polygon id="hArrBot" points="355,340 365,340 360,350" fill="#28a745" />
+                <text id="hText" x="370" y="305" font-family="Arial" font-weight="bold" font-size="20" fill="#28a745" dominant-baseline="middle">h</text>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Sliders បញ្ជា -->
+    <div class="controls-grid">
+        <div class="slider-box">
+            សម្ពាធ P<sub>1</sub> (ខាងលើ):<br>
+            <input type="range" id="sliderP1" min="100.0" max="110.0" value="105.0" step="0.1">
+        </div>
+        <div class="slider-box">
+            សម្ពាធ P<sub>2</sub> (ខាងក្រោម):<br>
+            <input type="range" id="sliderP2" min="102.0" max="115.0" value="106.8" step="0.1">
+        </div>
+        <div class="slider-box">
+            កម្ពស់ប្រអប់ <i>h</i> (cm):<br>
+            <input type="range" id="sliderH" min="10.0" max="40.0" value="20.0" step="1.0">
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងទិន្នន័យ (Grid) -->
+    <div class="dashboard">
+        <div class="data-box" style="border-top: 4px solid #d32f2f;">P<sub>1</sub> (kPa)<br><span id="liveP1">105.0 kPa</span></div>
+        <div class="data-box" style="border-top: 4px solid #007bff;">P<sub>2</sub> (kPa)<br><span id="liveP2">106.8 kPa</span></div>
+        <div class="data-box" style="border-top: 4px solid #28a745;">កម្ពស់ (h)<br><span id="liveH">20.0 cm</span></div>
+        <div class="data-box" style="border-top: 4px solid #e65100;">ម៉ាសមាតវត្ថុរាវ (&rho;)<br><span id="liveRho">918 kg/m&sup3;</span></div>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ -->
+    <div class="solution-box">
+        <h3>ដំណើរស្រាយលំហាត់គំរូ</h3>
+        <p><strong>បម្រាប់៖</strong> P<sub>1</sub> = <span id="solP1">105.0</span> kPa, P<sub>2</sub> = <span id="solP2">106.8</span> kPa, h = <span id="solH">20.0</span> cm = <span id="solHm">0.200</span> m, g = 9.80 m/s&sup2;</p>
+        
+        <p>តាមទំនាក់ទំនងសម្ពាធអាស្រ័យនឹងជម្រៅ៖</p>
+        <p style="text-align: center; font-size: 20px;"><strong>P<sub>2</sub> - P<sub>1</sub> = &rho; &middot; g &middot; h</strong></p>
+        
+        <p>ទាញរកម៉ាសមាត &rho; នៃអង្គធាតុរាវ៖</p>
+        <div style="text-align: center; font-size: 22px; margin: 15px 0;">
+            <span class="math-bold">&rho; = </span>
+            <div class="frac">
+                <span class="num math-bold">P<sub>2</sub> - P<sub>1</sub></span>
+                <span class="den math-bold">g &middot; h</span>
+            </div>
+            <span class="math-bold"> = </span>
+            <div class="frac">
+                <span class="num math-bold" id="solCalcTop">(106.8 - 105.0) &times; 10&sup3;</span>
+                <span class="den math-bold" id="solCalcBot">9.80 &times; 0.200</span>
+            </div>
+            <span class="math-bold"> = <span style="color: #e65100;" id="solResult">918</span> kg/m&sup3;</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    var simSvg = document.getElementById('simSvg');
+    var blockGroup = document.getElementById('blockGroup');
+    var vectorsGroup = document.getElementById('vectorsGroup');
+    var dragHint = document.getElementById('dragHint');
+    var waterWave = document.getElementById('waterWave');
+
+    var sliderP1 = document.getElementById('sliderP1');
+    var sliderP2 = document.getElementById('sliderP2');
+    var sliderH = document.getElementById('sliderH');
+
+    var liveP1 = document.getElementById('liveP1');
+    var liveP2 = document.getElementById('liveP2');
+    var liveH = document.getElementById('liveH');
+    var liveRho = document.getElementById('liveRho');
+
+    var blockObj = document.getElementById('blockObj');
+    var blockText = document.getElementById('blockText');
+    
+    var lineP1 = document.getElementById('lineP1');
+    var polyP1 = document.getElementById('polyP1');
+    var lblP1 = document.getElementById('lblP1');
+    
+    var lineP2 = document.getElementById('lineP2');
+    var polyP2 = document.getElementById('polyP2');
+    var lblP2 = document.getElementById('lblP2');
+
+    var hDashTop = document.getElementById('hDashTop');
+    var hDashBot = document.getElementById('hDashBot');
+    var hLineVert = document.getElementById('hLineVert');
+    var hArrTop = document.getElementById('hArrTop');
+    var hArrBot = document.getElementById('hArrBot');
+    var hText = document.getElementById('hText');
+
+    var solP1 = document.getElementById('solP1');
+    var solP2 = document.getElementById('solP2');
+    var solH = document.getElementById('solH');
+    var solHm = document.getElementById('solHm');
+    var solCalcTop = document.getElementById('solCalcTop');
+    var solCalcBot = document.getElementById('solCalcBot');
+    var solResult = document.getElementById('solResult');
+
+    // ស្ថានភាពរបស់ប្រអប់៖ 'land' (លើគោក), 'dragging' (កំពុងអូស), 'falling' (កំពុងធ្លាក់និងអណ្តែត), 'settled' (លំនឹងក្នុងទឹក)
+    var boxState = 'land';
+    var boxCenterX = 52;
+    var boxCenterY = 112;
+    var boxWidth = 76;
+    var rectH = 80;
+
+    var vy = 0;
+    var vx = 0;
+    var animFrameId = null;
+    var wavePhase = 0;
+    var dragOffsetX = 0;
+    var dragOffsetY = 0;
+
+    function getLandCenterY() {
+        return 152 - (rectH / 2);
+    }
+
+    function updateVisualPosition() {
+        var x = boxCenterX - (boxWidth / 2);
+        var y = boxCenterY - (rectH / 2);
+
+        blockObj.setAttribute("x", x);
+        blockObj.setAttribute("y", y);
+        blockObj.setAttribute("width", boxWidth);
+        blockObj.setAttribute("height", rectH);
+
+        blockText.setAttribute("x", boxCenterX);
+        blockText.setAttribute("y", boxCenterY + 5);
+
+        // អាប់ដេតព្រួញ P1, P2 និងបន្ទាត់វាស់ h តាមទីតាំងប្រអប់ក្នុងទឹក
+        var bottomY = y + rectH;
+
+        lineP1.setAttribute("x1", boxCenterX);
+        lineP1.setAttribute("x2", boxCenterX);
+        lineP1.setAttribute("y2", y);
+        lineP1.setAttribute("y1", y - 60);
+        polyP1.setAttribute("points", (boxCenterX - 10) + "," + y + " " + (boxCenterX + 10) + "," + y + " " + boxCenterX + "," + (y + 10));
+        lblP1.setAttribute("x", boxCenterX);
+        lblP1.setAttribute("y", y - 70);
+
+        lineP2.setAttribute("x1", boxCenterX);
+        lineP2.setAttribute("x2", boxCenterX);
+        lineP2.setAttribute("y2", bottomY);
+        lineP2.setAttribute("y1", bottomY + 60);
+        polyP2.setAttribute("points", (boxCenterX - 10) + "," + bottomY + " " + (boxCenterX + 10) + "," + bottomY + " " + boxCenterX + "," + (bottomY - 10));
+        lblP2.setAttribute("x", boxCenterX);
+        lblP2.setAttribute("y", bottomY + 70);
+
+        hDashTop.setAttribute("x1", boxCenterX + (boxWidth / 2) + 10);
+        hDashTop.setAttribute("y1", y);
+        hDashTop.setAttribute("y2", y);
+
+        hDashBot.setAttribute("x1", boxCenterX + (boxWidth / 2) + 10);
+        hDashBot.setAttribute("y1", bottomY);
+        hDashBot.setAttribute("y2", bottomY);
+
+        hLineVert.setAttribute("y1", y);
+        hLineVert.setAttribute("y2", bottomY);
+
+        hArrTop.setAttribute("points", "355," + (y + 10) + " 365," + (y + 10) + " 360," + y);
+        hArrBot.setAttribute("points", "355," + (bottomY - 10) + " 365," + (bottomY - 10) + " 360," + bottomY);
+        hText.setAttribute("y", boxCenterY + 5);
+    }
+
+    function updateSimulation() {
+        var p1 = parseFloat(sliderP1.value);
+        var p2 = parseFloat(sliderP2.value);
+        var h_cm = parseFloat(sliderH.value);
+
+        p2 = Math.max(p1 + 0.1, p2);
+        sliderP2.value = p2.toFixed(1);
+
+        var deltaP_kPa = p2 - p1;
+        var deltaP_Pa = deltaP_kPa * 1000;
+        var h_m = h_cm / 100;
+        var g = 9.80;
+        var rho = deltaP_Pa / (g * h_m);
+
+        liveP1.innerText = p1.toFixed(1) + " kPa";
+        liveP2.innerText = p2.toFixed(1) + " kPa";
+        liveH.innerText = h_cm.toFixed(1) + " cm";
+        liveRho.innerText = Math.round(rho).toLocaleString() + " kg/m\u00B3";
+
+        var pxPerCm = 4;
+        rectH = h_cm * pxPerCm;
+
+        if (boxState === 'land') {
+            boxWidth = 76;
+            boxCenterX = 52;
+            boxCenterY = getLandCenterY();
+        } else if (boxState === 'settled') {
+            boxWidth = 100;
+            boxCenterX = 250;
+            boxCenterY = 300;
+        }
+
+        updateVisualPosition();
+
+        solP1.innerText = p1.toFixed(1);
+        solP2.innerText = p2.toFixed(1);
+        solH.innerText = h_cm.toFixed(1);
+        solHm.innerText = h_m.toFixed(3);
+        solCalcTop.innerText = "(" + p2.toFixed(1) + " - " + p1.toFixed(1) + ") \u00D7 10\u00B3";
+        solCalcBot.innerText = "9.80 \u00D7 " + h_m.toFixed(3);
+        solResult.innerText = Math.round(rho).toLocaleString();
+    }
+
+    // បំប្លែងកូអរដោនេពីអេក្រង់ទូរសព្ទ/កុំព្យូទ័រ ទៅជាកូអរដោនេក្នុង SVG (0..500)
+    function getSvgPoint(evt) {
+        var rect = simSvg.getBoundingClientRect();
+        var clientX = evt.clientX;
+        var clientY = evt.clientY;
+        if (evt.touches && evt.touches.length) {
+            clientX = evt.touches[0].clientX;
+            clientY = evt.touches[0].clientY;
+        }
+        return {
+            x: (clientX - rect.left) * (500 / rect.width),
+            y: (clientY - rect.top) * (500 / rect.height)
+        };
+    }
+
+    // ចលនារូបវិទ្យាពេលប្រអប់ធ្លាក់ចូលទឹក លិចជ្រៅបន្តិច រួចអណ្តែតមករកចំណុចលំនឹងវិញ
+    function animateWaterDrop() {
+        if (boxState !== 'falling') return;
+
+        var targetX = 250;
+        var targetY = 300; // ចំណុចលំនឹងដូចរូបដើម
+        var waterSurfaceY = 200;
+
+        // ទាញប្រអប់ឱ្យរំកិលមកចំកណ្តាលធុងទឹកដោយរលូន
+        boxCenterX += (targetX - boxCenterX) * 0.14;
+
+        var bottomY = boxCenterY + (rectH / 2);
+
+        if (bottomY < waterSurfaceY) {
+            // កំពុងធ្លាក់ក្នុងខ្យល់មុនប៉ះផ្ទៃទឹក
+            vy += 1.4;
+        } else {
+            // ពេលចូលក្នុងទឹក៖ មានកម្លាំងដំណោលអាកស៊ីម៉ែតទាញមកចំណុចលំនឹង (targetY = 300)
+            // មេគុណរ៉ឺស័រទឹក និងកម្លាំងកកិតទឹកធ្វើឱ្យប្រអប់ធ្លាក់ជ្រៅហួសចំណុចលំនឹង (ដល់ប្រហែល Y=375) រួចអណ្តែតឡើងមកវិញ
+            var displacement = targetY - boxCenterY;
+            var buoyancySpring = displacement * 0.055;
+            vy += buoyancySpring;
+            vy *= 0.87; // កម្លាំងទប់នៃទឹក (Damping)
+
+            // បង្កើតចលនារលកទឹកពេលប្រអប់កំពុងអណ្តែតចុះឡើង
+            wavePhase += 0.28;
+            var amp = Math.min(14, Math.abs(vy) * 1.4 + 2);
+            var q1 = 200 - Math.sin(wavePhase) * amp;
+            var dWave = "M 120 200 Q 140 " + q1.toFixed(1) + " 160 200 T 200 200 T 240 200 T 280 200 T 320 200 T 360 200 T 380 200";
+            waterWave.setAttribute("d", dWave);
+        }
+
+        boxCenterY += vy;
+
+        // ទប់កុំឱ្យបុកបាតធុងជ្រុល
+        var maxCenterY = 455 - (rectH / 2);
+        if (boxCenterY > maxCenterY) {
+            boxCenterY = maxCenterY;
+            vy = -vy * 0.4;
+        }
+
+        // នៅពេលល្បឿន និងគម្លាតថយចុះជិតស្មើសូន្យ ឱ្យប្រអប់ឈប់ត្រង់ចំណុចលំនឹងដើម
+        if (Math.abs(boxCenterY - targetY) < 0.6 && Math.abs(vy) < 0.35 && Math.abs(boxCenterX - targetX) < 1.5) {
+            boxCenterX = targetX;
+            boxCenterY = targetY;
+            vy = 0;
+            boxState = 'settled';
+            waterWave.setAttribute("d", "M 120 200 Q 140 190 160 200 T 200 200 T 240 200 T 280 200 T 320 200 T 360 200 T 380 200");
+            vectorsGroup.setAttribute("opacity", "1");
+            updateVisualPosition();
+            return;
+        }
+
+        updateVisualPosition();
+        animFrameId = requestAnimationFrame(animateWaterDrop);
+    }
+
+    function onPointerDown(evt) {
+        evt.preventDefault();
+        if (animFrameId) {
+            cancelAnimationFrame(animFrameId);
+            animFrameId = null;
+        }
+        var pt = getSvgPoint(evt);
+        boxState = 'dragging';
+        boxWidth = 100;
+        dragOffsetX = pt.x - boxCenterX;
+        dragOffsetY = pt.y - boxCenterY;
+
+        vectorsGroup.setAttribute("opacity", "0");
+        dragHint.setAttribute("opacity", "0");
+        updateVisualPosition();
+    }
+
+    function onPointerMove(evt) {
+        if (boxState !== 'dragging') return;
+        evt.preventDefault();
+        var pt = getSvgPoint(evt);
+        boxCenterX = Math.max(50, Math.min(440, pt.x - dragOffsetX));
+        boxCenterY = Math.max(50, Math.min(420, pt.y - dragOffsetY));
+        updateVisualPosition();
+    }
+
+    function onPointerUp(evt) {
+        if (boxState !== 'dragging') return;
+        evt.preventDefault();
+
+        // ប្រសិនបើសិស្សអូសប្រអប់មកដល់តំបន់ធុងទឹក (x > 115) នោះទម្លាក់ប្រអប់ចូលទឹក
+        if (boxCenterX > 115) {
+            boxState = 'falling';
+            // ផ្តល់ល្បឿនធ្លាក់ដំបូង ដើម្បីឱ្យប្រអប់មុជចូលក្នុងទឹករាងជ្រៅបន្តិច មុននឹងអណ្តែតឡើងមកវិញ
+            vy = (boxCenterY < 220) ? 10.5 : 8.0;
+            animateWaterDrop();
+        } else {
+            // បើអូសមិនទាន់ផុតដីគោកទេ ឱ្យត្រឡប់មកដាក់លើគោកវិញ
+            resetBoxToLand();
+        }
+    }
+
+    function resetBoxToLand() {
+        if (animFrameId) {
+            cancelAnimationFrame(animFrameId);
+            animFrameId = null;
+        }
+        boxState = 'land';
+        boxWidth = 76;
+        boxCenterX = 52;
+        boxCenterY = getLandCenterY();
+        vy = 0;
+        vectorsGroup.setAttribute("opacity", "0");
+        dragHint.setAttribute("opacity", "1");
+        waterWave.setAttribute("d", "M 120 200 Q 140 190 160 200 T 200 200 T 240 200 T 280 200 T 320 200 T 360 200 T 380 200");
+        updateVisualPosition();
+    }
+
+    // ចាប់យកព្រឹត្តិការណ៍ចុចអូសទាំងលើទូរសព្ទ (Touch) និងកុំព្យូទ័រ (Mouse)
+    blockGroup.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+
+    blockGroup.addEventListener('touchstart', onPointerDown, { passive: false });
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp, { passive: false });
+
+    // ចាប់យកព្រឹត្តិការណ៍ពេលអូស Slider
+    sliderP1.addEventListener('input', updateSimulation);
+    sliderP2.addEventListener('input', updateSimulation);
+    sliderH.addEventListener('input', updateSimulation);
+
+    // ហៅអនុគមន៍ពេលបើកដំបូង (ប្រអប់នៅលើគោក)
+    updateSimulation();
+</script>
+
+</body>
+</html>
