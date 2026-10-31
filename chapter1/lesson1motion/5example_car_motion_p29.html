@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <title>ពណ៌នាតាមក្រាបបង្ហាញចលនារថយន្ត</title>
+    <style>
+        body {
+            font-family: 'Khmer OS Battambang', Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h2 { text-align: center; color: #1e3a8a; margin-top: 0; }
+        
+        /* ប្រអប់ប្រធានលំហាត់ និងប៊ូតុងដំណោះស្រាយ */
+        .problem-box {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-left: 5px solid #007bff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        .problem-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        .btn-solution {
+            background-color: #28a745;
+            color: white;
+            padding: 7px 16px;
+            font-size: 15px;
+            font-family: 'Khmer OS Battambang', Arial, sans-serif;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: auto;
+            transition: 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        .btn-solution:hover {
+            background-color: #218838;
+        }
+
+        /* ផ្ទាំងបង្ហាញដំណោះស្រាយលម្អិត */
+        .solution-panel {
+            display: none;
+            background: #ffffff;
+            border: 1px solid #b8daff;
+            border-left: 5px solid #28a745;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            font-size: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .solution-panel.show {
+            display: block;
+        }
+        .solution-panel h4 {
+            margin: 0 0 10px 0;
+            color: #155724;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 6px;
+            font-size: 16px;
+        }
+        .phase-item {
+            background: #f8f9fa;
+            border-left: 3px solid #007bff;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .dashboard {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            background: #e9ecef;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: bold;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: #87CEEB; /* ពណ៌មេឃ សម្រាប់ឡាន */
+            border: 2px solid #333;
+            border-radius: 5px;
+            max-width: 100%;
+        }
+        
+        /* ប៊ូតុងបញ្ជានៅខាងក្រោមផ្ទាល់រូបចលនាឡាន */
+        .controls {
+            text-align: center;
+            margin: 15px 0 20px 0;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .controls button {
+            padding: 9px 22px;
+            font-size: 16px;
+            font-family: 'Khmer OS Battambang', Arial, sans-serif;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            margin: 0 8px;
+            font-weight: bold;
+            transition: 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        .controls button:hover { background-color: #0056b3; }
+        #resetBtn { background-color: #dc3545; }
+        #resetBtn:hover { background-color: #c82333; }
+
+        .graph-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .graph-box {
+            width: 48%;
+            box-sizing: border-box;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .graph-box h3 {
+            text-align: center;
+            font-size: 16px;
+            margin-top: 0;
+            color: #444;
+        }
+        .graph-box canvas {
+            background: #fafafa;
+            border: 1px solid #ddd;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>ក្រាបពណ៌នាចលនារថយន្ត និងក្រាហ្វិក</h2>
+
+    <!-- ប្រធានលំហាត់គំរូ និងប៊ូតុងដំណោះស្រាយ -->
+    <div class="problem-box">
+        <b>លំហាត់គំរូ ៖</b> រថយន្តមួយធ្វើចលនាដោយល្បឿនប្រែប្រួលជាអនុគមន៍នៃពេល តាងដោយក្រាប (v-t) ខាងក្រោម ។
+        <div class="problem-footer">
+            <span>ចូរបកស្រាយ និងគូសក្រាបតាង (សំទុះ-ពេល) នៃចលនារបស់រថយន្តនោះ ។</span>
+            <button class="btn-solution" id="solBtn" onclick="toggleSolution()">📖 ដំណោះស្រាយ</button>
+        </div>
+    </div>
+
+    <!-- ផ្ទាំងដំណោះស្រាយលម្អិត -->
+    <div class="solution-panel" id="solutionPanel">
+        <h4>ការបកស្រាយចលនា និងគណនាសំទុះតាមចន្លោះពេលនីមួយៗ៖</h4>
+        <div class="phase-item">
+            <b>១. ចន្លោះពេលពី t = 0 s ដល់ t = 10 s ៖</b> ល្បឿនកើនឡើងស្មើពី 0 m/s ដល់ 15 m/s ។<br>
+            • សំទុះ៖ <b>a<sub>1</sub> = Δv / Δt = (15 - 0) / (10 - 0) = <span style="color:#007bff;">1.5 m/s²</span></b> (រថយន្តធ្វើ<b>ចលនាត្រង់ស្ទុះស្មើ</b>)។
+        </div>
+        <div class="phase-item">
+            <b>២. ចន្លោះពេលពី t = 10 s ដល់ t = 15 s ៖</b> ល្បឿននៅថេរ v = 15 m/s ។<br>
+            • សំទុះ៖ <b>a<sub>2</sub> = Δv / Δt = (15 - 15) / (15 - 10) = <span style="color:#007bff;">0 m/s²</span></b> (រថយន្តធ្វើ<b>ចលនាត្រង់ស្មើ</b>)។
+        </div>
+        <div class="phase-item">
+            <b>៣. ចន្លោះពេលពី t = 15 s ដល់ t = 20 s ៖</b> ល្បឿនថយចុះស្មើពី 15 m/s មក 0 m/s ។<br>
+            • សំទុះ៖ <b>a<sub>3</sub> = Δv / Δt = (0 - 15) / (20 - 15) = <span style="color:#dc3545;">-3.0 m/s²</span></b> (រថយន្តធ្វើ<b>ចលនាត្រង់យឺតស្មើ</b> រហូតដល់ឈប់)។
+        </div>
+        <div class="phase-item">
+            <b>៤. ចន្លោះពេលពី t = 20 s ដល់ t = 25 s ៖</b> ល្បឿនស្មើសូន្យ (v = 0 m/s) ។<br>
+            • សំទុះ៖ <b>a<sub>4</sub> = <span style="color:#007bff;">0 m/s²</span></b> (រថយន្ត<b>ឈប់ស្ងៀម</b>)។
+        </div>
+        <div class="phase-item">
+            <b>៥. ចន្លោះពេលពី t = 25 s ដល់ t = 30 s ៖</b> ល្បឿនកើនឡើងស្មើពី 0 m/s ដល់ 10 m/s ។<br>
+            • សំទុះ៖ <b>a<sub>5</sub> = Δv / Δt = (10 - 0) / (30 - 25) = <span style="color:#007bff;">2.0 m/s²</span></b> (រថយន្តធ្វើ<b>ចលនាត្រង់ស្ទុះស្មើ</b>ម្តងទៀត)។
+        </div>
+    </div>
+    
+    <div class="dashboard">
+        <div id="timeDisplay">ពេល (t): 0.00 s</div>
+        <div id="accelDisplay">សំទុះ (a): 0.00 m/s²</div>
+        <div id="velDisplay">ល្បឿន (v): 0.00 m/s</div>
+        <div id="posDisplay">ចម្ងាយចរ (x): 0.00 m</div>
+    </div>
+
+    <!-- ផ្ទាំងគំនូររថយន្ត និងផ្លូវ -->
+    <canvas id="simCanvas" width="850" height="200"></canvas>
+
+    <!-- ប៊ូតុងបញ្ជាចលនា នៅខាងក្រោមផ្ទាល់រូបចលនាឡាន -->
+    <div class="controls">
+        <button id="startBtn" onclick="startSim()">▶ ចាប់ផ្តើម</button>
+        <button id="resetBtn" onclick="resetSim()">↺ ចាប់ផ្តើមម្តងទៀត</button>
+    </div>
+
+    <!-- ផ្ទាំងក្រាហ្វិក -->
+    <div class="graph-container">
+        <div class="graph-box">
+            <h3>រូបទី 1.26៖ ក្រាហ្វិកល្បឿន និង រយៈពេល (v-t)</h3>
+            <canvas id="vCanvas" width="400" height="250"></canvas>
+        </div>
+        <div class="graph-box">
+            <h3>ក្រាហ្វិកសំទុះ និង រយៈពេល (a-t)</h3>
+            <canvas id="aCanvas" width="400" height="250"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleSolution() {
+        const panel = document.getElementById('solutionPanel');
+        const btn = document.getElementById('solBtn');
+        panel.classList.toggle('show');
+        if (panel.classList.contains('show')) {
+            btn.innerText = "🔼 លាក់ដំណោះស្រាយ";
+            btn.style.backgroundColor = "#007bff";
+        } else {
+            btn.innerText = "📖 ដំណោះស្រាយ";
+            btn.style.backgroundColor = "#28a745";
+        }
+    }
+
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const vCanvas = document.getElementById('vCanvas');
+    const vCtx = vCanvas.getContext('2d');
+    
+    const aCanvas = document.getElementById('aCanvas');
+    const aCtx = aCanvas.getContext('2d');
+    
+    let animationId;
+    let startTime;
+    let isRunning = false;
+    let t = 0; // ពេលគិតជាវិនាទី
+
+    // អថេរចលនា
+    let a = 0; // សំទុះ
+    let v = 0; // ល្បឿន
+    let x = 0; // ចម្ងាយចរ (អតិបរមា 212.5 m)
+
+    function drawScene() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // គូសផ្លូវថ្នល់
+        ctx.fillStyle = "#555";
+        ctx.fillRect(0, 130, canvas.width, 70);
+        
+        // គូសគំនូសកណ្តាលផ្លូវ
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 5;
+        ctx.setLineDash([20, 15]);
+        ctx.beginPath();
+        ctx.moveTo(0, 165);
+        ctx.lineTo(canvas.width, 165);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // គូសរថយន្ត 
+        let scale = 750 / 212.5; 
+        let carX = 20 + (x * scale); 
+        let carY = 90;
+
+        // តួរថយន្ត
+        ctx.fillStyle = "#e74c3c";
+        ctx.fillRect(carX, carY, 60, 30);
+        ctx.fillStyle = "#c0392b";
+        ctx.fillRect(carX + 10, carY - 20, 40, 20);
+
+        // កង់រថយន្ត
+        ctx.fillStyle = "#000";
+        ctx.beginPath(); ctx.arc(carX + 15, carY + 30, 10, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(carX + 45, carY + 30, 10, 0, Math.PI * 2); ctx.fill();
+        
+        // បង្ហាញប្រភេទចលនានៅលើរថយន្ត
+        ctx.fillStyle = "#000";
+        ctx.font = "14px 'Khmer OS Battambang'";
+        let motionText = "";
+        if (t <= 10 && t > 0) motionText = "ចលនាស្ទុះស្មើ";
+        else if (t <= 15 && t > 10) motionText = "ចលនាត្រង់ស្មើ";
+        else if (t <= 20 && t > 15) motionText = "ចលនាយឺតស្មើ";
+        else if (t <= 25 && t > 20) motionText = "ឈប់ស្ងៀម";
+        else if (t <= 30 && t > 25) motionText = "ចលនាស្ទុះស្មើ";
+        
+        ctx.fillText(motionText, carX - 10, carY - 30);
+    }
+
+    // អនុគមន៍សម្រាប់គណនាតម្លៃ v និង a តាមពេល t ដើម្បីគូសក្រាហ្វិក
+    function getV(time) {
+        if (time <= 10) return 1.5 * time;
+        if (time <= 15) return 15;
+        if (time <= 20) return 15 - 3 * (time - 15);
+        if (time <= 25) return 0;
+        if (time <= 30) return 2 * (time - 25);
+        return 0;
+    }
+    function getA(time) {
+        if (time < 10) return 1.5;
+        if (time >= 10 && time < 15) return 0;
+        if (time >= 15 && time < 20) return -3;
+        if (time >= 20 && time < 25) return 0;
+        if (time >= 25 && time <= 30) return 2;
+        return 0;
+    }
+
+    // អនុគមន៍បំប្លែងតម្លៃទៅជាកូអរដោនេលើផ្ទាំង Canvas ក្រាហ្វិក
+    function mapX(time) { return 40 + (time / 30) * 330; } 
+    function mapY_V(vel) { return 210 - (vel / 20) * 170; } 
+    function mapY_A(acc) { return 125 - (acc / 4) * 85; } 
+
+    function drawAxes(ctxType) {
+        let cx = (ctxType === 'v') ? vCtx : aCtx;
+        cx.strokeStyle = "#333";
+        cx.lineWidth = 1;
+        cx.font = "12px Arial";
+        cx.fillStyle = "#333";
+
+        if (ctxType === 'v') {
+            cx.beginPath(); cx.moveTo(40, 20); cx.lineTo(40, 210); cx.stroke(); // Y
+            cx.beginPath(); cx.moveTo(40, 210); cx.lineTo(380, 210); cx.stroke(); // X
+            cx.fillText("v (m/s)", 15, 15);
+            cx.fillText("t (s)", 375, 225);
+            for(let vel = 0; vel <= 20; vel+=5) {
+                let y = mapY_V(vel);
+                cx.fillText(vel, 20, y+4);
+                cx.beginPath(); cx.moveTo(35, y); cx.lineTo(40, y); cx.stroke();
+            }
+        } else {
+            cx.beginPath(); cx.moveTo(40, 20); cx.lineTo(40, 230); cx.stroke(); // Y
+            cx.beginPath(); cx.moveTo(40, 125); cx.lineTo(380, 125); cx.stroke(); // X (at a=0)
+            cx.fillText("a (m/s²)", 10, 15);
+            cx.fillText("t (s)", 375, 140);
+            for(let acc = -4; acc <= 4; acc+=2) {
+                let y = mapY_A(acc);
+                cx.fillText(acc, 20, y+4);
+                cx.beginPath(); cx.moveTo(35, y); cx.lineTo(40, y); cx.stroke();
+            }
+        }
+        
+        for(let time = 0; time <= 30; time+=5) {
+            let x = mapX(time);
+            let y_base = (ctxType === 'v') ? 210 : 125;
+            cx.fillText(time, x-5, y_base + 15);
+            cx.beginPath(); cx.moveTo(x, y_base-3); cx.lineTo(x, y_base+3); cx.stroke();
+        }
+    }
+
+    function drawGraphLines() {
+        // Clear Canvases
+        vCtx.clearRect(0, 0, vCanvas.width, vCanvas.height);
+        aCtx.clearRect(0, 0, aCanvas.width, aCanvas.height);
+        
+        // Draw Axes
+        drawAxes('v');
+        drawAxes('a');
+
+        // Draw Full Path Backgrounds (ស្រមោលក្រាហ្វិកពេញ)
+        vCtx.beginPath();
+        vCtx.strokeStyle = "rgba(0,0,0,0.1)";
+        vCtx.lineWidth = 2;
+        vCtx.moveTo(mapX(0), mapY_V(getV(0)));
+        for (let time = 0; time <= 30; time += 0.1) {
+            vCtx.lineTo(mapX(time), mapY_V(getV(time)));
+        }
+        vCtx.stroke();
+
+        aCtx.beginPath();
+        aCtx.strokeStyle = "rgba(0,0,0,0.1)";
+        aCtx.lineWidth = 2;
+        aCtx.moveTo(mapX(0), mapY_A(getA(0)));
+        for (let time = 0; time <= 30; time += 0.05) {
+            aCtx.lineTo(mapX(time), mapY_A(getA(time)));
+        }
+        aCtx.stroke();
+
+        // Draw Current Path (គំនូសក្រាហ្វិកគូសតាមពេលជាក់ស្តែង)
+        vCtx.beginPath();
+        vCtx.strokeStyle = "#007bff";
+        vCtx.lineWidth = 3;
+        vCtx.moveTo(mapX(0), mapY_V(getV(0)));
+        for (let time = 0; time <= t; time += 0.1) {
+            vCtx.lineTo(mapX(time), mapY_V(getV(time)));
+        }
+        vCtx.stroke();
+        
+        // ចំណុចក្រហមនៅលើក្រាហ្វិកល្បឿន
+        vCtx.beginPath();
+        vCtx.fillStyle = "red";
+        vCtx.arc(mapX(t), mapY_V(getV(t)), 5, 0, Math.PI*2);
+        vCtx.fill();
+
+        aCtx.beginPath();
+        aCtx.strokeStyle = "#e74c3c";
+        aCtx.lineWidth = 3;
+        aCtx.moveTo(mapX(0), mapY_A(getA(0)));
+        for (let time = 0; time <= t; time += 0.05) {
+            aCtx.lineTo(mapX(time), mapY_A(getA(time)));
+        }
+        aCtx.stroke();
+
+        // ចំណុចខៀវនៅលើក្រាហ្វិកសំទុះ
+        aCtx.beginPath();
+        aCtx.fillStyle = "blue";
+        aCtx.arc(mapX(t), mapY_A(getA(t)), 5, 0, Math.PI*2);
+        aCtx.fill();
+    }
+
+    function updatePhysics() {
+        if (t <= 10) {
+            a = 1.5; v = 1.5 * t; x = 0.5 * 1.5 * t * t;
+        } else if (t <= 15) {
+            a = 0; v = 15; x = 75 + 15 * (t - 10);
+        } else if (t <= 20) {
+            a = -3; v = 15 - 3 * (t - 15); x = 150 + 15 * (t - 15) - 0.5 * 3 * (t - 15) * (t - 15);
+        } else if (t <= 25) {
+            a = 0; v = 0; x = 187.5;
+        } else if (t <= 30) {
+            a = 2; v = 2 * (t - 25); x = 187.5 + 0.5 * 2 * (t - 25) * (t - 25);
+        } else {
+            t = 30; a = 0; v = 0; x = 212.5;
+            isRunning = false;
+            document.getElementById('startBtn').innerText = "▶ ចាប់ផ្តើម";
+        }
+    }
+
+    function updateDashboard() {
+        document.getElementById('timeDisplay').innerText = `ពេល (t): ${t.toFixed(2)} s`;
+        document.getElementById('accelDisplay').innerText = `សំទុះ (a): ${a.toFixed(2)} m/s²`;
+        document.getElementById('velDisplay').innerText = `ល្បឿន (v): ${v.toFixed(2)} m/s`;
+        document.getElementById('posDisplay').innerText = `ចម្ងាយចរ (x): ${x.toFixed(2)} m`;
+    }
+
+    function loop(timestamp) {
+        if (!isRunning) return;
+        
+        if (!startTime) startTime = timestamp;
+        let progress = (timestamp - startTime) / 1000; 
+        t = progress;
+
+        updatePhysics();
+        drawScene();
+        drawGraphLines();
+        updateDashboard();
+
+        if (isRunning) {
+            animationId = requestAnimationFrame(loop);
+        }
+    }
+
+    function startSim() {
+        if (!isRunning) {
+            if (t >= 30) resetSim();
+            isRunning = true;
+            startTime = performance.now() - (t * 1000);
+            animationId = requestAnimationFrame(loop);
+            document.getElementById('startBtn').innerText = "⏸ ផ្អាក";
+        } else {
+            isRunning = false;
+            cancelAnimationFrame(animationId);
+            document.getElementById('startBtn').innerText = "▶ បន្ត";
+        }
+    }
+
+    function resetSim() {
+        isRunning = false;
+        cancelAnimationFrame(animationId);
+        t = 0; a = 0; v = 0; x = 0;
+        startTime = null;
+        updateDashboard();
+        drawScene();
+        drawGraphLines();
+        document.getElementById('startBtn').innerText = "▶ ចាប់ផ្តើម";
+    }
+
+    // គូររូបភាពដំបូងពេលបើក
+    resetSim();
+</script>
+
+</body>
+</html>
