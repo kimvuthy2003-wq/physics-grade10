@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ការពិសោធន៍សម្ពាធទឹក និងបន្ទះលោហៈ (3D Simulation)</title>
+
+    <!-- Google Fonts សម្រាប់គាំទ្រអក្សរខ្មែរយូនីកូដបន្ថែមប្រសិនបើឧបករណ៍គ្មាន Khmer OS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Three.js សម្រាប់ 3D WebGL -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- MathJax សម្រាប់រូបមន្តគណិតវិទ្យា និងរូបវិទ្យា -->
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
+            startup: { typeset: true }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        * {
+            font-family: 'Khmer OS', 'Khmer OS Siemreap', 'Khmer OS System', 'Kantumruy Pro', sans-serif;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            color: #102a43;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        /* Custom Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #cbd5e1;
+            border-radius: 999px;
+            outline: none;
+            transition: background 0.2s;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #0284c7;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            border: 3px solid #ffffff;
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover,
+        input[type=range]::-webkit-slider-thumb:active {
+            transform: scale(1.18);
+            background: #0369a1;
+        }
+        #sliderH::-webkit-slider-thumb { background: #dc2626; }
+        #sliderA::-webkit-slider-thumb { background: #0284c7; }
+        #sliderM1::-webkit-slider-thumb { background: #d97706; }
+        #sliderM2::-webkit-slider-thumb { background: #7c3aed; }
+
+        /* 3D Canvas Container */
+        #canvas-wrapper {
+            position: relative;
+            width: 100%;
+            height: 540px;
+            background: radial-gradient(circle at 50% 25%, #1e293b 0%, #0f172a 100%);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.4), inset 0 0 0 2px rgba(255, 255, 255, 0.1);
+            touch-action: none; /* សំខាន់សម្រាប់ការអូសម្រាមដៃលើទូរសព្ទដោយមិនឱ្យរំកិលទំព័រ */
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #three-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .floating-badge {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        @keyframes pulse-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .animate-bounce-gentle {
+            animation: pulse-slow 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="py-4 px-3 sm:px-6 lg:px-8">
+
+<div class="max-w-6xl mx-auto space-y-5">
+
+    <!-- ក្បាលទំព័រ និងប្រធានបទពិសោធន៍ -->
+    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-sky-700 via-blue-700 to-indigo-800 px-5 py-4 text-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-2xl shadow-inner">
+                    🧪
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-wide">ការពិសោធន៍សម្ពាធទឹក និងបន្ទះបិទបាតបំពង់ (3D)</h1>
+                    <p class="text-xs sm:text-sm text-sky-100 opacity-90">ពិសោធន៍និម្មិត 3D អន្តរកម្ម — ប៉ះអូសបំពង់ដោយផ្ទាល់លើអេក្រង់</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 self-start sm:self-auto">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    3D ផ្ទាល់ (Interactive)
+                </span>
+            </div>
+        </div>
+
+        <div class="p-4 sm:p-5 bg-amber-50/90 border-t border-amber-200 text-amber-950 text-sm sm:text-base leading-relaxed">
+            <span class="font-bold text-amber-800 bg-amber-200/70 px-2 py-0.5 rounded mr-1">ប្រធានបទពិសោធន៍៖</span>
+            គេយកបន្ទះលោហៈ ឬក្រដាសរឹងតូចមួយ (ម៉ាស $m_1$) មកដាក់បិទមាត់បំពង់កែវ (ផ្ទៃមុខកាត់ $A$) រួចសង្កត់បញ្ចុះទៅក្នុងទឹក (ម៉ាសមាឌ $\rho = 1000\text{ kg/m}^3$) ឱ្យបានជម្រៅ $h$។ កម្លាំងរុញពីទឹកធ្វើឱ្យបន្ទះនេះមិនធ្លាក់។ បន្ទាប់មក គេដាក់ដុំទម្ងន់បន្ថែម (ម៉ាស $m_2$) ចូលទៅក្នុងបំពង់ រួចទាញបំពង់ឡើងលើសន្សឹមៗ។ <strong>តើនៅជម្រៅណាដែលបន្ទះនោះចាប់ផ្តើមរបូតធ្លាក់?</strong>
+        </div>
+    </div>
+
+    <!-- ផ្នែកកណ្តាល៖ ផ្ទាំងពិសោធន៍ 3D និងផ្ទាំងបញ្ជា -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+        <!-- ផ្នែកខាងឆ្វេង៖ 3D Simulation Viewport (7 Columns) -->
+        <div class="lg:col-span-7 flex flex-col gap-3">
+            <div id="canvas-wrapper">
+                <canvas id="three-canvas"></canvas>
+
+                <!-- ផ្លាកណែនាំការប៉ះអូសបំពង់ -->
+                <div id="drag-hint" class="floating-badge absolute top-3 left-3 bg-slate-900/75 text-white px-3.5 py-2 rounded-xl border border-white/15 text-xs sm:text-sm flex items-center gap-2.5 shadow-lg pointer-events-none animate-bounce-gentle">
+                    <span class="text-xl">👆</span>
+                    <div>
+                        <div class="font-bold text-sky-300">ប៉ះអូសបំពង់កែវឡើងលើ-ចុះក្រោម</div>
+                        <div class="text-[11px] text-slate-300">ឬអូសផ្នែកខាងក្រៅធុងដើម្បីបង្វិលមុំកាមេរ៉ា 3D</div>
+                    </div>
+                </div>
+
+                <!-- ផ្លាកបង្ហាញស្ថានភាពបន្ទះនៅលើអេក្រង់ 3D -->
+                <div class="floating-badge absolute top-3 right-3 bg-slate-900/80 px-3.5 py-2 rounded-xl border border-white/15 text-right shadow-lg pointer-events-none">
+                    <div class="text-[11px] text-slate-400">ស្ថានភាពបន្ទះបាត ($m_1$)</div>
+                    <div id="badge-status" class="text-sm sm:text-base font-bold text-emerald-400 flex items-center justify-end gap-1.5 mt-0.5">
+                        <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>
+                        <span id="status-text">ជាប់នឹងបំពង់</span>
+                    </div>
+                </div>
+
+                <!-- ស្លាក 2D ដើរតាមទីតាំង 3D នៃវ៉ិចទ័រកម្លាំង និងជម្រៅ h -->
+                <div id="label-fup" class="floating-badge absolute px-2.5 py-1 rounded-lg bg-emerald-950/85 border border-emerald-400/50 text-emerald-300 text-xs font-bold pointer-events-none shadow-md transition-opacity duration-150" style="left: 50%; top: 45%;">
+                    ↑ $F_{up}$ = <span id="lbl-fup-val">2.94</span> N
+                </div>
+                <div id="label-fdown" class="floating-badge absolute px-2.5 py-1 rounded-lg bg-purple-950/85 border border-purple-400/50 text-purple-200 text-xs font-bold pointer-events-none shadow-md transition-opacity duration-150" style="left: 50%; top: 65%;">
+                    ↓ $F_{down}$ = <span id="lbl-fdown-val">0.39</span> N
+                </div>
+                <div id="label-depth" class="floating-badge absolute px-2.5 py-1 rounded-lg bg-rose-950/90 border border-rose-400/60 text-rose-200 text-xs font-bold pointer-events-none shadow-md" style="left: 18%; top: 50%;">
+                    ជម្រៅ $h$ = <span id="lbl-h-val">15.0</span> cm
+                </div>
+
+                <!-- ប៊ូតុងដាក់បន្ទះភ្ជាប់ឡើងវិញ និងកំណត់កាមេរ៉ា (នៅខាងក្រោមអេក្រង់ 3D) -->
+                <div class="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-auto">
+                    <button id="btn-reattach" onclick="reattachPlate()" class="hidden items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 active:scale-95 text-white font-bold px-4 py-2.5 rounded-xl shadow-lg border border-amber-300/40 text-xs sm:text-sm transition-all cursor-pointer">
+                        <span>🔄</span>
+                        <span>ដាក់បន្ទះភ្ជាប់មាត់បំពង់ឡើងវិញ (សង្កត់ចុះទឹក)</span>
+                    </button>
+
+                    <div class="flex items-center gap-2 ml-auto">
+                        <button onclick="resetCameraView()" class="floating-badge bg-slate-800/80 hover:bg-slate-700/90 active:scale-95 text-slate-200 text-xs px-3 py-2 rounded-xl border border-white/15 shadow transition cursor-pointer">
+                            🎥 កាមេរ៉ាដើម
+                        </button>
+                        <button onclick="resetExperiment()" class="floating-badge bg-sky-700/85 hover:bg-sky-600/95 active:scale-95 text-white text-xs px-3 py-2 rounded-xl border border-sky-400/30 shadow transition cursor-pointer">
+                            ↺ កំណត់តម្លៃដើម
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ផ្នែកខាងស្តាំ៖ ផ្ទាំងទិន្នន័យ (Dashboard) និង Sliders បញ្ជា (5 Columns) -->
+        <div class="lg:col-span-5 flex flex-col gap-4">
+
+            <!-- ផ្ទាំងបង្ហាញតម្លៃគណនាផ្ទាល់ (4 Cards) -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border-t-4 border-emerald-500 border-x border-b border-slate-200">
+                    <div class="text-xs text-slate-500 font-semibold">កម្លាំងរុញពីទឹក ($F_{up}$)</div>
+                    <div id="liveFup" class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-1">2.94 N</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">$F_{up} = \rho g h A$</div>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border-t-4 border-purple-600 border-x border-b border-slate-200">
+                    <div class="text-xs text-slate-500 font-semibold">កម្លាំងទាញចុះ ($F_{down}$)</div>
+                    <div id="liveFdown" class="text-xl sm:text-2xl font-extrabold text-purple-700 mt-1">0.39 N</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">$F_{down} = (m_1 + m_2)g$</div>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border-t-4 border-amber-500 border-x border-b border-slate-200">
+                    <div class="text-xs text-slate-500 font-semibold">ជម្រៅលំនឹងផុតកំណត់ ($h_c$)</div>
+                    <div id="liveHc" class="text-xl sm:text-2xl font-extrabold text-amber-600 mt-1">2.0 cm</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">ធ្លាក់ពេល $h < h_c$</div>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border-t-4 border-sky-600 border-x border-b border-slate-200">
+                    <div class="text-xs text-slate-500 font-semibold">ស្ថានភាពបន្ទះបាត</div>
+                    <div id="liveStatus" class="text-lg sm:text-xl font-extrabold text-emerald-600 mt-1">ជាប់នឹងបំពង់</div>
+                    <div id="liveDiff" class="text-[11px] text-slate-500 mt-0.5">$\Delta F = +2.55\text{ N}$</div>
+                </div>
+            </div>
+
+            <!-- ឧបករណ៍កែតម្រូវតម្លៃ (Sliders) -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                    <h2 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+                        <span>🎛️</span> ប៉ារ៉ាម៉ែត្រនៃការពិសោធន៍
+                    </h2>
+                    <span class="text-xs text-slate-400">អូសបំពង់ 3D ឬកែខាងក្រោម</span>
+                </div>
+
+                <!-- Slider 1: ជម្រៅ h -->
+                <div class="bg-rose-50/60 p-3 rounded-xl border border-rose-100">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label for="sliderH" class="text-xs sm:text-sm font-bold text-slate-700">
+                            ១. ជម្រៅបំពង់លិចក្នុងទឹក ($h$) ៖
+                        </label>
+                        <span class="px-2.5 py-0.5 rounded-md bg-rose-600 text-white font-bold text-sm">
+                            <span id="valH">15.0</span> cm
+                        </span>
+                    </div>
+                    <input type="range" id="sliderH" min="1.0" max="28.0" value="15.0" step="0.1">
+                    <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                        <span>1.0 cm (ជិតផ្ទៃទឹក)</span>
+                        <span id="hc-marker-text" class="text-amber-700 font-semibold">ជម្រៅធ្លាក់ $h_c = 2.0\text{ cm}$</span>
+                        <span>28.0 cm (ជ្រៅ)</span>
+                    </div>
+                </div>
+
+                <!-- Slider 2: ផ្ទៃមុខកាត់ A -->
+                <div class="bg-sky-50/60 p-3 rounded-xl border border-sky-100">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label for="sliderA" class="text-xs sm:text-sm font-bold text-slate-700">
+                            ២. ផ្ទៃមុខកាត់បំពង់កែវ ($A$) ៖
+                        </label>
+                        <span class="px-2.5 py-0.5 rounded-md bg-sky-600 text-white font-bold text-sm">
+                            <span id="valA">20.0</span> cm²
+                        </span>
+                    </div>
+                    <input type="range" id="sliderA" min="10.0" max="60.0" value="20.0" step="1.0">
+                    <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                        <span>10 cm² (បំពង់តូច)</span>
+                        <span>60 cm² (បំពង់ធំ)</span>
+                    </div>
+                </div>
+
+                <!-- Slider 3: ម៉ាសបន្ទះបាត m1 -->
+                <div class="bg-amber-50/60 p-3 rounded-xl border border-amber-100">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label for="sliderM1" class="text-xs sm:text-sm font-bold text-slate-700">
+                            ៣. ម៉ាសបន្ទះបិទបាត ($m_1$) ៖
+                        </label>
+                        <span class="px-2.5 py-0.5 rounded-md bg-amber-600 text-white font-bold text-sm">
+                            <span id="valM1">40</span> g
+                        </span>
+                    </div>
+                    <input type="range" id="sliderM1" min="5" max="150" value="40" step="5">
+                    <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                        <span>5 g (ក្រដាសរឹងស្រាល)</span>
+                        <span>150 g (បន្ទះលោហៈធ្ងន់)</span>
+                    </div>
+                </div>
+
+                <!-- Slider 4: ម៉ាសទម្ងន់បន្ថែម m2 -->
+                <div class="bg-purple-50/60 p-3 rounded-xl border border-purple-100">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label for="sliderM2" class="text-xs sm:text-sm font-bold text-slate-700">
+                            ៤. ម៉ាសកូនទម្ងន់បន្ថែមក្នុងបំពង់ ($m_2$) ៖
+                        </label>
+                        <span class="px-2.5 py-0.5 rounded-md bg-purple-600 text-white font-bold text-sm">
+                            <span id="valM2">0</span> g
+                        </span>
+                    </div>
+                    <input type="range" id="sliderM2" min="0" max="300" value="0" step="10">
+                    <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                        <span>0 g (គ្មានដុំទម្ងន់)</span>
+                        <span>300 g (ដុំទម្ងន់ធ្ងន់)</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយ និងការវិភាគតាមទ្រឹស្តីរូបវិទ្យា -->
+    <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-5 sm:p-6 space-y-5">
+        <!-- ប្រអប់សន្និដ្ឋានផ្ទាល់ -->
+        <div id="theoryNote" class="p-4 rounded-xl bg-emerald-50 border-l-4 border-emerald-600 text-emerald-950 text-sm sm:text-base leading-relaxed">
+            💡 <strong>ការវិភាគផ្ទាល់៖</strong> កម្លាំងរុញពីទឹកធំជាងកម្លាំងទាញចុះនៃទម្ងន់ ($F_{up} \ge F_{down}$ ឬសម្ពាធទឹក $P_2 \ge P_1$) ធ្វើឱ្យបន្ទះបាត <strong>នៅជាប់ស្អិតនឹងមាត់បំពង់កែវ</strong>។ សាកល្បងយកម្រាមដៃប៉ះអូសបំពង់កែវឡើងលើឱ្យផុតជម្រៅលំនឹង $h_c$ នោះបន្ទះនឹងរបូតធ្លាក់ចុះទៅបាតធុង!
+        </div>
+
+        <div class="border-b border-slate-200 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <h3 class="text-lg sm:text-xl font-bold text-slate-800">
+                📐 ដំណោះស្រាយ និងការគណនាតាមទ្រឹស្តី (វិធីទី១ និងវិធីទី២)
+            </h3>
+            <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                $\rho_{\text{ទឹក}} = 1000\text{ kg/m}^3$, $g = 9.80\text{ m/s}^2$
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm sm:text-base">
+            <!-- វិធីទី១ និងទី២ តាមសម្ពាធ -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 overflow-x-auto">
+                <div class="font-bold text-sky-800 border-b border-slate-200 pb-1.5">
+                    ១. ការប្រៀបធៀបសម្ពាធក្នុងបំពង់ ($P_1$) និងសម្ពាធទឹក ($P_2$)
+                </div>
+                <p class="text-slate-700 text-xs sm:text-sm">
+                    • <strong>សម្ពាធសរុបសង្កត់លើបន្ទះពីខាងក្នុងបំពង់ ($P_1$)៖</strong>
+                </p>
+                <div class="bg-white p-2.5 rounded-lg border border-slate-200 text-center">
+                    $$ P_1 = P_{at} + \frac{(m_1 + m_2)g}{A} $$
+                </div>
+                <p class="text-slate-700 text-xs sm:text-sm">
+                    • <strong>សម្ពាធទឹករុញបន្ទះពីខាងក្រោមឡើងលើ ($P_2$)៖</strong>
+                </p>
+                <div class="bg-white p-2.5 rounded-lg border border-slate-200 text-center">
+                    $$ P_2 = P_{at} + \rho g h $$
+                </div>
+                <p class="text-slate-600 text-xs leading-relaxed">
+                    ដោយសារសម្ពាធបរិយាកាស $P_{at}$ មានតម្លៃស្មើគ្នាទាំងសងខាង នោះបន្ទះចាប់ផ្តើមរបូតធ្លាក់នៅពេល $P_1 > P_2$ ឬនៅជម្រៅលំនឹង $h_c = \frac{m_1 + m_2}{\rho A}$។
+                </p>
+            </div>
+
+            <!-- ការគណនាតម្លៃកម្លាំងផ្ទាល់ -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 overflow-x-auto">
+                <div class="font-bold text-indigo-800 border-b border-slate-200 pb-1.5">
+                    ២. ការគណនាតម្លៃកម្លាំងផ្ទាល់តាមប៉ារ៉ាម៉ែត្របច្ចុប្បន្ន
+                </div>
+                <p class="text-slate-700 text-xs sm:text-sm">
+                    • <strong>កម្លាំងទាញចុះក្រោមសរុប ($F_{down}$)៖</strong>
+                </p>
+                <div id="mathLine3" class="bg-white p-2.5 rounded-lg border border-slate-200 text-center text-xs sm:text-sm">
+                    $$ F_{down} = (m_1 + m_2)g = (0.040 + 0.000) \times 9.80 = 0.39 \text{ N} $$
+                </div>
+
+                <p class="text-slate-700 text-xs sm:text-sm">
+                    • <strong>កម្លាំងរុញរបស់ទឹកឡើងលើ ($F_{up}$)៖</strong>
+                </p>
+                <div id="mathLine4" class="bg-white p-2.5 rounded-lg border border-slate-200 text-center text-xs sm:text-sm">
+                    $$ F_{up} = \rho g h A = 1000 \times 9.80 \times 0.150 \times 0.0020 = 2.94 \text{ N} $$
+                </div>
+
+                <div class="bg-amber-50/90 p-2.5 rounded-lg border border-amber-200 text-xs text-amber-950 leading-relaxed">
+                    <strong>ចំណាំពិសេស៖</strong> បើបង្កើនផ្ទៃមុខកាត់បំពង់ $A$ ឱ្យធំជាងមុន នោះកម្លាំងរុញពីទឹក $F_{up} = \rho g h A$ ក៏កើនឡើងសមាមាត្រដែរ ដែលធ្វើឱ្យបន្ទះកាន់តែជាប់ណែន និងត្រូវការទាញឡើងដល់ជម្រៅកាន់តែរាក់ទើបធ្លាក់។
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ==========================================
+    // ១. អថេររូបវិទ្យា និងការកំណត់ខ្នាតក្នុងលំហ 3D
+    // ==========================================
+    var rho = 1000.0; // kg/m^3
+    var g = 9.80;     // m/s^2
+
+    var h_cm = 15.0;  // ជម្រៅបំពង់លិចក្នុងទឹក (cm)
+    var a_cm2 = 20.0; // ផ្ទៃមុខកាត់បំពង់ (cm^2)
+    var m1_g = 40.0;  // ម៉ាសបន្ទះបាត (g)
+    var m2_g = 0.0;   // ម៉ាសកូនទម្ងន់បន្ថែម (g)
+
+    // ស្ថានភាពបន្ទះ (ជាប់នឹងបំពង់ ឬ របូតធ្លាក់)
+    var isPlateDetached = false;
+    var plateCurrentY = 0;
+    var plateVelY = 0;
+    var plateTiltAngle = 0;
+
+    // ការកំណត់ខ្នាត 3D (1 ឯកតា 3D = 2 cm ក្នុងពិសោធន៍)
+    var CM_TO_3D = 0.25;              // 1 cm = 0.25 3D units
+    var WATER_SURFACE_Y = 2.2;        // កម្ពស់ផ្ទៃទឹក (h = 0 cm)
+    var TANK_BOTTOM_Y = WATER_SURFACE_Y - (30.0 * CM_TO_3D); // បាតធុងនៅជម្រៅ 30 cm (-5.3)
+    var TANK_TOP_Y = WATER_SURFACE_Y + (7.0 * CM_TO_3D);     // មាត់ធុងខាងលើ (+3.95)
+    var TANK_RADIUS = 3.2;            // កាំធុងទឹកធំ
+
+    // DOM Elements
+    var sH = document.getElementById('sliderH');
+    var sA = document.getElementById('sliderA');
+    var sM1 = document.getElementById('sliderM1');
+    var sM2 = document.getElementById('sliderM2');
+
+    var vH = document.getElementById('valH');
+    var vA = document.getElementById('valA');
+    var vM1 = document.getElementById('valM1');
+    var vM2 = document.getElementById('valM2');
+
+    var btnReattach = document.getElementById('btn-reattach');
+    var canvasWrapper = document.getElementById('canvas-wrapper');
+    var canvasEl = document.getElementById('three-canvas');
+
+    // ==========================================
+    // ២. ការបង្កើតឆាក 3D (Three.js Scene Setup)
+    // ==========================================
+    var scene = new THREE.Scene();
+
+    var camera = new THREE.PerspectiveCamera(40, canvasWrapper.clientWidth / canvasWrapper.clientHeight, 0.1, 100);
+    // មុំកាមេរ៉ាអាចបង្វិលបានបន្តិច
+    var camAzimuth = 0.28;
+    var camElevation = 0.22;
+    var camDistance = 16.2;
+    var camTarget = new THREE.Vector3(0, -0.6, 0);
+
+    function updateCameraPosition() {
+        camera.position.x = camTarget.x + camDistance * Math.sin(camAzimuth) * Math.cos(camElevation);
+        camera.position.y = camTarget.y + camDistance * Math.sin(camElevation);
+        camera.position.z = camTarget.z + camDistance * Math.cos(camAzimuth) * Math.cos(camElevation);
+        camera.lookAt(camTarget);
+    }
+    updateCameraPosition();
+
+    var renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: true });
+    renderer.setSize(canvasWrapper.clientWidth, canvasWrapper.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    // ភ្លើងបំភ្លឺក្នុងឆាក 3D (Lighting)
+    var ambientLight = new THREE.AmbientLight(0xdbeafe, 0.75);
+    scene.add(ambientLight);
+
+    var dirLight1 = new THREE.DirectionalLight(0xffffff, 1.1);
+    dirLight1.position.set(8, 14, 10);
+    dirLight1.castShadow = true;
+    scene.add(dirLight1);
+
+    var dirLight2 = new THREE.DirectionalLight(0x38bdf8, 0.55);
+    dirLight2.position.set(-10, -4, -6);
+    scene.add(dirLight2);
+
+    var pointLight = new THREE.PointLight(0x7dd3fc, 0.6, 20);
+    pointLight.position.set(0, 3, 5);
+    scene.add(pointLight);
+
+    // ==========================================
+    // ៣. សាងសង់វត្ថុពិសោធន៍ 3D (Tank, Water, Tube, Plate, Weights)
+    // ==========================================
+
+    // ៣.១ តុពិសោធន៍ខាងក្រោមធុង (Lab Base Pedestal)
+    var baseGeo = new THREE.CylinderGeometry(TANK_RADIUS + 0.6, TANK_RADIUS + 0.8, 0.45, 48);
+    var baseMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.4, roughness: 0.35 });
+    var baseMesh = new THREE.Mesh(baseGeo, baseMat);
+    baseMesh.position.y = TANK_BOTTOM_Y - 0.25;
+    baseMesh.receiveShadow = true;
+    scene.add(baseMesh);
+
+    // ៣.២ ទឹកក្នុងធុង (3D Water Cylinder + Animated Rippling Top Surface)
+    var waterHeight = WATER_SURFACE_Y - TANK_BOTTOM_Y;
+    var waterGeo = new THREE.CylinderGeometry(TANK_RADIUS - 0.08, TANK_RADIUS - 0.08, waterHeight, 48, 1, true);
+    var waterMat = new THREE.MeshPhongMaterial({
+        color: 0x0284c7,
+        emissive: 0x0369a1,
+        emissiveIntensity: 0.18,
+        specular: 0xbae6fd,
+        shininess: 90,
+        transparent: true,
+        opacity: 0.42,
+        side: THREE.DoubleSide,
+        depthWrite: false
+    });
+    var waterBodyMesh = new THREE.Mesh(waterGeo, waterMat);
+    waterBodyMesh.position.y = TANK_BOTTOM_Y + waterHeight / 2;
+    scene.add(waterBodyMesh);
+
+    // ផ្ទៃទឹកខាងលើ (Water Meniscus / Surface Disc)
+    var waterTopGeo = new THREE.CircleGeometry(TANK_RADIUS - 0.08, 48);
+    waterTopGeo.rotateX(-Math.PI / 2);
+    var waterTopMat = new THREE.MeshPhongMaterial({
+        color: 0x38bdf8,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.25,
+        specular: 0xffffff,
+        shininess: 120,
+        transparent: true,
+        opacity: 0.68,
+        side: THREE.DoubleSide,
+        depthWrite: false
+    });
+    var waterTopMesh = new THREE.Mesh(waterTopGeo, waterTopMat);
+    waterTopMesh.position.y = WATER_SURFACE_Y;
+    scene.add(waterTopMesh);
+
+    // កងពន្លឺជុំវិញផ្ទៃទឹក (Meniscus Rim)
+    var meniscusGeo = new THREE.TorusGeometry(TANK_RADIUS - 0.09, 0.03, 16, 64);
+    meniscusGeo.rotateX(Math.PI / 2);
+    var meniscusMat = new THREE.MeshBasicMaterial({ color: 0xe0f2fe, transparent: true, opacity: 0.85 });
+    var meniscusRim = new THREE.Mesh(meniscusGeo, meniscusMat);
+    meniscusRim.position.y = WATER_SURFACE_Y;
+    scene.add(meniscusRim);
+
+    // ៣.៣ ធុងកែវរាងស៊ីឡាំងធំ (Outer Glass Tank)
+    var tankHeight = TANK_TOP_Y - TANK_BOTTOM_Y;
+    var tankGeo = new THREE.CylinderGeometry(TANK_RADIUS, TANK_RADIUS, tankHeight, 48, 1, true);
+    var tankGlassMat = new THREE.MeshPhongMaterial({
+        color: 0xe2e8f0,
+        specular: 0xffffff,
+        shininess: 140,
+        transparent: true,
+        opacity: 0.22,
+        side: THREE.DoubleSide,
+        depthWrite: false
+    });
+    var tankMesh = new THREE.Mesh(tankGeo, tankGlassMat);
+    tankMesh.position.y = TANK_BOTTOM_Y + tankHeight / 2;
+    scene.add(tankMesh);
+
+    // មាត់ធុងកែវខាងលើ និងបាតធុង
+    var tankRimGeo = new THREE.TorusGeometry(TANK_RADIUS, 0.06, 16, 64);
+    tankRimGeo.rotateX(Math.PI / 2);
+    var tankRimMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.6, roughness: 0.2 });
+    var tankTopRim = new THREE.Mesh(tankRimGeo, tankRimMat);
+    tankTopRim.position.y = TANK_TOP_Y;
+    scene.add(tankTopRim);
+
+    var tankBotRim = new THREE.Mesh(tankRimGeo, tankRimMat);
+    tankBotRim.position.y = TANK_BOTTOM_Y;
+    scene.add(tankBotRim);
+
+    // ៣.៤ បន្ទាត់ក្រិតវាស់ជម្រៅទឹកនៅជំហៀងធុង 3D (0 cm ដល់ 30 cm)
+    function createScaleTexture() {
+        var c = document.createElement('canvas');
+        c.width = 256;
+        c.height = 1024;
+        var ctx = c.getContext('2d');
+        ctx.clearRect(0, 0, c.width, c.height);
+
+        // បន្ទាត់ឈរ
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(200, 40);
+        ctx.lineTo(200, 984);
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 34px "Khmer OS", Arial, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+
+        // ពី 0 cm ដល់ 30 cm
+        for (var cm = 0; cm <= 30; cm += 1) {
+            var y = 40 + (cm / 30) * 944;
+            ctx.beginPath();
+            if (cm % 5 === 0) {
+                ctx.lineWidth = 6;
+                ctx.strokeStyle = '#38bdf8';
+                ctx.moveTo(150, y);
+                ctx.lineTo(200, y);
+                ctx.stroke();
+                ctx.fillStyle = '#f8fafc';
+                ctx.fillText(cm + ' cm', 138, y);
+            } else {
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+                ctx.moveTo(175, y);
+                ctx.lineTo(200, y);
+                ctx.stroke();
+            }
+        }
+        return new THREE.CanvasTexture(c);
+    }
+
+    var rulerHeight = WATER_SURFACE_Y - TANK_BOTTOM_Y;
+    var rulerGeo = new THREE.PlaneGeometry(1.55, rulerHeight * (1024 / 944));
+    var rulerMat = new THREE.MeshBasicMaterial({
+        map: createScaleTexture(),
+        transparent: true,
+        side: THREE.DoubleSide,
+        depthWrite: false
+    });
+    var rulerMesh = new THREE.Mesh(rulerGeo, rulerMat);
+    rulerMesh.position.set(-TANK_RADIUS - 0.55, WATER_SURFACE_Y - rulerHeight / 2, 0.6);
+    scene.add(rulerMesh);
+
+    // ៣.៥ បំពង់កែវឈរ 3D (Interactive Glass Tube Group)
+    var tubeGroup = new THREE.Group();
+    scene.add(tubeGroup);
+
+    var TUBE_LENGTH_3D = 8.2; // ប្រវែងបំពង់កែវសរុប
+    var tubeWallGeo = new THREE.CylinderGeometry(1, 1, TUBE_LENGTH_3D, 40, 1, true);
+    // រំកិល Geometry ឱ្យបាតបំពង់នៅត្រង់ y = 0 នៃ tubeGroup
+    tubeWallGeo.translate(0, TUBE_LENGTH_3D / 2, 0);
+
+    var tubeGlassMat = new THREE.MeshPhongMaterial({
+        color: 0xf8fafc,
+        emissive: 0x38bdf8,
+        emissiveIntensity: 0.08,
+        specular: 0xffffff,
+        shininess: 160,
+        transparent: true,
+        opacity: 0.44,
+        side: THREE.DoubleSide
+    });
+    var tubeMesh = new THREE.Mesh(tubeWallGeo, tubeGlassMat);
+    tubeGroup.add(tubeMesh);
+
+    // កងមាត់បំពង់ខាងលើ និងខាងក្រោម
+    var tubeRimGeo = new THREE.TorusGeometry(1, 0.055, 16, 48);
+    tubeRimGeo.rotateX(Math.PI / 2);
+    var tubeRimMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.5, roughness: 0.2 });
+
+    var tubeBottomRim = new THREE.Mesh(tubeRimGeo, tubeRimMat);
+    tubeBottomRim.position.y = 0;
+    tubeGroup.add(tubeBottomRim);
+
+    var tubeTopRim = new THREE.Mesh(tubeRimGeo, tubeRimMat);
+    tubeTopRim.position.y = TUBE_LENGTH_3D;
+    tubeGroup.add(tubeTopRim);
+
+    // ចំណុចទាញនៅផ្នែកខាងលើនៃបំពង់ (Grip Handle Ring ដើម្បីងាយស្រួលមើលឃើញកន្លែងអូស)
+    var gripGeo = new THREE.CylinderGeometry(1.08, 1.08, 0.45, 32, 1, true);
+    var gripMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3, metalness: 0.3 });
+    var gripMesh = new THREE.Mesh(gripGeo, gripMat);
+    gripMesh.position.y = TUBE_LENGTH_3D - 0.5;
+    tubeGroup.add(gripMesh);
+
+    // បំពង់មើលមិនឃើញធំជាងបន្តិចសម្រាប់ងាយស្រួលប៉ះម្រាមដៃលើទូរសព្ទ (Touch Hitbox)
+    var hitBoxGeo = new THREE.CylinderGeometry(1.8, 1.8, TUBE_LENGTH_3D + 1.5, 16);
+    hitBoxGeo.translate(0, TUBE_LENGTH_3D / 2, 0);
+    var hitBoxMat = new THREE.MeshBasicMaterial({ visible: false });
+    var tubeHitBox = new THREE.Mesh(hitBoxGeo, hitBoxMat);
+    tubeGroup.add(tubeHitBox);
+
+    // ៣.៦ បន្ទះបិទបាតបំពង់ (Plate m1) និងដុំទម្ងន់បន្ថែម (Weight m2)
+    var plateGroup = new THREE.Group();
+    scene.add(plateGroup);
+
+    var plateGeo = new THREE.CylinderGeometry(1.08, 1.08, 0.14, 40);
+    var plateMat = new THREE.MeshStandardMaterial({
+        color: 0xf59e0b,
+        metalness: 0.55,
+        roughness: 0.25
+    });
+    var plateMesh = new THREE.Mesh(plateGeo, plateMat);
+    plateMesh.position.y = -0.07;
+    plateGroup.add(plateMesh);
+
+    // កូនទម្ងន់បន្ថែម m2 (រាងស៊ីឡាំងដែកពណ៌ស្វាយ/ក្រហម នៅលើបន្ទះបាត)
+    var weightGroup = new THREE.Group();
+    plateGroup.add(weightGroup);
+
+    var weightBodyGeo = new THREE.CylinderGeometry(0.65, 0.65, 0.9, 32);
+    weightBodyGeo.translate(0, 0.45, 0);
+    var weightMat = new THREE.MeshStandardMaterial({
+        color: 0x9333ea,
+        metalness: 0.65,
+        roughness: 0.25
+    });
+    var weightMesh = new THREE.Mesh(weightBodyGeo, weightMat);
+    weightGroup.add(weightMesh);
+
+    var weightKnobGeo = new THREE.TorusGeometry(0.18, 0.05, 12, 24);
+    var weightKnob = new THREE.Mesh(weightKnobGeo, weightMat);
+    weightKnob.position.y = 0.98;
+    weightGroup.add(weightKnob);
+
+    // ៣.៧ វ៉ិចទ័រកម្លាំង 3D (F_up ពណ៌បៃតង និង F_down ពណ៌ស្វាយ)
+    function createForceArrow3D(hexColor, isUpward) {
+        var group = new THREE.Group();
+        var mat = new THREE.MeshStandardMaterial({
+            color: hexColor,
+            emissive: hexColor,
+            emissiveIntensity: 0.35,
+            roughness: 0.3
+        });
+
+        var shaftGeo = new THREE.CylinderGeometry(0.08, 0.08, 1, 20);
+        shaftGeo.translate(0, 0.5, 0);
+        var shaft = new THREE.Mesh(shaftGeo, mat);
+
+        var headGeo = new THREE.ConeGeometry(0.24, 0.45, 24);
+        headGeo.translate(0, 0.225, 0);
+        var head = new THREE.Mesh(headGeo, mat);
+
+        group.add(shaft);
+        group.add(head);
+
+        group.userData = { shaft: shaft, head: head, isUpward: isUpward };
+        return group;
+    }
+
+    var arrowFup = createForceArrow3D(0x10b981, true);
+    var arrowFdown = createForceArrow3D(0xa855f7, false);
+    scene.add(arrowFup);
+    scene.add(arrowFdown);
+
+    function setArrowLength(arrowGroup, length3D) {
+        var shaftLen = Math.max(0.15, length3D - 0.4);
+        var isUp = arrowGroup.userData.isUpward;
+        arrowGroup.userData.shaft.scale.set(1, shaftLen, 1);
+        arrowGroup.userData.head.position.y = shaftLen;
+        arrowGroup.rotation.z = isUp ? 0 : Math.PI;
+    }
+
+    // ៣.៨ បន្ទាត់ចង្អុលជម្រៅ h និងជម្រៅលំនឹង hc ក្នុង 3D
+    var depthIndicatorMat = new THREE.LineBasicMaterial({ color: 0xf43f5e, linewidth: 2 });
+    var depthPoints = [new THREE.Vector3(-1.8, WATER_SURFACE_Y, 0), new THREE.Vector3(-1.8, 0, 0)];
+    var depthLineGeo = new THREE.BufferGeometry().setFromPoints(depthPoints);
+    var depthLine = new THREE.Line(depthLineGeo, depthIndicatorMat);
+    scene.add(depthLine);
+
+    // កងបង្ហាញកម្រិតជម្រៅលំនឹងផុតកំណត់ (Critical Depth hc Ring)
+    var hcRingGeo = new THREE.RingGeometry(1.12, 1.32, 48);
+    hcRingGeo.rotateX(-Math.PI / 2);
+    var hcRingMat = new THREE.MeshBasicMaterial({
+        color: 0xf59e0b,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.75
+    });
+    var hcRingMesh = new THREE.Mesh(hcRingGeo, hcRingMat);
+    scene.add(hcRingMesh);
+
+    // ៣.៩ ប្រព័ន្ធពពុះទឹក 3D (Water Bubbles ពេលបន្ទះរបូតធ្លាក់)
+    var bubbles = [];
+    var bubbleGeo = new THREE.SphereGeometry(0.08, 12, 12);
+    var bubbleMat = new THREE.MeshPhongMaterial({
+        color: 0xe0f2fe,
+        specular: 0xffffff,
+        shininess: 100,
+        transparent: true,
+        opacity: 0.75
+    });
+
+    function spawnWaterBubbles(originY, tubeRadius3D) {
+        for (var i = 0; i < 18; i++) {
+            var b = new THREE.Mesh(bubbleGeo, bubbleMat);
+            var angle = Math.random() * Math.PI * 2;
+            var r = Math.random() * tubeRadius3D * 0.9;
+            b.position.set(
+                Math.cos(angle) * r,
+                originY + (Math.random() - 0.5) * 0.25,
+                Math.sin(angle) * r
+            );
+            var scale = 0.5 + Math.random() * 1.1;
+            b.scale.set(scale, scale, scale);
+            b.userData = {
+                vy: 0.03 + Math.random() * 0.05,
+                vx: (Math.random() - 0.5) * 0.015,
+                vz: (Math.random() - 0.5) * 0.015
+            };
+            scene.add(b);
+            bubbles.push(b);
+        }
+    }
+
+    // ==========================================
+    // ៤. ការគណនារូបវិទ្យា និងធ្វើបច្ចុប្បន្នភាពទិន្នន័យ
+    // ==========================================
+    var mathJaxTimer = null;
+
+    function getTubeRadius3D() {
+        // បំប្លែងផ្ទៃមុខកាត់ A (10 ដល់ 60 cm^2) ទៅជាកាំបំពង់ក្នុង 3D (0.65 ដល់ 1.45)
+        return 0.52 + Math.sqrt(a_cm2 / Math.PI) * 0.24;
+    }
+
+    function calculatePhysicsAndSyncUI(triggerSource) {
+        if (triggerSource !== 'drag') {
+            h_cm = parseFloat(sH.value);
+        } else {
+            sH.value = h_cm.toFixed(1);
+        }
+        a_cm2 = parseFloat(sA.value);
+        m1_g = parseFloat(sM1.value);
+        m2_g = parseFloat(sM2.value);
+
+        // បង្ហាញតម្លៃលើ Sliders
+        vH.innerText = h_cm.toFixed(1);
+        vA.innerText = a_cm2.toFixed(1);
+        vM1.innerText = m1_g.toFixed(0);
+        vM2.innerText = m2_g.toFixed(0);
+
+        var m1_kg = m1_g / 1000.0;
+        var m2_kg = m2_g / 1000.0;
+        var a_m2 = a_cm2 / 10000.0;
+        var h_m = h_cm / 100.0;
+
+        var fDown = (m1_kg + m2_kg) * g;
+        var fUp = rho * g * h_m * a_m2;
+        var hc_m = (m1_kg + m2_kg) / (rho * a_m2);
+        var hc_cm = hc_m * 100.0;
+
+        var tubeMouthY = WATER_SURFACE_Y - (h_cm * CM_TO_3D);
+        var tubeRadius = getTubeRadius3D();
+
+        // ពិនិត្យលក្ខខណ្ឌរបូតធ្លាក់ ឬភ្ជាប់ឡើងវិញ
+        var shouldFall = (fDown > fUp + 0.0001);
+
+        if (shouldFall && !isPlateDetached) {
+            // បន្ទះចាប់ផ្តើមរបូតធ្លាក់ពីមាត់បំពង់!
+            isPlateDetached = true;
+            plateCurrentY = tubeMouthY;
+            plateVelY = -0.02;
+            spawnWaterBubbles(tubeMouthY, tubeRadius);
+        } else if (!shouldFall && isPlateDetached) {
+            // ប្រសិនបើសិស្សសង្កត់បំពង់ចុះក្រោមដល់បាត ឬជ្រៅជាងជម្រៅលំនឹង ឱ្យបន្ទះភ្ជាប់ឡើងវិញដោយស្វ័យប្រវត្តិ
+            if (tubeMouthY <= plateCurrentY + 0.35 || triggerSource === 'sliderOther') {
+                isPlateDetached = false;
+                plateCurrentY = tubeMouthY;
+                plateVelY = 0;
+                plateTiltAngle = 0;
+            }
+        }
+
+        if (!isPlateDetached) {
+            plateCurrentY = tubeMouthY;
+            plateTiltAngle = 0;
+        }
+
+        // អាប់ដេតផ្ទាំង Dashboard
+        document.getElementById('liveFup').innerText = fUp.toFixed(2) + " N";
+        document.getElementById('liveFdown').innerText = fDown.toFixed(2) + " N";
+        document.getElementById('liveHc').innerText = hc_cm.toFixed(1) + " cm";
+        document.getElementById('hc-marker-text').innerText = "ជម្រៅធ្លាក់ hc = " + hc_cm.toFixed(1) + " cm";
+
+        var diffF = fUp - fDown;
+        document.getElementById('liveDiff').innerText = (diffF >= 0 ? "ΔF = +" : "ΔF = ") + diffF.toFixed(2) + " N";
+
+        // អាប់ដេតស្លាកលើអេក្រង់ 3D
+        document.getElementById('lbl-fup-val').innerText = fUp.toFixed(2);
+        document.getElementById('lbl-fdown-val').innerText = fDown.toFixed(2);
+        document.getElementById('lbl-h-val').innerText = h_cm.toFixed(1);
+
+        var statusEl = document.getElementById('liveStatus');
+        var badgeStatusText = document.getElementById('status-text');
+        var badgeStatusDot = document.getElementById('status-dot');
+        var badgeStatusContainer = document.getElementById('badge-status');
+        var theoryNote = document.getElementById('theoryNote');
+
+        if (isPlateDetached) {
+            statusEl.innerText = "របូតធ្លាក់ដល់បាត";
+            statusEl.className = "text-lg sm:text-xl font-extrabold text-rose-600 mt-1";
+            badgeStatusText.innerText = "របូតធ្លាក់!";
+            badgeStatusContainer.className = "text-sm sm:text-base font-bold text-rose-400 flex items-center justify-end gap-1.5 mt-0.5";
+            badgeStatusDot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping inline-block";
+
+            btnReattach.classList.remove('hidden');
+            btnReattach.classList.add('inline-flex');
+
+            theoryNote.className = "p-4 rounded-xl bg-rose-50 border-l-4 border-rose-600 text-rose-950 text-sm sm:text-base leading-relaxed";
+            theoryNote.innerHTML = "⚠️ <strong>សន្និដ្ឋាន៖</strong> នៅជម្រៅ $h = " + h_cm.toFixed(1) + "\\text{ cm} < h_c (" + hc_cm.toFixed(1) + "\\text{ cm})$ កម្លាំងទាញចុះនៃទម្ងន់ ($F_{down} = " + fDown.toFixed(2) + "\\text{ N}$) ធំជាងកម្លាំងរុញពីទឹក ($F_{up} = " + fUp.toFixed(2) + "\\text{ N}$) ធ្វើឱ្យបន្ទះបាត <strong>របូតធ្លាក់ចុះទៅបាតធុងទឹក!</strong> ចុចប៊ូតុង <em>«ដាក់បន្ទះភ្ជាប់ឡើងវិញ»</em> ឬអូសបំពង់ចុះក្រោមដើម្បីភ្ជាប់បន្ទះវិញ។";
+        } else {
+            statusEl.innerText = "ជាប់នឹងបំពង់";
+            statusEl.className = "text-lg sm:text-xl font-extrabold text-emerald-600 mt-1";
+            badgeStatusText.innerText = "ជាប់នឹងបំពង់";
+            badgeStatusContainer.className = "text-sm sm:text-base font-bold text-emerald-400 flex items-center justify-end gap-1.5 mt-0.5";
+            badgeStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block";
+
+            btnReattach.classList.add('hidden');
+            btnReattach.classList.remove('inline-flex');
+
+            theoryNote.className = "p-4 rounded-xl bg-emerald-50 border-l-4 border-emerald-600 text-emerald-950 text-sm sm:text-base leading-relaxed";
+            theoryNote.innerHTML = "💡 <strong>សន្និដ្ឋាន៖</strong> នៅជម្រៅ $h = " + h_cm.toFixed(1) + "\\text{ cm} \\ge h_c (" + hc_cm.toFixed(1) + "\\text{ cm})$ កម្លាំងរុញពីទឹក ($F_{up} = " + fUp.toFixed(2) + "\\text{ N}$) ធំជាងកម្លាំងទាញចុះ ($F_{down} = " + fDown.toFixed(2) + "\\text{ N}$) ធ្វើឱ្យបន្ទះ <strong>ជាប់ស្អិតនឹងមាត់បំពង់កែវ</strong>។ សាកល្បងអូសបំពង់កែវឡើងលើរហូតដល់ផុតជម្រៅ $h_c = " + hc_cm.toFixed(1) + "\\text{ cm}$!";
+        }
+
+        // អាប់ដេតរូបរាង 3D តាមតម្លៃថ្មី
+        update3DGeometries(tubeMouthY, tubeRadius, fUp, fDown, hc_cm);
+
+        // អាប់ដេតរូបមន្តគណិតវិទ្យា MathJax
+        clearTimeout(mathJaxTimer);
+        mathJaxTimer = setTimeout(function () {
+            document.getElementById('mathLine3').innerHTML =
+                "$$ F_{down} = (m_1 + m_2)g = (" + m1_kg.toFixed(3) + " + " + m2_kg.toFixed(3) + ") \\times 9.80 = " + fDown.toFixed(2) + " \\text{ N} $$";
+            document.getElementById('mathLine4').innerHTML =
+                "$$ F_{up} = \\rho g h A = 1000 \\times 9.80 \\times " + h_m.toFixed(3) + " \\times " + a_m2.toFixed(4) + " = " + fUp.toFixed(2) + " \\text{ N} $$";
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([
+                    document.getElementById('mathLine3'),
+                    document.getElementById('mathLine4'),
+                    document.getElementById('theoryNote')
+                ]);
+            }
+        }, 180);
+    }
+
+    function update3DGeometries(tubeMouthY, tubeRadius, fUp, fDown, hc_cm) {
+        // ១. កែទំហំបំពង់កែវ និងទីតាំងឈរតាម h និង A
+        tubeGroup.position.y = tubeMouthY;
+        tubeMesh.scale.set(tubeRadius, 1, tubeRadius);
+        tubeBottomRim.scale.set(tubeRadius, tubeRadius, 1);
+        tubeTopRim.scale.set(tubeRadius, tubeRadius, 1);
+        gripMesh.scale.set(tubeRadius, 1, tubeRadius);
+
+        // ២. កែទំហំបន្ទះបាត (m1) និងកូនទម្ងន់បន្ថែម (m2)
+        var plateThicknessScale = 0.7 + (m1_g / 150.0) * 1.4;
+        plateMesh.scale.set(tubeRadius, plateThicknessScale, tubeRadius);
+
+        if (m2_g > 0) {
+            weightGroup.visible = true;
+            var wRadius = Math.min(tubeRadius * 0.78, 0.35 + (m2_g / 300.0) * 0.45);
+            var wHeight = 0.45 + (m2_g / 300.0) * 1.35;
+            weightGroup.scale.set(wRadius, wHeight, wRadius);
+        } else {
+            weightGroup.visible = false;
+        }
+
+        // ៣. កងបង្ហាញជម្រៅលំនឹង hc ក្នុងទឹក
+        if (hc_cm <= 29.5) {
+            hcRingMesh.visible = true;
+            hcRingMesh.position.y = WATER_SURFACE_Y - (hc_cm * CM_TO_3D);
+            hcRingMesh.scale.set(tubeRadius, tubeRadius, 1);
+        } else {
+            hcRingMesh.visible = false;
+        }
+
+        // ៤. បន្ទាត់វាស់ជម្រៅ h ពីផ្ទៃទឹកដល់មាត់បំពង់
+        var lineX = -tubeRadius - 0.55;
+        var posArr = depthLine.geometry.attributes.position.array;
+        posArr[0] = lineX; posArr[1] = WATER_SURFACE_Y; posArr[2] = 0.5;
+        posArr[3] = lineX; posArr[4] = tubeMouthY;      posArr[5] = 0.5;
+        depthLine.geometry.attributes.position.needsUpdate = true;
+
+        // ៥. វ៉ិចទ័រកម្លាំង F_up និង F_down
+        var lenUp3D = Math.min(Math.max(fUp * 0.48, 0.55), 2.8);
+        var lenDown3D = Math.min(Math.max(fDown * 0.48, 0.55), 2.8);
+        setArrowLength(arrowFup, lenUp3D);
+        setArrowLength(arrowFdown, lenDown3D);
+    }
+
+    // មុខងារដាក់បន្ទះភ្ជាប់នឹងមាត់បំពង់ឡើងវិញ
+    window.reattachPlate = function () {
+        var m1_kg = m1_g / 1000.0;
+        var m2_kg = m2_g / 1000.0;
+        var a_m2 = a_cm2 / 10000.0;
+        var hc_cm = ((m1_kg + m2_kg) / (rho * a_m2)) * 100.0;
+
+        // បើជម្រៅបច្ចុប្បន្នរាក់ជាងជម្រៅលំនឹង ឱ្យរុញបំពង់ចុះក្រោមឱ្យជ្រៅជាង hc បន្តិចដើម្បីឱ្យបន្ទះជាប់
+        if (h_cm <= hc_cm) {
+            h_cm = Math.min(28.0, Math.max(hc_cm + 3.0, 15.0));
+            sH.value = h_cm.toFixed(1);
+        }
+        isPlateDetached = false;
+        plateTiltAngle = 0;
+        plateVelY = 0;
+        calculatePhysicsAndSyncUI('reattach');
+    };
+
+    window.resetCameraView = function () {
+        camAzimuth = 0.28;
+        camElevation = 0.22;
+        camDistance = 16.2;
+        updateCameraPosition();
+    };
+
+    window.resetExperiment = function () {
+        sH.value = 15.0;
+        sA.value = 20.0;
+        sM1.value = 40;
+        sM2.value = 0;
+        isPlateDetached = false;
+        plateTiltAngle = 0;
+        plateVelY = 0;
+        resetCameraView();
+        calculatePhysicsAndSyncUI('reset');
+    };
+
+    // ==========================================
+    // ៥. ការបញ្ជាដោយម្រាមដៃប៉ះអូសលើបំពង់ 3D និង Mouse (Touch & Mouse Drag)
+    // ==========================================
+    var raycaster = new THREE.Raycaster();
+    var pointerNDC = new THREE.Vector2();
+    var interactionMode = 'none'; // 'dragTube' ឬ 'orbitCam'
+    var dragStartClientY = 0;
+    var dragStartClientX = 0;
+    var dragStartH_cm = 15.0;
+    var startCamAzimuth = 0;
+    var startCamElevation = 0;
+
+    function getPointerNormalized(clientX, clientY) {
+        var rect = canvasEl.getBoundingClientRect();
+        pointerNDC.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+        pointerNDC.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    }
+
+    function onPointerDown(clientX, clientY) {
+        getPointerNormalized(clientX, clientY);
+        raycaster.setFromCamera(pointerNDC, camera);
+
+        var hits = raycaster.intersectObject(tubeHitBox, false);
+        dragStartClientX = clientX;
+        dragStartClientY = clientY;
+
+        if (hits.length > 0) {
+            interactionMode = 'dragTube';
+            dragStartH_cm = h_cm;
+            canvasEl.style.cursor = 'ns-resize';
+            // បំភ្លឺពណ៌បំពង់កែវពេលកំពុងចាប់អូស
+            tubeGlassMat.emissiveIntensity = 0.28;
+            gripMat.color.setHex(0x38bdf8);
+        } else {
+            interactionMode = 'orbitCam';
+            startCamAzimuth = camAzimuth;
+            startCamElevation = camElevation;
+            canvasEl.style.cursor = 'grabbing';
+        }
+    }
+
+    function onPointerMove(clientX, clientY) {
+        if (interactionMode === 'none') {
+            // ផ្លាស់ប្តូររូបសញ្ញា Mouse ពេលដាក់លើបំពង់
+            getPointerNormalized(clientX, clientY);
+            raycaster.setFromCamera(pointerNDC, camera);
+            var hoverHits = raycaster.intersectObject(tubeHitBox, false);
+            canvasEl.style.cursor = hoverHits.length > 0 ? 'ns-resize' : 'grab';
+            return;
+        }
+
+        if (interactionMode === 'dragTube') {
+            var deltaPxY = clientY - dragStartClientY;
+            var rect = canvasEl.getBoundingClientRect();
+            // អូសចុះក្រោម = បង្កើនជម្រៅ h, អូសឡើងលើ = បន្ថយជម្រៅ h
+            var cmPerPixel = 36.0 / rect.height;
+            var newH = dragStartH_cm + (deltaPxY * cmPerPixel);
+            h_cm = Math.max(1.0, Math.min(28.0, newH));
+            calculatePhysicsAndSyncUI('drag');
+        } else if (interactionMode === 'orbitCam') {
+            var dx = clientX - dragStartClientX;
+            var dy = clientY - dragStartClientY;
+            camAzimuth = Math.max(-0.9, Math.min(0.9, startCamAzimuth - dx * 0.006));
+            camElevation = Math.max(-0.15, Math.min(0.75, startCamElevation + dy * 0.005));
+            updateCameraPosition();
+        }
+    }
+
+    function onPointerUp() {
+        interactionMode = 'none';
+        canvasEl.style.cursor = 'grab';
+        tubeGlassMat.emissiveIntensity = 0.08;
+        gripMat.color.setHex(0x0284c7);
+    }
+
+    // Mouse Events
+    canvasEl.addEventListener('mousedown', function (e) {
+        onPointerDown(e.clientX, e.clientY);
+    });
+    window.addEventListener('mousemove', function (e) {
+        onPointerMove(e.clientX, e.clientY);
+    });
+    window.addEventListener('mouseup', function () {
+        onPointerUp();
+    });
+
+    // Touch Events សម្រាប់ទូរសព្ទ និង Tablet
+    canvasEl.addEventListener('touchstart', function (e) {
+        if (e.touches.length === 1) {
+            e.preventDefault();
+            onPointerDown(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: false });
+
+    window.addEventListener('touchmove', function (e) {
+        if (interactionMode !== 'none' && e.touches.length === 1) {
+            e.preventDefault();
+            onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: false });
+
+    window.addEventListener('touchend', function () {
+        onPointerUp();
+    });
+
+    // ព្រឹត្តិការណ៍ពេលកែប្រែ Sliders
+    sH.addEventListener('input', function () { calculatePhysicsAndSyncUI('sliderH'); });
+    sA.addEventListener('input', function () { calculatePhysicsAndSyncUI('sliderOther'); });
+    sM1.addEventListener('input', function () { calculatePhysicsAndSyncUI('sliderOther'); });
+    sM2.addEventListener('input', function () { calculatePhysicsAndSyncUI('sliderOther'); });
+
+    // ==========================================
+    // ៦. ការធ្វើបច្ចុប្បន្នភាពទីតាំងស្លាក 2D លើអេក្រង់ 3D និង Animation Loop
+    // ==========================================
+    var lblFupEl = document.getElementById('label-fup');
+    var lblFdownEl = document.getElementById('label-fdown');
+    var lblDepthEl = document.getElementById('label-depth');
+
+    function project3DToScreen(vec3) {
+        var v = vec3.clone().project(camera);
+        var x = (v.x * 0.5 + 0.5) * canvasWrapper.clientWidth;
+        var y = (-(v.y * 0.5) + 0.5) * canvasWrapper.clientHeight;
+        return { x: x, y: y };
+    }
+
+    var clock = new THREE.Clock();
+
+    function animate() {
+        requestAnimationFrame(animate);
+        var elapsedTime = clock.getElapsedTime();
+
+        // ១. ចលនារលកទឹកស្រាលៗលើផ្ទៃទឹក
+        waterTopMesh.position.y = WATER_SURFACE_Y + Math.sin(elapsedTime * 2.5) * 0.015;
+        meniscusRim.scale.set(
+            1 + Math.sin(elapsedTime * 2.0) * 0.004,
+            1 + Math.cos(elapsedTime * 2.0) * 0.004,
+            1
+        );
+
+        // ២. ចលនាធ្លាក់នៃបន្ទះបាត (Plate Falling Physics in Water)
+        var tubeMouthY = WATER_SURFACE_Y - (h_cm * CM_TO_3D);
+        var bottomLimitY = TANK_BOTTOM_Y + 0.18;
+
+        if (isPlateDetached) {
+            if (plateCurrentY > bottomLimitY) {
+                // សំទុះធ្លាក់ក្នុងទឹក (មានកម្លាំងទប់នៃទឹក)
+                plateVelY -= 0.0038;
+                plateVelY *= 0.96; // កម្លាំងកកិតទឹក
+                plateCurrentY += plateVelY;
+                // ផ្អៀងតិចៗពេលកំពុងលិចធ្លាក់ក្នុងទឹក
+                plateTiltAngle = Math.sin(elapsedTime * 6.0) * 0.14;
+
+                if (plateCurrentY <= bottomLimitY) {
+                    plateCurrentY = bottomLimitY;
+                    plateVelY = 0;
+                    plateTiltAngle = 0.04;
+                    spawnWaterBubbles(bottomLimitY, getTubeRadius3D() * 0.7);
+                }
+            }
+        } else {
+            plateCurrentY = tubeMouthY;
+            plateTiltAngle = 0;
+        }
+
+        plateGroup.position.y = plateCurrentY;
+        plateGroup.rotation.z = plateTiltAngle;
+
+        // ៣. ទីតាំងវ៉ិចទ័រកម្លាំង 3D ដើរតាមបន្ទះបាត
+        arrowFup.position.set(0.32, plateCurrentY - 0.1, 0.4);
+        arrowFdown.position.set(-0.32, plateCurrentY - 0.1, 0.4);
+
+        // ៤. ចលនាពពុះទឹកអណ្តែតឡើងលើ
+        for (var i = bubbles.length - 1; i >= 0; i--) {
+            var b = bubbles[i];
+            b.position.y += b.userData.vy;
+            b.position.x += b.userData.vx + Math.sin(elapsedTime * 5 + i) * 0.004;
+            b.position.z += b.userData.vz;
+            if (b.position.y >= WATER_SURFACE_Y) {
+                scene.remove(b);
+                bubbles.splice(i, 1);
+            }
+        }
+
+        // ៥. គណនាទីតាំងស្លាក 2D ឱ្យដើរតាមវ៉ិចទ័រ 3D
+        var tubeRadius = getTubeRadius3D();
+        var posFup = project3DToScreen(new THREE.Vector3(tubeRadius + 0.45, plateCurrentY + 0.9, 0.4));
+        var posFdown = project3DToScreen(new THREE.Vector3(tubeRadius + 0.45, plateCurrentY - 0.95, 0.4));
+        var posDepth = project3DToScreen(new THREE.Vector3(-tubeRadius - 0.9, (WATER_SURFACE_Y + tubeMouthY) / 2, 0.5));
+
+        lblFupEl.style.left = Math.min(Math.max(posFup.x, 10), canvasWrapper.clientWidth - 135) + 'px';
+        lblFupEl.style.top = Math.min(Math.max(posFup.y, 55), canvasWrapper.clientHeight - 75) + 'px';
+
+        lblFdownEl.style.left = Math.min(Math.max(posFdown.x, 10), canvasWrapper.clientWidth - 145) + 'px';
+        lblFdownEl.style.top = Math.min(Math.max(posFdown.y, 55), canvasWrapper.clientHeight - 60) + 'px';
+
+        lblDepthEl.style.left = Math.min(Math.max(posDepth.x - 105, 10), canvasWrapper.clientWidth - 140) + 'px';
+        lblDepthEl.style.top = Math.min(Math.max(posDepth.y - 12, 55), canvasWrapper.clientHeight - 65) + 'px';
+
+        renderer.render(scene, camera);
+    }
+
+    // តម្រូវទំហំ Canvas ដោយស្វ័យប្រវត្តិពេលបង្វិលអេក្រង់ទូរសព្ទ ឬប្តូរទំហំ Window
+    window.addEventListener('resize', function () {
+        var w = canvasWrapper.clientWidth;
+        var h = canvasWrapper.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+    });
+
+    // ចាប់ផ្តើមដំណើរការពិសោធន៍នៅពេលផ្ទុកទំព័ររួចរាល់
+    window.onload = function () {
+        calculatePhysicsAndSyncUI('init');
+        animate();
+    };
+</script>
+
+</body>
+</html>
