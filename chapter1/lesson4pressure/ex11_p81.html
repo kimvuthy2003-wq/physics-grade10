@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>លំហាត់ទី១១៖ ម៉ាណូម៉ែត្ររ៉ឺស័រក្នុងទឹក </title>
+
+    <!-- Google Fonts សម្រាប់គាំទ្រអក្សរខ្មែរយូនីកូដបន្ថែមប្រសិនបើឧបករណ៍គ្មាន Khmer OS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Three.js សម្រាប់ក្រាហ្វិក 3D WebGL -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- MathJax សម្រាប់រូបមន្តគណិតវិទ្យា និងរូបវិទ្យា -->
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
+            startup: { typeset: true }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        * {
+            font-family: 'Khmer OS', 'Khmer OS Siemreap', 'Khmer OS System', 'Kantumruy Pro', sans-serif;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            color: #0f172a;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #cbd5e1;
+            border-radius: 999px;
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            border: 3px solid #ffffff;
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover,
+        input[type=range]::-webkit-slider-thumb:active {
+            transform: scale(1.18);
+        }
+        #sliderH::-webkit-slider-thumb { background: #dc2626; }
+        #sliderK::-webkit-slider-thumb { background: #7c3aed; }
+        #sliderD::-webkit-slider-thumb { background: #0284c7; }
+
+        /* 3D Viewport */
+        #canvas-wrapper {
+            position: relative;
+            width: 100%;
+            height: 550px;
+            background: radial-gradient(circle at 50% 15%, #0c4a6e 0%, #082f49 45%, #020617 100%);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.45), inset 0 0 0 2px rgba(255, 255, 255, 0.12);
+            touch-action: none; /* សំខាន់សម្រាប់ការអូសម្រាមដៃលើទូរសព្ទ */
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #three-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .glass-badge {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        @keyframes floatHint {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        .animate-float {
+            animation: floatHint 2.2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="py-4 px-3 sm:px-6 lg:px-8">
+
+<div class="max-w-6xl mx-auto space-y-5">
+
+    <!-- ក្បាលទំព័រ និងប្រធានលំហាត់ទី១១ -->
+    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-cyan-800 via-sky-700 to-blue-800 px-5 py-4 text-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center text-2xl shadow-inner">
+                    🌊
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-wide">លំហាត់ទី១១៖ ម៉ាណូម៉ែត្ររ៉ឺស័រក្នុងទឹក </h1>
+                    <p class="text-xs sm:text-sm text-sky-100 opacity-90">ប៉ះអូសស៊ីឡាំងម៉ាណូម៉ែត្រឡើងលើ-ចុះក្រោម និងចុចមើលជិតលើចម្ងាយផ្លាស់ទី $x$ របស់ពីស្តុង</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 self-start sm:self-auto">
+                <button id="btnToggleSolution" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer">
+                    <span>📖</span>
+                    <span>បង្ហាញ / លាក់ដំណោះស្រាយ</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 sm:p-5 bg-amber-50/90 border-t border-amber-200 text-amber-950 text-sm sm:text-base leading-relaxed">
+            <span class="font-bold text-amber-900 bg-amber-200/80 px-2.5 py-0.5 rounded mr-1">ប្រធានលំហាត់ទី១១ (ទំព័រ ៨១)៖</span>
+            រ៉ឺស័រក្នុងម៉ាណូម៉ែត្រមានថេរកម្រាញ $k = 1250 \text{ N/m}$ និងពីស្តុងមានអង្កត់ផ្ចិត $d = 1.20 \text{ cm}$។ គណនាជម្រៅទឹក $h$ កាលណាគេដាក់ម៉ាណូម៉ែត្រចូលទៅក្នុងទឹកទន្លេ ហើយធ្វើឱ្យពីស្តុងផ្លាស់ទីបានចម្ងាយ $x = 0.500 \text{ cm}$ បើគេមិនគិតសម្ពាធបរិយាកាស។ (យក $\rho = 1000 \text{ kg/m}^3, g = 9.80 \text{ m/s}^2$)
+        </div>
+    </div>
+
+    <!-- ប្រអប់ដំណោះស្រាយលម្អិត (អាចបើក/បិទបាន) -->
+    <div id="solutionBox" class="hidden bg-white rounded-2xl shadow-md border-l-4 border-sky-600 border-t border-r border-b border-slate-200 p-5 sm:p-6 space-y-4">
+        <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl text-emerald-950 text-sm sm:text-base">
+            💡 <strong>គោលការណ៍រូបវិទ្យា៖</strong> ផ្នែកខាងក្រោមពីស្តុងក្នុងស៊ីឡាំងម៉ាណូម៉ែត្រជា <strong>សុញ្ញាកាស ($P_{\text{ក្នុង}} = 0$)</strong>។ នៅពេលដាក់ចូលក្នុងទឹកជម្រៅ $h$ សម្ពាធទឹកសង្កត់ពីលើពីស្តុងដោយកម្លាំង $F_p = P \cdot A$ ធ្វើឱ្យរ៉ឺស័ររួញចុះក្រោមបានចម្ងាយ $x$ រហូតដល់កម្លាំងទប់របស់រ៉ឺស័រ $F_s = k \cdot x$ មានតម្លៃស្មើនឹង $F_p$។
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm sm:text-base">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2.5 overflow-x-auto">
+                <h3 class="font-bold text-sky-900 border-b border-slate-200 pb-1.5">១. ទំនាក់ទំនងរូបមន្តគ្រឹះ</h3>
+                <p>• កម្លាំងសម្ពាធទឹកសង្កត់លើពីស្តុង៖</p>
+                <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                    $$ F_p = P \cdot A = (\rho g h) \cdot \left(\frac{\pi d^2}{4}\right) $$
+                </div>
+                <p>• កម្លាំងទប់របស់រ៉ឺស័រ (ច្បាប់ហ៊ុក)៖</p>
+                <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                    $$ F_s = k \cdot x $$
+                </div>
+                <p>• ពេលពីស្តុងមានលំនឹង ($F_p = F_s$) គេទាញបាន៖</p>
+                <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                    $$ h = \frac{4 k x}{\rho g \pi d^2} \quad \text{ឬ} \quad x = \frac{\rho g h \pi d^2}{4 k} $$
+                </div>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2.5 overflow-x-auto">
+                <h3 class="font-bold text-indigo-900 border-b border-slate-200 pb-1.5">២. ការជំនួសលេខផ្ទាល់តាមពិសោធន៍</h3>
+                <ul class="space-y-1 text-xs sm:text-sm text-slate-700 list-disc list-inside">
+                    <li>ថេរកម្រាញរ៉ឺស័រ៖ $k =$ <span id="solK" class="font-bold text-purple-700">1250</span> $\text{N/m}$</li>
+                    <li>អង្កត់ផ្ចិតពីស្តុង៖ $d =$ <span id="solD" class="font-bold text-sky-700">1.20</span> $\text{cm} =$ <span id="solDm">0.0120</span> $\text{m}$</li>
+                    <li>ចម្ងាយផ្លាស់ទីរបស់ពីស្តុង៖ $x =$ <span id="solXcm" class="font-bold text-emerald-700">0.500</span> $\text{cm} =$ <span id="solXm">0.00500</span> $\text{m}$</li>
+                    <li>ម៉ាសមាឌទឹក៖ $\rho = 1000\text{ kg/m}^3$, $g = 9.80\text{ m/s}^2$</li>
+                </ul>
+                <div id="mathLineResult" class="bg-white p-3 rounded-lg border border-slate-200 text-center text-xs sm:text-sm">
+                    $$ h = \frac{4 \times 1250 \times 0.00500}{1000 \times 9.80 \times 3.1416 \times (0.0120)^2} \approx 5.64 \text{ m} $$
+                </div>
+                <div class="text-xs text-slate-500">
+                    * អ្នកអាចផ្លាស់ប្តូរតម្លៃ $h, k$ ឬអូសស៊ីឡាំង 3D ដើម្បីមើលការគណនាផ្លាស់ប្តូរដោយស្វ័យប្រវត្តិ។
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ផ្នែកកណ្តាល៖ ឆាកពិសោធន៍ 3D និងផ្ទាំងបញ្ជា -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+        <!-- ផ្នែកខាងឆ្វេង៖ 3D Simulation Viewport (7 Columns) -->
+        <div class="lg:col-span-7 flex flex-col gap-3">
+            <div id="canvas-wrapper">
+                <canvas id="three-canvas"></canvas>
+
+                <!-- ផ្លាកណែនាំការប៉ះអូសស៊ីឡាំងលើទូរសព្ទ -->
+                <div class="glass-badge absolute top-3 left-3 bg-slate-900/80 text-white px-3.5 py-2 rounded-xl border border-white/15 text-xs sm:text-sm flex items-center gap-2.5 shadow-lg pointer-events-none animate-float">
+                    <span class="text-xl">👆</span>
+                    <div>
+                        <div class="font-bold text-sky-300">ប៉ះអូសស៊ីឡាំងម៉ាណូម៉ែត្រឡើងលើ-ចុះក្រោម</div>
+                        <div class="text-[11px] text-slate-300">ដើម្បីសង្កេតមើលពីស្តុងរួញ ឬលាតតាមចម្ងាយ $x$</div>
+                    </div>
+                </div>
+
+                <!-- ផ្លាកបង្ហាញតម្លៃ x និង h នៅលើអេក្រង់ 3D -->
+                <div class="glass-badge absolute top-3 right-3 bg-slate-900/85 px-3.5 py-2 rounded-xl border border-white/15 text-right shadow-lg pointer-events-none">
+                    <div class="text-[11px] text-slate-400">ចម្ងាយពីស្តុងផ្លាស់ទី ($x$)</div>
+                    <div class="text-base sm:text-lg font-extrabold text-emerald-400">
+                        x = <span id="hud-x">0.500</span> cm
+                    </div>
+                    <div class="text-[11px] text-rose-300 font-semibold">
+                        ជម្រៅទឹក h = <span id="hud-h">5.64</span> m
+                    </div>
+                </div>
+
+                <!-- ស្លាក 2D ដើរតាមទីតាំង 3D នៃម៉ាណូម៉ែត្រ -->
+                <div id="label-3d-fp" class="glass-badge absolute px-2.5 py-1 rounded-lg bg-rose-950/90 border border-rose-400/60 text-rose-200 text-xs font-bold pointer-events-none shadow-md">
+                    ↓ កម្លាំងទឹក $F_p$ = <span id="lbl-fp-val">6.25</span> N
+                </div>
+
+                <div id="label-3d-fs" class="glass-badge absolute px-2.5 py-1 rounded-lg bg-sky-950/90 border border-sky-400/60 text-sky-200 text-xs font-bold pointer-events-none shadow-md">
+                    ↑ កម្លាំងរ៉ឺស័រ $F_s$ = <span id="lbl-fs-val">6.25</span> N
+                </div>
+
+                <div id="label-3d-x" class="glass-badge absolute px-3 py-1.5 rounded-lg bg-amber-950/95 border-2 border-amber-400 text-amber-200 text-xs sm:text-sm font-extrabold pointer-events-none shadow-lg">
+                    ↕ ចម្ងាយផ្លាស់ទី $x$ = <span id="lbl-x-val">0.500</span> cm
+                </div>
+
+                <!-- ប៊ូតុងបញ្ជាមុំកាមេរ៉ា (មើលជិតពីស្តុង / មើលទូទៅ) -->
+                <div class="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-auto">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button id="btnZoomClose" onclick="setCameraMode('closeup')" class="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 active:scale-95 text-white font-bold px-3.5 py-2.5 rounded-xl shadow-lg border border-amber-300/50 text-xs sm:text-sm flex items-center gap-1.5 transition cursor-pointer">
+                            <span>🔍</span>
+                            <span id="zoomBtnText">មើលជិតពីស្តុង និងចម្ងាយ x</span>
+                        </button>
+
+                        <button id="btnZoomFull" onclick="setCameraMode('overview')" class="glass-badge bg-slate-800/85 hover:bg-slate-700 text-slate-200 font-semibold px-3 py-2.5 rounded-xl border border-white/15 text-xs sm:text-sm transition cursor-pointer">
+                            🌊 មើលជម្រៅទឹកទាំងមូល
+                        </button>
+                    </div>
+
+                    <button onclick="resetToProblem11()" class="glass-badge bg-sky-700/90 hover:bg-sky-600 active:scale-95 text-white text-xs sm:text-sm font-semibold px-3.5 py-2.5 rounded-xl border border-sky-400/40 shadow transition cursor-pointer">
+                        🎯 តម្លៃលំហាត់ទី១១ ($h=5.64\text{ m}$)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ផ្នែកខាងស្តាំ៖ តារាងទិន្នន័យ និង Sliders បញ្ជា (5 Columns) -->
+        <div class="lg:col-span-5 flex flex-col gap-4">
+
+            <!-- ប្រអប់ទិន្នន័យរូបវិទ្យាទាំង ៤ -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border-t-4 border-emerald-500 border-x border-b border-slate-200">
+                    <div class="text-xs text-slate-500 font-semibold">ចម្ងាយពីស្តុងផ្លាស់ទី ($x$)</div>
+                    <div id="liveX" class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-1">0.500 cm</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">$x = F_p / k$</div>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border-t-4 border-rose-600 border-x border-b border-slate-200">
+                    <div class="text-xs text-slate-500 font-semibold">ជម្រៅទឹកទន្លេ ($h$)</div>
+                    <div id="liveHCard" class="text-xl sm:text-2xl font-extrabold text-rose-600 mt-1">5.64 m</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">អូសស៊ីឡាំងដើម្បីប្តូរជម្រៅ</div>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border-t-4 border-amber-500 border-x border-b border-slate-200">
+                    <div class="text-xs text-slate-500 font-semibold">សម្ពាធទឹកត្រង់ពីស្តុង ($P$)</div>
+                    <div id="liveP" class="text-lg sm:text-xl font-extrabold text-amber-600 mt-1">55,272 Pa</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">$P = \rho g h$</div>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border-t-4 border-sky-600 border-x border-b border-slate-200">
+                    <div class="text-xs text-slate-500 font-semibold">កម្លាំងសង្កត់ = កម្លាំងរ៉ឺស័រ</div>
+                    <div id="liveF" class="text-lg sm:text-xl font-extrabold text-sky-600 mt-1">6.25 N</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">$F_p = F_s = k x$</div>
+                </div>
+            </div>
+
+            <!-- Sliders កែតម្រូវប៉ារ៉ាម៉ែត្រ -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                    <h2 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+                        <span>🎛️</span> បញ្ជាការពិសោធន៍ម៉ាណូម៉ែត្រ
+                    </h2>
+                    <span class="text-xs text-slate-400">អូសលើ 3D ឬកែខាងក្រោម</span>
+                </div>
+
+                <!-- Slider 1: ជម្រៅទឹក h -->
+                <div class="bg-rose-50/70 p-3.5 rounded-xl border border-rose-100">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label for="sliderH" class="text-xs sm:text-sm font-bold text-slate-700">
+                            ១. ជម្រៅម៉ាណូម៉ែត្រក្នុងទឹក ($h$) ៖
+                        </label>
+                        <span class="px-2.5 py-0.5 rounded-md bg-rose-600 text-white font-bold text-sm">
+                            <span id="valH">5.64</span> m
+                        </span>
+                    </div>
+                    <input type="range" id="sliderH" min="0.00" max="10.00" value="5.64" step="0.01">
+                    <div class="flex justify-between text-[11px] text-slate-500 mt-1.5">
+                        <span>0.00 m (លើផ្ទៃទឹក $x=0$)</span>
+                        <span class="text-rose-700 font-bold">ចម្លើយលំហាត់៖ 5.64 m</span>
+                        <span>10.00 m (បាតទន្លេ)</span>
+                    </div>
+                </div>
+
+                <!--ប៊ូតុងលើកស៊ីឡាំងឡើងលើសន្សឹមៗដោយស្វ័យប្រវត្តិ-->
+                <div class="flex gap-2">
+                    <button onclick="animateLiftToSurface()" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white font-bold py-2.5 px-3 rounded-xl shadow text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer">
+                        <span>⬆️</span>
+                        <span>លើកស៊ីឡាំងឡើងលើផ្ទៃទឹកសន្សឹមៗ (សង្កេត $x \to 0$)</span>
+                    </button>
+                    <button onclick="animateLowerToDepth()" class="w-full bg-sky-600 hover:bg-sky-500 active:scale-98 text-white font-bold py-2.5 px-3 rounded-xl shadow text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer">
+                        <span>⬇️</span>
+                        <span>ដាក់ចុះទៅជម្រៅ $5.64\text{ m}$ វិញ</span>
+                    </button>
+                </div>
+
+                <!-- Slider 2: ថេរកម្រាញរ៉ឺស័រ k -->
+                <div class="bg-purple-50/70 p-3.5 rounded-xl border border-purple-100">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label for="sliderK" class="text-xs sm:text-sm font-bold text-slate-700">
+                            ២. ថេរកម្រាញរ៉ឺស័រ ($k$) ៖
+                        </label>
+                        <span class="px-2.5 py-0.5 rounded-md bg-purple-600 text-white font-bold text-sm">
+                            <span id="valK">1250</span> N/m
+                        </span>
+                    </div>
+                    <input type="range" id="sliderK" min="500" max="2500" value="1250" step="25">
+                    <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                        <span>500 N/m (រ៉ឺស័រទន់ ងាយរួញ)</span>
+                        <span>1250 N/m</span>
+                        <span>2500 N/m (រ៉ឺស័ររឹង)</span>
+                    </div>
+                </div>
+
+                <!-- Slider 3: អង្កត់ផ្ចិតពីស្តុង d -->
+                <div class="bg-sky-50/70 p-3.5 rounded-xl border border-sky-100">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label for="sliderD" class="text-xs sm:text-sm font-bold text-slate-700">
+                            ៣. អង្កត់ផ្ចិតពីស្តុង ($d$) ៖
+                        </label>
+                        <span class="px-2.5 py-0.5 rounded-md bg-sky-600 text-white font-bold text-sm">
+                            <span id="valD">1.20</span> cm
+                        </span>
+                    </div>
+                    <input type="range" id="sliderD" min="0.80" max="2.00" value="1.20" step="0.05">
+                    <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                        <span>0.80 cm</span>
+                        <span>លំហាត់៖ 1.20 cm</span>
+                        <span>2.00 cm</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ការពន្យល់សង្កេតផ្ទាល់ -->
+            <div id="observationNote" class="bg-amber-50 border-l-4 border-amber-500 p-3.5 rounded-xl text-xs sm:text-sm text-amber-950 leading-relaxed">
+                🔍 <strong>ការសង្កេត៖</strong> នៅពេលអ្នកប៉ះអូសស៊ីឡាំងម៉ាណូម៉ែត្រ <strong>ឡើងលើ</strong> ជម្រៅទឹក $h$ ថយចុះ ធ្វើឱ្យសម្ពាធទឹកសង្កត់ពីលើពីស្តុងថយចុះ ហើយរ៉ឺស័ររុញពីស្តុងឡើងលើវិញ (ចម្ងាយផ្លាស់ទី $x$ រួមតូចរហូតដល់ $0\text{ cm}$ នៅលើផ្ទៃទឹក)។
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ====================================================
+    // ១. អថេររូបវិទ្យា និងខ្នាតក្នុងលំហ 3D
+    // ====================================================
+    var rho = 1000.0; // kg/m^3
+    var g = 9.80;     // m/s^2
+    var h_m = 5.64;   // ជម្រៅទឹក (m)
+    var k_val = 1250; // ថេរកម្រាញរ៉ឺស័រ (N/m)
+    var d_cm = 1.20;  // អង្កត់ផ្ចិតពីស្តុង (cm)
+
+    // ខ្នាតក្នុងលំហ 3D (1 ម៉ែត្រជម្រៅទឹក = 0.72 ឯកតា 3D)
+    var M_TO_3D = 0.72;
+    var WATER_SURFACE_Y = 3.2;                     // កម្ពស់ផ្ទៃទឹក (h = 0 m)
+    var RIVER_BOTTOM_Y = WATER_SURFACE_Y - (10.5 * M_TO_3D); // បាតទន្លេ (-4.36)
+    var TANK_RADIUS = 3.5;
+
+    // ទំហំស៊ីឡាំងម៉ាណូម៉ែត្រក្នុង 3D (ពង្រីកឱ្យសិស្សងាយមើលឃើញពីស្តុង និងរ៉ឺស័រខាងក្នុង)
+    var MANO_HEIGHT = 2.55;
+    var PISTON_THICKNESS = 0.22;
+    // កម្រិតទីតាំងដើមរបស់ពីស្តុងពេលគ្មានសម្ពាធ (x = 0) ធៀបនឹងមាត់លើនៃតួម៉ាណូម៉ែត្រ
+    var PISTON_ZERO_OFFSET = -0.32;
+
+    // DOM Elements
+    var sH = document.getElementById('sliderH');
+    var sK = document.getElementById('sliderK');
+    var sD = document.getElementById('sliderD');
+    var vH = document.getElementById('valH');
+    var vK = document.getElementById('valK');
+    var vD = document.getElementById('valD');
+
+    var canvasWrapper = document.getElementById('canvas-wrapper');
+    var canvasEl = document.getElementById('three-canvas');
+
+    // ប៊ូតុងបង្ហាញ/លាក់ដំណោះស្រាយ
+    var btnToggleSolution = document.getElementById('btnToggleSolution');
+    var solutionBox = document.getElementById('solutionBox');
+    btnToggleSolution.addEventListener('click', function () {
+        if (solutionBox.classList.contains('hidden')) {
+            solutionBox.classList.remove('hidden');
+        } else {
+            solutionBox.classList.add('hidden');
+        }
+    });
+
+    // ====================================================
+    // ២. រៀបចំឆាក 3D (Three.js Scene, Camera & Lights)
+    // ====================================================
+    var scene = new THREE.Scene();
+
+    var camera = new THREE.PerspectiveCamera(38, canvasWrapper.clientWidth / canvasWrapper.clientHeight, 0.1, 100);
+
+    // មុំកាមេរ៉ា និងមុខងារ Zoom មើលជិតពីស្តុង (Smooth Camera Interpolation)
+    var cameraMode = 'overview'; // 'overview' ឬ 'closeup'
+    var camAzimuth = 0.22;
+    var camElevation = 0.14;
+    var currentCamDist = 14.2;
+    var targetCamDist = 14.2;
+    var currentCamTarget = new THREE.Vector3(0, -0.4, 0);
+    var desiredCamTarget = new THREE.Vector3(0, -0.4, 0);
+
+    var renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: true });
+    renderer.setSize(canvasWrapper.clientWidth, canvasWrapper.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // ភ្លើងបំភ្លឺក្នុងឆាក 3D
+    var ambientLight = new THREE.AmbientLight(0xe0f2fe, 0.85);
+    scene.add(ambientLight);
+
+    var sunLight = new THREE.DirectionalLight(0xffffff, 1.15);
+    sunLight.position.set(7, 15, 10);
+    scene.add(sunLight);
+
+    var deepWaterLight = new THREE.DirectionalLight(0x0284c7, 0.65);
+    deepWaterLight.position.set(-8, -6, -5);
+    scene.add(deepWaterLight);
+
+    var manoSpotLight = new THREE.PointLight(0xbae6fd, 0.8, 12);
+    scene.add(manoSpotLight);
+
+    // ====================================================
+    // ៣. សាងសង់វត្ថុ 3D (ទឹកទន្លេ, បន្ទាត់ក្រិតជម្រៅ, ម៉ាណូម៉ែត្ររ៉ឺស័រ 3D)
+    // ====================================================
+
+    // ៣.១ បាតទន្លេ និងស៊ីឡាំងទឹកទន្លេថ្លា
+    var riverBedGeo = new THREE.CylinderGeometry(TANK_RADIUS + 0.4, TANK_RADIUS + 0.6, 0.4, 48);
+    var riverBedMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7, metalness: 0.2 });
+    var riverBedMesh = new THREE.Mesh(riverBedGeo, riverBedMat);
+    riverBedMesh.position.y = RIVER_BOTTOM_Y - 0.2;
+    scene.add(riverBedMesh);
+
+    var waterHeight = WATER_SURFACE_Y - RIVER_BOTTOM_Y;
+    var waterCylGeo = new THREE.CylinderGeometry(TANK_RADIUS, TANK_RADIUS, waterHeight, 48, 1, true);
+    var waterCylMat = new THREE.MeshPhongMaterial({
+        color: 0x0284c7,
+        emissive: 0x075985,
+        emissiveIntensity: 0.22,
+        specular: 0x7dd3fc,
+        shininess: 90,
+        transparent: true,
+        opacity: 0.36,
+        side: THREE.DoubleSide,
+        depthWrite: false
+    });
+    var waterCylMesh = new THREE.Mesh(waterCylGeo, waterCylMat);
+    waterCylMesh.position.y = RIVER_BOTTOM_Y + waterHeight / 2;
+    scene.add(waterCylMesh);
+
+    // ផ្ទៃទឹកខាងលើ (h = 0 m)
+    var waterTopGeo = new THREE.CircleGeometry(TANK_RADIUS, 48);
+    waterTopGeo.rotateX(-Math.PI / 2);
+    var waterTopMat = new THREE.MeshPhongMaterial({
+        color: 0x38bdf8,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.25,
+        specular: 0xffffff,
+        shininess: 120,
+        transparent: true,
+        opacity: 0.65,
+        side: THREE.DoubleSide,
+        depthWrite: false
+    });
+    var waterTopMesh = new THREE.Mesh(waterTopGeo, waterTopMat);
+    waterTopMesh.position.y = WATER_SURFACE_Y;
+    scene.add(waterTopMesh);
+
+    var surfaceRingGeo = new THREE.TorusGeometry(TANK_RADIUS, 0.04, 16, 64);
+    surfaceRingGeo.rotateX(Math.PI / 2);
+    var surfaceRingMat = new THREE.MeshBasicMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.85 });
+    var surfaceRingMesh = new THREE.Mesh(surfaceRingGeo, surfaceRingMat);
+    surfaceRingMesh.position.y = WATER_SURFACE_Y;
+    scene.add(surfaceRingMesh);
+
+    // ៣.២ បន្ទាត់ក្រិតវាស់ជម្រៅទឹកទន្លេ (0 m ដល់ 10 m)
+    function createDepthScaleTexture() {
+        var c = document.createElement('canvas');
+        c.width = 256;
+        c.height = 1024;
+        var ctx = c.getContext('2d');
+        ctx.clearRect(0, 0, c.width, c.height);
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(210, 40);
+        ctx.lineTo(210, 984);
+        ctx.stroke();
+
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+
+        for (var m = 0; m <= 10; m++) {
+            var y = 40 + (m / 10) * 944;
+            ctx.beginPath();
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = '#38bdf8';
+            ctx.moveTo(155, y);
+            ctx.lineTo(210, y);
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 36px "Khmer OS", Arial, sans-serif';
+            ctx.fillText(m + ' m', 142, y);
+
+            if (m < 10) {
+                var yHalf = y + (0.5 / 10) * 944;
+                ctx.beginPath();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+                ctx.moveTo(180, yHalf);
+                ctx.lineTo(210, yHalf);
+                ctx.stroke();
+            }
+        }
+        return new THREE.CanvasTexture(c);
+    }
+
+    var scaleSpan3D = 10.0 * M_TO_3D;
+    var depthRulerGeo = new THREE.PlaneGeometry(1.5, scaleSpan3D * (1024 / 944));
+    var depthRulerMat = new THREE.MeshBasicMaterial({
+        map: createDepthScaleTexture(),
+        transparent: true,
+        side: THREE.DoubleSide,
+        depthWrite: false
+    });
+    var depthRulerMesh = new THREE.Mesh(depthRulerGeo, depthRulerMat);
+    depthRulerMesh.position.set(-TANK_RADIUS + 0.45, WATER_SURFACE_Y - scaleSpan3D / 2, 0.8);
+    scene.add(depthRulerMesh);
+
+    // ====================================================
+    // ៣.៣ ប្រព័ន្ធម៉ាណូម៉ែត្ររ៉ឺស័រ 3D (Manometer Cylinder, Piston, Helical Spring, Local x Scale)
+    // ====================================================
+    var manometerGroup = new THREE.Group();
+    scene.add(manometerGroup);
+
+    // ខ្សែកាបយោងម៉ាណូម៉ែត្រពីខាងលើ (Suspension Cable & Frame)
+    var cableGeo = new THREE.CylinderGeometry(0.04, 0.04, 12, 16);
+    cableGeo.translate(0, 6, 0);
+    var cableMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.2 });
+    var cableMesh = new THREE.Mesh(cableGeo, cableMat);
+    cableMesh.position.set(0, 0.45, 0);
+    manometerGroup.add(cableMesh);
+
+    // ដៃយោងរាងអក្សរ U ភ្ជាប់ទៅស៊ីឡាំងដើម្បីកុំឱ្យបាំងមាត់ស៊ីឡាំងខាងលើ
+    var yokeMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.7, roughness: 0.3 });
+    var yokeTopBar = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.08, 0.08), yokeMat);
+    yokeTopBar.position.set(0, 0.45, 0);
+    manometerGroup.add(yokeTopBar);
+
+    var yokeLeftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.6, 12), yokeMat);
+    yokeLeftArm.position.set(-1.0, 0.15, 0);
+    manometerGroup.add(yokeLeftArm);
+
+    var yokeRightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.6, 12), yokeMat);
+    yokeRightArm.position.set(1.0, 0.15, 0);
+    manometerGroup.add(yokeRightArm);
+
+    // តួស៊ីឡាំងកែវថ្លារបស់ម៉ាណូម៉ែត្រ (ខាងលើនៅត្រង់ y = 0 ដល់បាតនៅ y = -MANO_HEIGHT)
+    var cylWallGeo = new THREE.CylinderGeometry(1, 1, MANO_HEIGHT, 40, 1, true);
+    cylWallGeo.translate(0, -MANO_HEIGHT / 2, 0);
+    var cylWallMat = new THREE.MeshPhongMaterial({
+        color: 0xf8fafc,
+        emissive: 0x38bdf8,
+        emissiveIntensity: 0.08,
+        specular: 0xffffff,
+        shininess: 150,
+        transparent: true,
+        opacity: 0.38,
+        side: THREE.DoubleSide
+    });
+    var cylWallMesh = new THREE.Mesh(cylWallGeo, cylWallMat);
+    manometerGroup.add(cylWallMesh);
+
+    // បាតស៊ីឡាំងម៉ាណូម៉ែត្របិទជិត (Vacuum Chamber Base)
+    var cylBaseGeo = new THREE.CylinderGeometry(1.06, 1.06, 0.16, 40);
+    var cylBaseMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7, roughness: 0.25 });
+    var cylBaseMesh = new THREE.Mesh(cylBaseGeo, cylBaseMat);
+    cylBaseMesh.position.y = -MANO_HEIGHT;
+    manometerGroup.add(cylBaseMesh);
+
+    // កងមាត់លើរបស់ស៊ីឡាំង (Open Top Rim ឱ្យទឹកចូលសង្កត់លើពីស្តុង)
+    var cylTopRimGeo = new THREE.TorusGeometry(1.02, 0.055, 16, 48);
+    cylTopRimGeo.rotateX(Math.PI / 2);
+    var cylTopRimMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.5, roughness: 0.25 });
+    var cylTopRimMesh = new THREE.Mesh(cylTopRimGeo, cylTopRimMat);
+    cylTopRimMesh.position.y = 0;
+    manometerGroup.add(cylTopRimMesh);
+
+    // កងបន្ទាត់ដាច់ៗពណ៌ទឹកក្រូច បង្ហាញទីតាំងដើមរបស់ពីស្តុងពេល x = 0 cm
+    var zeroRingGeo = new THREE.TorusGeometry(1.03, 0.028, 12, 48);
+    zeroRingGeo.rotateX(Math.PI / 2);
+    var zeroRingMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+    var zeroRingMesh = new THREE.Mesh(zeroRingGeo, zeroRingMat);
+    zeroRingMesh.position.y = PISTON_ZERO_OFFSET;
+    manometerGroup.add(zeroRingMesh);
+
+    // ពីស្តុងលោហៈ 3D (Movable Piston with Rubber O-Ring Seal)
+    var pistonGroup = new THREE.Group();
+    manometerGroup.add(pistonGroup);
+
+    var pistonDiscGeo = new THREE.CylinderGeometry(0.96, 0.96, PISTON_THICKNESS, 40);
+    pistonDiscGeo.translate(0, -PISTON_THICKNESS / 2, 0);
+    var pistonDiscMat = new THREE.MeshStandardMaterial({
+        color: 0xe2e8f0,
+        metalness: 0.75,
+        roughness: 0.2
+    });
+    var pistonDiscMesh = new THREE.Mesh(pistonDiscGeo, pistonDiscMat);
+    pistonGroup.add(pistonDiscMesh);
+
+    // កងកៅស៊ូទប់ទឹកជុំវិញពីស្តុង (O-Ring Seal)
+    var oRingGeo = new THREE.TorusGeometry(0.96, 0.045, 16, 48);
+    oRingGeo.rotateX(Math.PI / 2);
+    var oRingMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
+    var oRingMesh = new THREE.Mesh(oRingGeo, oRingMat);
+    oRingMesh.position.y = -PISTON_THICKNESS / 2;
+    pistonGroup.add(oRingMesh);
+
+    // រ៉ឺស័រ 3D ពិតៗ (3D Helical Coil Spring)
+    var springMat = new THREE.MeshStandardMaterial({
+        color: 0xfbbf24,
+        metalness: 0.7,
+        roughness: 0.22
+    });
+    var springMesh = null;
+
+    function buildHelicalSpringGeometry(topY, bottomY, coilRadius, turns) {
+        var points = [];
+        var segments = 180;
+        var totalHeight = topY - bottomY;
+        for (var i = 0; i <= segments; i++) {
+            var t = i / segments;
+            var angle = t * Math.PI * 2 * turns;
+            var y = bottomY + t * totalHeight;
+            // បង្រួមចុងរ៉ឺស័រទាំងសងខាងឱ្យរាបស្មើជាប់បាត និងពីស្តុង
+            var r = coilRadius;
+            points.push(new THREE.Vector3(Math.cos(angle) * r, y, Math.sin(angle) * r));
+        }
+        var curve = new THREE.CatmullRomCurve3(points);
+        return new THREE.TubeGeometry(curve, 160, 0.065, 12, false);
+    }
+
+    // បន្ទាត់ក្រិតខ្នាតមីលីម៉ែត្រ/សង់ទីម៉ែត្រភ្ជាប់នៅជាប់ស៊ីឡាំង សម្រាប់វាស់ចម្ងាយផ្លាស់ទី x (0.0 cm ដល់ 1.0 cm)
+    function createPistonXScaleTexture() {
+        var c = document.createElement('canvas');
+        c.width = 256;
+        c.height = 512;
+        var ctx = c.getContext('2d');
+        ctx.clearRect(0, 0, c.width, c.height);
+
+        // ផ្ទៃខាងក្រោយថ្លាស្រាល
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
+        ctx.fillRect(10, 10, 236, 492);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(10, 10, 236, 492);
+
+        ctx.fillStyle = '#fde047';
+        ctx.font = 'bold 26px "Khmer OS", Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('ខ្នាតរួញ x (cm)', 128, 46);
+
+        // ក្រិតពី 0.0 cm ដល់ 1.0 cm
+        var startY = 85;
+        var endY = 465;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+
+        for (var i = 0; i <= 10; i++) {
+            var valCm = (i * 0.1).toFixed(1);
+            var y = startY + (i / 10) * (endY - startY);
+
+            ctx.beginPath();
+            if (i % 5 === 0) {
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 5;
+                ctx.moveTo(25, y);
+                ctx.lineTo(95, y);
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 28px Arial, sans-serif';
+                ctx.fillText(valCm + ' cm', 105, y);
+            } else {
+                ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+                ctx.lineWidth = 3;
+                ctx.moveTo(25, y);
+                ctx.lineTo(68, y);
+                ctx.stroke();
+            }
+        }
+        return new THREE.CanvasTexture(c);
+    }
+
+    // 1.0 cm នៃការផ្លាស់ទីពីស្តុង ត្រូវនឹង 1.35 ឯកតា 3D នៅក្នុងស៊ីឡាំងម៉ាណូម៉ែត្រ
+    var X_CM_TO_3D = 1.35;
+    var xScalePlaneHeight = (1.0 * X_CM_TO_3D) * (512 / 380);
+    var xScaleGeo = new THREE.PlaneGeometry(0.85, xScalePlaneHeight);
+    var xScaleMat = new THREE.MeshBasicMaterial({
+        map: createPistonXScaleTexture(),
+        transparent: true,
+        side: THREE.DoubleSide
+    });
+    var xScaleMesh = new THREE.Mesh(xScaleGeo, xScaleMat);
+    // តម្រឹមលេខ 0.0 cm ឱ្យចំកម្រិត PISTON_ZERO_OFFSET
+    xScaleMesh.position.set(1.55, PISTON_ZERO_OFFSET - (0.5 * X_CM_TO_3D) + 0.06, 0.2);
+    manometerGroup.add(xScaleMesh);
+
+    // ទ្រនិចពណ៌ក្រហម-ទឹកក្រូចភ្ជាប់នឹងពីស្តុង ចង្អុលទៅលើបន្ទាត់ខ្នាត x (Red Indicator Pointer)
+    var pointerBarGeo = new THREE.BoxGeometry(0.65, 0.045, 0.045);
+    var pointerBarMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+    var pistonPointerMesh = new THREE.Mesh(pointerBarGeo, pointerBarMat);
+    pistonPointerMesh.position.set(1.05, 0, 0.2);
+    pistonGroup.add(pistonPointerMesh);
+
+    // ៣.៤ វ៉ិចទ័រកម្លាំង 3D (កម្លាំងទឹកសង្កត់ចុះ F_p និងកម្លាំងរ៉ឺស័ររុញឡើង F_s)
+    function createArrow3D(hexColor, isDownward) {
+        var grp = new THREE.Group();
+        var mat = new THREE.MeshStandardMaterial({
+            color: hexColor,
+            emissive: hexColor,
+            emissiveIntensity: 0.4,
+            roughness: 0.25
+        });
+        var shaftGeo = new THREE.CylinderGeometry(0.065, 0.065, 1, 20);
+        shaftGeo.translate(0, 0.5, 0);
+        var shaft = new THREE.Mesh(shaftGeo, mat);
+
+        var coneGeo = new THREE.ConeGeometry(0.19, 0.36, 24);
+        coneGeo.translate(0, 0.18, 0);
+        var cone = new THREE.Mesh(coneGeo, mat);
+
+        grp.add(shaft);
+        grp.add(cone);
+        grp.userData = { shaft: shaft, cone: cone, isDownward: isDownward };
+        return grp;
+    }
+
+    var arrowFp = createArrow3D(0xf43f5e, true);  // ពណ៌ក្រហម សង្កត់ចុះលើពីស្តុង
+    var arrowFs = createArrow3D(0x38bdf8, false); // ពណ៌ฟ้า រុញឡើងពីរ៉ឺស័រ
+    manometerGroup.add(arrowFp);
+    manometerGroup.add(arrowFs);
+
+    function updateArrowSize(arrowGrp, len3D) {
+        if (len3D < 0.08) {
+            arrowGrp.visible = false;
+            return;
+        }
+        arrowGrp.visible = true;
+        var shaftLen = Math.max(0.12, len3D - 0.32);
+        arrowGrp.userData.shaft.scale.set(1, shaftLen, 1);
+        arrowGrp.userData.cone.position.y = shaftLen;
+        arrowGrp.rotation.z = arrowGrp.userData.isDownward ? Math.PI : 0;
+    }
+
+    // ប្រអប់មើលមិនឃើញសម្រាប់ងាយស្រួលប៉ះម្រាមដៃអូសស៊ីឡាំងលើទូរសព្ទ (Touch Hitbox)
+    var manoHitGeo = new THREE.CylinderGeometry(1.9, 1.9, MANO_HEIGHT + 1.4, 16);
+    manoHitGeo.translate(0, -MANO_HEIGHT / 2 + 0.3, 0);
+    var manoHitMat = new THREE.MeshBasicMaterial({ visible: false });
+    var manoHitBox = new THREE.Mesh(manoHitGeo, manoHitMat);
+    manometerGroup.add(manoHitBox);
+
+    // ====================================================
+    // ៤. ការគណនារូបវិទ្យា និងការធ្វើបច្ចុប្បន្នភាពរូប 3D
+    // ====================================================
+    var mathTimer = null;
+
+    function updatePhysicsAnd3D(source) {
+        if (source !== 'drag' && source !== 'anim') {
+            h_m = parseFloat(sH.value);
+        } else {
+            sH.value = h_m.toFixed(2);
+        }
+        k_val = parseFloat(sK.value);
+        d_cm = parseFloat(sD.value);
+
+        vH.innerText = h_m.toFixed(2);
+        vK.innerText = k_val.toFixed(0);
+        vD.innerText = d_cm.toFixed(2);
+
+        // គណនាតាមរូបមន្តរូបវិទ្យា
+        var d_m = d_cm / 100.0;
+        var A_m2 = (Math.PI * d_m * d_m) / 4.0;
+        var P_pa = rho * g * h_m;
+        var F_n = P_pa * A_m2;
+        var x_m = F_n / k_val;
+        var x_cm = x_m * 100.0;
+
+        // អាប់ដេតតារាងទិន្នន័យ
+        document.getElementById('liveX').innerText = x_cm.toFixed(3) + " cm";
+        document.getElementById('liveHCard').innerText = h_m.toFixed(2) + " m";
+        document.getElementById('liveP').innerText = Math.round(P_pa).toLocaleString() + " Pa";
+        document.getElementById('liveF').innerText = F_n.toFixed(2) + " N";
+
+        document.getElementById('hud-x').innerText = x_cm.toFixed(3);
+        document.getElementById('hud-h').innerText = h_m.toFixed(2);
+
+        document.getElementById('lbl-fp-val').innerText = F_n.toFixed(2);
+        document.getElementById('lbl-fs-val').innerText = F_n.toFixed(2);
+        document.getElementById('lbl-x-val').innerText = x_cm.toFixed(3);
+
+        // អាប់ដេតប្រអប់សង្កេត
+        var obsEl = document.getElementById('observationNote');
+        if (h_m <= 0.05) {
+            obsEl.innerHTML = "✨ <strong>នៅលើផ្ទៃទឹក ($h = 0.00\\text{ m}$):</strong> គ្មានសម្ពាធទឹកសង្កត់លើពីស្តុងទេ ($P = 0\\text{ Pa}, F_p = 0\\text{ N}$) ដូច្នេះរ៉ឺស័ររុញពីស្តុងត្រឡប់ទៅទីតាំងដើមវិញទាំងស្រុង គឺ <strong>$x = 0.000\\text{ cm}$</strong>។";
+        } else if (Math.abs(h_m - 5.64) <= 0.05 && k_val === 1250 && Math.abs(d_cm - 1.20) < 0.01) {
+            obsEl.innerHTML = "🎯 <strong>ត្រង់ចម្លើយលំហាត់ទី១១ ($h = 5.64\\text{ m}$):</strong> សម្ពាធទឹក $P = 55,272\\text{ Pa}$ បង្កើតកម្លាំងសង្កត់ $F_p = 6.25\\text{ N}$ ធ្វើឱ្យពីស្តុងផ្លាស់ទីចុះក្រោមបានចម្ងាយគំរូ <strong>$x = 0.500\\text{ cm}$</strong> គត់!";
+        } else {
+            obsEl.innerHTML = "🔍 <strong>នៅជម្រៅ $h = " + h_m.toFixed(2) + "\\text{ m}$:</strong> សម្ពាធទឹកសង្កត់លើពីស្តុងដោយកម្លាំង $F_p = " + F_n.toFixed(2) + "\\text{ N}$ ធ្វើឱ្យរ៉ឺស័ររួញចុះក្រោមបានចម្ងាយ <strong>$x = " + x_cm.toFixed(3) + "\\text{ cm}$</strong>។";
+        }
+
+        // ====================================================
+        // កែប្រែទីតាំងស៊ីឡាំងម៉ាណូម៉ែត្រ ពីស្តុង និងរ៉ឺស័រ 3D
+        // ====================================================
+        var manoTopY = WATER_SURFACE_Y - (h_m * M_TO_3D);
+        manometerGroup.position.y = manoTopY;
+        manoSpotLight.position.set(2, manoTopY - 1.0, 4);
+
+        // ទំហំកាំស៊ីឡាំងប្រែប្រួលបន្តិចតាមអង្កត់ផ្ចិត d
+        var radiusScale = 0.72 + (d_cm - 1.20) * 0.35;
+        cylWallMesh.scale.set(radiusScale, 1, radiusScale);
+        cylBaseMesh.scale.set(radiusScale, 1, radiusScale);
+        cylTopRimMesh.scale.set(radiusScale, radiusScale, 1);
+        zeroRingMesh.scale.set(radiusScale, radiusScale, 1);
+        pistonDiscMesh.scale.set(radiusScale, 1, radiusScale);
+        oRingMesh.scale.set(radiusScale, radiusScale, 1);
+
+        // ចម្ងាយផ្លាស់ទីរបស់ពីស្តុងក្នុងស៊ីឡាំង 3D
+        var visualDisp3D = Math.min(x_cm * X_CM_TO_3D, MANO_HEIGHT - 0.85);
+        var currentPistonTopY = PISTON_ZERO_OFFSET - visualDisp3D;
+        pistonGroup.position.y = currentPistonTopY;
+        pistonPointerMesh.position.x = radiusScale + 0.32;
+        xScaleMesh.position.x = radiusScale + 0.82;
+
+        // សាងសង់រ៉ឺស័រ 3D ថ្មីឱ្យរួញ ឬលាតតាមទីតាំងពីស្តុង
+        var springTopY = currentPistonTopY - PISTON_THICKNESS;
+        var springBottomY = -MANO_HEIGHT + 0.08;
+        if (springMesh) {
+            manometerGroup.remove(springMesh);
+            springMesh.geometry.dispose();
+        }
+        var newSpringGeo = buildHelicalSpringGeometry(springTopY, springBottomY, radiusScale * 0.58, 7.5);
+        springMesh = new THREE.Mesh(newSpringGeo, springMat);
+        manometerGroup.add(springMesh);
+
+        // តម្រូវប្រវែងវ៉ិចទ័រកម្លាំង F_p និង F_s
+        var arrowLen = Math.min(F_n * 0.14, 1.45);
+        arrowFp.position.set(-0.22, currentPistonTopY + arrowLen + 0.04, 0.25);
+        updateArrowSize(arrowFp, arrowLen);
+
+        arrowFs.position.set(0.22, currentPistonTopY - PISTON_THICKNESS - arrowLen - 0.04, 0.25);
+        updateArrowSize(arrowFs, arrowLen);
+
+        // អាប់ដេតដំណោះស្រាយគណិតវិទ្យា MathJax
+        document.getElementById('solK').innerText = k_val.toFixed(0);
+        document.getElementById('solD').innerText = d_cm.toFixed(2);
+        document.getElementById('solDm').innerText = d_m.toFixed(4);
+        document.getElementById('solXcm').innerText = x_cm.toFixed(3);
+        document.getElementById('solXm').innerText = x_m.toFixed(5);
+
+        clearTimeout(mathTimer);
+        mathTimer = setTimeout(function () {
+            var eqEl = document.getElementById('mathLineResult');
+            eqEl.innerHTML = "$$ h = \\frac{4 \\times " + k_val.toFixed(0) + " \\times " + x_m.toFixed(5) + "}{1000 \\times 9.80 \\times 3.1416 \\times (" + d_m.toFixed(4) + ")^2} \\approx " + h_m.toFixed(2) + " \\text{ m} $$";
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([eqEl, obsEl]);
+            }
+        }, 200);
+    }
+
+    // ====================================================
+    // ៥. មុខងារប៊ូតុងមើលជិត (Close-up Zoom) និងប៊ូតុងលើកស៊ីឡាំងស្វ័យប្រវត្តិ
+    // ====================================================
+    window.setCameraMode = function (mode) {
+        cameraMode = mode;
+        var zoomBtnText = document.getElementById('zoomBtnText');
+        if (mode === 'closeup') {
+            targetCamDist = 5.2; // Zoom ចូលជិតស៊ីឡាំងម៉ាណូម៉ែត្រដើម្បីមើលពីស្តុង និងខ្នាត x
+            zoomBtnText.innerText = "កំពុងមើលជិតពីស្តុង (ចុចដើម្បីចេញ)";
+        } else {
+            targetCamDist = 14.2;
+            zoomBtnText.innerText = "មើលជិតពីស្តុង និងចម្ងាយ x";
+        }
+    };
+
+    // ចុចប៊ូតុង Zoom ម្តងទៀតអាចប្តូរទៅមកបាន
+    document.getElementById('btnZoomClose').onclick = function () {
+        if (cameraMode === 'closeup') {
+            setCameraMode('overview');
+        } else {
+            setCameraMode('closeup');
+        }
+    };
+
+    var autoLiftInterval = null;
+    window.animateLiftToSurface = function () {
+        clearInterval(autoLiftInterval);
+        autoLiftInterval = setInterval(function () {
+            if (h_m > 0.02) {
+                h_m = Math.max(0.0, h_m - 0.08);
+                updatePhysicsAnd3D('anim');
+            } else {
+                h_m = 0.0;
+                updatePhysicsAnd3D('anim');
+                clearInterval(autoLiftInterval);
+            }
+        }, 25);
+    };
+
+    window.animateLowerToDepth = function () {
+        clearInterval(autoLiftInterval);
+        autoLiftInterval = setInterval(function () {
+            var diff = 5.64 - h_m;
+            if (Math.abs(diff) > 0.04) {
+                h_m += Math.sign(diff) * 0.08;
+                updatePhysicsAnd3D('anim');
+            } else {
+                h_m = 5.64;
+                updatePhysicsAnd3D('anim');
+                clearInterval(autoLiftInterval);
+            }
+        }, 25);
+    };
+
+    window.resetToProblem11 = function () {
+        clearInterval(autoLiftInterval);
+        sH.value = 5.64;
+        sK.value = 1250;
+        sD.value = 1.20;
+        camAzimuth = 0.22;
+        camElevation = 0.14;
+        updatePhysicsAnd3D('reset');
+    };
+
+    // ====================================================
+    // ៦. ការប៉ះអូសស៊ីឡាំងម៉ាណូម៉ែត្រលើអេក្រង់ទូរសព្ទ និង Mouse
+    // ====================================================
+    var raycaster = new THREE.Raycaster();
+    var pointerNDC = new THREE.Vector2();
+    var activeAction = 'none'; // 'dragMano' ឬ 'orbitCam'
+    var startClientX = 0;
+    var startClientY = 0;
+    var startH_m = 5.64;
+    var startAzimuth = 0;
+    var startElevation = 0;
+
+    function updatePointerNDC(clientX, clientY) {
+        var rect = canvasEl.getBoundingClientRect();
+        pointerNDC.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+        pointerNDC.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    }
+
+    function handlePointerDown(clientX, clientY) {
+        clearInterval(autoLiftInterval);
+        updatePointerNDC(clientX, clientY);
+        raycaster.setFromCamera(pointerNDC, camera);
+
+        var hits = raycaster.intersectObject(manoHitBox, false);
+        startClientX = clientX;
+        startClientY = clientY;
+
+        if (hits.length > 0) {
+            activeAction = 'dragMano';
+            startH_m = h_m;
+            canvasEl.style.cursor = 'ns-resize';
+            cylWallMat.emissiveIntensity = 0.28;
+            cylTopRimMat.color.setHex(0x38bdf8);
+        } else {
+            activeAction = 'orbitCam';
+            startAzimuth = camAzimuth;
+            startElevation = camElevation;
+            canvasEl.style.cursor = 'grabbing';
+        }
+    }
+
+    function handlePointerMove(clientX, clientY) {
+        if (activeAction === 'none') {
+            updatePointerNDC(clientX, clientY);
+            raycaster.setFromCamera(pointerNDC, camera);
+            var hoverHits = raycaster.intersectObject(manoHitBox, false);
+            canvasEl.style.cursor = hoverHits.length > 0 ? 'ns-resize' : 'grab';
+            return;
+        }
+
+        if (activeAction === 'dragMano') {
+            var deltaY = clientY - startClientY;
+            var rect = canvasEl.getBoundingClientRect();
+            // បើកំពុងមើលជិត (Closeup) អូសតិចៗឱ្យផ្លាស់ទីយឺតស្រួលសង្កេត
+            var sensitivity = (cameraMode === 'closeup') ? 6.0 : 12.5;
+            var metersPerPx = sensitivity / rect.height;
+            h_m = Math.max(0.0, Math.min(10.0, startH_m + deltaY * metersPerPx));
+            updatePhysicsAnd3D('drag');
+        } else if (activeAction === 'orbitCam') {
+            var dx = clientX - startClientX;
+            var dy = clientY - startClientY;
+            camAzimuth = Math.max(-0.85, Math.min(0.85, startAzimuth - dx * 0.006));
+            camElevation = Math.max(-0.2, Math.min(0.65, startElevation + dy * 0.005));
+        }
+    }
+
+    function handlePointerUp() {
+        activeAction = 'none';
+        canvasEl.style.cursor = 'grab';
+        cylWallMat.emissiveIntensity = 0.08;
+        cylTopRimMat.color.setHex(0x0284c7);
+    }
+
+    // Mouse Events
+    canvasEl.addEventListener('mousedown', function (e) { handlePointerDown(e.clientX, e.clientY); });
+    window.addEventListener('mousemove', function (e) { handlePointerMove(e.clientX, e.clientY); });
+    window.addEventListener('mouseup', function () { handlePointerUp(); });
+
+    // Touch Events សម្រាប់សិស្សប្រើទូរសព្ទដៃ
+    canvasEl.addEventListener('touchstart', function (e) {
+        if (e.touches.length === 1) {
+            e.preventDefault();
+            handlePointerDown(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: false });
+
+    window.addEventListener('touchmove', function (e) {
+        if (activeAction !== 'none' && e.touches.length === 1) {
+            e.preventDefault();
+            handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: false });
+
+    window.addEventListener('touchend', function () {
+        handlePointerUp();
+    });
+
+    // Sliders Events
+    sH.addEventListener('input', function () { clearInterval(autoLiftInterval); updatePhysicsAnd3D('slider'); });
+    sK.addEventListener('input', function () { updatePhysicsAnd3D('slider'); });
+    sD.addEventListener('input', function () { updatePhysicsAnd3D('slider'); });
+
+    // ====================================================
+    // ៧. ការធ្វើចលនាកាមេរ៉ា និងទីតាំងស្លាក 2D លើឆាក 3D (Animation Loop)
+    // ====================================================
+    var lblFpEl = document.getElementById('label-3d-fp');
+    var lblFsEl = document.getElementById('label-3d-fs');
+    var lblXEl = document.getElementById('label-3d-x');
+
+    function toScreenXY(vec3) {
+        var v = vec3.clone().project(camera);
+        return {
+            x: (v.x * 0.5 + 0.5) * canvasWrapper.clientWidth,
+            y: (-(v.y * 0.5) + 0.5) * canvasWrapper.clientHeight
+        };
+    }
+
+    var clock = new THREE.Clock();
+
+    function animate() {
+        requestAnimationFrame(animate);
+        var t = clock.getElapsedTime();
+
+        // រលកទឹកស្រាលៗលើផ្ទៃទឹកទន្លេ
+        waterTopMesh.position.y = WATER_SURFACE_Y + Math.sin(t * 2.2) * 0.015;
+
+        // កំណត់ចំណុចដែលកាមេរ៉ាផ្តោតមើល (Overview vs Close-up ដើរតាមពីស្តុង)
+        var manoWorldY = manometerGroup.position.y;
+        var pistonWorldY = manoWorldY + pistonGroup.position.y;
+
+        if (cameraMode === 'closeup') {
+            desiredCamTarget.set(0.25, pistonWorldY - 0.35, 0);
+        } else {
+            desiredCamTarget.set(0, -0.55, 0);
+        }
+
+        // Smooth Lerp សម្រាប់កាមេរ៉ា
+        currentCamDist += (targetCamDist - currentCamDist) * 0.1;
+        currentCamTarget.lerp(desiredCamTarget, 0.12);
+
+        camera.position.x = currentCamTarget.x + currentCamDist * Math.sin(camAzimuth) * Math.cos(camElevation);
+        camera.position.y = currentCamTarget.y + currentCamDist * Math.sin(camElevation);
+        camera.position.z = currentCamTarget.z + currentCamDist * Math.cos(camAzimuth) * Math.cos(camElevation);
+        camera.lookAt(currentCamTarget);
+
+        // គណនាទីតាំងស្លាក 2D ឱ្យដើរតាមម៉ាណូម៉ែត្រ 3D
+        var posFp = toScreenXY(new THREE.Vector3(-1.35, pistonWorldY + 0.55, 0.3));
+        var posFs = toScreenXY(new THREE.Vector3(-1.35, pistonWorldY - 0.85, 0.3));
+        var posX = toScreenXY(new THREE.Vector3(1.85, pistonWorldY - 0.1, 0.3));
+
+        var maxW = canvasWrapper.clientWidth;
+        var maxH = canvasWrapper.clientHeight;
+
+        lblFpEl.style.left = Math.min(Math.max(posFp.x - 95, 10), maxW - 160) + 'px';
+        lblFpEl.style.top = Math.min(Math.max(posFp.y - 15, 65), maxH - 75) + 'px';
+
+        lblFsEl.style.left = Math.min(Math.max(posFs.x - 95, 10), maxW - 160) + 'px';
+        lblFsEl.style.top = Math.min(Math.max(posFs.y - 15, 65), maxH - 75) + 'px';
+
+        lblXEl.style.left = Math.min(Math.max(posX.x + 10, 10), maxW - 185) + 'px';
+        lblXEl.style.top = Math.min(Math.max(posX.y - 18, 65), maxH - 75) + 'px';
+
+        renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', function () {
+        var w = canvasWrapper.clientWidth;
+        var h = canvasWrapper.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+    });
+
+    window.onload = function () {
+        updatePhysicsAnd3D('init');
+        animate();
+    };
+</script>
+
+</body>
+</html>
