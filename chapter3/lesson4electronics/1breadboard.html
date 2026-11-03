@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D E-Lab Pro: បន្ទះសៀគ្វីពិតៗ</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <style>
+        body { font-family: 'Battambang', sans-serif; margin: 0; overflow: hidden; background-color: #0f172a; user-select: none; touch-action: none; }
+        #lab-container { position: relative; height: 100vh; width: 100vw; overflow: hidden; }
+        
+        #workspace { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+        #canvas-container { width: 100%; height: 100%; display: block; outline: none; touch-action: none; }
+
+        /* Mobile Responsive Bottom Toolbox */
+        #toolbox { 
+            position: absolute; bottom: 0; left: 0; width: 100%; 
+            background-color: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; z-index: 100; 
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.6); 
+            border-radius: 20px 20px 0 0; border-top: 1px solid #475569;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
+        }
+        #toolbox.closed { transform: translateY(calc(100% - 50px)); }
+
+        .toolbox-header { 
+            height: 50px; display: flex; justify-content: center; align-items: center; gap: 10px;
+            cursor: pointer; border-bottom: 1px solid #334155; 
+        }
+        .toolbox-content { 
+            display: flex; overflow-x: auto; padding: 15px; gap: 12px; align-items: center;
+            -ms-overflow-style: none; scrollbar-width: none;
+        }
+        .toolbox-content::-webkit-scrollbar { display: none; }
+        
+        .tool-item {
+            min-width: 90px; flex-shrink: 0; touch-action: none; /* សំខាន់សម្រាប់ការអូសលើទូរសព្ទ */
+            border: 2px dashed #475569; border-radius: 10px; padding: 10px 5px; text-align: center; cursor: grab;
+            background-color: #1e293b; transition: all 0.2s; font-size: 12px; font-weight: bold; color: #cbd5e1;
+        }
+        .tool-item:active { transform: scale(0.95); background-color: #3b82f6; color: white; cursor: grabbing;}
+        .tool-icon { font-size: 24px; margin-bottom: 5px; pointer-events: none;}
+
+        #top-bar { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 20; width: max-content; }
+        
+        .control-btn {
+            padding: 10px 20px; border-radius: 30px; font-weight: bold; font-size: 14px; cursor: pointer; font-family: 'Battambang', sans-serif;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: all 0.2s; border: 2px solid rgba(255,255,255,0.2);
+        }
+        #btnPower { background-color: #10b981; color: white; }
+        #btnPower.off { background-color: #ef4444; }
+        #btnRotate { background-color: #3b82f6; color: white; }
+
+        #warning-box {
+            position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%);
+            background-color: rgba(220, 38, 38, 0.95); color: white; padding: 20px; border-radius: 15px;
+            text-align: center; font-size: 18px; font-weight: bold; width: 90%; max-width: 400px;
+            display: none; z-index: 50; border: 3px solid #fca5a5; animation: pulseWarning 0.8s infinite alternate;
+        }
+        @keyframes pulseWarning { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.05); } }
+
+        .instruction-box {
+            position: absolute; top: 70px; right: 15px; background: rgba(15, 23, 42, 0.7); padding: 12px; border-radius: 10px;
+            font-size: 11px; color: #cbd5e1; pointer-events: none; border-left: 3px solid #3b82f6; z-index: 10;
+        }
+        @media (max-width: 768px) { .instruction-box { display: none; } }
+    </style>
+</head>
+<body>
+
+<div id="lab-container">
+    <div id="workspace">
+        <div id="top-bar">
+            <button id="btnPower" class="control-btn off">⚡ បើកចរន្ត</button>
+            <button id="btnRotate" class="control-btn">🔄 បង្វិល</button>
+        </div>
+
+        <div id="warning-box">
+            ⚠️ ឆ្លងចរន្តអគ្គិសនី (Short Circuit)<br>
+            <span class="text-sm font-normal mt-2 block">ប៉ូល (+) និង (-) ភ្ជាប់គ្នាដោយគ្មានគ្រឿងទទួល!</span>
+        </div>
+
+        <div class="instruction-box">
+            <b>របៀបបញ្ជា៖</b><br>
+            - <b>អូសទាញគ្រឿង</b> ពីឃ្លាំងមកដាក់លើក្តារ<br>
+            - <b>ចុចអូសលើគ្រឿង</b> ដើម្បីរំកិលទីតាំង<br>
+            - <b>Double Tap</b> ដើម្បីលុបគ្រឿង<br>
+            - <b>អូសអេក្រង់ទទេ</b> ដើម្បីបង្វិលកាមេរ៉ាមើល
+        </div>
+
+        <div id="canvas-container"></div>
+    </div>
+
+    <!-- ឃ្លាំងអគ្គិសនី -->
+    <div id="toolbox" class="closed">
+        <div class="toolbox-header" onclick="toggleToolbox()">
+            <span id="toggle-icon" class="text-white">🔽</span>
+            <h2 class="text-lg font-bold text-white m-0">ឃ្លាំងអគ្គិសនី 3D</h2>
+        </div>
+        
+        <div class="toolbox-content" id="drag-source">
+            <div class="tool-item" data-type="battery"><div class="tool-icon">🔋</div>ថ្មពិល 9V</div>
+            <div class="tool-item" data-type="switch"><div class="tool-icon">🕹️</div>កុងតាក់</div>
+            <div class="tool-item" data-type="resistor"><div class="tool-icon">〰️</div>រេស៊ីស្តង់</div>
+            <div class="tool-item" data-type="led"><div class="tool-icon">🔴</div>អំពូល LED</div>
+            <div class="tool-item" data-type="bulb"><div class="tool-icon">💡</div>អំពូលធម្មតា</div>
+            <div class="tool-item" data-type="halogen"><div class="tool-icon">🔦</div>អំពូលយ៉ូត</div>
+            <div class="tool-item" data-type="motor"><div class="tool-icon">⚙️</div>ម៉ូទ័រ</div>
+            <div class="tool-item" data-type="buzzer"><div class="tool-icon">🔔</div>ប៊ីប (Buzzer)</div>
+            <div class="tool-item" data-type="fuse"><div class="tool-icon">🧨</div>ហ្វុយស៊ីប</div>
+            <div class="tool-item" data-type="inductor"><div class="tool-icon">🧲</div>អាំងឌុចទ័រ</div>
+            <div class="tool-item" data-type="capacitor"><div class="tool-icon">⏸️</div>កុងដង់សាទ័រ</div>
+            <div class="tool-item" data-type="diode"><div class="tool-icon">▶️</div>ឌីយ៉ូត</div>
+            <div class="tool-item" data-type="ldr"><div class="tool-icon">☀️</div>សេនស័រ LDR</div>
+            <div class="tool-item" data-type="potentiometer"><div class="tool-icon">🎛️</div>ប៉ូតង់ស្យូម៉ែត</div>
+            
+            <button onclick="clearBoard()" class="ml-4 bg-red-600 text-white font-bold py-2 px-4 rounded-lg flex-shrink-0 shadow-lg">
+                🗑️ សម្អាតក្ដារ
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // មុខងារបើក/បិទ ឃ្លាំង
+    function toggleToolbox() {
+        const tb = document.getElementById('toolbox');
+        const icon = document.getElementById('toggle-icon');
+        if (tb.classList.contains('closed')) {
+            tb.classList.remove('closed');
+            icon.innerText = '🔽';
+        } else {
+            tb.classList.add('closed');
+            icon.innerText = '🔼';
+        }
+    }
+    // បើកឃ្លាំងដោយស្វ័យប្រវត្តិពេលចាប់ផ្តើម
+    setTimeout(() => { document.getElementById('toolbox').classList.remove('closed'); }, 500);
+
+    // --- 1. Three.js Setup ---
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1e293b);
+    scene.fog = new THREE.Fog(0x1e293b, 40, 100);
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(0, 45, 40);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 - 0.05; 
+    controls.enablePan = false; 
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); scene.add(ambientLight);
+    const spotLight = new THREE.SpotLight(0xffffff, 0.8); spotLight.position.set(0, 60, 20); spotLight.castShadow = true; scene.add(spotLight);
+
+    // --- 2. 3D Breadboard ---
+    const boardGroup = new THREE.Group(); scene.add(boardGroup);
+    const boardMesh = new THREE.Mesh(new THREE.BoxGeometry(60, 3, 22), new THREE.MeshStandardMaterial({ color: 0xf8fafc }));
+    boardMesh.receiveShadow = true; boardMesh.position.y = -1.5; boardGroup.add(boardMesh);
+
+    const createLine = (z, color) => {
+        const line = new THREE.Mesh(new THREE.PlaneGeometry(56, 0.2), new THREE.MeshBasicMaterial({ color: color }));
+        line.rotation.x = -Math.PI / 2; line.position.set(0, 0.01, z); boardGroup.add(line);
+    };
+    createLine(-9.5, 0xef4444); createLine(-7.5, 0x3b82f6); createLine(7.5, 0xef4444); createLine(9.5, 0x3b82f6);  
+    
+    const centerDip = new THREE.Mesh(new THREE.BoxGeometry(60, 0.8, 1.5), new THREE.MeshStandardMaterial({color: 0x94a3b8}));
+    centerDip.position.set(0, -0.1, 0); boardGroup.add(centerDip);
+
+    const pitch = 1.5, cols = 36, holes = []; 
+    const holeMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+    const holeGeo = new THREE.CircleGeometry(0.35, 12);
+
+    function addHole(x, z, nodeName) {
+        const h = new THREE.Mesh(holeGeo, holeMat);
+        h.rotation.x = -Math.PI / 2; h.position.set(x, 0.02, z); boardGroup.add(h);
+        holes.push({ x: x, z: z, node: nodeName });
+    }
+
+    const startX = -((cols-1)*pitch)/2;
+    for(let i=0; i<cols; i++) {
+        let x = startX + i * pitch;
+        addHole(x, -8.5, 'PWR_T_PLUS'); addHole(x, -6.5, 'PWR_T_MINUS');
+        for(let j=0; j<5; j++) addHole(x, -4.5 + (j*pitch), 'T_TOP_' + i);
+        for(let j=0; j<5; j++) addHole(x, 1.5 + (j*pitch), 'T_BOT_' + i);
+        addHole(x, 6.5, 'PWR_B_PLUS'); addHole(x, 8.5, 'PWR_B_MINUS');
+    }
+
+    // --- 3. 3D Component Factory ---
+    const components = [];
+    const matSilver = new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.9, roughness: 0.2 });
+
+    function createLeg(x, z, y) {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, y, 8), matSilver);
+        leg.position.set(x, y/2, z); return leg;
+    }
+    function createBentWire(sx, ex, y) {
+        const wire = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, Math.abs(ex-sx), 8), matSilver);
+        wire.rotation.z = Math.PI / 2; wire.position.set((sx+ex)/2, y, 0); return wire;
+    }
+
+    function create3DComponent(type) {
+        const group = new THREE.Group(); group.userData = { type: type, pins: [], isActive: false };
+        let bodyY = 3.5;
+
+        if (type === 'resistor') {
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 4, 16), new THREE.MeshStandardMaterial({color: 0xcd853f}));
+            body.rotation.z = Math.PI / 2; body.position.y = bodyY;
+            group.add(body, createBentWire(-3, -2, bodyY), createBentWire(2, 3, bodyY), createLeg(-3, 0, bodyY), createLeg(3, 0, bodyY));
+            group.userData.pins = [{x: -3, z: 0}, {x: 3, z: 0}];
+        }
+        else if (type === 'diode') {
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 3, 16), new THREE.MeshStandardMaterial({color: 0x111111}));
+            body.rotation.z = Math.PI / 2; body.position.y = bodyY;
+            const stripe = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.82, 0.4, 16), new THREE.MeshBasicMaterial({color: 0xcccccc}));
+            stripe.rotation.z = Math.PI/2; stripe.position.set(1, bodyY, 0);
+            group.add(body, stripe, createBentWire(-3, -1.5, bodyY), createBentWire(1.5, 3, bodyY), createLeg(-3, 0, bodyY), createLeg(3, 0, bodyY));
+            group.userData.pins = [{x: -3, z: 0, isPos: true}, {x: 3, z: 0, isNeg: true}];
+        }
+        else if (type === 'led') {
+            bodyY = 2.5;
+            // កែសម្រួលអំពូល LED ឱ្យក្រហមដិតខ្លាំង
+            const ledMat = new THREE.MeshPhysicalMaterial({
+                color: 0xff0000, emissive: 0x660000, transmission: 0.3, opacity: 1, transparent: true, roughness: 0.1
+            });
+            const bulb = new THREE.Mesh(new THREE.SphereGeometry(1.5, 16, 16), ledMat); bulb.position.y = bodyY + 1;
+            group.add(bulb, createLeg(-1.5, 0, bodyY), createLeg(1.5, 0, bodyY));
+            group.userData.pins = [{x: -1.5, z: 0, isPos: true}, {x: 1.5, z: 0, isNeg: true}];
+            group.userData.bulbMesh = bulb; 
+            group.userData.defaultEmissive = 0x660000;
+        }
+        else if (type === 'motor') {
+            bodyY = 2;
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 4, 16), new THREE.MeshStandardMaterial({color: 0x9ca3af}));
+            body.rotation.z = Math.PI/2; body.position.y = bodyY;
+            const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 5.5, 8), new THREE.MeshStandardMaterial({color: 0x475569}));
+            shaft.rotation.z = Math.PI/2; shaft.position.y = bodyY;
+            group.add(body, shaft, createLeg(-1.5, 0, bodyY), createLeg(1.5, 0, bodyY));
+            group.userData.pins = [{x: -1.5, z: 0}, {x: 1.5, z: 0}];
+            group.userData.animMesh = shaft;
+        }
+        else if (type === 'buzzer') {
+            bodyY = 1.5;
+            const bGroup = new THREE.Group(); // Subgroup សម្រាប់ធ្វើចលនាញ័រ
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 2.5, 16), new THREE.MeshStandardMaterial({color: 0x111111}));
+            body.position.y = bodyY;
+            const top = new THREE.Mesh(new THREE.CircleGeometry(1.8, 16), new THREE.MeshBasicMaterial({color: 0x333333}));
+            top.rotation.x = -Math.PI/2; top.position.y = bodyY + 1.26;
+            bGroup.add(body, top);
+            group.add(bGroup, createLeg(-1.5, 0, bodyY), createLeg(1.5, 0, bodyY));
+            group.userData.pins = [{x: -1.5, z: 0}, {x: 1.5, z: 0}];
+            group.userData.animMesh = bGroup;
+        }
+        else if (type === 'fuse') {
+            bodyY = 1.5;
+            const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 3, 16), new THREE.MeshPhysicalMaterial({color: 0xffffff, transmission: 0.9, transparent: true}));
+            glass.rotation.z = Math.PI/2; glass.position.y = bodyY;
+            const wire = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.8, 8), new THREE.MeshBasicMaterial({color: 0x555555}));
+            wire.rotation.z = Math.PI/2; wire.position.y = bodyY;
+            const cap1 = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.5, 16), matSilver); cap1.rotation.z = Math.PI/2; cap1.position.set(-1.5, bodyY, 0);
+            const cap2 = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.5, 16), matSilver); cap2.rotation.z = Math.PI/2; cap2.position.set(1.5, bodyY, 0);
+            group.add(glass, wire, cap1, cap2, createLeg(-1.5, 0, bodyY), createLeg(1.5, 0, bodyY));
+            group.userData.pins = [{x: -1.5, z: 0}, {x: 1.5, z: 0}];
+        }
+        else if (type === 'inductor') {
+            bodyY = 2;
+            const core = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 3, 16), new THREE.MeshStandardMaterial({color: 0x333333}));
+            core.rotation.z = Math.PI/2; core.position.y = bodyY;
+            group.add(core, createLeg(-1.5, 0, bodyY), createLeg(1.5, 0, bodyY));
+            for(let i=0; i<5; i++) {
+                let ring = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.15, 8, 16), new THREE.MeshStandardMaterial({color: 0xb87333}));
+                ring.rotation.y = Math.PI/2; ring.position.set(-1 + i*0.5, bodyY, 0);
+                group.add(ring);
+            }
+            group.userData.pins = [{x: -1.5, z: 0}, {x: 1.5, z: 0}];
+        }
+        else if (type === 'bulb' || type === 'halogen') {
+            bodyY = 2.5;
+            const bulb = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 16), new THREE.MeshPhysicalMaterial({color:0xffffff, transmission:0.9, transparent:true})); 
+            bulb.position.y = bodyY + 1;
+            const fil = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.5), new THREE.MeshBasicMaterial({color: 0x555555})); fil.position.y = bodyY + 1;
+            group.add(bulb, fil, createLeg(-1.5, 0, bodyY), createLeg(1.5, 0, bodyY));
+            group.userData.pins = [{x: -1.5, z: 0}, {x: 1.5, z: 0}];
+            group.userData.bulbMesh = fil;
+        }
+        else if (type === 'capacitor') {
+            bodyY = 4;
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 5, 16), new THREE.MeshStandardMaterial({color: 0x0284c7})); body.position.y = bodyY;
+            group.add(body, createLeg(-1.5, 0, 1.5), createLeg(1.5, 0, 1.5));
+            group.userData.pins = [{x: -1.5, z: 0}, {x: 1.5, z: 0}];
+        }
+        else if (type === 'switch' || type === 'potentiometer') {
+            bodyY = 2;
+            const body = new THREE.Mesh(new THREE.BoxGeometry(5, 2, 3), new THREE.MeshStandardMaterial({color: type==='switch'?0x2563eb:0x475569})); body.position.y = bodyY;
+            group.add(body, createLeg(-1.5, 0, bodyY), createLeg(0, 0, bodyY), createLeg(1.5, 0, bodyY));
+            group.userData.pins = [{x: -1.5, z: 0}, {x: 0, z: 0}, {x: 1.5, z: 0}];
+        }
+        else if (type === 'ldr') {
+            const base = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.5, 16), new THREE.MeshStandardMaterial({color: 0x9ca3af})); base.position.y = 1.5;
+            group.add(base, createLeg(-0.75, 0, 1.5), createLeg(0.75, 0, 1.5));
+            group.userData.pins = [{x: -0.75, z: 0}, {x: 0.75, z: 0}]; 
+        }
+        else if (type === 'battery') {
+            bodyY = 6;
+            const body = new THREE.Mesh(new THREE.BoxGeometry(5, 12, 3), new THREE.MeshStandardMaterial({color: 0x0f172a})); body.position.y = bodyY;
+            const cap = new THREE.Mesh(new THREE.BoxGeometry(5, 2, 3), new THREE.MeshStandardMaterial({color: 0xef4444})); cap.position.y = bodyY+7;
+            group.add(body, cap, createLeg(-1.5, 0, bodyY), createLeg(1.5, 0, bodyY));
+            group.userData.pins = [{x: -1.5, z: 0}, {x: 1.5, z: 0}];
+        }
+
+        // Invisible Hitbox សម្រាប់ចាប់ទាញ
+        const box = new THREE.Box3().setFromObject(group);
+        const hitMesh = new THREE.Mesh(
+            new THREE.BoxGeometry(box.max.x - box.min.x + 2, box.max.y - box.min.y + 2, box.max.z - box.min.z + 2), 
+            new THREE.MeshBasicMaterial({visible: false})
+        );
+        hitMesh.position.y = (box.max.y + box.min.y) / 2;
+        group.add(hitMesh); group.userData.hitMesh = hitMesh;
+
+        return group;
+    }
+
+    // --- 4. មុខងារទាញអូស (Pointer Events for Touch & Mouse Dragging) ---
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let draggedObj = null;
+    let lastSelectedObj = null;
+    let offset = new THREE.Vector3();
+    const workPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+    function getMouse2D(e) {
+        const rect = container.getBoundingClientRect();
+        return {
+            x: ((e.clientX - rect.left) / container.clientWidth) * 2 - 1,
+            y: -((e.clientY - rect.top) / container.clientHeight) * 2 + 1
+        };
+    }
+
+    function getIntersectPoint(mouse2D) {
+        raycaster.setFromCamera(mouse2D, camera);
+        const intersectPoint = new THREE.Vector3();
+        raycaster.ray.intersectPlane(workPlane, intersectPoint);
+        return intersectPoint;
+    }
+
+    // ចាប់ទាញចេញពីឃ្លាំង (Toolbox Drag)
+    document.querySelectorAll('.tool-item').forEach(item => {
+        item.addEventListener('pointerdown', (e) => {
+            e.preventDefault(); // ការពារកុំឱ្យអូស Scroll អេក្រង់
+            const type = item.getAttribute('data-type');
+            const comp = create3DComponent(type);
+            scene.add(comp);
+            components.push(comp);
+            
+            lastSelectedObj = comp;
+            draggedObj = comp;
+            controls.enabled = false; // បិទកាមេរ៉ាសិន
+            
+            const mouse2D = getMouse2D(e);
+            const pt = getIntersectPoint(mouse2D);
+            draggedObj.position.set(pt.x, 2, pt.z);
+            offset.set(0, 0, 0);
+
+            // លាក់ផ្ទាំងឃ្លាំងដោយស្វ័យប្រវត្តិបើអូសលើទូរសព្ទ
+            if(window.innerWidth < 768) {
+                document.getElementById('toolbox').classList.add('closed');
+                document.getElementById('toggle-icon').innerText = '🔼';
+            }
+        });
+    });
+
+    // ចាប់ទាញគ្រឿងដែលមានស្រាប់លើក្តារ
+    container.addEventListener('pointerdown', (e) => {
+        const mouse2D = getMouse2D(e);
+        raycaster.setFromCamera(mouse2D, camera);
+        const intersects = raycaster.intersectObjects(components.map(c => c.userData.hitMesh));
+        
+        if (intersects.length > 0) {
+            controls.enabled = false;
+            draggedObj = intersects[0].object.parent;
+            lastSelectedObj = draggedObj;
+            
+            const pt = getIntersectPoint(mouse2D);
+            offset.copy(pt).sub(draggedObj.position);
+            draggedObj.position.y = 2; // លើកឡើងបន្តិចពេលកំពុងអូស
+            
+            // Double Tap សម្រាប់លុប
+            const now = Date.now();
+            if (draggedObj.userData.lastTouch && (now - draggedObj.userData.lastTouch) < 350) {
+                scene.remove(draggedObj);
+                components.splice(components.indexOf(draggedObj), 1);
+                draggedObj = null; lastSelectedObj = null;
+                controls.enabled = true;
+                simulateCircuit();
+            } else {
+                if(draggedObj) draggedObj.userData.lastTouch = now;
+            }
+        }
+    });
+
+    // អូសរំកិលទីតាំង (Move pointer)
+    window.addEventListener('pointermove', (e) => {
+        if (draggedObj) {
+            const mouse2D = getMouse2D(e);
+            const pt = getIntersectPoint(mouse2D);
+            draggedObj.position.x = pt.x - offset.x;
+            draggedObj.position.z = pt.z - offset.z;
+            draggedObj.position.y = 2;
+        }
+    });
+
+    // ទម្លាក់គ្រឿង (Drop object)
+    window.addEventListener('pointerup', (e) => {
+        if (draggedObj) {
+            snapToGrid(draggedObj);
+            draggedObj = null;
+            controls.enabled = true; // បើកកាមេរ៉ាវិញ
+            simulateCircuit();
+        }
+    });
+
+    // មុខងារ Snap ចូលរន្ធ
+    function snapToGrid(comp) {
+        let nearest = holes.reduce((p, c) => Math.hypot(c.x-comp.position.x, c.z-comp.position.z) < Math.hypot(p.x-comp.position.x, p.z-comp.position.z) ? c : p);
+        comp.position.x = nearest.x; comp.position.z = nearest.z; comp.position.y = 0;
+        
+        comp.userData.snappedNodes = [];
+        comp.userData.pins.forEach(pin => {
+            let px = comp.position.x + (pin.x * Math.cos(comp.rotation.y) - pin.z * Math.sin(comp.rotation.y));
+            let pz = comp.position.z + (pin.x * Math.sin(comp.rotation.y) + pin.z * Math.cos(comp.rotation.y));
+            let hole = holes.find(h => Math.hypot(h.x - px, h.z - pz) < 0.5);
+            if(hole) comp.userData.snappedNodes.push(hole.node);
+        });
+    }
+
+    // ប៊ូតុងបង្វិលគ្រឿង
+    document.getElementById('btnRotate').addEventListener('click', () => {
+        if (lastSelectedObj) {
+            lastSelectedObj.rotation.y += Math.PI / 2;
+            snapToGrid(lastSelectedObj); simulateCircuit();
+        }
+    });
+    window.addEventListener('keydown', (e) => {
+        if ((e.key === 'r' || e.key === 'R') && lastSelectedObj) {
+            lastSelectedObj.rotation.y += Math.PI / 2; snapToGrid(lastSelectedObj); simulateCircuit();
+        }
+    });
+
+    window.clearBoard = function() {
+        components.forEach(c => scene.remove(c));
+        components.length = 0; lastSelectedObj = null; simulateCircuit();
+    };
+
+    // --- 5. Circuit Engine (ប្រព័ន្ធសៀគ្វីឆ្លាតវៃ) ---
+    let isPowerOn = false;
+    const btnPower = document.getElementById('btnPower');
+    const warningBox = document.getElementById('warning-box');
+
+    btnPower.addEventListener('click', () => {
+        isPowerOn = !isPowerOn;
+        btnPower.textContent = isPowerOn ? '⚡ បិទចរន្ត' : '⚡ បើកចរន្ត';
+        btnPower.classList.toggle('off');
+        simulateCircuit();
+    });
+
+    function simulateCircuit() {
+        // Reset ភាពសកម្មទាំងអស់សិន
+        components.forEach(c => { 
+            if(c.userData.bulbMesh) {
+                c.userData.bulbMesh.material.emissive.setHex(c.userData.defaultEmissive || 0x000000);
+                c.userData.bulbMesh.material.emissiveIntensity = 1;
+            }
+            c.userData.isActive = false; 
+        });
+        warningBox.style.display = 'none';
+        if (!isPowerOn) return;
+
+        const batteries = components.filter(c => c.userData.type === 'battery' && c.userData.snappedNodes?.length === 2);
+        if(batteries.length === 0) return;
+
+        let isShort = false; let graph = {};
+        const addEdge = (u, v) => { if(!graph[u]) graph[u] = []; graph[u].push(v); };
+
+        components.forEach(c => {
+            let nodes = c.userData.snappedNodes;
+            if(!nodes || nodes.length < 2) return;
+            let t = c.userData.type;
+            if (['resistor', 'bulb', 'halogen', 'potentiometer', 'ldr', 'motor', 'buzzer', 'fuse', 'inductor'].includes(t)) { 
+                addEdge(nodes[0], nodes[1]); addEdge(nodes[1], nodes[0]); 
+            } 
+            else if (t === 'switch' && nodes.length >= 2) { addEdge(nodes[0], nodes[1]); addEdge(nodes[1], nodes[0]); }
+            else if (['led', 'diode'].includes(t)) {
+                if(c.userData.pins[0].isPos) addEdge(nodes[0], nodes[1]); else addEdge(nodes[1], nodes[0]);
+            }
+        });
+
+        batteries.forEach(bat => {
+            let vcc = bat.userData.snappedNodes[0], gnd = bat.userData.snappedNodes[1];
+            if(vcc === gnd) isShort = true;
+            
+            components.forEach(c => {
+                if (c.userData.snappedNodes?.length === 2) {
+                    let path1 = hasPath(vcc, c.userData.snappedNodes[0], graph) && hasPath(c.userData.snappedNodes[1], gnd, graph);
+                    let path2 = hasPath(vcc, c.userData.snappedNodes[1], graph) && hasPath(c.userData.snappedNodes[0], gnd, graph);
+                    
+                    if (['bulb', 'halogen', 'led'].includes(c.userData.type)) {
+                        if (c.userData.type === 'led') {
+                            if((c.userData.pins[0].isPos && path1) || (!c.userData.pins[0].isPos && path2)) {
+                                c.userData.bulbMesh.material.emissive.setHex(0xff0000);
+                                c.userData.bulbMesh.material.emissiveIntensity = 5; // ភ្លឺក្រហមខ្លាំង
+                            }
+                        } else if(path1 || path2) {
+                            c.userData.bulbMesh.material.emissive.setHex(c.userData.type==='halogen' ? 0xffffff : 0xffaa00);
+                        }
+                    } else if (['motor', 'buzzer'].includes(c.userData.type)) {
+                        if(path1 || path2) c.userData.isActive = true; // ធ្វើឱ្យម៉ូទ័រ/ប៊ីបដើរ
+                    }
+                }
+            });
+        });
+
+        if(isShort) {
+            warningBox.style.display = 'block';
+            components.forEach(c => { 
+                if(c.userData.bulbMesh) c.userData.bulbMesh.material.emissive.setHex(c.userData.defaultEmissive || 0x000000); 
+                c.userData.isActive = false;
+            });
+        }
+    }
+
+    function hasPath(start, target, graph) {
+        if(start === target) return true;
+        if(!graph[start]) return false;
+        let queue = [start], visited = new Set([start]);
+        while(queue.length > 0) {
+            let curr = queue.shift();
+            if(curr === target) return true;
+            if(graph[curr]) {
+                for(let neighbor of graph[curr]) {
+                    if(!visited.has(neighbor)) { visited.add(neighbor); queue.push(neighbor); }
+                }
+            }
+        }
+        return false;
+    }
+
+    // --- 6. Animation (ម៉ូទ័រវិល និងប៊ីបញ័រ) ---
+    function animate() { 
+        requestAnimationFrame(animate); 
+        controls.update(); 
+        
+        // ធ្វើចលនាគ្រឿងសកម្ម
+        components.forEach(c => {
+            if (c.userData.isActive) {
+                if (c.userData.type === 'motor' && c.userData.animMesh) {
+                    c.userData.animMesh.rotation.x += 0.3; // វិលអ័ក្ស
+                }
+                if (c.userData.type === 'buzzer' && c.userData.animMesh) {
+                    c.userData.animMesh.position.y = 1.5 + Math.sin(Date.now() * 0.05) * 0.1; // ញ័រឡើងចុះ
+                }
+            } else {
+                if (c.userData.type === 'buzzer' && c.userData.animMesh) {
+                    c.userData.animMesh.position.y = 1.5; // ឈប់ញ័រ
+                }
+            }
+        });
+
+        renderer.render(scene, camera); 
+    }
+    animate();
+
+</script>
+</body>
+</html>
