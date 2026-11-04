@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ចលនារបស់អង្គធាតុតាមពីរវិមាឌ - ពិសោធន៍ និងដំណោះស្រាយ</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Kantumruy Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+
+    <!-- MathJax 3 Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            line-height: 1.8;
+        }
+
+        /* Custom styling for range slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: #cbd5e1;
+            border-radius: 999px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+            transition: transform 0.15s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.12);
+        }
+
+        .sim-svg-container {
+            width: 100%;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            border-radius: 14px;
+            overflow: hidden;
+            border: 2px solid #334155;
+            box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .math-scroll {
+            overflow-x: auto;
+            padding: 4px 0;
+        }
+    </style>
+</head>
+<body class="py-6 px-3 sm:px-6 lg:px-8">
+
+    <div class="max-w-5xl mx-auto space-y-6">
+
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white rounded-2xl p-6 sm:p-8 shadow-lg text-center">
+            <h1 class="text-2xl sm:text-3xl font-bold mb-2">ចលនារបស់អង្គធាតុតាមពីរវិមាឌ (2D Motion)</h1>
+            <p class="text-blue-100 text-sm sm:text-base">
+                រូបពិសោធន៍អន្តរកម្មក្នុងប្លង់ $(x, y)$ • ប្រធានលំហាត់ • ដំណោះស្រាយគណិតវិទ្យា
+            </p>
+        </header>
+
+        <!-- ========================================================================= -->
+        <!-- ផ្នែកទី១៖ រូបពិសោធន៍ (TOP SECTION: INTERACTIVE 2D SIMULATION)            -->
+        <!-- ========================================================================= -->
+        <section class="bg-white rounded-2xl p-4 sm:p-6 shadow-md border border-slate-200">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b-2 border-blue-100">
+                <div class="flex items-center gap-3">
+                    <span class="bg-blue-700 text-white text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full">ផ្នែកខាងលើ</span>
+                    <h2 class="text-lg sm:text-xl font-bold text-blue-900">១. រូបពិសោធន៍នៃចលនារបស់វត្ថុក្នុងប្លង់ $(x, y)$</h2>
+                </div>
+                <span class="text-xs sm:text-sm text-slate-500 font-medium">
+                    សមីការ៖ $x(t) = 4t^2 - 1\text{ (m)}$, $y(t) = 2t^2 - 2\text{ (m)}$, $m = 3.00\text{ kg}$
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <!-- Left Column: Responsive SVG Coordinate Plane Simulation -->
+                <div class="lg:col-span-8 flex flex-col gap-3">
+                    <div class="sim-svg-container">
+                        <!-- SVG Coordinate Plane: Always visible and crisp on all devices -->
+                        <svg id="simSvg" viewBox="0 0 720 460" class="w-full h-auto block select-none">
+                            <defs>
+                                <!-- Arrowheads for axes and vectors -->
+                                <marker id="arrowAxis" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"></path>
+                                </marker>
+                                <marker id="arrowVel" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#22c55e"></path>
+                                </marker>
+                                <marker id="arrowForce" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#ef4444"></path>
+                                </marker>
+                                <marker id="arrowForceComp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#f59e0b"></path>
+                                </marker>
+                                <!-- Glow filter for the moving object -->
+                                <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                                    <feGaussianBlur stdDeviation="3" result="blur"></feGaussianBlur>
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over"></feComposite>
+                                </filter>
+                            </defs>
+
+                            <!-- Dynamic Grid Group -->
+                            <g id="gridLayer"></g>
+
+                            <!-- Coordinate Axes Group -->
+                            <g id="axesLayer"></g>
+
+                            <!-- Full Trajectory Preview Line (from t=0 to t=2.0s) -->
+                            <line id="fullPathLine" x1="102" y1="382" x2="614" y2="126"
+                                  stroke="#38bdf8" stroke-width="2" stroke-dasharray="6,6" stroke-opacity="0.35" />
+
+                            <!-- Active Traced Trajectory Line (from t=0 to current t) -->
+                            <line id="activePathLine" x1="102" y1="382" x2="102" y2="382"
+                                  stroke="#38bdf8" stroke-width="4" stroke-linecap="round" />
+
+                            <!-- Dashed Coordinate Projections to X and Y axes -->
+                            <line id="projXLine" x1="102" y1="382" x2="102" y2="318"
+                                  stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4" />
+                            <line id="projYLine" x1="102" y1="382" x2="134" y2="382"
+                                  stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4" />
+
+                            <!-- Initial Point Marker at t=0 (-1, -2) -->
+                            <g id="startMarker">
+                                <circle cx="102" cy="382" r="5.5" fill="#cbd5e1" stroke="#0f172a" stroke-width="2" />
+                                <text x="40" y="405" fill="#cbd5e1" font-size="12" font-family="monospace">t=0s (-1m, -2m)</text>
+                            </g>
+
+                            <!-- Force Component Vectors Fx and Fy (Dashed Orange) -->
+                            <line id="fxVector" x1="102" y1="382" x2="178" y2="382"
+                                  stroke="#f59e0b" stroke-width="2.2" stroke-dasharray="4,3" marker-end="url(#arrowForceComp)" />
+                            <text id="fxLabel" x="140" y="398" fill="#fbbf24" font-size="12" font-weight="bold">Fx=24N</text>
+
+                            <line id="fyVector" x1="102" y1="382" x2="102" y2="344"
+                                  stroke="#f59e0b" stroke-width="2.2" stroke-dasharray="4,3" marker-end="url(#arrowForceComp)" />
+                            <text id="fyLabel" x="45" y="362" fill="#fbbf24" font-size="12" font-weight="bold">Fy=12N</text>
+
+                            <!-- Resultant Force Vector F (Solid Red) -->
+                            <line id="fResultantVector" x1="102" y1="382" x2="178" y2="344"
+                                  stroke="#ef4444" stroke-width="3" marker-end="url(#arrowForce)" />
+                            <text id="fResultantLabel" x="184" y="342" fill="#f87171" font-size="12.5" font-weight="bold">F = 26.83 N</text>
+
+                            <!-- Velocity Vector v (Solid Green) -->
+                            <line id="velVector" x1="102" y1="382" x2="102" y2="382"
+                                  stroke="#22c55e" stroke-width="3" marker-end="url(#arrowVel)" visibility="hidden" />
+                            <text id="velLabel" x="110" y="370" fill="#4ade80" font-size="12.5" font-weight="bold" visibility="hidden">v</text>
+
+                            <!-- Moving Object (Mass m = 3.00 kg) -->
+                            <g id="massGroup" transform="translate(102, 382)">
+                                <circle cx="0" cy="0" r="13" fill="#3b82f6" stroke="#ffffff" stroke-width="3" filter="url(#glow)" />
+                                <text x="0" y="4" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">3kg</text>
+                                <!-- Live Position Tag next to Object -->
+                                <rect id="posTagBg" x="16" y="10" width="128" height="24" rx="5" fill="#0f172a" fill-opacity="0.85" stroke="#475569" stroke-width="1" />
+                                <text id="posTagText" x="80" y="26" fill="#38bdf8" font-size="11.5" font-family="monospace" font-weight="bold" text-anchor="middle">(-1.0m, -2.0m)</text>
+                            </g>
+
+                            <!-- Top-left HUD Overlay inside SVG -->
+                            <g transform="translate(16, 16)">
+                                <rect x="0" y="0" width="215" height="66" rx="8" fill="#0f172a" fill-opacity="0.85" stroke="#334155" stroke-width="1" />
+                                <text x="12" y="22" fill="#e2e8f0" font-size="12.5" font-weight="bold">ម៉ាសវត្ថុ៖ m = 3.00 kg</text>
+                                <text x="12" y="41" fill="#38bdf8" font-size="12" font-family="monospace" id="svgHudTime">រយៈពេល៖ t = 0.00 s</text>
+                                <text x="12" y="58" fill="#4ade80" font-size="12" font-family="monospace" id="svgHudVel">ល្បឿន៖ v = 0.00 m/s</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Legend Bar below Canvas/SVG -->
+                    <div class="flex flex-wrap items-center justify-center sm:justify-between gap-3 bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3.5 h-3.5 rounded-full bg-blue-500 inline-block border border-white shadow"></span>
+                            <span>វត្ថុ ($m=3\text{ kg}$)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-4 h-1 bg-sky-400 inline-block rounded"></span>
+                            <span>គន្លងចលនា $(x, y)$</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-4 h-1 bg-green-500 inline-block rounded"></span>
+                            <span>វ៉ិចទ័រល្បឿន $\vec{v}(t)$</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-4 h-1 bg-amber-500 inline-block rounded"></span>
+                            <span>កម្លាំង $\vec{F}_x, \vec{F}_y$</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-4 h-1 bg-red-500 inline-block rounded"></span>
+                            <span>កម្លាំងផ្គួប $\vec{F}$</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Controls & Real-time Telemetry -->
+                <div class="lg:col-span-4 flex flex-col gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <!-- Control Buttons -->
+                    <div class="flex gap-2">
+                        <button id="playPauseBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-2.5 px-4 rounded-xl shadow transition flex items-center justify-center gap-2 text-sm sm:text-base">
+                            <span id="playIcon">⏸</span>
+                            <span id="playText">ផ្អាក (Pause)</span>
+                        </button>
+                        <button id="resetBtn" class="bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-800 font-semibold py-2.5 px-4 rounded-xl transition text-sm sm:text-base">
+                            ↺ កំណត់ឡើងវិញ
+                        </button>
+                    </div>
+
+                    <!-- Slider Control -->
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-2">
+                        <div class="flex justify-between items-center text-sm font-bold">
+                            <label for="timeSlider" class="text-slate-700">រយៈពេលចលនា ($t$) ៖</label>
+                            <span id="timeValueLabel" class="text-blue-700 font-mono text-base bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-200">0.00 s</span>
+                        </div>
+                        <input type="range" id="timeSlider" min="0" max="2.0" step="0.01" value="0" class="w-full">
+                        <div class="flex justify-between text-xs text-slate-400 font-mono">
+                            <span>0.00 s (ដើមទី)</span>
+                            <span>1.00 s</span>
+                            <span>2.00 s</span>
+                        </div>
+                    </div>
+
+                    <!-- Live Telemetry Readout Cards -->
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div class="bg-white p-2.5 rounded-lg border border-slate-200">
+                            <span class="text-xs text-slate-500 block">កូអរដោនេ $x(t)$</span>
+                            <span id="readX" class="font-mono font-bold text-slate-800 text-sm sm:text-base">-1.00 m</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-lg border border-slate-200">
+                            <span class="text-xs text-slate-500 block">កូអរដោនេ $y(t)$</span>
+                            <span id="readY" class="font-mono font-bold text-slate-800 text-sm sm:text-base">-2.00 m</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-lg border border-slate-200">
+                            <span class="text-xs text-slate-500 block">ល្បឿន $v_x = 8t$</span>
+                            <span id="readVx" class="font-mono font-bold text-emerald-600 text-sm sm:text-base">0.00 m/s</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-lg border border-slate-200">
+                            <span class="text-xs text-slate-500 block">ល្បឿន $v_y = 4t$</span>
+                            <span id="readVy" class="font-mono font-bold text-emerald-600 text-sm sm:text-base">0.00 m/s</span>
+                        </div>
+                        <div class="bg-emerald-50 p-2.5 rounded-lg border border-emerald-200 col-span-2 flex justify-between items-center">
+                            <span class="text-xs sm:text-sm font-semibold text-emerald-900">ល្បឿនសរុប $v = \sqrt{v_x^2 + v_y^2}$</span>
+                            <span id="readV" class="font-mono font-bold text-emerald-700 text-base">0.00 m/s</span>
+                        </div>
+                        <div class="bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+                            <span class="text-xs text-amber-800 block">កម្លាំង $F_x = ma_x$</span>
+                            <span class="font-mono font-bold text-amber-700 text-sm sm:text-base">24.0 N</span>
+                        </div>
+                        <div class="bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+                            <span class="text-xs text-amber-800 block">កម្លាំង $F_y = ma_y$</span>
+                            <span class="font-mono font-bold text-amber-700 text-sm sm:text-base">12.0 N</span>
+                        </div>
+                        <div class="bg-red-50 p-2.5 rounded-lg border border-red-200 col-span-2 flex justify-between items-center">
+                            <span class="text-xs sm:text-sm font-semibold text-red-900">កម្លាំងផ្គួប $F = \sqrt{F_x^2 + F_y^2}$</span>
+                            <span class="font-mono font-bold text-red-600 text-base">26.83 N</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ផ្នែកទី២៖ ប្រធានលំហាត់ (MIDDLE SECTION: PROBLEM STATEMENT)                -->
+        <!-- ========================================================================= -->
+        <section class="bg-white rounded-2xl p-5 sm:p-7 shadow-md border border-slate-200">
+            <div class="flex items-center gap-3 pb-3 mb-4 border-b-2 border-blue-100">
+                <span class="bg-indigo-700 text-white text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full">លំហាត់</span>
+                <h2 class="text-lg sm:text-xl font-bold text-indigo-950">២. ប្រធានលំហាត់</h2>
+            </div>
+
+            <div class="bg-blue-50/80 border-l-4 border-blue-600 p-4 sm:p-6 rounded-r-xl text-base sm:text-lg space-y-3 text-slate-800">
+                <p>
+                    <strong>១.</strong> វត្ថុមួយមានម៉ាស $3.00\text{ kg}$ បានផ្លាស់ទីក្នុងប្លង់មួយដែលមានកូអរដោនេ $x = 4t^2 - 1$ និង $y = 2t^2 - 2$ ដែល $x, y$ គិតជាម៉ែត្រ ($\text{m}$) និង $t$ ជាវិនាទី ($\text{s}$) ។
+                </p>
+                <ul class="space-y-2 pl-4 sm:pl-6 font-medium">
+                    <li><strong>ក.</strong> កំណត់ល្បឿនដើមនៃវត្ថុ</li>
+                    <li><strong>ខ.</strong> រកទំហំនៃកម្លាំងដែលមានអំពើលើវត្ថុតាមទិសដៅ $x$ និង $y$</li>
+                    <li><strong>គ.</strong> គណនាកម្លាំងផ្គួបដែលមានអំពើលើវត្ថុ ។</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ផ្នែកទី៣៖ ដំណោះស្រាយលម្អិត (BOTTOM SECTION: DETAILED SOLUTION)           -->
+        <!-- ========================================================================= -->
+        <section class="bg-white rounded-2xl p-5 sm:p-7 shadow-md border border-slate-200 space-y-5">
+            <div class="flex items-center gap-3 pb-3 border-b-2 border-emerald-100">
+                <span class="bg-emerald-700 text-white text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full">ផ្នែកខាងក្រោម</span>
+                <h2 class="text-lg sm:text-xl font-bold text-emerald-950">៣. ដំណោះស្រាយលម្អិត</h2>
+            </div>
+
+            <!-- បម្រាប់ -->
+            <div class="bg-slate-50 rounded-xl p-4 sm:p-5 border border-slate-200">
+                <h3 class="font-bold text-slate-900 text-base sm:text-lg mb-2 flex items-center gap-2">
+                    <span class="bg-slate-200 text-slate-800 px-2.5 py-0.5 rounded-md text-sm">បម្រាប់</span>
+                    <span>ទិន្នន័យដើមនៃលំហាត់</span>
+                </h3>
+                <ul class="list-disc list-inside space-y-1 text-slate-700 pl-2">
+                    <li>ម៉ាសរបស់វត្ថុ៖ $m = 3.00\text{ kg}$</li>
+                    <li>សមីការកូអរដោនេតាមអ័ក្ស $x$ ៖ $x(t) = 4t^2 - 1 \quad (\text{m})$</li>
+                    <li>សមីការកូអរដោនេតាមអ័ក្ស $y$ ៖ $y(t) = 2t^2 - 2 \quad (\text{m})$</li>
+                </ul>
+            </div>
+
+            <!-- សំណួរ ក -->
+            <div class="bg-slate-50 rounded-xl p-4 sm:p-5 border border-slate-200 space-y-2">
+                <h3 class="font-bold text-blue-950 text-base sm:text-lg flex items-center gap-2">
+                    <span class="bg-blue-100 text-blue-800 px-3 py-0.5 rounded-md">ក</span>
+                    <span>កំណត់ល្បឿនដើមនៃវត្ថុ ($v_0$)</span>
+                </h3>
+                <p class="text-slate-700">
+                    កំប៉ូសង់ល្បឿននៃវត្ថុតាមទិសដៅ $x$ និង $y$ នៅខណៈ $t$ គឺជាដេរីវេទីមួយនៃកូអរដោនេ $x(t)$ និង $y(t)$ ធៀបនឹងរយៈពេល $t$ ៖
+                </p>
+                <div class="math-scroll">
+                    $$v_x(t) = \frac{dx}{dt} = \frac{d}{dt}(4t^2 - 1) = 8t \quad (\text{m/s})$$
+                    $$v_y(t) = \frac{dy}{dt} = \frac{d}{dt}(2t^2 - 2) = 4t \quad (\text{m/s})$$
+                </div>
+                <p class="text-slate-700">
+                    នៅខណៈដើម $t = 0\text{ s}$ យើងទទួលបានកំប៉ូសង់ល្បឿនដើមតាមអ័ក្សទាំងពីរ៖
+                </p>
+                <div class="math-scroll">
+                    $$v_{0x} = v_x(0) = 8(0) = 0\text{ m/s}$$
+                    $$v_{0y} = v_y(0) = 4(0) = 0\text{ m/s}$$
+                </div>
+                <p class="text-slate-700">ទំហំល្បឿនដើមនៃវត្ថុគឺ៖</p>
+                <div class="math-scroll">
+                    $$v_0 = \sqrt{v_{0x}^2 + v_{0y}^2} = \sqrt{0^2 + 0^2} = 0\text{ m/s}$$
+                </div>
+                <div class="bg-emerald-50 border border-emerald-300 text-emerald-900 font-semibold px-4 py-2.5 rounded-lg inline-block">
+                    ដូចនេះ ល្បឿនដើមនៃវត្ថុគឺ $v_0 = 0\text{ m/s}$ ។
+                </div>
+            </div>
+
+            <!-- សំណួរ ខ -->
+            <div class="bg-slate-50 rounded-xl p-4 sm:p-5 border border-slate-200 space-y-2">
+                <h3 class="font-bold text-blue-950 text-base sm:text-lg flex items-center gap-2">
+                    <span class="bg-blue-100 text-blue-800 px-3 py-0.5 rounded-md">ខ</span>
+                    <span>រកទំហំនៃកម្លាំងដែលមានអំពើលើវត្ថុតាមទិសដៅ $x$ និង $y$</span>
+                </h3>
+                <p class="text-slate-700">
+                    ជាដំបូង យើងគណនាកំប៉ូសង់សំទុះ $a_x$ និង $a_y$ ដោយធ្វើដេរីវេនៃកំប៉ូសង់ល្បឿន $v_x(t)$ និង $v_y(t)$ ធៀបនឹងរយៈពេល $t$ ៖
+                </p>
+                <div class="math-scroll">
+                    $$a_x = \frac{dv_x}{dt} = \frac{d}{dt}(8t) = 8.00\text{ m/s}^2$$
+                    $$a_y = \frac{dv_y}{dt} = \frac{d}{dt}(4t) = 4.00\text{ m/s}^2$$
+                </div>
+                <p class="text-slate-700">
+                    តាមច្បាប់ទី២ញូតុន ($\vec{F} = m\vec{a}$) ទំហំនៃកម្លាំងដែលមានអំពើលើវត្ថុតាមទិសដៅ $x$ និង $y$ គឺ៖
+                </p>
+                <div class="math-scroll">
+                    $$F_x = m \cdot a_x = 3.00\text{ kg} \times 8.00\text{ m/s}^2 = 24.0\text{ N}$$
+                    $$F_y = m \cdot a_y = 3.00\text{ kg} \times 4.00\text{ m/s}^2 = 12.0\text{ N}$$
+                </div>
+                <div class="bg-emerald-50 border border-emerald-300 text-emerald-900 font-semibold px-4 py-2.5 rounded-lg inline-block">
+                    ដូចនេះ កម្លាំងតាមទិសដៅ $x$ គឺ $F_x = 24.0\text{ N}$ និងតាមទិសដៅ $y$ គឺ $F_y = 12.0\text{ N}$ ។
+                </div>
+            </div>
+
+            <!-- សំណួរ គ -->
+            <div class="bg-slate-50 rounded-xl p-4 sm:p-5 border border-slate-200 space-y-2">
+                <h3 class="font-bold text-blue-950 text-base sm:text-lg flex items-center gap-2">
+                    <span class="bg-blue-100 text-blue-800 px-3 py-0.5 rounded-md">គ</span>
+                    <span>គណនាកម្លាំងផ្គួបដែលមានអំពើលើវត្ថុ ($F$)</span>
+                </h3>
+                <p class="text-slate-700">
+                    ដោយវ៉ិចទ័រកម្លាំង $\vec{F}_x$ និង $\vec{F}_y$ កែងគ្នា ទំហំនៃកម្លាំងផ្គួប $\vec{F} = \vec{F}_x + \vec{F}_y$ គណនាតាមរូបមន្ត៖
+                </p>
+                <div class="math-scroll">
+                    $$F = \sqrt{F_x^2 + F_y^2} = \sqrt{(24.0\text{ N})^2 + (12.0\text{ N})^2}$$
+                    $$F = \sqrt{576 + 144} = \sqrt{720}\text{ N} = 12\sqrt{5}\text{ N} \approx 26.83\text{ N}$$
+                </div>
+                <p class="text-slate-700">
+                    ទិសដៅនៃកម្លាំងផ្គួប $\vec{F}$ បង្កើតបានមុំ $\theta$ ធៀបនឹងអ័ក្ស $x$ វិជ្ជមាន៖
+                </p>
+                <div class="math-scroll">
+                    $$\tan\theta = \frac{F_y}{F_x} = \frac{12.0}{24.0} = 0.5 \implies \theta = \arctan(0.5) \approx 26.57^\circ$$
+                </div>
+                <div class="bg-emerald-50 border border-emerald-300 text-emerald-900 font-semibold px-4 py-2.5 rounded-lg inline-block">
+                    ដូចនេះ កម្លាំងផ្គួបដែលមានអំពើលើវត្ថុមានទំហំ $F = 12\sqrt{5}\text{ N} \approx 26.83\text{ N}$ ។
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- JAVASCRIPT FOR 2D SVG PHYSICS SIMULATION                                  -->
+    <!-- ========================================================================= -->
+    <script>
+        (function () {
+            // SVG Coordinate Mapping Constants
+            // World coordinates: x in [-3, 18], y in [-3, 8]
+            // Screen SVG viewBox: 720 x 460
+            // Origin (0,0) at (134, 318), Scale = 32 pixels per meter
+            const ORIGIN_X = 134;
+            const ORIGIN_Y = 318;
+            const SCALE = 32;
+
+            function toScreenX(x) {
+                return ORIGIN_X + x * SCALE;
+            }
+
+            function toScreenY(y) {
+                return ORIGIN_Y - y * SCALE;
+            }
+
+            // Build Grid & Axes once on initialization
+            const gridLayer = document.getElementById('gridLayer');
+            const axesLayer = document.getElementById('axesLayer');
+            const svgNS = 'http://www.w3.org/2000/svg';
+
+            function createSvgElement(tag, attrs) {
+                const el = document.createElementNS(svgNS, tag);
+                for (const key in attrs) {
+                    el.setAttribute(key, attrs[key]);
+                }
+                return el;
+            }
+
+            function initGridAndAxes() {
+                // Vertical grid lines: x from -2 to 16
+                for (let gx = -2; gx <= 16; gx += 1) {
+                    const sx = toScreenX(gx);
+                    const isMajor = gx % 2 === 0;
+                    gridLayer.appendChild(createSvgElement('line', {
+                        x1: sx, y1: 20, x2: sx, y2: 430,
+                        stroke: isMajor ? '#334155' : '#1e293b',
+                        'stroke-width': isMajor ? '1.2' : '0.8'
+                    }));
+
+                    if (isMajor && gx !== 0) {
+                        const label = createSvgElement('text', {
+                            x: sx, y: ORIGIN_Y + 18,
+                            fill: '#94a3b8',
+                            'font-size': '11',
+                            'font-family': 'monospace',
+                            'text-anchor': 'middle'
+                        });
+                        label.textContent = gx + 'm';
+                        axesLayer.appendChild(label);
+                    }
+                }
+
+                // Horizontal grid lines: y from -3 to 8
+                for (let gy = -3; gy <= 8; gy += 1) {
+                    const sy = toScreenY(gy);
+                    const isMajor = gy % 2 === 0;
+                    gridLayer.appendChild(createSvgElement('line', {
+                        x1: 30, y1: sy, x2: 690, y2: sy,
+                        stroke: isMajor ? '#334155' : '#1e293b',
+                        'stroke-width': isMajor ? '1.2' : '0.8'
+                    }));
+
+                    if (isMajor && gy !== 0) {
+                        const label = createSvgElement('text', {
+                            x: ORIGIN_X - 10, y: sy + 4,
+                            fill: '#94a3b8',
+                            'font-size': '11',
+                            'font-family': 'monospace',
+                            'text-anchor': 'end'
+                        });
+                        label.textContent = gy + 'm';
+                        axesLayer.appendChild(label);
+                    }
+                }
+
+                // X-Axis line
+                axesLayer.appendChild(createSvgElement('line', {
+                    x1: 30, y1: ORIGIN_Y, x2: 695, y2: ORIGIN_Y,
+                    stroke: '#94a3b8', 'stroke-width': '2',
+                    'marker-end': 'url(#arrowAxis)'
+                }));
+
+                // Y-Axis line
+                axesLayer.appendChild(createSvgElement('line', {
+                    x1: ORIGIN_X, y1: 430, x2: ORIGIN_X, y2: 20,
+                    stroke: '#94a3b8', 'stroke-width': '2',
+                    'marker-end': 'url(#arrowAxis)'
+                }));
+
+                // Origin (0,0) label
+                const originLabel = createSvgElement('text', {
+                    x: ORIGIN_X - 8, y: ORIGIN_Y + 16,
+                    fill: '#cbd5e1', 'font-size': '11', 'font-family': 'monospace', 'text-anchor': 'end'
+                });
+                originLabel.textContent = '0';
+                axesLayer.appendChild(originLabel);
+
+                // Axis Titles
+                const xTitle = createSvgElement('text', {
+                    x: 685, y: ORIGIN_Y - 10,
+                    fill: '#f8fafc', 'font-size': '13', 'font-weight': 'bold', 'text-anchor': 'end'
+                });
+                xTitle.textContent = 'អ័ក្ស x (m)';
+                axesLayer.appendChild(xTitle);
+
+                const yTitle = createSvgElement('text', {
+                    x: ORIGIN_X + 12, y: 32,
+                    fill: '#f8fafc', 'font-size': '13', 'font-weight': 'bold'
+                });
+                yTitle.textContent = 'អ័ក្ស y (m)';
+                axesLayer.appendChild(yTitle);
+            }
+
+            // DOM Elements for Dynamic Updates
+            const activePathLine = document.getElementById('activePathLine');
+            const projXLine = document.getElementById('projXLine');
+            const projYLine = document.getElementById('projYLine');
+            const fxVector = document.getElementById('fxVector');
+            const fxLabel = document.getElementById('fxLabel');
+            const fyVector = document.getElementById('fyVector');
+            const fyLabel = document.getElementById('fyLabel');
+            const fResultantVector = document.getElementById('fResultantVector');
+            const fResultantLabel = document.getElementById('fResultantLabel');
+            const velVector = document.getElementById('velVector');
+            const velLabel = document.getElementById('velLabel');
+            const massGroup = document.getElementById('massGroup');
+            const posTagText = document.getElementById('posTagText');
+            const svgHudTime = document.getElementById('svgHudTime');
+            const svgHudVel = document.getElementById('svgHudVel');
+
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const playIcon = document.getElementById('playIcon');
+            const playText = document.getElementById('playText');
+            const resetBtn = document.getElementById('resetBtn');
+            const timeSlider = document.getElementById('timeSlider');
+            const timeValueLabel = document.getElementById('timeValueLabel');
+
+            const readX = document.getElementById('readX');
+            const readY = document.getElementById('readY');
+            const readVx = document.getElementById('readVx');
+            const readVy = document.getElementById('readVy');
+            const readV = document.getElementById('readV');
+
+            // Simulation State
+            let t = 0.0;
+            const tMax = 2.0;
+            let isPlaying = true; // Auto-play on load so user sees motion immediately
+            let lastTime = null;
+
+            function updateSimulation(currentT) {
+                // Physics Calculations
+                const x = 4 * currentT * currentT - 1;
+                const y = 2 * currentT * currentT - 2;
+                const vx = 8 * currentT;
+                const vy = 4 * currentT;
+                const v = Math.hypot(vx, vy);
+
+                const sx = toScreenX(x);
+                const sy = toScreenY(y);
+                const s0x = toScreenX(-1);
+                const s0y = toScreenY(-2);
+
+                // Update Active Trajectory Path
+                activePathLine.setAttribute('x1', s0x);
+                activePathLine.setAttribute('y1', s0y);
+                activePathLine.setAttribute('x2', sx);
+                activePathLine.setAttribute('y2', sy);
+
+                // Update Projection Lines to Axes
+                projXLine.setAttribute('x1', sx);
+                projXLine.setAttribute('y1', sy);
+                projXLine.setAttribute('x2', sx);
+                projXLine.setAttribute('y2', ORIGIN_Y);
+
+                projYLine.setAttribute('x1', sx);
+                projYLine.setAttribute('y1', sy);
+                projYLine.setAttribute('x2', ORIGIN_X);
+                projYLine.setAttribute('y2', sy);
+
+                // Update Force Components Fx (24N -> 76px) and Fy (12N -> 38px)
+                const fxLen = 76;
+                const fyLen = 38;
+
+                fxVector.setAttribute('x1', sx);
+                fxVector.setAttribute('y1', sy);
+                fxVector.setAttribute('x2', sx + fxLen);
+                fxVector.setAttribute('y2', sy);
+                fxLabel.setAttribute('x', sx + fxLen / 2 - 18);
+                fxLabel.setAttribute('y', sy + 16);
+
+                fyVector.setAttribute('x1', sx);
+                fyVector.setAttribute('y1', sy);
+                fyVector.setAttribute('x2', sx);
+                fyVector.setAttribute('y2', sy - fyLen);
+                fyLabel.setAttribute('x', sx - 56);
+                fyLabel.setAttribute('y', sy - fyLen / 2 + 4);
+
+                // Update Resultant Force Vector F (26.83 N)
+                fResultantVector.setAttribute('x1', sx);
+                fResultantVector.setAttribute('y1', sy);
+                fResultantVector.setAttribute('x2', sx + fxLen);
+                fResultantVector.setAttribute('y2', sy - fyLen);
+                fResultantLabel.setAttribute('x', sx + fxLen + 6);
+                fResultantLabel.setAttribute('y', sy - fyLen - 2);
+
+                // Update Velocity Vector v (scaled for visual clarity)
+                if (currentT > 0.04) {
+                    const vScale = 6.0;
+                    const vxPx = vx * vScale;
+                    const vyPx = vy * vScale;
+                    velVector.setAttribute('visibility', 'visible');
+                    velLabel.setAttribute('visibility', 'visible');
+                    velVector.setAttribute('x1', sx);
+                    velVector.setAttribute('y1', sy);
+                    velVector.setAttribute('x2', sx + vxPx);
+                    velVector.setAttribute('y2', sy - vyPx);
+                    velLabel.setAttribute('x', sx + vxPx + 6);
+                    velLabel.setAttribute('y', sy - vyPx + 4);
+                    velLabel.textContent = 'v = ' + v.toFixed(1) + ' m/s';
+                } else {
+                    velVector.setAttribute('visibility', 'hidden');
+                    velLabel.setAttribute('visibility', 'hidden');
+                }
+
+                // Update Moving Mass Group Position
+                massGroup.setAttribute('transform', 'translate(' + sx + ',' + sy + ')');
+                posTagText.textContent = '(' + x.toFixed(1) + 'm, ' + y.toFixed(1) + 'm)';
+
+                // Update HUD & Readouts
+                svgHudTime.textContent = 'រយៈពេល៖ t = ' + currentT.toFixed(2) + ' s';
+                svgHudVel.textContent = 'ល្បឿន៖ v = ' + v.toFixed(2) + ' m/s';
+
+                timeSlider.value = currentT.toFixed(2);
+                timeValueLabel.textContent = currentT.toFixed(2) + ' s';
+
+                readX.textContent = x.toFixed(2) + ' m';
+                readY.textContent = y.toFixed(2) + ' m';
+                readVx.textContent = vx.toFixed(2) + ' m/s';
+                readVy.textContent = vy.toFixed(2) + ' m/s';
+                readV.textContent = v.toFixed(2) + ' m/s';
+            }
+
+            function setButtonState(playing) {
+                if (playing) {
+                    playIcon.textContent = '⏸';
+                    playText.textContent = 'ផ្អាក (Pause)';
+                } else {
+                    playIcon.textContent = '▶';
+                    playText.textContent = t >= tMax ? 'ចាប់ផ្ដើមឡើងវិញ' : 'បន្ត (Play)';
+                }
+            }
+
+            function animate(timestamp) {
+                if (!isPlaying) return;
+                if (!lastTime) lastTime = timestamp;
+                const dt = (timestamp - lastTime) / 1000;
+                lastTime = timestamp;
+
+                t += dt * 0.65; // Smooth educational playback speed
+                if (t >= tMax) {
+                    t = 0; // Loop smoothly so the user always sees active motion
+                }
+
+                updateSimulation(t);
+                requestAnimationFrame(animate);
+            }
+
+            // Event Listeners
+            playPauseBtn.addEventListener('click', function () {
+                isPlaying = !isPlaying;
+                setButtonState(isPlaying);
+                if (isPlaying) {
+                    if (t >= tMax) t = 0;
+                    lastTime = null;
+                    requestAnimationFrame(animate);
+                }
+            });
+
+            resetBtn.addEventListener('click', function () {
+                isPlaying = false;
+                t = 0.0;
+                lastTime = null;
+                updateSimulation(t);
+                setButtonState(false);
+            });
+
+            timeSlider.addEventListener('input', function (e) {
+                isPlaying = false;
+                t = parseFloat(e.target.value);
+                updateSimulation(t);
+                setButtonState(false);
+            });
+
+            // Initialize Grid, Render Initial State, and Start Animation
+            initGridAndAxes();
+            updateSimulation(t);
+            setButtonState(true);
+            requestAnimationFrame(animate);
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ពិសោធន៍ទម្លាក់សេរីនៃថូផ្កាពីកម្ពស់ 20m - លំហាត់ និងដំណោះស្រាយ</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Kantumruy Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+
+    <!-- MathJax 3 Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            line-height: 1.85;
+        }
+
+        /* Custom Range Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: #cbd5e1;
+            border-radius: 999px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.45);
+            transition: transform 0.15s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        /* Smooth collapsible solution transition */
+        .solution-collapse {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
+        }
+
+        .solution-collapse.open {
+            max-height: 3200px;
+            opacity: 1;
+        }
+
+        .math-scroll {
+            overflow-x: auto;
+            padding: 4px 0;
+        }
+
+        @keyframes pulseRing {
+            0% { r: 22px; opacity: 0.85; }
+            100% { r: 42px; opacity: 0; }
+        }
+
+        .pulse-circle {
+            animation: pulseRing 1.6s infinite ease-out;
+        }
+    </style>
+</head>
+<body class="py-6 px-3 sm:px-6 lg:px-8">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+
+        <!-- ========================================================================= -->
+        <!-- HEADER                                                                    -->
+        <!-- ========================================================================= -->
+        <header class="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 text-white rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="text-center md:text-left">
+                    <span class="inline-block bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold px-3.5 py-1 rounded-full mb-2">
+                        រូបវិទ្យា៖ ចលនាទម្លាក់សេរី និងថាមពលមេកានិច
+                    </span>
+                    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">
+                        ពិសោធន៍ជាក់ស្ដែង៖ ការធ្លាក់នៃថូផ្កាពីកម្ពស់ $20.0\text{ m}$
+                    </h1>
+                    <p class="text-blue-200 text-sm sm:text-base mt-1">
+                        ប្រធានលំហាត់ • ដំណោះស្រាយលម្អិត • ពិសោធន៍អន្តរកម្មតាមពេលវេលាជាក់ស្ដែង
+                    </p>
+                </div>
+                <div class="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-3 rounded-xl border border-white/15 text-xs sm:text-sm">
+                    <div class="text-center px-2 border-r border-white/20">
+                        <span class="block text-blue-200">ម៉ាសថូផ្កា</span>
+                        <span class="font-mono font-bold text-base text-white">$m = 1.00\text{ kg}$</span>
+                    </div>
+                    <div class="text-center px-2 border-r border-white/20">
+                        <span class="block text-blue-200">កម្ពស់បង្អួច</span>
+                        <span class="font-mono font-bold text-base text-amber-300">$h = 20.0\text{ m}$</span>
+                    </div>
+                    <div class="text-center px-2">
+                        <span class="block text-blue-200">សំទុះទំនាញដី</span>
+                        <span class="font-mono font-bold text-base text-emerald-300">$g = 9.80\text{ m/s}^2$</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ========================================================================= -->
+        <!-- ផ្នែកទី១៖ ប្រធានលំហាត់ និងប៊ូតុងបង្ហាញដំណោះស្រាយ (TOP SECTION)              -->
+        <!-- ========================================================================= -->
+        <section class="bg-white rounded-2xl p-5 sm:p-7 shadow-md border border-slate-200">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b-2 border-blue-100">
+                <div class="flex items-center gap-3">
+                    <span class="bg-blue-700 text-white text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full">ផ្នែកខាងលើ</span>
+                    <h2 class="text-lg sm:text-xl font-bold text-blue-950">១. ប្រធានលំហាត់</h2>
+                </div>
+                <span class="text-xs sm:text-sm text-slate-500">ចលនាទម្លាក់សេរីដោយមិនគិតកម្លាំងទប់នៃខ្យល់</span>
+            </div>
+
+            <!-- Exact Problem Statement Box -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50/60 border-l-4 border-blue-600 p-5 sm:p-6 rounded-r-xl text-base sm:text-lg text-slate-800 space-y-3 shadow-sm">
+                <p class="leading-relaxed">
+                    <strong>2.</strong> ថូផ្កាមួយ $1.00\text{ kg}$ ធ្លាក់តាមបង្អួចនៃអគារមួយដែលមានកម្ពស់ $20.0\text{ m}$ ពីផ្ទៃដី $h$ ។ ដោយមិនគិតកម្លាំងទប់នៃខ្យល់ ។ កំណត់
+                </p>
+                <ul class="space-y-2 pl-4 sm:pl-6 font-medium text-slate-900">
+                    <li><strong>ក.</strong> ល្បឿនថូនៅខណៈដែលថូធ្លាក់ដល់ដី</li>
+                    <li><strong>ខ.</strong> រយៈពេលទម្លាក់</li>
+                    <li><strong>គ.</strong> ថាមពលស៊ីនេទិកនៅខណៈដែលថូធ្លាក់ដល់ដី ។ គេឱ្យ $g = 9.80\text{ m/s}^2$</li>
+                </ul>
+            </div>
+
+            <!-- Action Bar Below Problem Statement: Toggle Solution Button -->
+            <div class="mt-5 flex flex-wrap items-center justify-between gap-4 pt-2">
+                <button id="toggleSolutionBtn" type="button"
+                        class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 text-base cursor-pointer">
+                    <span id="toggleSolIcon" class="text-xl">👁️</span>
+                    <span id="toggleSolText">បង្ហាញដំណោះស្រាយលម្អិត (Show Solution)</span>
+                    <svg id="toggleSolChevron" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+
+                <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-slate-600">
+                    <span class="font-semibold text-slate-500">ចម្លើយសង្ខេប៖</span>
+                    <span class="bg-slate-100 border border-slate-200 px-3 py-1 rounded-lg font-mono">ក. $v \approx 19.80\text{ m/s}$</span>
+                    <span class="bg-slate-100 border border-slate-200 px-3 py-1 rounded-lg font-mono">ខ. $t \approx 2.02\text{ s}$</span>
+                    <span class="bg-slate-100 border border-slate-200 px-3 py-1 rounded-lg font-mono">គ. $K = 196\text{ J}$</span>
+                </div>
+            </div>
+
+            <!-- Collapsible Detailed Solution Section (Directly below the Problem Statement) -->
+            <div id="solutionContainer" class="solution-collapse">
+                <div class="mt-6 pt-6 border-t-2 border-dashed border-emerald-200 space-y-5">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <span class="bg-emerald-700 text-white text-xs font-bold px-3 py-1 rounded-full">ដំណោះស្រាយ</span>
+                            <h3 class="text-lg sm:text-xl font-bold text-emerald-950">ដំណោះស្រាយលម្អិតតាមជំហាននីមួយៗ</h3>
+                        </div>
+                    </div>
+
+                    <!-- បម្រាប់ (Given Data) -->
+                    <div class="bg-slate-50 rounded-xl p-4 sm:p-5 border border-slate-200">
+                        <h4 class="font-bold text-slate-900 text-base sm:text-lg mb-2 flex items-center gap-2">
+                            <span class="bg-slate-200 text-slate-800 px-2.5 py-0.5 rounded-md text-sm">បម្រាប់</span>
+                            <span>ទិន្នន័យដែលគេឱ្យក្នុងប្រធានលំហាត់</span>
+                        </h4>
+                        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700 pl-2">
+                            <li>• ម៉ាសរបស់ថូផ្កា៖ $m = 1.00\text{ kg}$</li>
+                            <li>• កម្ពស់បង្អួចអគារពីផ្ទៃដី៖ $h = 20.0\text{ m}$</li>
+                            <li>• ល្បឿនដើមពេលចាប់ផ្ដើមធ្លាក់៖ $v_0 = 0\text{ m/s}$</li>
+                            <li>• សំទុះទំនាញដី៖ $g = 9.80\text{ m/s}^2$</li>
+                        </ul>
+                    </div>
+
+                    <!-- សំណួរ ក -->
+                    <div class="bg-slate-50 rounded-xl p-4 sm:p-5 border border-slate-200 space-y-2">
+                        <h4 class="font-bold text-blue-950 text-base sm:text-lg flex items-center gap-2">
+                            <span class="bg-blue-100 text-blue-800 px-3 py-0.5 rounded-md">ក</span>
+                            <span>កំណត់ល្បឿនថូផ្កានៅខណៈដែលថូធ្លាក់ដល់ដី ($v$)</span>
+                        </h4>
+                        <p class="text-slate-700">
+                            ដោយថូផ្កាធ្លាក់ដោយសេរីពីភាពនៅស្ងៀម ($v_0 = 0\text{ m/s}$) ដោយមិនគិតកម្លាំងទប់នៃខ្យល់ តាមទំនាក់ទំនងរវាងល្បឿន និងកម្ពស់ទម្លាក់៖
+                        </p>
+                        <div class="math-scroll">
+                            $$v^2 - v_0^2 = 2gh$$
+                        </div>
+                        <p class="text-slate-700">ដោយ $v_0 = 0$ គេទាញបាន៖</p>
+                        <div class="math-scroll">
+                            $$v = \sqrt{2gh} = \sqrt{2 \times 9.80\text{ m/s}^2 \times 20.0\text{ m}} = \sqrt{392\text{ m}^2/\text{s}^2} \approx 19.80\text{ m/s}$$
+                        </div>
+                        <div class="bg-emerald-50 border border-emerald-300 text-emerald-900 font-semibold px-4 py-2 rounded-lg inline-block">
+                            ដូចនេះ ល្បឿនថូផ្កានៅខណៈធ្លាក់ដល់ដីគឺ $v \approx 19.80\text{ m/s}$ ។
+                        </div>
+                    </div>
+
+                    <!-- សំណួរ ខ -->
+                    <div class="bg-slate-50 rounded-xl p-4 sm:p-5 border border-slate-200 space-y-2">
+                        <h4 class="font-bold text-blue-950 text-base sm:text-lg flex items-center gap-2">
+                            <span class="bg-blue-100 text-blue-800 px-3 py-0.5 rounded-md">ខ</span>
+                            <span>កំណត់រយៈពេលទម្លាក់ ($t$)</span>
+                        </h4>
+                        <p class="text-slate-700">
+                            តាមសមីការចម្ងាយចរនៃចលនាទម្លាក់សេរីដោយគ្មានល្បឿនដើម ($v_0 = 0$) ៖
+                        </p>
+                        <div class="math-scroll">
+                            $$h = \frac{1}{2}gt^2 \implies t = \sqrt{\frac{2h}{g}}$$
+                        </div>
+                        <p class="text-slate-700">ជំនួសតម្លៃលេខ $h = 20.0\text{ m}$ និង $g = 9.80\text{ m/s}^2$ ៖</p>
+                        <div class="math-scroll">
+                            $$t = \sqrt{\frac{2 \times 20.0\text{ m}}{9.80\text{ m/s}^2}} = \sqrt{\frac{40.0}{9.80}} \approx 2.02\text{ s}$$
+                        </div>
+                        <p class="text-slate-600 text-sm">
+                            <em>(ឬគណនាតាមរូបមន្ត $v = gt \implies t = \frac{v}{g} = \frac{19.80\text{ m/s}}{9.80\text{ m/s}^2} \approx 2.02\text{ s}$)</em>
+                        </p>
+                        <div class="bg-emerald-50 border border-emerald-300 text-emerald-900 font-semibold px-4 py-2 rounded-lg inline-block">
+                            ដូចនេះ រយៈពេលទម្លាក់នៃថូផ្កាគឺ $t \approx 2.02\text{ s}$ ។
+                        </div>
+                    </div>
+
+                    <!-- សំណួរ គ -->
+                    <div class="bg-slate-50 rounded-xl p-4 sm:p-5 border border-slate-200 space-y-2">
+                        <h4 class="font-bold text-blue-950 text-base sm:text-lg flex items-center gap-2">
+                            <span class="bg-blue-100 text-blue-800 px-3 py-0.5 rounded-md">គ</span>
+                            <span>គណនាថាមពលស៊ីនេទិកនៅខណៈដែលថូធ្លាក់ដល់ដី ($K$)</span>
+                        </h4>
+                        <p class="text-slate-700">
+                            <strong>របៀបទី១៖</strong> គណនាតាមរូបមន្តថាមពលស៊ីនេទិកនៅខណៈប៉ះដី (ដោយ $v^2 = 2gh = 392\text{ m}^2/\text{s}^2$) ៖
+                        </p>
+                        <div class="math-scroll">
+                            $$K = \frac{1}{2}mv^2 = \frac{1}{2} \times 1.00\text{ kg} \times 392\text{ m}^2/\text{s}^2 = 196\text{ J}$$
+                        </div>
+                        <p class="text-slate-700">
+                            <strong>របៀបទី២៖</strong> គណនាតាមច្បាប់រក្សាថាមពលមេកានិច (ថាមពលប៉ូតង់ស្យែលនៅកម្ពស់ $20.0\text{ m}$ បំប្លែងទាំងស្រុងទៅជាថាមពលស៊ីនេទិកពេលដល់ដី) ៖
+                        </p>
+                        <div class="math-scroll">
+                            $$K = U_0 = mgh = 1.00\text{ kg} \times 9.80\text{ m/s}^2 \times 20.0\text{ m} = 196\text{ J}$$
+                        </div>
+                        <div class="bg-emerald-50 border border-emerald-300 text-emerald-900 font-semibold px-4 py-2 rounded-lg inline-block">
+                            ដូចនេះ ថាមពលស៊ីនេទិកនៅខណៈដែលថូធ្លាក់ដល់ដីគឺ $K = 196\text{ J}$ ។
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ផ្នែកទី២៖ ពិសោធន៍ជាក់ស្ដែង (REALISTIC 20m BUILDING & FLOWER POT SIMULATOR) -->
+        <!-- ========================================================================= -->
+        <section class="bg-white rounded-2xl p-4 sm:p-6 shadow-md border border-slate-200">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b-2 border-amber-100">
+                <div class="flex items-center gap-3">
+                    <span class="bg-amber-600 text-white text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full">ពិសោធន៍ជាក់ស្ដែង</span>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-900">
+                        ២. ពិសោធន៍បង្ហាញពីថូផ្កាស្ថិតនៅកម្ពស់ $20.0\text{ m}$ ពីដី និងការធ្លាក់ដល់ដី
+                    </h2>
+                </div>
+                <span id="simStatusBadge" class="bg-blue-100 text-blue-800 text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full border border-blue-300">
+                    📍 ស្ថានភាព៖ ថូផ្កាកំពុងស្ថិតនៅបង្អួចកម្ពស់ 20.0 m ពីដី (t = 0.00 s)
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+                <!-- LEFT COLUMN: Interactive Visual Scene (SVG Building + 20m Ruler + Flower Pot) -->
+                <div class="lg:col-span-7 flex flex-col gap-3">
+                    <div class="rounded-2xl overflow-hidden border-2 border-slate-300 shadow-inner bg-slate-900 relative">
+                        <svg id="experimentSvg" viewBox="0 0 680 620" class="w-full h-auto block select-none">
+                            <defs>
+                                <!-- Sky Gradient -->
+                                <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#0f172a" />
+                                    <stop offset="55%" stop-color="#1e3a8a" />
+                                    <stop offset="100%" stop-color="#38bdf8" />
+                                </linearGradient>
+
+                                <!-- Ground Gradient -->
+                                <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#15803d" />
+                                    <stop offset="18%" stop-color="#166534" />
+                                    <stop offset="100%" stop-color="#14532d" />
+                                </linearGradient>
+
+                                <!-- Building Wall Gradient -->
+                                <linearGradient id="wallGrad" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="#334155" />
+                                    <stop offset="85%" stop-color="#475569" />
+                                    <stop offset="100%" stop-color="#1e293b" />
+                                </linearGradient>
+
+                                <!-- Terracotta Flower Pot Gradient -->
+                                <linearGradient id="potGrad" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="#ea580c" />
+                                    <stop offset="50%" stop-color="#f97316" />
+                                    <stop offset="100%" stop-color="#c2410c" />
+                                </linearGradient>
+
+                                <!-- Arrow Markers -->
+                                <marker id="arrowVel" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#22c55e" />
+                                </marker>
+                                <marker id="arrowWeight" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#f43f5e" />
+                                </marker>
+                                <marker id="arrowDim" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#fde047" />
+                                </marker>
+                            </defs>
+
+                            <!-- Sky Background (y from 0 to 520) -->
+                            <rect x="0" y="0" width="680" height="520" fill="url(#skyGrad)" />
+
+                            <!-- Subtle Clouds -->
+                            <g fill="#ffffff" fill-opacity="0.12">
+                                <ellipse cx="520" cy="75" rx="65" ry="20" />
+                                <ellipse cx="555" cy="68" rx="45" ry="18" />
+                                <ellipse cx="485" cy="80" rx="40" ry="15" />
+                                <ellipse cx="380" cy="145" rx="50" ry="14" />
+                            </g>
+
+                            <!-- Horizontal Height Grid Lines (Every 5m) -->
+                            <!-- Coordinate Mapping: y=20m -> Y=100px; y=0m -> Y=520px (Scale: 21px per meter) -->
+                            <g stroke="#94a3b8" stroke-width="1" stroke-dasharray="5,5" stroke-opacity="0.35">
+                                <line x1="210" y1="100" x2="650" y2="100" /> <!-- 20m -->
+                                <line x1="210" y1="205" x2="650" y2="205" /> <!-- 15m -->
+                                <line x1="210" y1="310" x2="650" y2="310" /> <!-- 10m -->
+                                <line x1="210" y1="415" x2="650" y2="415" /> <!-- 5m -->
+                            </g>
+
+                            <!-- ================================================= -->
+                            <!-- MULTI-STORY BUILDING ON THE LEFT                  -->
+                            <!-- ================================================= -->
+                            <g id="buildingStructure">
+                                <!-- Main Building Body -->
+                                <rect x="25" y="45" width="185" height="475" fill="url(#wallGrad)" stroke="#1e293b" stroke-width="2" />
+                                <!-- Roof Ledge -->
+                                <rect x="18" y="35" width="199" height="12" rx="3" fill="#1e293b" />
+
+                                <!-- Floor Lines & Windows (4 Floors: 5m, 10m, 15m, 20m) -->
+                                <!-- Floor 4 (Top Window at h = 20.0m -> Sill at Y = 100px) -->
+                                <rect x="48" y="60" width="52" height="40" rx="3" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+                                <line x1="74" y1="60" x2="74" y2="100" stroke="#64748b" stroke-width="1.5" />
+                                <line x1="48" y1="80" x2="100" y2="80" stroke="#64748b" stroke-width="1.5" />
+
+                                <!-- THE OPEN WINDOW AT h = 20.0m WHERE THE FLOWER POT DROPS -->
+                                <rect x="135" y="54" width="65" height="46" rx="2" fill="#0f172a" stroke="#fbbf24" stroke-width="2.5" />
+                                <!-- Open Window Casement -->
+                                <rect x="137" y="56" width="22" height="42" fill="#38bdf8" fill-opacity="0.25" stroke="#94a3b8" stroke-width="1" />
+                                <!-- Extended Window Sill at exactly Y = 100px (20.0 m) -->
+                                <rect x="130" y="100" width="115" height="7" rx="2" fill="#cbd5e1" stroke="#475569" stroke-width="1.5" />
+                                <text x="134" y="48" fill="#fde047" font-size="11.5" font-weight="bold">បង្អួចអគារ (h = 20.0 m)</text>
+
+                                <!-- Floor 3 (15m level -> Y=205px) -->
+                                <rect x="48" y="165" width="52" height="40" rx="3" fill="#0f172a" stroke="#64748b" stroke-width="2" />
+                                <rect x="135" y="165" width="52" height="40" rx="3" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+                                <rect x="130" y="205" width="62" height="5" fill="#94a3b8" />
+
+                                <!-- Floor 2 (10m level -> Y=310px) -->
+                                <rect x="48" y="270" width="52" height="40" rx="3" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+                                <rect x="135" y="270" width="52" height="40" rx="3" fill="#0f172a" stroke="#64748b" stroke-width="2" />
+                                <rect x="130" y="310" width="62" height="5" fill="#94a3b8" />
+
+                                <!-- Floor 1 (5m level -> Y=415px) -->
+                                <rect x="48" y="375" width="52" height="40" rx="3" fill="#0f172a" stroke="#64748b" stroke-width="2" />
+                                <rect x="135" y="375" width="52" height="40" rx="3" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+                                <rect x="130" y="415" width="62" height="5" fill="#94a3b8" />
+
+                                <!-- Ground Floor Entrance -->
+                                <rect x="75" y="460" width="65" height="60" rx="3" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                                <line x1="107.5" y1="460" x2="107.5" y2="520" stroke="#94a3b8" stroke-width="2" />
+                            </g>
+
+                            <!-- ================================================= -->
+                            <!-- GROUND / EARTH SURFACE (Y = 520px -> y = 0.0 m)   -->
+                            <!-- ================================================= -->
+                            <g id="groundLayer">
+                                <rect x="0" y="520" width="680" height="100" fill="url(#groundGrad)" />
+                                <line x1="0" y1="520" x2="680" y2="520" stroke="#4ade80" stroke-width="3" />
+                                <text x="555" y="542" fill="#bbf7d0" font-size="12.5" font-weight="bold">ផ្ទៃដី (y = 0.0 m)</text>
+                            </g>
+
+                            <!-- ================================================= -->
+                            <!-- VERTICAL HEIGHT RULER (0m to 20.0m)               -->
+                            <!-- ================================================= -->
+                            <g id="rulerLayer"></g>
+
+                            <!-- Total Building Window Height Bracket (h = 20.0 m) -->
+                            <g id="totalHeightBracket">
+                                <line x1="635" y1="100" x2="635" y2="520" stroke="#fde047" stroke-width="2" marker-start="url(#arrowDim)" marker-end="url(#arrowDim)" />
+                                <rect x="595" y="292" width="76" height="36" rx="6" fill="#0f172a" fill-opacity="0.9" stroke="#fde047" stroke-width="1.2" />
+                                <text x="633" y="308" fill="#fde047" font-size="11" font-weight="bold" text-anchor="middle">កម្ពស់សរុប</text>
+                                <text x="633" y="322" fill="#ffffff" font-size="11.5" font-family="monospace" font-weight="bold" text-anchor="middle">h = 20.0m</text>
+                            </g>
+
+                            <!-- ================================================= -->
+                            <!-- STROBOSCOPIC MOTION TRAIL & GHOST MARKERS         -->
+                            <!-- ================================================= -->
+                            <!-- Vertical Fall Guideline at X = 310 -->
+                            <line x1="310" y1="100" x2="310" y2="520" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4,4" stroke-opacity="0.5" />
+
+                            <!-- Active Fall Path Line from Y=100 (20m) to current Y -->
+                            <line id="activeFallLine" x1="310" y1="100" x2="310" y2="100" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" />
+
+                            <!-- Stroboscopic Ghost Dots Group (populated dynamically) -->
+                            <g id="strobeGroup"></g>
+
+                            <!-- ================================================= -->
+                            <!-- DYNAMIC HEIGHT BRACKET FROM GROUND TO FLOWER POT  -->
+                            <!-- ================================================= -->
+                            <g id="currentHeightBracket">
+                                <line id="currHeightLine" x1="232" y1="100" x2="232" y2="520" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3,3" />
+                                <line id="currHeightHorizontal" x1="218" y1="100" x2="310" y2="100" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="3,3" />
+                            </g>
+
+                            <!-- ================================================= -->
+                            <!-- VECTORS ATTACHED TO FLOWER POT (Weight & Velocity)-->
+                            <!-- ================================================= -->
+                            <!-- Gravity Weight Vector F_g = mg = 9.80 N -->
+                            <line id="weightVector" x1="296" y1="100" x2="296" y2="148" stroke="#f43f5e" stroke-width="3" marker-end="url(#arrowWeight)" />
+                            <text id="weightLabel" x="288" y="138" fill="#fda4af" font-size="11.5" font-weight="bold" text-anchor="end">P = mg = 9.8N</text>
+
+                            <!-- Velocity Vector v(t) -->
+                            <line id="velocityVector" x1="324" y1="100" x2="324" y2="100" stroke="#22c55e" stroke-width="3.5" marker-end="url(#arrowVel)" visibility="hidden" />
+                            <text id="velocityLabel" x="334" y="120" fill="#4ade80" font-size="12" font-weight="bold" font-family="monospace" visibility="hidden">v = 0.0 m/s</text>
+
+                            <!-- ================================================= -->
+                            <!-- THE FLOWER POT (ថូផ្កា m = 1.00 kg)                -->
+                            <!-- ================================================= -->
+                            <!-- Pulse highlight ring when at 20.0m -->
+                            <circle id="potPulseRing" cx="310" cy="92" r="24" fill="none" stroke="#fde047" stroke-width="2.5" class="pulse-circle" />
+
+                            <g id="flowerPotGroup" transform="translate(310, 100)">
+                                <!-- Green Plant Stems & Leaves -->
+                                <path d="M 0 -28 Q -14 -42 -20 -30 Q -10 -24 0 -26" fill="#22c55e" stroke="#14532d" stroke-width="1" />
+                                <path d="M 0 -28 Q 14 -42 20 -30 Q 10 -24 0 -26" fill="#16a34a" stroke="#14532d" stroke-width="1" />
+                                <line x1="0" y1="-24" x2="0" y2="-44" stroke="#15803d" stroke-width="2.5" />
+                                <!-- Blooming Flower -->
+                                <circle cx="-5" cy="-45" r="5" fill="#f43f5e" />
+                                <circle cx="5" cy="-45" r="5" fill="#f43f5e" />
+                                <circle cx="0" cy="-50" r="5" fill="#f43f5e" />
+                                <circle cx="0" cy="-40" r="5" fill="#f43f5e" />
+                                <circle cx="0" cy="-45" r="4" fill="#fde047" />
+
+                                <!-- Terracotta Pot Rim (Top of pot) -->
+                                <rect x="-17" y="-26" width="34" height="6" rx="2" fill="#ea580c" stroke="#7c2d12" stroke-width="1.2" />
+                                <!-- Terracotta Pot Body (Base sits at y = 0 local so y=0 aligns with exact height line) -->
+                                <polygon points="-14,-20 14,-20 10,0 -10,0" fill="url(#potGrad)" stroke="#7c2d12" stroke-width="1.2" />
+                                <!-- Mass Label on Pot -->
+                                <text x="0" y="-7" fill="#ffffff" font-size="9.5" font-weight="bold" text-anchor="middle">1kg</text>
+                            </g>
+
+                            <!-- Ground Impact Burst Effect (Visible when y = 0 m) -->
+                            <g id="impactBurst" transform="translate(310, 520)" visibility="hidden">
+                                <circle cx="0" cy="0" r="26" fill="#ef4444" fill-opacity="0.25" stroke="#f87171" stroke-width="2" stroke-dasharray="4,3" />
+                                <path d="M -28 -4 L -12 -14 M 28 -4 L 12 -14 M -18 -22 L -6 -10 M 18 -22 L 6 -10" stroke="#fde047" stroke-width="2.5" stroke-linecap="round" />
+                            </g>
+
+                            <!-- ================================================= -->
+                            <!-- FLOATING CALLOUT CARD POINTING TO FLOWER POT      -->
+                            <!-- ================================================= -->
+                            <g id="potCalloutGroup" transform="translate(350, 55)">
+                                <!-- Pointer Triangle -->
+                                <polygon points="-12,38 0,30 0,46" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
+                                <!-- Callout Box -->
+                                <rect x="0" y="0" width="235" height="92" rx="10" fill="#0f172a" fill-opacity="0.92" stroke="#38bdf8" stroke-width="1.8" />
+                                <text id="calloutTitle" x="12" y="21" fill="#fde047" font-size="12" font-weight="bold">📍 ថូផ្កានៅកម្ពស់ 20.0 m ពីដី</text>
+                                <text id="calloutTime" x="12" y="40" fill="#e2e8f0" font-size="11.5" font-family="monospace">• រយៈពេល៖ t = 0.00 s</text>
+                                <text id="calloutHeight" x="12" y="57" fill="#38bdf8" font-size="11.5" font-family="monospace">• កម្ពស់ពីដី៖ y = 20.00 m</text>
+                                <text id="calloutVel" x="12" y="74" fill="#4ade80" font-size="11.5" font-family="monospace">• ល្បឿនខណៈ៖ v = 0.00 m/s</text>
+                                <text id="calloutKE" x="12" y="88" fill="#fb923c" font-size="11" font-family="monospace">• ថាមពលស៊ីនេទិក៖ K = 0.0 J</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Quick Moment Inspection Buttons (Highlight 20m start vs Mid-air vs Impact) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <button id="btnInspect20m" type="button"
+                                class="bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 text-amber-950 font-bold py-2.5 px-3 rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm cursor-pointer">
+                            <span>📍 ខណៈនៅកម្ពស់ 20.0 m</span>
+                            <span class="font-mono text-xs bg-amber-200 px-1.5 py-0.5 rounded">(t=0s)</span>
+                        </button>
+                        <button id="btnInspect10m" type="button"
+                                class="bg-sky-50 hover:bg-sky-100 border border-sky-300 text-sky-950 font-semibold py-2.5 px-3 rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm cursor-pointer">
+                            <span>⏱️ ខណៈនៅកម្ពស់ 10.0 m</span>
+                            <span class="font-mono text-xs bg-sky-200 px-1.5 py-0.5 rounded">(t=1.43s)</span>
+                        </button>
+                        <button id="btnInspect0m" type="button"
+                                class="bg-rose-50 hover:bg-rose-100 border border-rose-300 text-rose-950 font-semibold py-2.5 px-3 rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm cursor-pointer">
+                            <span>💥 ខណៈប៉ះដី 0.0 m</span>
+                            <span class="font-mono text-xs bg-rose-200 px-1.5 py-0.5 rounded">(t=2.02s)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Controls, Scrubber, Live Telemetry & Energy Conservation Chart -->
+                <div class="lg:col-span-5 flex flex-col gap-4 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200">
+
+                    <!-- Play / Pause / Reset Controls -->
+                    <div class="flex gap-2.5">
+                        <button id="playPauseBtn" type="button"
+                                class="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-4 rounded-xl shadow-md transition flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer">
+                            <span id="playIcon">▶</span>
+                            <span id="playText">ចាប់ផ្ដើមទម្លាក់ថូផ្កា (Drop)</span>
+                        </button>
+                        <button id="resetBtn" type="button"
+                                class="bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-800 font-semibold py-3 px-4 rounded-xl transition text-sm sm:text-base cursor-pointer">
+                            ↺ កំណត់ឡើងវិញ
+                        </button>
+                    </div>
+
+                    <!-- Playback Speed Selector -->
+                    <div class="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm">
+                        <span class="font-semibold text-slate-700">ល្បឿនបង្ហាញពិសោធន៍៖</span>
+                        <div class="flex gap-1.5">
+                            <button type="button" data-speed="1" class="speed-btn bg-blue-600 text-white font-bold px-2.5 py-1 rounded-lg transition cursor-pointer">1x ធម្មតា</button>
+                            <button type="button" data-speed="0.4" class="speed-btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-2.5 py-1 rounded-lg transition cursor-pointer">0.4x យឺត</button>
+                            <button type="button" data-speed="0.15" class="speed-btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-2.5 py-1 rounded-lg transition cursor-pointer">0.15x យឺតបំផុត</button>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Time Slider -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2 shadow-sm">
+                        <div class="flex justify-between items-center">
+                            <label for="timeSlider" class="text-sm font-bold text-slate-700">រយៈពេលទម្លាក់ ($t$) ៖</label>
+                            <span id="timeBadge" class="font-mono font-bold text-base text-blue-700 bg-blue-50 px-3 py-0.5 rounded-lg border border-blue-200">0.00 s</span>
+                        </div>
+                        <input type="range" id="timeSlider" min="0" max="2.0203" step="0.005" value="0" class="w-full">
+                        <div class="flex justify-between text-xs text-slate-400 font-mono">
+                            <span>0.00 s (កម្ពស់ 20m)</span>
+                            <span>1.01 s</span>
+                            <span>2.02 s (ដល់ដី 0m)</span>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Telemetry Cards -->
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                            <span class="text-xs text-slate-500 block">កម្ពស់ថូផ្កាពីដី $y(t)$</span>
+                            <span id="statHeight" class="font-mono font-bold text-sky-600 text-base sm:text-lg">20.00 m</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                            <span class="text-xs text-slate-500 block">ចម្ងាយធ្លាក់បាន $d = \frac{1}{2}gt^2$</span>
+                            <span id="statFallDist" class="font-mono font-bold text-slate-800 text-base sm:text-lg">0.00 m</span>
+                        </div>
+                        <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 shadow-sm">
+                            <span class="text-xs text-emerald-800 font-semibold block">ល្បឿនខណៈ $v = gt$ (សំណួរ ក)</span>
+                            <span id="statVel" class="font-mono font-bold text-emerald-700 text-base sm:text-lg">0.00 m/s</span>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-xl border border-blue-200 shadow-sm">
+                            <span class="text-xs text-blue-800 font-semibold block">រយៈពេល $t$ (សំណួរ ខ)</span>
+                            <span id="statTime" class="font-mono font-bold text-blue-700 text-base sm:text-lg">0.00 s</span>
+                        </div>
+                    </div>
+
+                    <!-- Live Mechanical Energy Bar Chart (Question C Visualization) -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-3 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-bold text-slate-800">បម្រែបម្រួលថាមពលមេកានិច (សំណួរ គ)</h3>
+                            <span class="text-xs font-mono font-bold text-slate-600">សរុប $E = 196.0\text{ J}$</span>
+                        </div>
+
+                        <!-- Potential Energy Bar U = mgy -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs font-semibold">
+                                <span class="text-sky-700">ថាមពលប៉ូតង់ស្យែល $U = mgy$</span>
+                                <span id="statPE" class="font-mono font-bold text-sky-700">196.0 J (100%)</span>
+                            </div>
+                            <div class="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                                <div id="barPE" class="h-full bg-sky-500 transition-all duration-75" style="width: 100%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Kinetic Energy Bar K = 1/2 mv^2 -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs font-semibold">
+                                <span class="text-amber-700">ថាមពលស៊ីនេទិក $K = \frac{1}{2}mv^2$</span>
+                                <span id="statKE" class="font-mono font-bold text-amber-700">0.0 J (0%)</span>
+                            </div>
+                            <div class="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                                <div id="barKE" class="h-full bg-amber-500 transition-all duration-75" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Explanation Note -->
+                        <div id="momentExplanationBox" class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs sm:text-sm text-amber-950 leading-relaxed">
+                            <strong>ការពន្យល់នៅកម្ពស់ $20.0\text{ m}$ ($t=0\text{ s}$)៖</strong> ថូផ្កាចាប់ផ្ដើមធ្លាក់ពីបង្អួចដោយល្បឿនដើម $v_0 = 0\text{ m/s}$ ។ ថាមពលស៊ីនេទិក $K = 0\text{ J}$ ហើយថាមពលប៉ូតង់ស្យែលមានតម្លៃអតិបរមា $U = mgh = 196.0\text{ J}$ ។
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- JAVASCRIPT: SIMULATOR PHYSICS & SOLUTION TOGGLE LOGIC                     -->
+    <!-- ========================================================================= -->
+    <script>
+        (function () {
+            // 1. Solution Toggle Logic
+            const toggleSolutionBtn = document.getElementById('toggleSolutionBtn');
+            const solutionContainer = document.getElementById('solutionContainer');
+            const toggleSolIcon = document.getElementById('toggleSolIcon');
+            const toggleSolText = document.getElementById('toggleSolText');
+            const toggleSolChevron = document.getElementById('toggleSolChevron');
+
+            let isSolutionOpen = false;
+
+            toggleSolutionBtn.addEventListener('click', function () {
+                isSolutionOpen = !isSolutionOpen;
+                if (isSolutionOpen) {
+                    solutionContainer.classList.add('open');
+                    toggleSolIcon.textContent = '🙈';
+                    toggleSolText.textContent = 'លាក់ដំណោះស្រាយលម្អិត (Hide Solution)';
+                    toggleSolChevron.style.transform = 'rotate(180deg)';
+                } else {
+                    solutionContainer.classList.remove('open');
+                    toggleSolIcon.textContent = '👁️';
+                    toggleSolText.textContent = 'បង្ហាញដំណោះស្រាយលម្អិត (Show Solution)';
+                    toggleSolChevron.style.transform = 'rotate(0deg)';
+                }
+            });
+
+            // 2. Physics Constants (from Problem Statement)
+            const MASS = 1.00;          // kg
+            const H_INITIAL = 20.0;     // m
+            const G = 9.80;             // m/s^2
+            const T_MAX = Math.sqrt((2 * H_INITIAL) / G); // sqrt(40 / 9.8) ≈ 2.020305 s
+            const E_TOTAL = MASS * G * H_INITIAL;         // 196.0 J
+
+            // SVG Vertical Coordinate Mapping:
+            // y = 20.0 m -> Y_TOP = 100 px
+            // y = 0.0 m  -> Y_GROUND = 520 px
+            // Scale = 21 pixels per meter
+            const Y_TOP = 100;
+            const Y_GROUND = 520;
+            const PX_PER_METER = (Y_GROUND - Y_TOP) / H_INITIAL; // 21 px/m
+            const POT_X = 310;
+
+            function heightToSvgY(yMeters) {
+                return Y_GROUND - yMeters * PX_PER_METER;
+            }
+
+            // Build Vertical Ruler & Stroboscopic Markers
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const rulerLayer = document.getElementById('rulerLayer');
+            const strobeGroup = document.getElementById('strobeGroup');
+
+            function createSvgEl(tag, attrs) {
+                const el = document.createElementNS(svgNS, tag);
+                for (const key in attrs) {
+                    el.setAttribute(key, attrs[key]);
+                }
+                return el;
+            }
+
+            function initRuler() {
+                // Ruler spine at X = 210
+                rulerLayer.appendChild(createSvgEl('line', {
+                    x1: 210, y1: Y_TOP, x2: 210, y2: Y_GROUND,
+                    stroke: '#cbd5e1', 'stroke-width': '2'
+                }));
+
+                for (let m = 0; m <= 20; m += 1) {
+                    const sy = heightToSvgY(m);
+                    const isMajor = m % 5 === 0;
+                    rulerLayer.appendChild(createSvgEl('line', {
+                        x1: 210, y1: sy, x2: isMajor ? 224 : 217, y2: sy,
+                        stroke: isMajor ? '#fde047' : '#94a3b8',
+                        'stroke-width': isMajor ? '2' : '1'
+                    }));
+
+                    if (isMajor) {
+                        const label = createSvgEl('text', {
+                            x: 228, y: sy + 4,
+                            fill: m === 20 ? '#fde047' : '#e2e8f0',
+                            'font-size': '11.5',
+                            'font-family': 'monospace',
+                            'font-weight': 'bold'
+                        });
+                        label.textContent = m + 'm';
+                        rulerLayer.appendChild(label);
+                    }
+                }
+            }
+
+            // Pre-compute stroboscopic timestamps (0.5s, 1.0s, 1.5s)
+            const strobeTimes = [0.5, 1.0, 1.5];
+            const strobeElements = [];
+
+            function initStrobeMarkers() {
+                strobeTimes.forEach(function (st) {
+                    const fallDist = 0.5 * G * st * st;
+                    const yPos = H_INITIAL - fallDist;
+                    const sy = heightToSvgY(yPos);
+
+                    const g = createSvgEl('g', { visibility: 'hidden' });
+                    const circle = createSvgEl('circle', {
+                        cx: POT_X, cy: sy, r: '5',
+                        fill: '#38bdf8', 'fill-opacity': '0.45',
+                        stroke: '#bae6fd', 'stroke-width': '1.5'
+                    });
+                    const txt = createSvgEl('text', {
+                        x: POT_X - 14, y: sy + 4,
+                        fill: '#bae6fd', 'font-size': '10.5',
+                        'font-family': 'monospace', 'text-anchor': 'end'
+                    });
+                    txt.textContent = 't=' + st.toFixed(1) + 's (' + yPos.toFixed(1) + 'm)';
+
+                    g.appendChild(circle);
+                    g.appendChild(txt);
+                    strobeGroup.appendChild(g);
+                    strobeElements.push({ time: st, el: g });
+                });
+            }
+
+            // DOM Elements for Simulation
+            const flowerPotGroup = document.getElementById('flowerPotGroup');
+            const potPulseRing = document.getElementById('potPulseRing');
+            const activeFallLine = document.getElementById('activeFallLine');
+            const currHeightLine = document.getElementById('currHeightLine');
+            const currHeightHorizontal = document.getElementById('currHeightHorizontal');
+            const weightVector = document.getElementById('weightVector');
+            const weightLabel = document.getElementById('weightLabel');
+            const velocityVector = document.getElementById('velocityVector');
+            const velocityLabel = document.getElementById('velocityLabel');
+            const impactBurst = document.getElementById('impactBurst');
+
+            const potCalloutGroup = document.getElementById('potCalloutGroup');
+            const calloutTitle = document.getElementById('calloutTitle');
+            const calloutTime = document.getElementById('calloutTime');
+            const calloutHeight = document.getElementById('calloutHeight');
+            const calloutVel = document.getElementById('calloutVel');
+            const calloutKE = document.getElementById('calloutKE');
+
+            const simStatusBadge = document.getElementById('simStatusBadge');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const playIcon = document.getElementById('playIcon');
+            const playText = document.getElementById('playText');
+            const resetBtn = document.getElementById('resetBtn');
+            const timeSlider = document.getElementById('timeSlider');
+            const timeBadge = document.getElementById('timeBadge');
+
+            const statHeight = document.getElementById('statHeight');
+            const statFallDist = document.getElementById('statFallDist');
+            const statVel = document.getElementById('statVel');
+            const statTime = document.getElementById('statTime');
+            const statPE = document.getElementById('statPE');
+            const statKE = document.getElementById('statKE');
+            const barPE = document.getElementById('barPE');
+            const barKE = document.getElementById('barKE');
+            const momentExplanationBox = document.getElementById('momentExplanationBox');
+
+            const btnInspect20m = document.getElementById('btnInspect20m');
+            const btnInspect10m = document.getElementById('btnInspect10m');
+            const btnInspect0m = document.getElementById('btnInspect0m');
+            const speedBtns = document.querySelectorAll('.speed-btn');
+
+            // Simulation State
+            let t = 0.0; // Start right at t = 0.00 s (height = 20.0 m) so user clearly sees the 20m initial state
+            let isPlaying = false;
+            let playbackSpeed = 1.0;
+            let lastTimestamp = null;
+
+            function updateScene(currentT) {
+                const clampedT = Math.max(0, Math.min(T_MAX, currentT));
+                const fallDist = Math.min(H_INITIAL, 0.5 * G * clampedT * clampedT);
+                const yMeters = Math.max(0, H_INITIAL - fallDist);
+                const v = G * clampedT;
+                const pe = MASS * G * yMeters;
+                const ke = E_TOTAL - pe;
+
+                const sy = heightToSvgY(yMeters);
+
+                // Move Flower Pot
+                flowerPotGroup.setAttribute('transform', 'translate(' + POT_X + ',' + sy + ')');
+
+                // Show Pulse Ring when at 20.0 m (t ~ 0)
+                if (clampedT < 0.02) {
+                    potPulseRing.setAttribute('visibility', 'visible');
+                    potPulseRing.setAttribute('cy', sy - 10);
+                } else {
+                    potPulseRing.setAttribute('visibility', 'hidden');
+                }
+
+                // Active Fall Line
+                activeFallLine.setAttribute('y2', sy);
+
+                // Height Guideline
+                currHeightLine.setAttribute('y1', sy);
+                currHeightHorizontal.setAttribute('y1', sy);
+                currHeightHorizontal.setAttribute('y2', sy);
+
+                // Weight Vector (constant 9.8 N downward)
+                weightVector.setAttribute('y1', sy);
+                weightVector.setAttribute('y2', sy + 44);
+                weightLabel.setAttribute('y', sy + 32);
+
+                // Velocity Vector (scales with v)
+                if (clampedT > 0.03) {
+                    const vLen = Math.min(85, v * 4.2);
+                    velocityVector.setAttribute('visibility', 'visible');
+                    velocityLabel.setAttribute('visibility', 'visible');
+                    velocityVector.setAttribute('y1', sy);
+                    velocityVector.setAttribute('y2', sy + vLen);
+                    velocityLabel.setAttribute('y', sy + vLen - 4);
+                    velocityLabel.textContent = 'v = ' + v.toFixed(1) + ' m/s';
+                } else {
+                    velocityVector.setAttribute('visibility', 'hidden');
+                    velocityLabel.setAttribute('visibility', 'hidden');
+                }
+
+                // Strobe Markers Visibility
+                strobeElements.forEach(function (item) {
+                    item.el.setAttribute('visibility', clampedT >= item.time ? 'visible' : 'hidden');
+                });
+
+                // Impact Burst at Ground (y = 0)
+                if (Math.abs(clampedT - T_MAX) < 0.008) {
+                    impactBurst.setAttribute('visibility', 'visible');
+                } else {
+                    impactBurst.setAttribute('visibility', 'hidden');
+                }
+
+                // Position Floating Callout Box smoothly so it never clips off bottom
+                const calloutY = Math.min(415, Math.max(45, sy - 42));
+                potCalloutGroup.setAttribute('transform', 'translate(352,' + calloutY + ')');
+
+                if (clampedT < 0.01) {
+                    calloutTitle.textContent = '📍 ថូផ្កានៅកម្ពស់ 20.0 m ពីដី';
+                    calloutTitle.setAttribute('fill', '#fde047');
+                    simStatusBadge.textContent = '📍 ស្ថានភាព៖ ថូផ្កាកំពុងស្ថិតនៅបង្អួចកម្ពស់ 20.0 m ពីដី (t = 0.00 s)';
+                    simStatusBadge.className = 'bg-amber-100 text-amber-900 text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full border border-amber-300';
+                    momentExplanationBox.innerHTML = '<strong>ការពន្យល់នៅកម្ពស់ 20.0 m (t = 0.00 s)៖</strong> ថូផ្កាស្ថិតនៅមាត់បង្អួចអគារកម្ពស់ 20.0 m ពីដី មានល្បឿនដើម $v_0 = 0\\text{ m/s}$ និងថាមពលប៉ូតង់ស្យែល $U = 196.0\\text{ J}$ ។';
+                } else if (Math.abs(clampedT - T_MAX) < 0.008) {
+                    calloutTitle.textContent = '💥 ថូផ្កាធ្លាក់ដល់ផ្ទៃដី (0.0 m)';
+                    calloutTitle.setAttribute('fill', '#f87171');
+                    simStatusBadge.textContent = '💥 ស្ថានភាព៖ ថូផ្កាធ្លាក់ដល់ផ្ទៃដី 0.0 m (t = 2.02 s, v = 19.80 m/s, K = 196 J)';
+                    simStatusBadge.className = 'bg-rose-100 text-rose-900 text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full border border-rose-300';
+                    momentExplanationBox.innerHTML = '<strong>ការពន្យល់ពេលធ្លាក់ដល់ដី (y = 0.0 m, t = 2.02 s)៖</strong> ថូផ្កាមានល្បឿនអតិបរមា <strong>v = 19.80 m/s</strong> ក្នុងរយៈពេល <strong>t = 2.02 s</strong> និងថាមពលស៊ីនេទិក <strong>K = 196.0 J</strong> ។';
+                } else {
+                    calloutTitle.textContent = '⬇️ ថូផ្កាកំពុងធ្លាក់ដោយសេរី';
+                    calloutTitle.setAttribute('fill', '#38bdf8');
+                    simStatusBadge.textContent = '⬇️ កំពុងធ្លាក់៖ កម្ពស់ y = ' + yMeters.toFixed(2) + ' m | ល្បឿន v = ' + v.toFixed(2) + ' m/s';
+                    simStatusBadge.className = 'bg-blue-100 text-blue-900 text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full border border-blue-300';
+                    momentExplanationBox.innerHTML = '<strong>កំពុងធ្លាក់នៅកម្ពស់ ' + yMeters.toFixed(2) + ' m (t = ' + clampedT.toFixed(2) + ' s)៖</strong> ថាមពលប៉ូតង់ស្យែលថយចុះមកនៅ <strong>' + pe.toFixed(1) + ' J</strong> ហើយបំប្លែងជាថាមពលស៊ីនេទិក <strong>' + ke.toFixed(1) + ' J</strong> ។';
+                }
+
+                calloutTime.textContent = '• រយៈពេល៖ t = ' + clampedT.toFixed(2) + ' s';
+                calloutHeight.textContent = '• កម្ពស់ពីដី៖ y = ' + yMeters.toFixed(2) + ' m';
+                calloutVel.textContent = '• ល្បឿនខណៈ៖ v = ' + v.toFixed(2) + ' m/s';
+                calloutKE.textContent = '• ថាមពលស៊ីនេទិក៖ K = ' + ke.toFixed(1) + ' J';
+
+                // Update Dashboard Telemetry
+                timeSlider.value = clampedT;
+                timeBadge.textContent = clampedT.toFixed(2) + ' s';
+                statHeight.textContent = yMeters.toFixed(2) + ' m';
+                statFallDist.textContent = fallDist.toFixed(2) + ' m';
+                statVel.textContent = v.toFixed(2) + ' m/s';
+                statTime.textContent = clampedT.toFixed(2) + ' s';
+
+                const pePercent = (pe / E_TOTAL) * 100;
+                const kePercent = (ke / E_TOTAL) * 100;
+
+                statPE.textContent = pe.toFixed(1) + ' J (' + Math.round(pePercent) + '%)';
+                statKE.textContent = ke.toFixed(1) + ' J (' + Math.round(kePercent) + '%)';
+                barPE.style.width = pePercent.toFixed(1) + '%';
+                barKE.style.width = kePercent.toFixed(1) + '%';
+            }
+
+            function updatePlayButtonUI() {
+                if (isPlaying) {
+                    playIcon.textContent = '⏸';
+                    playText.textContent = 'ផ្អាក (Pause)';
+                } else {
+                    playIcon.textContent = '▶';
+                    playText.textContent = t >= T_MAX - 0.01 ? 'ទម្លាក់ម្ដងទៀត (Replay)' : 'ចាប់ផ្ដើមទម្លាក់ថូផ្កា (Drop)';
+                }
+            }
+
+            function stepAnimation(timestamp) {
+                if (!isPlaying) return;
+                if (!lastTimestamp) lastTimestamp = timestamp;
+                const dt = ((timestamp - lastTimestamp) / 1000) * playbackSpeed;
+                lastTimestamp = timestamp;
+
+                t += dt;
+                if (t >= T_MAX) {
+                    t = T_MAX;
+                    isPlaying = false;
+                    updateScene(t);
+                    updatePlayButtonUI();
+                    return;
+                }
+
+                updateScene(t);
+                requestAnimationFrame(stepAnimation);
+            }
+
+            // Button Listeners
+            playPauseBtn.addEventListener('click', function () {
+                if (isPlaying) {
+                    isPlaying = false;
+                    updatePlayButtonUI();
+                } else {
+                    if (t >= T_MAX - 0.01) {
+                        t = 0.0;
+                    }
+                    isPlaying = true;
+                    lastTimestamp = null;
+                    updatePlayButtonUI();
+                    requestAnimationFrame(stepAnimation);
+                }
+            });
+
+            resetBtn.addEventListener('click', function () {
+                isPlaying = false;
+                t = 0.0;
+                lastTimestamp = null;
+                updateScene(t);
+                updatePlayButtonUI();
+            });
+
+            timeSlider.addEventListener('input', function (e) {
+                isPlaying = false;
+                t = parseFloat(e.target.value);
+                updateScene(t);
+                updatePlayButtonUI();
+            });
+
+            // Quick Inspection Moment Buttons
+            btnInspect20m.addEventListener('click', function () {
+                isPlaying = false;
+                t = 0.0;
+                updateScene(t);
+                updatePlayButtonUI();
+            });
+
+            btnInspect10m.addEventListener('click', function () {
+                isPlaying = false;
+                // Time when y = 10.0m (fallDist = 10.0m): t = sqrt(20 / 9.8) ≈ 1.4286 s
+                t = Math.sqrt(20.0 / G);
+                updateScene(t);
+                updatePlayButtonUI();
+            });
+
+            btnInspect0m.addEventListener('click', function () {
+                isPlaying = false;
+                t = T_MAX;
+                updateScene(t);
+                updatePlayButtonUI();
+            });
+
+            // Speed Selector Buttons
+            speedBtns.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    playbackSpeed = parseFloat(btn.getAttribute('data-speed'));
+                    speedBtns.forEach(function (b) {
+                        b.className = 'speed-btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-2.5 py-1 rounded-lg transition cursor-pointer';
+                    });
+                    btn.className = 'speed-btn bg-blue-600 text-white font-bold px-2.5 py-1 rounded-lg transition cursor-pointer';
+                });
+            });
+
+            // Initialize Scene at t = 0.00 s (Flower Pot at 20.0 m window)
+            initRuler();
+            initStrobeMarkers();
+            updateScene(0.0);
+            updatePlayButtonUI();
+        })();
+    </script>
+</body>
+</html>
