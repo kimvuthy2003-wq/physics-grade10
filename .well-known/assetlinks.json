@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.vuthyphysicsg10",
+        "sha256_cert_fingerprints": ["09:C1:07:2B:AA:BE:6D:F0:8D:20:34:38:09:C5:56:E3:5B:93:0A:77:1D:56:51:32:A5:72:EB:2E:30:F0:C1:F8"]
+      }
+    }]
