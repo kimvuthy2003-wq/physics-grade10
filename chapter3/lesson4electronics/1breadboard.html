@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>3D E-Lab Pro: បន្ទះសៀគ្វីពិតៗ</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Khmer Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Three.js r128 & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        html, body {
+            font-family: 'Battambang', sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #e8f0f8;
+            color: #0f172a;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        #lab-container {
+            position: relative;
+            height: 100vh;
+            height: 100dvh;
+            width: 100vw;
+            overflow: hidden;
+            background: linear-gradient(180deg, #f1f5f9 0%, #e8f0f8 100%);
+        }
+
+        #workspace {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            display: block;
+            outline: none;
+            touch-action: none;
+        }
+
+        /* Top Floating Control Bar */
+        #top-bar {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            z-index: 30;
+            max-width: 96vw;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid #cbd5e1;
+            border-radius: 9999px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+        }
+
+        .control-btn {
+            padding: 8px 15px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: 'Battambang', sans-serif;
+            transition: all 0.2s ease;
+            border: 1.5px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .control-btn:active { transform: scale(0.95); }
+
+        #btnPower {
+            background-color: #10b981;
+            color: #ffffff;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+        }
+        #btnPower:hover { background-color: #059669; }
+        #btnPower.off {
+            background-color: #ef4444;
+            box-shadow: 0 3px 10px rgba(239, 68, 68, 0.3);
+        }
+        #btnPower.off:hover { background-color: #dc2626; }
+
+        #btnRotate {
+            background-color: #3b82f6;
+            color: #ffffff;
+            box-shadow: 0 3px 10px rgba(59, 130, 246, 0.28);
+        }
+        #btnRotate:hover { background-color: #2563eb; }
+
+        #btnXray {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            border-color: #cbd5e1;
+        }
+        #btnXray:hover { background-color: #e2e8f0; }
+        #btnXray.active {
+            background-color: #0ea5e9;
+            color: #ffffff;
+            border-color: #0284c7;
+            box-shadow: 0 3px 12px rgba(14, 165, 233, 0.35);
+        }
+
+        /* Compact Khmer X-Ray Legend Card */
+        #xray-legend {
+            position: absolute;
+            top: 72px;
+            left: 14px;
+            width: 295px;
+            max-width: calc(100vw - 28px);
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid #bae6fd;
+            border-left: 5px solid #0ea5e9;
+            border-radius: 14px;
+            padding: 11px 13px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
+            z-index: 25;
+            display: none;
+            animation: slideInLeft 0.22s ease-out;
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-12px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Desktop Instruction Panel */
+        .instruction-box {
+            position: absolute;
+            top: 72px;
+            right: 14px;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 11px 13px;
+            border-radius: 14px;
+            font-size: 12px;
+            line-height: 1.65;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            border-left: 4px solid #3b82f6;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+            z-index: 20;
+            pointer-events: none;
+            max-width: 265px;
+        }
+
+        @media (max-width: 820px) {
+            .instruction-box { display: none; }
+            #top-bar { border-radius: 16px; top: 10px; gap: 6px; padding: 5px 8px; }
+            .control-btn { padding: 7px 12px; font-size: 12px; }
+            #xray-legend { top: 68px; font-size: 11.5px; }
+        }
+
+        /* Short Circuit Warning Popup */
+        #warning-box {
+            position: absolute;
+            top: 24%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(220, 38, 38, 0.96);
+            color: #ffffff;
+            padding: 16px 24px;
+            border-radius: 16px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            width: 90%;
+            max-width: 420px;
+            display: none;
+            z-index: 60;
+            border: 3px solid #fecaca;
+            box-shadow: 0 15px 35px rgba(220, 38, 38, 0.35);
+            animation: pulseWarning 0.8s infinite alternate;
+        }
+        @keyframes pulseWarning {
+            from { transform: translate(-50%, -50%) scale(1); }
+            to { transform: translate(-50%, -50%) scale(1.04); }
+        }
+
+        /* Toast Feedback */
+        #toast-msg {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            background: rgba(15, 23, 42, 0.88);
+            color: #ffffff;
+            padding: 7px 16px;
+            border-radius: 9999px;
+            font-size: 12px;
+            z-index: 55;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.22s ease;
+            white-space: nowrap;
+        }
+        #toast-msg.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Permanently Open, Raised Floating Bottom Toolbox */
+        #toolbox {
+            position: fixed;
+            bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+            left: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.16);
+            border-radius: 18px;
+            border: 1.5px solid #cbd5e1;
+        }
+
+        /* Non-collapsible simple header */
+        .toolbox-header {
+            padding: 8px 14px 6px 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            pointer-events: none;
+        }
+
+        .toolbox-scroll-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .scroll-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            width: 34px;
+            height: 34px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1.5px solid #cbd5e1;
+            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+            color: #334155;
+            font-weight: bold;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+        .scroll-arrow:hover {
+            background: #3b82f6;
+            color: #ffffff;
+            border-color: #2563eb;
+        }
+        #scroll-left { left: 8px; }
+        #scroll-right { right: 8px; }
+
+        .toolbox-content {
+            display: flex;
+            overflow-x: auto;
+            padding: 10px 48px 11px 48px;
+            gap: 9px;
+            align-items: stretch;
+            scroll-behavior: smooth;
+            width: 100%;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            touch-action: pan-x;
+        }
+        .toolbox-content::-webkit-scrollbar { display: none; }
+
+        .tool-item {
+            min-width: 88px;
+            flex-shrink: 0;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 13px;
+            padding: 8px 6px;
+            text-align: center;
+            cursor: grab;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            transition: all 0.16s ease;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #1e293b;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .tool-item:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(59, 130, 246, 0.16);
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+        .tool-item:active {
+            transform: scale(0.95);
+            background-color: #3b82f6;
+            color: #ffffff;
+            cursor: grabbing;
+        }
+        .tool-icon {
+            font-size: 22px;
+            line-height: 1.15;
+            margin-bottom: 3px;
+            pointer-events: none;
+        }
+
+        .clear-tool-btn {
+            min-width: 96px;
+            flex-shrink: 0;
+            border: 1.5px solid #fecdd3;
+            border-radius: 13px;
+            padding: 8px 10px;
+            text-align: center;
+            cursor: pointer;
+            background: linear-gradient(180deg, #fff1f2 0%, #ffe4e6 100%);
+            color: #e11d48;
+            font-size: 11.5px;
+            font-weight: 700;
+            font-family: 'Battambang', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.16s ease;
+            box-shadow: 0 2px 6px rgba(225, 29, 72, 0.08);
+        }
+        .clear-tool-btn:hover {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #dc2626;
+        }
+        .clear-tool-btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+<div id="lab-container">
+    <!-- 3D Workspace -->
+    <div id="workspace">
+        <!-- Top Control Bar -->
+        <div id="top-bar">
+            <button id="btnPower" class="control-btn off" title="បើក ឬ បិទចរន្តអគ្គិសនី">
+                <span>⚡</span><span id="powerText">បើកចរន្ត</span>
+            </button>
+            <button id="btnRotate" class="control-btn" title="បង្វិលគ្រឿង 90 ដឺក្រេ (ឬចុចអក្សរ R)">
+                <span>🔄</span><span>បង្វិល</span>
+            </button>
+            <button id="btnXray" class="control-btn" title="បង្ហាញខ្សែតភ្ជាប់ខាងក្នុង Breadboard">
+                <span>🔍</span><span id="xrayText">បង្ហាញខ្សែខាងក្នុង</span>
+            </button>
+        </div>
+
+        <!-- Toast Feedback -->
+        <div id="toast-msg"></div>
+
+        <!-- Compact Khmer X-Ray Legend Card -->
+        <div id="xray-legend">
+            <div class="text-xs sm:text-sm font-bold text-slate-800 mb-1.5 flex items-center gap-1.5">
+                <span>💡</span> រចនាសម្ព័ន្ធខ្សែខាងក្នុង Breadboard
+            </div>
+            <div class="space-y-1.5 text-xs text-slate-700 leading-relaxed">
+                <div class="flex items-start gap-2">
+                    <span class="inline-block w-4 h-2.5 rounded-sm bg-red-500 mt-1 flex-shrink-0"></span>
+                    <span><b class="text-red-600">ជួរដេកក្រហម (+) / ខៀវ (-)៖</b> ជួរភ្លើងតភ្ជាប់គ្នាតាមជួរផ្ដេកពេញមួយជួរ។</span>
+                </div>
+                <div class="flex items-start gap-2">
+                    <span class="inline-block w-2.5 h-4 rounded-sm bg-emerald-500 mt-0.5 ml-0.5 flex-shrink-0"></span>
+                    <span><b class="text-emerald-700">ជួរឈរបៃតង (a-e &amp; f-j)៖</b> តភ្ជាប់គ្នាម្ដង ៥ រន្ធតាមជួរឈរ និងផ្ដាច់គ្នាត្រង់ប្រឡោះកណ្ដាល។</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Short Circuit Warning -->
+        <div id="warning-box">
+            ⚠️ ឆ្លងចរន្តអគ្គិសនី (Short Circuit)
+            <span class="text-sm font-normal mt-1.5 block">ប៉ូល (+) និង (-) ភ្ជាប់គ្នាដោយផ្ទាល់គ្មានគ្រឿងទទួល!</span>
+        </div>
+
+        <!-- Instructions Panel (Desktop) -->
+        <div class="instruction-box">
+            <div class="font-bold text-slate-800 mb-1 text-sm">📌 របៀបប្រើប្រាស់៖</div>
+            • <b>អូសគ្រឿង</b> ពីឃ្លាំងខាងក្រោមមកដាក់លើក្ដារ<br>
+            • <b>ចុចអូសលើគ្រឿង</b> ដើម្បីរំកិលទីតាំង<br>
+            • <b>ចុចប៊ូតុង 🔄</b> ឬចុច <b>R</b> ដើម្បីបង្វិល 90°<br>
+            • <b>ចុច ២ ដង (Double Tap)</b> ដើម្បីលុបគ្រឿង<br>
+            • <b>អូសផ្ទៃទទេ</b> ដើម្បីបង្វិលកាមេរ៉ា 3D
+        </div>
+
+        <!-- Three.js Canvas Container -->
+        <div id="canvas-container"></div>
+    </div>
+
+    <!-- Permanently Open, Raised Floating Bottom Toolbox -->
+    <div id="toolbox">
+        <div class="toolbox-header">
+            <h2 class="text-xs sm:text-sm font-bold text-slate-800 m-0 text-center">
+                🧰 ឃ្លាំងគ្រឿងអគ្គិសនី 3D <span class="font-normal text-slate-500">(អូសទាញមកដាក់លើក្ដារ Breadboard)</span>
+            </h2>
+        </div>
+
+        <div class="toolbox-scroll-wrapper">
+            <button id="scroll-left" class="scroll-arrow" onclick="scrollToolbox(-250)" aria-label="រំកិលទៅឆ្វេង">◀</button>
+            
+            <div class="toolbox-content" id="drag-source">
+                <div class="tool-item" data-type="battery"><div class="tool-icon">🔋</div>ថ្មពិល 9V</div>
+                <div class="tool-item" data-type="wire"><div class="tool-icon">➖</div>ខ្សែចម្លង</div>
+                <div class="tool-item" data-type="switch"><div class="tool-icon">🕹️</div>កុងតាក់</div>
+                <div class="tool-item" data-type="resistor"><div class="tool-icon">〰️</div>រេស៊ីស្តង់</div>
+                <div class="tool-item" data-type="led"><div class="tool-icon">🔴</div>អំពូល LED</div>
+                <div class="tool-item" data-type="bulb"><div class="tool-icon">💡</div>អំពូលធម្មតា</div>
+                <div class="tool-item" data-type="halogen"><div class="tool-icon">🔦</div>អំពូលយ៉ូត</div>
+                <div class="tool-item" data-type="motor"><div class="tool-icon">⚙️</div>ម៉ូទ័រ</div>
+                <div class="tool-item" data-type="buzzer"><div class="tool-icon">🔔</div>ប៊ីប (Buzzer)</div>
+                <div class="tool-item" data-type="fuse"><div class="tool-icon">🧨</div>ហ្វុយស៊ីប</div>
+                <div class="tool-item" data-type="inductor"><div class="tool-icon">🧲</div>អាំងឌុចទ័រ</div>
+                <div class="tool-item" data-type="capacitor"><div class="tool-icon">⏸️</div>កុងដង់សាទ័រ</div>
+                <div class="tool-item" data-type="diode"><div class="tool-icon">▶️</div>ឌីយ៉ូត</div>
+                <div class="tool-item" data-type="ldr"><div class="tool-icon">☀️</div>សេនស័រ LDR</div>
+                <div class="tool-item" data-type="potentiometer"><div class="tool-icon">🎛️</div>ប៉ូតង់ស្យូម៉ែត</div>
+
+                <button id="btnClearBoard" class="clear-tool-btn" type="button">
+                    <div class="tool-icon">🗑️</div>សម្អាតក្ដារ
+                </button>
+            </div>
+
+            <button id="scroll-right" class="scroll-arrow" onclick="scrollToolbox(250)" aria-label="រំកិលទៅស្ដាំ">▶</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // =========================================================================
+    // 1. UI HELPERS (Horizontal Scroll & Toast Notifications)
+    // =========================================================================
+    function scrollToolbox(delta) {
+        const el = document.getElementById('drag-source');
+        el.scrollBy({ left: delta, behavior: 'smooth' });
+    }
+
+    // Enable mouse wheel horizontal scrolling on the bottom toolbox
+    document.getElementById('drag-source').addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaY) > 0) {
+            e.preventDefault();
+            e.currentTarget.scrollLeft += e.deltaY;
+        }
+    }, { passive: false });
+
+    let toastTimer = null;
+    function showToast(msg) {
+        const toast = document.getElementById('toast-msg');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // =========================================================================
+    // 2. THREE.JS BRIGHT, CLEAR LABORATORY SCENE & LIGHTING
+    // =========================================================================
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xe8f0f8); // Bright sky-lab color, NO dark fog
+
+    const camera = new THREE.PerspectiveCamera(42, container.clientWidth / container.clientHeight, 0.1, 1000);
+    // Positioned slightly higher & offset so the breadboard sits nicely above the raised bottom toolbox
+    camera.position.set(0, 50, 42);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.maxPolarAngle = Math.PI / 2 - 0.06;
+    controls.minDistance = 18;
+    controls.maxDistance = 110;
+    // Target shifted slightly toward +Z so the breadboard appears comfortably in the upper visible area
+    controls.target.set(0, 0, 4.5);
+
+    // Crisp Studio Lighting
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xdbeafe, 0.75);
+    hemiLight.position.set(0, 60, 0);
+    scene.add(hemiLight);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+    dirLight.position.set(20, 60, 30);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 10;
+    dirLight.shadow.camera.far = 160;
+    const shadowExtent = 44;
+    dirLight.shadow.camera.left = -shadowExtent;
+    dirLight.shadow.camera.right = shadowExtent;
+    dirLight.shadow.camera.top = shadowExtent;
+    dirLight.shadow.camera.bottom = -shadowExtent;
+    dirLight.shadow.bias = -0.0005;
+    scene.add(dirLight);
+
+    // Clean bright desk plane & subtle grid
+    const floorMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(260, 260),
+        new THREE.MeshStandardMaterial({ color: 0xeaf1f8, roughness: 0.9, metalness: 0.0 })
+    );
+    floorMesh.rotation.x = -Math.PI / 2;
+    floorMesh.position.y = -2.85;
+    floorMesh.receiveShadow = true;
+    scene.add(floorMesh);
+
+    const gridHelper = new THREE.GridHelper(180, 45, 0xcbd5e1, 0xd8e4f0);
+    gridHelper.position.y = -2.83;
+    scene.add(gridHelper);
+
+    // =========================================================================
+    // 3. MATHEMATICALLY EXACT UNIFORM-GRID 3D BREADBOARD & INTERNAL BUS BARS
+    // =========================================================================
+    const boardGroup = new THREE.Group();
+    scene.add(boardGroup);
+
+    const pitch = 1.5;
+    const cols = 30;
+    const startX = -((cols - 1) * pitch) / 2; // -21.75 to +21.75
+
+    // Exact uniform Z coordinates (all half-pitch offsets so every vertical span is an exact integer multiple of pitch!)
+    const Z_TOP_MINUS = -8.5 * pitch; // -12.75 (Blue -)
+    const Z_TOP_PLUS  = -7.5 * pitch; // -11.25 (Red +)
+    const Z_TOP_ROWS  = [-5.5, -4.5, -3.5, -2.5, -1.5].map(m => m * pitch); // a, b, c, d, e
+    const Z_BOT_ROWS  = [ 1.5,  2.5,  3.5,  4.5,  5.5].map(m => m * pitch); // f, g, h, i, j
+    const Z_BOT_PLUS  =  7.5 * pitch; // +11.25 (Red +)
+    const Z_BOT_MINUS =  8.5 * pitch; // +12.75 (Blue -)
+
+    const boardW = 50.0;
+    const boardH = 2.8;
+    const boardD = 30.0;
+
+    // Solid base backing plate underneath (gives crisp contrast in X-Ray mode)
+    const basePlate = new THREE.Mesh(
+        new THREE.BoxGeometry(boardW + 0.6, 0.45, boardD + 0.6),
+        new THREE.MeshStandardMaterial({ color: 0xdbeafe, roughness: 0.55 })
+    );
+    basePlate.position.y = -2.6;
+    basePlate.receiveShadow = true;
+    boardGroup.add(basePlate);
+
+    // Main White/Ivory Breadboard Body (becomes semi-transparent in X-Ray mode)
+    const boardShellMat = new THREE.MeshStandardMaterial({
+        color: 0xfefefe,
+        roughness: 0.35,
+        metalness: 0.04,
+        transparent: true,
+        opacity: 1.0
+    });
+    const boardMesh = new THREE.Mesh(new THREE.BoxGeometry(boardW, boardH - 0.35, boardD), boardShellMat);
+    boardMesh.position.y = -(boardH - 0.35) / 2;
+    boardMesh.receiveShadow = true;
+    boardMesh.castShadow = true;
+    boardGroup.add(boardMesh);
+
+    // Clean Center Trench (centered at z = 0, between row e at -2.25 and row f at +2.25)
+    const ravineMat = new THREE.MeshStandardMaterial({
+        color: 0xe2e8f0,
+        roughness: 0.65,
+        transparent: true,
+        opacity: 1.0
+    });
+    const centerDip = new THREE.Mesh(new THREE.BoxGeometry(boardW - 1.2, 0.32, 2.2), ravineMat);
+    centerDip.position.set(0, -0.06, 0);
+    boardGroup.add(centerDip);
+
+    // Crisp Printed Top Markings Texture (Red +, Blue -, Columns 1..30, Rows a-e & f-j)
+    function createBoardLabelsTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 2048;
+        canvas.height = 1229;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const toU = (x) => ((x + boardW / 2) / boardW) * canvas.width;
+        const toV = (z) => ((z + boardD / 2) / boardD) * canvas.height;
+
+        const drawStripe = (z, color) => {
+            ctx.fillStyle = color;
+            const y = toV(z) - 4;
+            ctx.fillRect(toU(startX - 0.7), y, toU(-startX + 0.7) - toU(startX - 0.7), 8);
+        };
+
+        // Top rails: Blue (-) outer at -8.5*pitch, Red (+) inner at -7.5*pitch
+        drawStripe(Z_TOP_MINUS - 0.85, '#2563eb');
+        drawStripe(Z_TOP_PLUS  + 0.85, '#ef4444');
+        // Bottom rails: Red (+) inner at +7.5*pitch, Blue (-) outer at +8.5*pitch
+        drawStripe(Z_BOT_PLUS  - 0.85, '#ef4444');
+        drawStripe(Z_BOT_MINUS + 0.85, '#2563eb');
+
+        // Plus & Minus signs at left and right ends
+        ctx.font = 'bold 34px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const signXs = [startX - 1.75, -startX + 1.75];
+        signXs.forEach(sx => {
+            ctx.fillStyle = '#2563eb';
+            ctx.fillText('−', toU(sx), toV(Z_TOP_MINUS));
+            ctx.fillText('−', toU(sx), toV(Z_BOT_MINUS));
+            ctx.fillStyle = '#dc2626';
+            ctx.fillText('+', toU(sx), toV(Z_TOP_PLUS));
+            ctx.fillText('+', toU(sx), toV(Z_BOT_PLUS));
+        });
+
+        // Row Letters: a-e (top) and f-j (bottom)
+        const topLetters = ['a', 'b', 'c', 'd', 'e'];
+        const botLetters = ['f', 'g', 'h', 'i', 'j'];
+        ctx.font = 'bold 24px monospace';
+        ctx.fillStyle = '#475569';
+        signXs.forEach(sx => {
+            Z_TOP_ROWS.forEach((z, idx) => ctx.fillText(topLetters[idx], toU(sx), toV(z)));
+            Z_BOT_ROWS.forEach((z, idx) => ctx.fillText(botLetters[idx], toU(sx), toV(z)));
+        });
+
+        // Column numbers 1..30 (every column clearly printed)
+        ctx.font = 'bold 17px monospace';
+        ctx.fillStyle = '#64748b';
+        for (let i = 0; i < cols; i++) {
+            const colNum = i + 1;
+            const cx = startX + i * pitch;
+            ctx.fillText(String(colNum), toU(cx), toV(-6.5 * pitch));
+            ctx.fillText(String(colNum), toU(cx), toV( 6.5 * pitch));
+        }
+
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.anisotropy = 8;
+        return tex;
+    }
+
+    const labelPlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(boardW, boardD),
+        new THREE.MeshBasicMaterial({ map: createBoardLabelsTexture(), transparent: true, depthWrite: false })
+    );
+    labelPlane.rotation.x = -Math.PI / 2;
+    labelPlane.position.y = 0.015;
+    boardGroup.add(labelPlane);
+
+    // Breadboard Holes + Fast Spatial Lookup Map
+    const holes = [];
+    const nodeToHoles = {};
+    const holeSpatialMap = new Map();
+
+    function holeKey(x, z) {
+        return `${Math.round(x * 100)},${Math.round(z * 100)}`;
+    }
+
+    const holeSquareGeo = new THREE.PlaneGeometry(0.68, 0.68);
+    const holeRimGeo = new THREE.RingGeometry(0.36, 0.48, 4);
+    const holeMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
+    const holeRimMat = new THREE.MeshBasicMaterial({ color: 0xcbd5e1 });
+
+    function addHole(x, z, nodeName) {
+        const h = new THREE.Mesh(holeSquareGeo, holeMat);
+        h.rotation.x = -Math.PI / 2;
+        h.position.set(x, 0.02, z);
+        boardGroup.add(h);
+
+        const rim = new THREE.Mesh(holeRimGeo, holeRimMat);
+        rim.rotation.x = -Math.PI / 2;
+        rim.rotation.z = Math.PI / 4;
+        rim.position.set(x, 0.018, z);
+        boardGroup.add(rim);
+
+        const holeData = { x, z, node: nodeName };
+        holes.push(holeData);
+        holeSpatialMap.set(holeKey(x, z), holeData);
+
+        if (!nodeToHoles[nodeName]) nodeToHoles[nodeName] = [];
+        nodeToHoles[nodeName].push(holeData);
+    }
+
+    for (let col = 0; col < cols; col++) {
+        const x = startX + col * pitch;
+        addHole(x, Z_TOP_MINUS, 'PWR_T_MINUS');
+        addHole(x, Z_TOP_PLUS,  'PWR_T_PLUS');
+        Z_TOP_ROWS.forEach(z => addHole(x, z, `T_TOP_${col}`));
+        Z_BOT_ROWS.forEach(z => addHole(x, z, `T_BOT_${col}`));
+        addHole(x, Z_BOT_PLUS,  'PWR_B_PLUS');
+        addHole(x, Z_BOT_MINUS, 'PWR_B_MINUS');
+    }
+
+    // --- 3D Internal Metal Conductor Strips (Visible in X-Ray Mode) ---
+    const internalWiresGroup = new THREE.Group();
+    internalWiresGroup.visible = false;
+    boardGroup.add(internalWiresGroup);
+
+    const railLength = (cols - 1) * pitch + 0.9;
+    const matRedBus = new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xdc2626, emissiveIntensity: 0.45, metalness: 0.4, roughness: 0.3 });
+    const matBlueBus = new THREE.MeshStandardMaterial({ color: 0x2563eb, emissive: 0x1d4ed8, emissiveIntensity: 0.45, metalness: 0.4, roughness: 0.3 });
+    const matGreenBus = new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x059669, emissiveIntensity: 0.4, metalness: 0.45, roughness: 0.3 });
+
+    [
+        { z: Z_TOP_MINUS, mat: matBlueBus },
+        { z: Z_TOP_PLUS,  mat: matRedBus },
+        { z: Z_BOT_PLUS,  mat: matRedBus },
+        { z: Z_BOT_MINUS, mat: matBlueBus }
+    ].forEach(rail => {
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(railLength, 0.36, 0.56), rail.mat);
+        bar.position.set(0, -0.45, rail.z);
+        internalWiresGroup.add(bar);
+    });
+
+    // Vertical 5-hole terminal strips (a-e centered at -3.5*pitch, f-j centered at +3.5*pitch)
+    const terminalBarLen = 4 * pitch + 0.7;
+    for (let col = 0; col < cols; col++) {
+        const x = startX + col * pitch;
+        const topBar = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.36, terminalBarLen), matGreenBus);
+        topBar.position.set(x, -0.45, -3.5 * pitch);
+        internalWiresGroup.add(topBar);
+
+        const botBar = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.36, terminalBarLen), matGreenBus);
+        botBar.position.set(x, -0.45,  3.5 * pitch);
+        internalWiresGroup.add(botBar);
+    }
+
+    // --- Highlight Overlays: Connected Strip Overlay + Bright Green Target Snap Rings ---
+    const highlightGroup = new THREE.Group();
+    boardGroup.add(highlightGroup);
+
+    const targetRingsGroup = new THREE.Group();
+    boardGroup.add(targetRingsGroup);
+
+    function clearGroupMeshes(grp) {
+        while (grp.children.length > 0) {
+            const child = grp.children[0];
+            grp.remove(child);
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) child.material.dispose();
+        }
+    }
+
+    function highlightNodes(nodeNames) {
+        clearGroupMeshes(highlightGroup);
+        if (!nodeNames || nodeNames.length === 0) return;
+
+        const uniqueNodes = [...new Set(nodeNames)];
+        uniqueNodes.forEach(nodeName => {
+            const list = nodeToHoles[nodeName];
+            if (!list || list.length === 0) return;
+
+            let color = 0x10b981;
+            if (nodeName.includes('PLUS')) color = 0xef4444;
+            else if (nodeName.includes('MINUS')) color = 0x2563eb;
+
+            let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+            list.forEach(h => {
+                if (h.x < minX) minX = h.x;
+                if (h.x > maxX) maxX = h.x;
+                if (h.z < minZ) minZ = h.z;
+                if (h.z > maxZ) maxZ = h.z;
+            });
+
+            const stripMesh = new THREE.Mesh(
+                new THREE.PlaneGeometry((maxX - minX) + 0.95, (maxZ - minZ) + 0.95),
+                new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.32, depthWrite: false })
+            );
+            stripMesh.rotation.x = -Math.PI / 2;
+            stripMesh.position.set((minX + maxX) / 2, 0.032, (minZ + maxZ) / 2);
+            highlightGroup.add(stripMesh);
+
+            const ringGeo = new THREE.RingGeometry(0.38, 0.52, 16);
+            const ringMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.85, depthWrite: false });
+            list.forEach(h => {
+                const r = new THREE.Mesh(ringGeo, ringMat);
+                r.rotation.x = -Math.PI / 2;
+                r.position.set(h.x, 0.036, h.z);
+                highlightGroup.add(r);
+            });
+        });
+    }
+
+    function showTargetSnapRings(targetHoles) {
+        clearGroupMeshes(targetRingsGroup);
+        if (!targetHoles || targetHoles.length === 0) return;
+
+        const outerGeo = new THREE.RingGeometry(0.42, 0.68, 24);
+        const outerMat = new THREE.MeshBasicMaterial({ color: 0x22c55e, transparent: true, opacity: 0.98, depthWrite: false });
+        const innerGeo = new THREE.CircleGeometry(0.32, 18);
+        const innerMat = new THREE.MeshBasicMaterial({ color: 0x86efac, transparent: true, opacity: 0.85, depthWrite: false });
+
+        targetHoles.forEach(h => {
+            const ring = new THREE.Mesh(outerGeo, outerMat);
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.set(h.x, 0.055, h.z);
+            targetRingsGroup.add(ring);
+
+            const dot = new THREE.Mesh(innerGeo, innerMat);
+            dot.rotation.x = -Math.PI / 2;
+            dot.position.set(h.x, 0.052, h.z);
+            targetRingsGroup.add(dot);
+        });
+    }
+
+    // X-Ray Mode Toggle
+    let isXrayOn = false;
+    const btnXray = document.getElementById('btnXray');
+    const xrayText = document.getElementById('xrayText');
+    const xrayLegend = document.getElementById('xray-legend');
+
+    btnXray.addEventListener('click', () => {
+        isXrayOn = !isXrayOn;
+        btnXray.classList.toggle('active', isXrayOn);
+        xrayText.textContent = isXrayOn ? 'លាក់ខ្សែខាងក្នុង' : 'បង្ហាញខ្សែខាងក្នុង';
+        xrayLegend.style.display = isXrayOn ? 'block' : 'none';
+
+        internalWiresGroup.visible = isXrayOn;
+        boardShellMat.opacity = isXrayOn ? 0.36 : 1.0;
+        boardShellMat.depthWrite = !isXrayOn;
+        ravineMat.opacity = isXrayOn ? 0.36 : 1.0;
+        ravineMat.depthWrite = !isXrayOn;
+    });
+
+    // =========================================================================
+    // 4. 3D COMPONENT FACTORY (Exact Pitch-Aligned Legs Extending Into Holes)
+    // =========================================================================
+    const components = [];
+    const matSilver = new THREE.MeshStandardMaterial({ color: 0xd1d5db, metalness: 0.85, roughness: 0.22 });
+
+    // Every leg extends from y = -0.2 (plugged into hole) up to bodyY
+    function createLeg(x, z, bodyY) {
+        const legDepth = 0.2;
+        const totalH = bodyY + legDepth;
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, totalH, 10), matSilver);
+        leg.position.set(x, (bodyY - legDepth) / 2, z);
+        leg.castShadow = true;
+        return leg;
+    }
+
+    function createBentWire(sx, ex, y) {
+        const wire = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, Math.abs(ex - sx), 10), matSilver);
+        wire.rotation.z = Math.PI / 2;
+        wire.position.set((sx + ex) / 2, y, 0);
+        wire.castShadow = true;
+        return wire;
+    }
+
+    function create3DComponent(type) {
+        const group = new THREE.Group();
+        group.userData = { type, pins: [], isActive: false, snappedNodes: [], switchOn: true };
+
+        if (type === 'battery') {
+            // 1-pitch span: -0.5*pitch (-0.75, + red) to +0.5*pitch (+0.75, - black)
+            const p1 = -0.5 * pitch, p2 = 0.5 * pitch;
+            const legTop = 1.6;
+            const bodyY = 5.4;
+
+            const body = new THREE.Mesh(
+                new THREE.BoxGeometry(3.4, 7.6, 2.2),
+                new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 })
+            );
+            body.position.y = bodyY;
+            body.castShadow = true;
+
+            const topBand = new THREE.Mesh(
+                new THREE.BoxGeometry(3.45, 2.0, 2.25),
+                new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.35 })
+            );
+            topBand.position.y = bodyY + 2.8;
+
+            // Positive (+) red collar at p1, Negative (-) black collar at p2
+            const posCollar = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.32, 0.32, 0.7, 12),
+                new THREE.MeshStandardMaterial({ color: 0xef4444 })
+            );
+            posCollar.position.set(p1, 1.35, 0);
+
+            const negCollar = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.32, 0.32, 0.7, 12),
+                new THREE.MeshStandardMaterial({ color: 0x111827 })
+            );
+            negCollar.position.set(p2, 1.35, 0);
+
+            group.add(body, topBand, posCollar, negCollar, createLeg(p1, 0, legTop), createLeg(p2, 0, legTop));
+            group.userData.pins = [{ x: p1, z: 0, isPos: true }, { x: p2, z: 0, isNeg: true }];
+        }
+        else if (type === 'wire') {
+            // 3-pitch span: -1.5*pitch (-2.25) to +1.5*pitch (+2.25) — bridges center trench directly!
+            const p1 = -1.5 * pitch, p2 = 1.5 * pitch;
+            const bodyY = 1.6;
+            const palette = [0xef4444, 0x2563eb, 0x10b981, 0xf59e0b, 0x8b5cf6];
+            const wireMat = new THREE.MeshStandardMaterial({ color: palette[components.length % palette.length], roughness: 0.35 });
+
+            const insulation = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, p2 - p1, 12), wireMat);
+            insulation.rotation.z = Math.PI / 2;
+            insulation.position.y = bodyY;
+            insulation.castShadow = true;
+
+            const cap1 = new THREE.Mesh(new THREE.SphereGeometry(0.24, 10, 10), wireMat);
+            cap1.position.set(p1, bodyY, 0);
+            const cap2 = cap1.clone();
+            cap2.position.set(p2, bodyY, 0);
+
+            group.add(insulation, cap1, cap2, createLeg(p1, 0, bodyY), createLeg(p2, 0, bodyY));
+            group.userData.pins = [{ x: p1, z: 0 }, { x: p2, z: 0 }];
+        }
+        else if (type === 'resistor') {
+            // 4-pitch span: -2*pitch (-3.0) to +2*pitch (+3.0)
+            const p1 = -2 * pitch, p2 = 2 * pitch;
+            const bodyY = 2.6;
+            const body = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.68, 0.68, 3.2, 16),
+                new THREE.MeshStandardMaterial({ color: 0xd9a066, roughness: 0.45 })
+            );
+            body.rotation.z = Math.PI / 2;
+            body.position.y = bodyY;
+            body.castShadow = true;
+
+            const bandColors = [0x991b1b, 0x111827, 0xdc2626, 0xeab308];
+            const bandXs = [-0.95, -0.35, 0.25, 0.95];
+            bandXs.forEach((bx, idx) => {
+                const band = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.7, 0.7, 0.24, 16),
+                    new THREE.MeshStandardMaterial({ color: bandColors[idx], roughness: 0.4 })
+                );
+                band.rotation.z = Math.PI / 2;
+                band.position.set(bx, bodyY, 0);
+                group.add(band);
+            });
+
+            group.add(body, createBentWire(p1, -1.6, bodyY), createBentWire(1.6, p2, bodyY), createLeg(p1, 0, bodyY), createLeg(p2, 0, bodyY));
+            group.userData.pins = [{ x: p1, z: 0 }, { x: p2, z: 0 }];
+        }
+        else if (type === 'diode') {
+            // 4-pitch span: -2*pitch (-3.0) to +2*pitch (+3.0)
+            const p1 = -2 * pitch, p2 = 2 * pitch;
+            const bodyY = 2.6;
+            const body = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.68, 0.68, 2.8, 16),
+                new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.4 })
+            );
+            body.rotation.z = Math.PI / 2;
+            body.position.y = bodyY;
+            body.castShadow = true;
+
+            const stripe = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.7, 0.7, 0.4, 16),
+                new THREE.MeshStandardMaterial({ color: 0xe5e7eb, roughness: 0.3 })
+            );
+            stripe.rotation.z = Math.PI / 2;
+            stripe.position.set(0.9, bodyY, 0);
+
+            group.add(body, stripe, createBentWire(p1, -1.4, bodyY), createBentWire(1.4, p2, bodyY), createLeg(p1, 0, bodyY), createLeg(p2, 0, bodyY));
+            group.userData.pins = [{ x: p1, z: 0, isPos: true }, { x: p2, z: 0, isNeg: true }];
+        }
+        else if (type === 'led') {
+            // 2-pitch span: -1*pitch (-1.5) to +1*pitch (+1.5)
+            const p1 = -1 * pitch, p2 = 1 * pitch;
+            const bodyY = 2.2;
+            const ledMat = new THREE.MeshStandardMaterial({
+                color: 0xef4444,
+                emissive: 0x450a0a,
+                emissiveIntensity: 0.5,
+                roughness: 0.2,
+                metalness: 0.1
+            });
+            const dome = new THREE.Mesh(new THREE.SphereGeometry(1.12, 20, 20), ledMat);
+            dome.position.y = bodyY + 1.3;
+            dome.castShadow = true;
+
+            const cyl = new THREE.Mesh(new THREE.CylinderGeometry(1.12, 1.12, 1.15, 20), ledMat);
+            cyl.position.y = bodyY + 0.7;
+            cyl.castShadow = true;
+
+            const rim = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 0.3, 20), ledMat);
+            rim.position.y = bodyY + 0.15;
+
+            const halo = new THREE.Mesh(
+                new THREE.SphereGeometry(2.2, 16, 16),
+                new THREE.MeshBasicMaterial({ color: 0xff2222, transparent: true, opacity: 0.0, depthWrite: false })
+            );
+            halo.position.y = bodyY + 1.1;
+
+            group.add(
+                dome, cyl, rim, halo,
+                createBentWire(p1, -0.5, bodyY), createBentWire(0.5, p2, bodyY),
+                createLeg(p1, 0, bodyY), createLeg(p2, 0, bodyY)
+            );
+            group.userData.pins = [{ x: p1, z: 0, isPos: true }, { x: p2, z: 0, isNeg: true }];
+            group.userData.bulbMesh = dome;
+            group.userData.haloMesh = halo;
+            group.userData.defaultEmissive = 0x450a0a;
+        }
+        else if (type === 'bulb' || type === 'halogen') {
+            // 2-pitch span: -1*pitch (-1.5) to +1*pitch (+1.5)
+            const p1 = -1 * pitch, p2 = 1 * pitch;
+            const bodyY = 2.2;
+            const isHalogen = type === 'halogen';
+
+            const base = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.95, 0.95, 1.0, 16),
+                new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.3 })
+            );
+            base.position.y = bodyY + 0.3;
+
+            const glassGeo = isHalogen
+                ? new THREE.CylinderGeometry(0.88, 0.88, 2.7, 18)
+                : new THREE.SphereGeometry(1.65, 20, 20);
+            const glass = new THREE.Mesh(
+                glassGeo,
+                new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.42, roughness: 0.1, metalness: 0.1 })
+            );
+            glass.position.y = bodyY + (isHalogen ? 2.0 : 1.9);
+
+            const fil = new THREE.Mesh(
+                new THREE.TorusGeometry(0.42, 0.11, 8, 16),
+                new THREE.MeshStandardMaterial({ color: 0x64748b, emissive: 0x000000, emissiveIntensity: 1, roughness: 0.35 })
+            );
+            fil.position.y = bodyY + (isHalogen ? 2.0 : 1.9);
+
+            const halo = new THREE.Mesh(
+                new THREE.SphereGeometry(2.5, 16, 16),
+                new THREE.MeshBasicMaterial({ color: isHalogen ? 0xfffbeb : 0xfbbf24, transparent: true, opacity: 0.0, depthWrite: false })
+            );
+            halo.position.y = bodyY + 1.9;
+
+            group.add(
+                base, glass, fil, halo,
+                createBentWire(p1, -0.7, bodyY), createBentWire(0.7, p2, bodyY),
+                createLeg(p1, 0, bodyY), createLeg(p2, 0, bodyY)
+            );
+            group.userData.pins = [{ x: p1, z: 0 }, { x: p2, z: 0 }];
+            group.userData.bulbMesh = fil;
+            group.userData.haloMesh = halo;
+            group.userData.defaultEmissive = 0x000000;
+        }
+        else if (type === 'motor') {
+            // 2-pitch span: -1*pitch (-1.5) to +1*pitch (+1.5)
+            const p1 = -1 * pitch, p2 = 1 * pitch;
+            const bodyY = 2.2;
+            const body = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.65, 1.65, 3.6, 20),
+                new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.65, roughness: 0.3 })
+            );
+            body.rotation.z = Math.PI / 2;
+            body.position.y = bodyY;
+            body.castShadow = true;
+
+            const rotorGroup = new THREE.Group();
+            rotorGroup.position.set(2.3, bodyY, 0);
+            const shaft = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.26, 0.26, 1.7, 10),
+                new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8 })
+            );
+            shaft.rotation.z = Math.PI / 2;
+            const blade = new THREE.Mesh(
+                new THREE.BoxGeometry(0.18, 3.2, 0.5),
+                new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.3 })
+            );
+            blade.position.x = 0.55;
+            rotorGroup.add(shaft, blade);
+
+            group.add(body, rotorGroup, createLeg(p1, 0, bodyY), createLeg(p2, 0, bodyY));
+            group.userData.pins = [{ x: p1, z: 0 }, { x: p2, z: 0 }];
+            group.userData.animMesh = rotorGroup;
+        }
+        else if (type === 'buzzer') {
+            // 2-pitch span: -1*pitch (-1.5) to +1*pitch (+1.5)
+            const p1 = -1 * pitch, p2 = 1 * pitch;
+            const bodyY = 1.6;
+            const bGroup = new THREE.Group();
+            bGroup.position.y = bodyY;
+
+            const body = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.75, 1.75, 2.1, 20),
+                new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 })
+            );
+            body.castShadow = true;
+            const topHole = new THREE.Mesh(
+                new THREE.CircleGeometry(0.55, 16),
+                new THREE.MeshBasicMaterial({ color: 0x94a3b8 })
+            );
+            topHole.rotation.x = -Math.PI / 2;
+            topHole.position.y = 1.07;
+            bGroup.add(body, topHole);
+
+            group.add(bGroup, createLeg(p1, 0, bodyY), createLeg(p2, 0, bodyY));
+            group.userData.pins = [{ x: p1, z: 0 }, { x: p2, z: 0 }];
+            group.userData.animMesh = bGroup;
+        }
+        else if (type === 'fuse') {
+            // 2-pitch span: -1*pitch (-1.5) to +1*pitch (+1.5)
+            const p1 = -1 * pitch, p2 = 1 * pitch;
+            const bodyY = 1.8;
+            const glass = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.68, 0.68, 2.2, 16),
+                new THREE.MeshStandardMaterial({ color: 0xf8fafc, transparent: true, opacity: 0.45, roughness: 0.1 })
+            );
+            glass.rotation.z = Math.PI / 2;
+            glass.position.y = bodyY;
+
+            const wire = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.08, 0.08, 2.5, 8),
+                new THREE.MeshBasicMaterial({ color: 0x475569 })
+            );
+            wire.rotation.z = Math.PI / 2;
+            wire.position.y = bodyY;
+
+            const cap1 = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 0.62, 16), matSilver);
+            cap1.rotation.z = Math.PI / 2;
+            cap1.position.set(p1 + 0.15, bodyY, 0);
+            const cap2 = cap1.clone();
+            cap2.position.set(p2 - 0.15, bodyY, 0);
+
+            group.add(glass, wire, cap1, cap2, createLeg(p1, 0, bodyY), createLeg(p2, 0, bodyY));
+            group.userData.pins = [{ x: p1, z: 0 }, { x: p2, z: 0 }];
+        }
+        else if (type === 'inductor') {
+            // 2-pitch span: -1*pitch (-1.5) to +1*pitch (+1.5)
+            const p1 = -1 * pitch, p2 = 1 * pitch;
+            const bodyY = 2.0;
+            const core = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.55, 0.55, 3.0, 16),
+                new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5 })
+            );
+            core.rotation.z = Math.PI / 2;
+            core.position.y = bodyY;
+            group.add(core, createLeg(p1, 0, bodyY), createLeg(p2, 0, bodyY));
+
+            const copperMat = new THREE.MeshStandardMaterial({ color: 0xc26d27, metalness: 0.7, roughness: 0.25 });
+            for (let i = 0; i < 6; i++) {
+                const ring = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.14, 10, 18), copperMat);
+                ring.rotation.y = Math.PI / 2;
+                ring.position.set(-1.1 + i * 0.44, bodyY, 0);
+                ring.castShadow = true;
+                group.add(ring);
+            }
+            group.userData.pins = [{ x: p1, z: 0 }, { x: p2, z: 0 }];
+        }
+        else if (type === 'capacitor') {
+            // 2-pitch span: -1*pitch (-1.5) to +1*pitch (+1.5)
+            const p1 = -1 * pitch, p2 = 1 * pitch;
+            const bodyY = 3.4;
+            const body = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.32, 1.32, 4.1, 20),
+                new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.35 })
+            );
+            body.position.y = bodyY;
+            body.castShadow = true;
+
+            const topMetal = new THREE.Mesh(new THREE.CircleGeometry(1.18, 20), matSilver);
+            topMetal.rotation.x = -Math.PI / 2;
+            topMetal.position.y = bodyY + 2.06;
+
+            group.add(
+                body, topMetal,
+                createBentWire(p1, -0.6, 1.4), createBentWire(0.6, p2, 1.4),
+                createLeg(p1, 0, 1.4), createLeg(p2, 0, 1.4)
+            );
+            group.userData.pins = [{ x: p1, z: 0 }, { x: p2, z: 0 }];
+        }
+        else if (type === 'ldr') {
+            // 2-pitch span: -1*pitch (-1.5) to +1*pitch (+1.5)
+            const p1 = -1 * pitch, p2 = 1 * pitch;
+            const bodyY = 1.6;
+            const base = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.28, 1.28, 0.52, 18),
+                new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.4 })
+            );
+            base.position.y = bodyY;
+            const face = new THREE.Mesh(
+                new THREE.CircleGeometry(1.08, 18),
+                new THREE.MeshBasicMaterial({ color: 0xfef3c7 })
+            );
+            face.rotation.x = -Math.PI / 2;
+            face.position.y = bodyY + 0.28;
+
+            group.add(
+                base, face,
+                createBentWire(p1, -0.7, bodyY), createBentWire(0.7, p2, bodyY),
+                createLeg(p1, 0, bodyY), createLeg(p2, 0, bodyY)
+            );
+            group.userData.pins = [{ x: p1, z: 0 }, { x: p2, z: 0 }];
+        }
+        else if (type === 'switch') {
+            // 3 pins: -1*pitch (-1.5), 0, +1*pitch (+1.5)
+            const p1 = -1 * pitch, p2 = 0, p3 = 1 * pitch;
+            const bodyY = 1.6;
+            const body = new THREE.Mesh(
+                new THREE.BoxGeometry(4.0, 1.55, 2.2),
+                new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.35 })
+            );
+            body.position.y = bodyY;
+            body.castShadow = true;
+
+            const lever = new THREE.Mesh(
+                new THREE.BoxGeometry(0.75, 1.35, 0.75),
+                new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 })
+            );
+            lever.position.set(0.55, bodyY + 1.1, 0);
+            lever.rotation.z = -0.35;
+
+            group.add(body, lever, createLeg(p1, 0, bodyY), createLeg(p2, 0, bodyY), createLeg(p3, 0, bodyY));
+            group.userData.pins = [{ x: p1, z: 0 }, { x: p2, z: 0 }, { x: p3, z: 0 }];
+            group.userData.leverMesh = lever;
+        }
+        else if (type === 'potentiometer') {
+            // 3 pins: -1*pitch (-1.5), 0, +1*pitch (+1.5)
+            const p1 = -1 * pitch, p2 = 0, p3 = 1 * pitch;
+            const bodyY = 1.8;
+            const body = new THREE.Mesh(
+                new THREE.BoxGeometry(4.0, 1.75, 2.6),
+                new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.4 })
+            );
+            body.position.y = bodyY;
+            body.castShadow = true;
+
+            const knob = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.92, 1.0, 1.7, 18),
+                new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.3 })
+            );
+            knob.position.y = bodyY + 1.55;
+
+            group.add(body, knob, createLeg(p1, 0, bodyY), createLeg(p2, 0, bodyY), createLeg(p3, 0, bodyY));
+            group.userData.pins = [{ x: p1, z: 0 }, { x: p2, z: 0 }, { x: p3, z: 0 }];
+        }
+
+        // Invisible Hitbox for comfortable touch & mouse grabbing
+        const box = new THREE.Box3().setFromObject(group);
+        const size = new THREE.Vector3();
+        const center = new THREE.Vector3();
+        box.getSize(size);
+        box.getCenter(center);
+
+        const hitMesh = new THREE.Mesh(
+            new THREE.BoxGeometry(Math.max(size.x + 1.0, 3.0), Math.max(size.y + 1.0, 3.0), Math.max(size.z + 1.2, 2.4)),
+            new THREE.MeshBasicMaterial({ visible: false })
+        );
+        hitMesh.position.copy(center);
+        group.add(hitMesh);
+        group.userData.hitMesh = hitMesh;
+
+        return group;
+    }
+
+    // =========================================================================
+    // 5. EXACT MULTI-PIN VALID HOLE SNAPPING (Using Three.js Vector3 Rotation)
+    // =========================================================================
+    const yAxis = new THREE.Vector3(0, 1, 0);
+
+    function getRotatedPinOffsets(comp) {
+        return comp.userData.pins.map(pin =>
+            new THREE.Vector3(pin.x, 0, pin.z).applyAxisAngle(yAxis, comp.rotation.y)
+        );
+    }
+
+    function findExactHole(x, z, tol = 0.15) {
+        const direct = holeSpatialMap.get(holeKey(x, z));
+        if (direct && Math.hypot(direct.x - x, direct.z - z) <= tol) {
+            return direct;
+        }
+        // Fallback linear check within tolerance
+        for (let i = 0; i < holes.length; i++) {
+            const h = holes[i];
+            if (Math.hypot(h.x - x, h.z - z) <= tol) return h;
+        }
+        return null;
+    }
+
+    /**
+     * Tests placing pin[0] on every hole in `holes` and verifies that ALL pins
+     * land within 0.15 of an actual breadboard hole. Returns the valid placement
+     * closest to the component's current (x, z).
+     */
+    function findBestValidPlacement(comp, refX = comp.position.x, refZ = comp.position.z) {
+        const offsets = getRotatedPinOffsets(comp);
+        if (offsets.length === 0) return null;
+
+        const off0 = offsets[0];
+        let best = null;
+        let bestDist = Infinity;
+
+        for (let i = 0; i < holes.length; i++) {
+            const h0 = holes[i];
+            const candX = h0.x - off0.x;
+            const candZ = h0.z - off0.z;
+
+            // Quick distance prune
+            const dist = Math.hypot(candX - refX, candZ - refZ);
+            if (dist >= bestDist) continue;
+
+            // Verify ALL remaining pins land on valid holes within 0.15
+            const matchedHoles = [h0];
+            let allValid = true;
+            for (let k = 1; k < offsets.length; k++) {
+                const px = candX + offsets[k].x;
+                const pz = candZ + offsets[k].z;
+                const hk = findExactHole(px, pz, 0.15);
+                if (!hk) {
+                    allValid = false;
+                    break;
+                }
+                matchedHoles.push(hk);
+            }
+
+            if (allValid) {
+                bestDist = dist;
+                best = { x: candX, z: candZ, matchedHoles };
+            }
+        }
+        return best;
+    }
+
+    function snapToGrid(comp) {
+        const placement = findBestValidPlacement(comp);
+        if (placement) {
+            comp.position.x = placement.x;
+            comp.position.z = placement.z;
+            comp.position.y = 0;
+            comp.userData.snappedNodes = placement.matchedHoles.map(h => h.node);
+        } else {
+            comp.position.y = 0;
+            comp.userData.snappedNodes = [];
+        }
+    }
+
+    // =========================================================================
+    // 6. POINTER INTERACTIONS (Mouse & Touch Dragging, Hover, Rotate, Delete)
+    // =========================================================================
+    const raycaster = new THREE.Raycaster();
+    let draggedObj = null;
+    let lastSelectedObj = null;
+    let dragOffset = new THREE.Vector3();
+    let pointerDownPos = { x: 0, y: 0 };
+    const workPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+    function getMouse2D(e) {
+        const rect = container.getBoundingClientRect();
+        return {
+            x: ((e.clientX - rect.left) / rect.width) * 2 - 1,
+            y: -((e.clientY - rect.top) / rect.height) * 2 + 1
+        };
+    }
+
+    function getIntersectPoint(mouse2D) {
+        raycaster.setFromCamera(mouse2D, camera);
+        const pt = new THREE.Vector3();
+        raycaster.ray.intersectPlane(workPlane, pt);
+        return pt;
+    }
+
+    function findNearestHole(x, z, maxDist = 0.72) {
+        let best = null;
+        let bestD = maxDist;
+        for (let i = 0; i < holes.length; i++) {
+            const h = holes[i];
+            const d = Math.hypot(h.x - x, h.z - z);
+            if (d < bestD) {
+                bestD = d;
+                best = h;
+            }
+        }
+        return best;
+    }
+
+    function updateDragPreview(comp) {
+        const placement = findBestValidPlacement(comp);
+        if (placement) {
+            showTargetSnapRings(placement.matchedHoles);
+            highlightNodes(placement.matchedHoles.map(h => h.node));
+        } else {
+            showTargetSnapRings([]);
+            highlightNodes([]);
+        }
+    }
+
+    // Spawn & drag from bottom toolbox (toolbox stays PERMANENTLY OPEN!)
+    let pendingTouchSpawn = null;
+
+    function spawnAndDragComponent(type, clientX, clientY) {
+        const comp = create3DComponent(type);
+        scene.add(comp);
+        components.push(comp);
+
+        lastSelectedObj = comp;
+        draggedObj = comp;
+        controls.enabled = false;
+
+        const pt = getIntersectPoint(getMouse2D({ clientX, clientY }));
+        draggedObj.position.set(pt.x, 2.0, pt.z);
+        dragOffset.set(0, 0, 0);
+        updateDragPreview(draggedObj);
+    }
+
+    document.querySelectorAll('.tool-item').forEach(item => {
+        item.addEventListener('pointerdown', (e) => {
+            const type = item.getAttribute('data-type');
+            if (e.pointerType === 'mouse') {
+                e.preventDefault();
+                spawnAndDragComponent(type, e.clientX, e.clientY);
+            } else {
+                // On touch devices: allow horizontal scroll in toolbox, drag upward to pull out onto board
+                pendingTouchSpawn = { type, startX: e.clientX, startY: e.clientY, moved: false };
+            }
+        });
+    });
+
+    // Grab existing component on breadboard
+    container.addEventListener('pointerdown', (e) => {
+        pointerDownPos = { x: e.clientX, y: e.clientY };
+        const mouse2D = getMouse2D(e);
+        raycaster.setFromCamera(mouse2D, camera);
+        const intersects = raycaster.intersectObjects(components.map(c => c.userData.hitMesh));
+
+        if (intersects.length > 0) {
+            controls.enabled = false;
+            draggedObj = intersects[0].object.parent;
+            lastSelectedObj = draggedObj;
+
+            const pt = getIntersectPoint(mouse2D);
+            dragOffset.copy(pt).sub(draggedObj.position);
+            draggedObj.position.y = 2.0;
+
+            // Double Tap / Double Click to delete component
+            const now = Date.now();
+            if (draggedObj.userData.lastTouch && (now - draggedObj.userData.lastTouch) < 340) {
+                scene.remove(draggedObj);
+                components.splice(components.indexOf(draggedObj), 1);
+                draggedObj = null;
+                lastSelectedObj = null;
+                controls.enabled = true;
+                showTargetSnapRings([]);
+                highlightNodes([]);
+                simulateCircuit();
+                showToast('🗑️ បានលុបគ្រឿងអគ្គិសនី');
+            } else {
+                draggedObj.userData.lastTouch = now;
+                updateDragPreview(draggedObj);
+            }
+        }
+    });
+
+    // Pointer Move: Dragging with Green Target Snap Rings OR Hover Strip Highlighting
+    window.addEventListener('pointermove', (e) => {
+        if (pendingTouchSpawn && !draggedObj) {
+            const dx = e.clientX - pendingTouchSpawn.startX;
+            const dy = e.clientY - pendingTouchSpawn.startY;
+            if (Math.hypot(dx, dy) > 8) pendingTouchSpawn.moved = true;
+
+            if (dy < -10 && Math.abs(dy) >= Math.abs(dx) * 0.85) {
+                spawnAndDragComponent(pendingTouchSpawn.type, e.clientX, e.clientY);
+                pendingTouchSpawn = null;
+            } else if (Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy)) {
+                pendingTouchSpawn = null; // User is horizontally scrolling the toolbox
+            }
+            return;
+        }
+
+        const mouse2D = getMouse2D(e);
+        const pt = getIntersectPoint(mouse2D);
+
+        if (draggedObj) {
+            draggedObj.position.x = pt.x - dragOffset.x;
+            draggedObj.position.z = pt.z - dragOffset.z;
+            draggedObj.position.y = 2.0;
+            updateDragPreview(draggedObj);
+        } else {
+            showTargetSnapRings([]);
+            const h = findNearestHole(pt.x, pt.z, 0.72);
+            if (h) {
+                highlightNodes([h.node]);
+            } else {
+                highlightNodes([]);
+            }
+        }
+    });
+
+    // Pointer Up: Snap cleanly into valid breadboard holes
+    window.addEventListener('pointerup', (e) => {
+        // Quick tap on a touch toolbox item spawns it right onto the center of the board for convenience
+        if (pendingTouchSpawn && !pendingTouchSpawn.moved && !draggedObj) {
+            const comp = create3DComponent(pendingTouchSpawn.type);
+            scene.add(comp);
+            components.push(comp);
+            comp.position.set(0, 0, -3.5 * pitch);
+            snapToGrid(comp);
+            lastSelectedObj = comp;
+            simulateCircuit();
+            showToast('✨ បានដាក់គ្រឿងលើក្ដារ (អាចអូសរំកិលបាន)');
+        }
+        pendingTouchSpawn = null;
+
+        if (draggedObj) {
+            const movedDist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+            if (draggedObj.userData.type === 'switch' && movedDist < 6) {
+                draggedObj.userData.switchOn = !draggedObj.userData.switchOn;
+                if (draggedObj.userData.leverMesh) {
+                    draggedObj.userData.leverMesh.position.x = draggedObj.userData.switchOn ? 0.55 : -0.55;
+                    draggedObj.userData.leverMesh.rotation.z = draggedObj.userData.switchOn ? -0.35 : 0.35;
+                }
+                showToast(draggedObj.userData.switchOn ? '🕹️ កុងតាក់៖ បើក (ON)' : '🕹️ កុងតាក់៖ បិទ (OFF)');
+            }
+
+            snapToGrid(draggedObj);
+            draggedObj = null;
+            controls.enabled = true;
+            showTargetSnapRings([]);
+            highlightNodes([]);
+            simulateCircuit();
+        }
+    });
+
+    // Rotate selected component by 90 degrees and immediately re-snap all legs cleanly
+    function rotateSelected() {
+        if (lastSelectedObj) {
+            lastSelectedObj.rotation.y += Math.PI / 2;
+            snapToGrid(lastSelectedObj);
+            simulateCircuit();
+        } else {
+            showToast('👆 សូមចុចជ្រើសរើសគ្រឿងលើក្ដារជាមុនសិន');
+        }
+    }
+    document.getElementById('btnRotate').addEventListener('click', rotateSelected);
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'r' || e.key === 'R') rotateSelected();
+    });
+
+    // Clear Board
+    function clearBoard() {
+        components.forEach(c => scene.remove(c));
+        components.length = 0;
+        lastSelectedObj = null;
+        showTargetSnapRings([]);
+        highlightNodes([]);
+        simulateCircuit();
+        showToast('🧹 បានសម្អាតក្ដារ Breadboard រួចរាល់');
+    }
+    document.getElementById('btnClearBoard').addEventListener('click', clearBoard);
+
+    // =========================================================================
+    // 7. GRAPH-BASED CIRCUIT SIMULATION ENGINE
+    // =========================================================================
+    let isPowerOn = false;
+    const btnPower = document.getElementById('btnPower');
+    const powerText = document.getElementById('powerText');
+    const warningBox = document.getElementById('warning-box');
+
+    btnPower.addEventListener('click', () => {
+        isPowerOn = !isPowerOn;
+        powerText.textContent = isPowerOn ? 'បិទចរន្ត' : 'បើកចរន្ត';
+        btnPower.classList.toggle('off', !isPowerOn);
+        simulateCircuit();
+    });
+
+    function simulateCircuit() {
+        components.forEach(c => {
+            if (c.userData.bulbMesh && c.userData.bulbMesh.material && c.userData.bulbMesh.material.emissive) {
+                c.userData.bulbMesh.material.emissive.setHex(c.userData.defaultEmissive || 0x000000);
+                c.userData.bulbMesh.material.emissiveIntensity = 0.5;
+            }
+            if (c.userData.haloMesh) c.userData.haloMesh.material.opacity = 0.0;
+            c.userData.isActive = false;
+        });
+        warningBox.style.display = 'none';
+
+        if (!isPowerOn) return;
+
+        const batteries = components.filter(c => c.userData.type === 'battery' && c.userData.snappedNodes.length === 2);
+        if (batteries.length === 0) return;
+
+        let isShort = false;
+        const graph = {};
+        const zeroOhmGraph = {};
+
+        const addEdge = (g, u, v) => {
+            if (!g[u]) g[u] = [];
+            g[u].push(v);
+        };
+
+        components.forEach(c => {
+            const nodes = c.userData.snappedNodes;
+            if (!nodes || nodes.length < 2) return;
+            const t = c.userData.type;
+
+            if (t === 'wire' || t === 'fuse') {
+                addEdge(graph, nodes[0], nodes[1]);
+                addEdge(graph, nodes[1], nodes[0]);
+                addEdge(zeroOhmGraph, nodes[0], nodes[1]);
+                addEdge(zeroOhmGraph, nodes[1], nodes[0]);
+            } else if (t === 'switch') {
+                if (c.userData.switchOn) {
+                    // Connects pin 0 to middle pin 1 (and pin 2 when closed)
+                    addEdge(graph, nodes[0], nodes[1]);
+                    addEdge(graph, nodes[1], nodes[0]);
+                    addEdge(zeroOhmGraph, nodes[0], nodes[1]);
+                    addEdge(zeroOhmGraph, nodes[1], nodes[0]);
+                    if (nodes.length >= 3) {
+                        addEdge(graph, nodes[1], nodes[2]);
+                        addEdge(graph, nodes[2], nodes[1]);
+                        addEdge(zeroOhmGraph, nodes[1], nodes[2]);
+                        addEdge(zeroOhmGraph, nodes[2], nodes[1]);
+                    }
+                }
+            } else if (['resistor', 'bulb', 'halogen', 'potentiometer', 'ldr', 'motor', 'buzzer', 'inductor', 'capacitor'].includes(t)) {
+                addEdge(graph, nodes[0], nodes[1]);
+                addEdge(graph, nodes[1], nodes[0]);
+                if (t === 'potentiometer' && nodes.length >= 3) {
+                    addEdge(graph, nodes[1], nodes[2]);
+                    addEdge(graph, nodes[2], nodes[1]);
+                }
+            } else if (t === 'led' || t === 'diode') {
+                // Polarized: anode (pin 0) -> cathode (pin 1)
+                addEdge(graph, nodes[0], nodes[1]);
+            }
+        });
+
+        batteries.forEach(bat => {
+            const vcc = bat.userData.snappedNodes[0]; // + Red pin
+            const gnd = bat.userData.snappedNodes[1]; // - Black pin
+
+            if (vcc === gnd || hasPath(vcc, gnd, zeroOhmGraph)) {
+                isShort = true;
+                return;
+            }
+
+            components.forEach(c => {
+                if (c.userData.snappedNodes.length < 2) return;
+                const n0 = c.userData.snappedNodes[0];
+                const n1 = c.userData.snappedNodes[1];
+
+                const forward = hasPath(vcc, n0, graph) && hasPath(n1, gnd, graph);
+                const reverse = hasPath(vcc, n1, graph) && hasPath(n0, gnd, graph);
+
+                if (c.userData.type === 'led') {
+                    if (forward) {
+                        c.userData.bulbMesh.material.emissive.setHex(0xff1111);
+                        c.userData.bulbMesh.material.emissiveIntensity = 3.5;
+                        if (c.userData.haloMesh) c.userData.haloMesh.material.opacity = 0.38;
+                        c.userData.isActive = true;
+                    }
+                } else if (c.userData.type === 'bulb' || c.userData.type === 'halogen') {
+                    if (forward || reverse) {
+                        const glowHex = c.userData.type === 'halogen' ? 0xffffff : 0xffb703;
+                        c.userData.bulbMesh.material.emissive.setHex(glowHex);
+                        c.userData.bulbMesh.material.emissiveIntensity = 3.6;
+                        if (c.userData.haloMesh) c.userData.haloMesh.material.opacity = 0.42;
+                        c.userData.isActive = true;
+                    }
+                } else if (c.userData.type === 'motor' || c.userData.type === 'buzzer') {
+                    if (forward || reverse) {
+                        c.userData.isActive = true;
+                    }
+                }
+            });
+        });
+
+        if (isShort) {
+            warningBox.style.display = 'block';
+            components.forEach(c => {
+                if (c.userData.bulbMesh && c.userData.bulbMesh.material.emissive) {
+                    c.userData.bulbMesh.material.emissive.setHex(c.userData.defaultEmissive || 0x000000);
+                }
+                if (c.userData.haloMesh) c.userData.haloMesh.material.opacity = 0.0;
+                c.userData.isActive = false;
+            });
+        }
+    }
+
+    function hasPath(start, target, graph) {
+        if (start === target) return true;
+        if (!graph[start]) return false;
+        const queue = [start];
+        const visited = new Set([start]);
+        while (queue.length > 0) {
+            const curr = queue.shift();
+            if (curr === target) return true;
+            const neighbors = graph[curr];
+            if (neighbors) {
+                for (let i = 0; i < neighbors.length; i++) {
+                    const next = neighbors[i];
+                    if (!visited.has(next)) {
+                        visited.add(next);
+                        queue.push(next);
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    // =========================================================================
+    // 8. ANIMATION LOOP (Started cleanly on window.onload)
+    // =========================================================================
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+
+        const now = Date.now();
+        components.forEach(c => {
+            if (c.userData.isActive) {
+                if (c.userData.type === 'motor' && c.userData.animMesh) {
+                    c.userData.animMesh.rotation.x += 0.34;
+                }
+                if (c.userData.type === 'buzzer' && c.userData.animMesh) {
+                    c.userData.animMesh.position.y = 1.6 + Math.sin(now * 0.06) * 0.14;
+                }
+            } else if (c.userData.type === 'buzzer' && c.userData.animMesh) {
+                c.userData.animMesh.position.y = 1.6;
+            }
+        });
+
+        renderer.render(scene, camera);
+    }
+
+    window.onload = function () {
+        animate();
+    };
+</script>
+</body>
+</html>
